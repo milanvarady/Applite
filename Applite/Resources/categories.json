@@ -1,0 +1,67 @@
+[
+    {
+        "id": "Browsers",
+        "casks": ["google-chrome", "brave-browser", "firefox", "microsoft-edge", "opera", "opera-gx", "vivaldi", "arc", "librewolf", "tor-browser"],
+        "sfSymbol": "network"
+    },
+    {
+        "id": "Communication",
+        "casks": ["whatsapp", "messenger", "wechat", "telegram-desktop", "discord", "viber", "signal", "zoom", "skype", "microsoft-teams"],
+        "sfSymbol": "text.bubble"
+    },
+    {
+        "id": "Productivity",
+        "casks": ["raycast", "alfred", "rectangle", "spectacle", "alt-tab", "cleanshot", "shottr", "notion", "evernote", "fantastical", "cheatsheet", "bettertouchtool", "numi", "clipy", "maccy", "soulver", "unclutter", "hazel", "hazeover"],
+        "sfSymbol": "gauge.high"
+    },
+    {
+        "id": "Office Tools",
+        "casks": ["slack", "asana", "microsoft-teams", "microsoft-word", "libreoffice", "dropbox", "onedrive", "microsoft-excel", "microsoft-outlook", "microsoft-powerpoint"],
+        "sfSymbol": "doc.text"
+    },
+    {
+        "id": "Menu Bar",
+        "casks": ["istat-menus", "stats", "bartender", "hiddenbar", "dozer", "caffeine", "amphetamine", "dropzone", "airbuddy", "ticktick", "tomatobar", "itsycal", "hot", "flux"],
+        "sfSymbol": "menubar.rectangle"
+    },
+    {
+        "id": "Utilities",
+        "casks": ["appcleaner", "the-unarchiver", "adobe-acrobat-reader", "balenaetcher", "transmission", "imageoptim", "handbrake", "obs", "daisydisk", "onyx", "pdf-expert", "downie"],
+        "sfSymbol": "wrench.and.screwdriver"
+    },
+    {
+        "id": "Creative Tools",
+        "casks": ["gimp", "figma", "inkscape", "krita", "audacity", "blender", "godot", "affinity-photo", "affinity-publisher", "affinity-designer", "acron", "sketch"],
+        "sfSymbol": "paintbrush.pointed"
+    },
+    {
+        "id": "Media",
+        "casks": ["iina", "vlc", "spotify", "plex", "tidal"],
+        "sfSymbol": "play.tv"
+    },
+    {
+        "id": "Developer Tools",
+        "casks": ["github", "docker", "fig", "rapidapi", "android-studio", "transmit"],
+        "sfSymbol": "desktopcomputer"
+    },
+    {
+        "id": "IDEs",
+        "casks": ["visual-studio-code", "sublime-text", "intellij-idea", "intellij-idea-ce", "pycharm", "pycharm-ce", "warp", "iterm2", "hyper", "dataspell", "phpstorm", "webstorm", "rider", "goland", "clion", "rubymine", "visual-studio", "textmate"],
+        "sfSymbol": "chevron.left.slash.chevron.right"
+    },
+    {
+        "id": "Virtualization",
+        "casks": ["parallels", "utm", "virtualbox", "vmware-fusion"],
+        "sfSymbol": "shippingbox"
+    },
+    {
+        "id": "Gaming",
+        "casks": ["steam", "battle-net", "epic-games", "minecraft"],
+        "sfSymbol": "gamecontroller"
+    },
+    {
+        "id": "Password Managers",
+        "casks": ["1password", "bitwarden", "lastpass", "keeper-password-manager", "keepassxc", "nordpass", "enpass", "authy", "roboform"],
+        "sfSymbol": "lock.square"
+    }
+]
