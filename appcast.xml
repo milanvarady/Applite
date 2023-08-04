@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Applite</title>
+        <item>
+            <title>1.0</title>
+            <pubDate>Fri, 04 Aug 2023 13:50:51 +0200</pubDate>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/milanvarady/Applite/releases/download/v1.0/Applite.dmg" length="2554599" type="application/octet-stream" sparkle:edSignature="b1QdvXfsCX0TTZnk/Uo7ANZXRozcnhGNIrRQaYSptHpvvWEErjOvNKyMBqMVG/OTFtc4Azah4BdCr6oEHuB1DQ=="/>
+        </item>
+    </channel>
+</rss>
