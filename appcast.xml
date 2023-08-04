@@ -4,11 +4,11 @@
         <title>Applite</title>
         <item>
             <title>1.0</title>
-            <pubDate>Fri, 04 Aug 2023 13:50:51 +0200</pubDate>
-            <sparkle:version>2</sparkle:version>
+            <pubDate>Fri, 04 Aug 2023 18:40:23 +0200</pubDate>
+            <sparkle:version>3</sparkle:version>
             <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/milanvarady/Applite/releases/download/v1.0/Applite.dmg" length="2554599" type="application/octet-stream" sparkle:edSignature="b1QdvXfsCX0TTZnk/Uo7ANZXRozcnhGNIrRQaYSptHpvvWEErjOvNKyMBqMVG/OTFtc4Azah4BdCr6oEHuB1DQ=="/>
+            <enclosure url="https://github.com/milanvarady/Applite/releases/download/v1.0/Applite.dmg" length="2558447" type="application/octet-stream" sparkle:edSignature="ptOKlpttacG59IfZCHo92Z1e5BhODu9ZU13NkEsrxlyiNgeKUuuKuvhHWCD+/vPSqpb/+awfPaRnmFfYOJT9CQ=="/>
         </item>
     </channel>
 </rss>
