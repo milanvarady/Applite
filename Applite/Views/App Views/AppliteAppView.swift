@@ -6,10 +6,16 @@
 //
 
 import SwiftUI
+import Sparkle
 
 /// This view is included in the installed section so users can update and uninstall Applite itself
 struct AppliteAppView: View {
     @Environment(\.openWindow) var openWindow
+    private let updaterController: SPUStandardUpdaterController
+    
+    init() {
+        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+    }
     
     var body: some View {
         HStack {
@@ -28,10 +34,8 @@ struct AppliteAppView: View {
             }
             
             Spacer()
-            
-            Button {
                 
-            } label: {
+            CheckForUpdatesView(updater: updaterController.updater) {
                 Label("Update", systemImage: "arrow.uturn.down")
                     .foregroundColor(.blue)
             }

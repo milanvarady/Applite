@@ -1,3 +1,6 @@
+![GitHub](https://img.shields.io/github/license/milanvarady/Applite)
+![GitHub release (with filter)](https://img.shields.io/github/v/release/milanvarady/Applite)
+![GitHub all releases](https://img.shields.io/github/downloads/milanvarady/Applite/total)
 
 # Applite
 
@@ -45,3 +48,9 @@ If you have any questions, feel free to e-mail me: [milan@aerolite.dev](mailto:m
 
 Applite is licensed under the [MIT](https://choosealicense.com/licenses/mit/) License. See [LICENSE](LICENSE.txt) for more details.
 
+## Alternatives
+
+- [Cork](https://github.com/buresdv/Cork)
+- [Cakebrew](https://github.com/brunophilipe/Cakebrew)
+- [App Fair](https://github.com/App-Fair/App)
+- [Brewlet](https://github.com/zkokaja/Brewlet)

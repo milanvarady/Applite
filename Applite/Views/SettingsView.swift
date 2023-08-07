@@ -143,7 +143,9 @@ fileprivate struct UpdateSettingsView: View {
     
     var body: some View {
         VStack {
-            CheckForUpdatesView(updater: updater)
+            CheckForUpdatesView(updater: updater) {
+                Label("Check for Updates...", systemImage: "arrow.uturn.down")
+            }
             
             Text("Current app version: \(Bundle.main.version) (\(Bundle.main.buildNumber))")
                 .font(.system(.body, weight: .light))

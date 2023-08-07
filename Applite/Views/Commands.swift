@@ -21,7 +21,9 @@ struct CommandsMenu: Commands {
                 openWindow(id: "uninstall-self")
             }
             
-            CheckForUpdatesView(updater: updaterController.updater)
+            CheckForUpdatesView(updater: updaterController.updater) {
+                Text("Check for Updates...")
+            }
             
             Divider()
         }
