@@ -6,6 +6,16 @@
 
 User-friendly GUI macOS application for Homebrew Casks
 
+## Table of Contents
+1. [Key Features](#key-features)
+2. [About](#about)
+3. [Screenshots](#screenshots)
+4. [Installation](#installation)
+5. [Acknowledgements](#acknowledgements)
+6. [Contact](#contact)
+7. [License](#license)
+8. [Alternatives](#Alternatives)
+
 ## Key Features
 
 - Install, update and uninstall apps with a single click
@@ -18,6 +28,8 @@ User-friendly GUI macOS application for Homebrew Casks
 Applite is a free and open-source macOS application that streamlines the installation and management of third-party apps using [Homebrew](https://brew.sh/). The app is built using [Swift](https://developer.apple.com/swift/) and [SwiftUI](https://developer.apple.com/xcode/swiftui/).
 
 The main goal of the application is to bring the convenience of [Homebrew cask](https://github.com/Homebrew/homebrew-cask) to the non-technical user. So the UI was designed with simplicity and ease of use in mind.
+
+FAQ on the [official website](https://aerolite.dev/applite)
 
 ## Screenshots
 
@@ -54,3 +66,4 @@ Applite is licensed under the [MIT](https://choosealicense.com/licenses/mit/) Li
 - [Cakebrew](https://github.com/brunophilipe/Cakebrew)
 - [App Fair](https://github.com/App-Fair/App)
 - [Brewlet](https://github.com/zkokaja/Brewlet)
+- [BrewMate](https://github.com/romankurnovskii/BrewMate)
