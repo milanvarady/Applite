@@ -149,7 +149,7 @@ struct BrewManagementView: View {
                     }
                 }
                 
-                Text("**Note:** This will reinstall \(Bundle.main.appName)'s Homebrew installation at `~/Library/Applicaiton Support/\(Bundle.main.appName)/homebrew`")
+                Text("**Note:** This will reinstall \(Bundle.main.appName)'s Homebrew installation at `~/Library/Application Support/\(Bundle.main.appName)/homebrew`")
                     .padding(.bottom, 2)
                 
                 Text("**Warning:** After reinstalling, all currently installed apps will be unlinked from \(Bundle.main.appName). They won't be deleted, but you won't be able to update or uninstall them via \(Bundle.main.appName).")
