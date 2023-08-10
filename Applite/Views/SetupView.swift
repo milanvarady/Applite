@@ -134,10 +134,10 @@ struct SetupView: View {
                         .foregroundStyle(.blue)
                     
                     VStack(alignment: .leading) {
-                        Text(title)
+                        Text(NSLocalizedString(title, comment: ""))
                             .font(.system(size: 14, weight: .bold))
                         
-                        Text(description)
+                        Text(NSLocalizedString(description, comment: ""))
                             .font(.system(size: 12, weight: .light))
                     }
                 }

@@ -16,7 +16,7 @@ struct CategoryView: View {
         VStack(alignment: .leading) {
             // Category name
             Group {
-                Text(category.id)
+                Text(NSLocalizedString(category.id, comment: "String Categorie"))
                     .font(.system(size: 42, weight: .bold))
                     .padding(.bottom, -20)
                 

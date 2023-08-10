@@ -42,8 +42,8 @@ struct BrewManagementView: View {
             
             // Show Homebrew version and number of installed casks
             Group {
-                Text("**Homebrew version:** \(homebrewVersion)")
-                Text("**Number of apps installed:** \(numberOfCasks)")
+                Text("**Homebrew version:** \(NSLocalizedString(homebrewVersion, comment: "homebrewVersion"))")
+                Text("**Number of apps installed:** \(NSLocalizedString(numberOfCasks, comment: "numberOfCasks installed"))")
             }
             
             // Actions section

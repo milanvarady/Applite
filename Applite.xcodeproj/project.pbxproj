@@ -54,6 +54,7 @@
 		41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 41C8FA282A7A598B000BB9A2 /* Sparkle */; };
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
 		41DF006729EAB285004EB7AE /* PZCircularControl in Frameworks */ = {isa = PBXBuildFile; productRef = 41DF006629EAB285004EB7AE /* PZCircularControl */; };
+		BD2708462A8527E7000FF6B9 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = BD2708482A8527E7000FF6B9 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -103,6 +104,8 @@
 		4196C90128FAF57A00EADDDA /* AppliteDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppliteDebug.entitlements; sourceTree = "<group>"; };
 		4196C90328FC03A900EADDDA /* Shell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
 		41DF006329EAA094004EB7AE /* SendNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendNotification.swift; sourceTree = "<group>"; };
+		BD2708472A8527E7000FF6B9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		BD2708492A8527F5000FF6B9 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -178,6 +181,7 @@
 		414074E828DF53E80073EB22 = {
 			isa = PBXGroup;
 			children = (
+				BD2708482A8527E7000FF6B9 /* Localizable.strings */,
 				418F332728F1C95B0023D76F /* Packages */,
 				414074F328DF53E80073EB22 /* Applite */,
 				414074F228DF53E80073EB22 /* Products */,
@@ -374,6 +378,7 @@
 			knownRegions = (
 				en,
 				Base,
+				fr,
 			);
 			mainGroup = 414074E828DF53E80073EB22;
 			packageReferences = (
@@ -398,6 +403,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				414074FC28DF53EB0073EB22 /* Preview Assets.xcassets in Resources */,
+				BD2708462A8527E7000FF6B9 /* Localizable.strings in Resources */,
 				41857B732911A2F2004A1894 /* categories.json in Resources */,
 				414074F928DF53EB0073EB22 /* Assets.xcassets in Resources */,
 			);
@@ -454,11 +460,25 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXVariantGroup section */
+		BD2708482A8527E7000FF6B9 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BD2708472A8527E7000FF6B9 /* en */,
+				BD2708492A8527F5000FF6B9 /* fr */,
+			);
+			name = Localizable.strings;
+			path = Applite/Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
 		414074FE28DF53EB0073EB22 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -521,6 +541,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";

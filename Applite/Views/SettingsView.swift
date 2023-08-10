@@ -70,7 +70,7 @@ fileprivate struct GeneralSettingsView: View {
             Picker("Color Scheme:", selection: $colorSchemePreference) {
                 
                 ForEach(ColorSchemePreference.allCases) { color in
-                    Text(color.rawValue.capitalized)
+                    Text(NSLocalizedString(color.rawValue.capitalized, comment: ""))
                 }
             }
             .pickerStyle(.segmented)

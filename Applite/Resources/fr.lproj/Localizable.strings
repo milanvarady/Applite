@@ -1,0 +1,136 @@
+/* 
+  Localizable.strings
+  Applite
+
+  Created by Tom Theret on 10/08/2023.
+  
+*/
+
+
+"Open" = "Ouvrir";
+"Relaunch" = "Relancer";
+
+
+
+"Install" = "Installer";
+"Installing" = "Installation";
+"Installed" = "Installé";
+"Reinstall" = "Réinstaller";
+"Retry" = "Réessayer";
+"Retry Install" = "Réessayer l'installation";
+"Force Install" = "Forcer l'installation";
+"Uninstall" = "Désinstaller";
+"Uninstall..." = "Désinstaller...";
+"Uninstalling" = "Désinstallation";
+"Update" = "Mettre à jour";
+
+"Update All" = "Tout mettre à jour";
+"Manage Homebrew" = "Gérer Homebrew";
+"See All" = "Voir tout";
+"Download" = "Télécharger";
+"Cancel" = "Annuler";
+"Yes" = "Oui";
+"Continue" = "Continuer";
+"Back" = "Revenir";
+"Xcode Command Line Tools" = "Outils de ligne de commande Xcode";
+"Retry the installation or visit the troubleshooting page." = "Réessayez l'installation ou visitez la page de dépannage.";
+"Troubleshooting" = "Dépanage";
+"Installation failed" = "Echec de l'installation";
+"Broken Brew Path" = "Le chemin d'accès de Homebrew est cassé";
+"This app" = "Cette app";
+"Retry load" = "Réessayer de charger";
+"Error" = "Erreur";
+"Homepage" = "Page d'accueil";
+
+
+"%@ is already installed. If you want to add it to %@ click more options (chevron icon) and press Force Install." = "%@ est déjà installé. Si vous souhaitez l'ajouter à %@, cliquez sur plus d'options (icône en forme de chevron) et appuyez sur Forcer l'installation.";
+
+
+
+//Sorting
+"Sorting Options" = "Trier";
+"Sort by" = "Trier par";
+"Most downloaded (default)" = "Plus téléchergé (par défaut)";
+"Hide apps with few downloads" = "Masquer les applications avec peu de téléchargements";
+
+//Setup view
+"Welcome to %@" = "Bienvenue sur %@";
+"Download apps with ease" = "Téléchargez des applications en toute simplicité";
+"Download third party applications with a single click. No more \"Drag to Applications folder\"." = "Téléchargez des applications tierces en un seul clic. Plus besoin de \"Glisser dans le dossier Applications\".";
+"Manage applications" = "Gérer vos applications";
+"Update and uninstall your applications. No more leftover files from deleted applications." = "Mettez à jour et désinstallez vos applications. Fini les résidus des applications supprimées.";
+"Browse through a handpicked list of awesome apps." = "Parcourez une liste triée sur le volet d'applications géniales.";
+"Do you already have Homebrew installed?" = "Avez-vous déjà installé Homebrew ?";
+"No (I don't know what it is)" = "Non (je ne sais pas ce que c'est)";
+"Installing dependencies" = "Installation des dépendances";
+"This application uses the free and open source [Homebrew](https://brew.sh/) package manager to download and manage applications. If you already have it installed on your system, you can use it right away. If you don't have brew installed or don't know what it is, select **No**. This will create a new brew installation just for %@." = "Cette application utilise le gestionnaire de packages gratuit et open source [Homebrew](https://brew.sh/) pour télécharger et gérer les applications. Si vous l'avez déjà installé sur votre système, vous pouvez l'utiliser immédiatement. Si vous n'avez pas installé Homebrew ou si vous ne savez pas ce que c'est, sélectionnez **Non**. Cela créera une nouvelle installation de Homebrew juste pour %@.";
+"Provide Brew Executable Path" = "Donner le chemin d'accès de Homebrew";
+"You will be prompted to install the Xcode Command Line Tools, please click \"Install\" as it is required for this application to work. It will take a few minutes, you can see the progress on the installation window." = "Vous serez invité à installer les outils de ligne de commande Xcode, veuillez cliquer sur \"Installer\" car ils sont nécessaires pour que cette application fonctionne. Cela prendra quelques minutes, vous pouvez voir la progression dans la fenêtre d'installation.";
+"[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. %@ uses Homebrew under the hood to download and manage applications." = "[Homebrew](https://brew.sh) est un outil de gestion de packages gratuit et open source qui facilite l'installation d'applications tierces. %@ utilise Homebrew sous le capot pour télécharger et gérer des applications.";
+"You will be prompted to install Xcode Command Line Tools. Please select \"Install\" as it is required for this application to work." = "Vous serez invité à installer les outils de ligne de commande Xcode. Veuillez sélectionner \"Installer\" car ils sont nécessaires pour que cette application fonctionne.";
+"All set!" = "Tout est prêt!";
+"Start Using %@" = "Commancer à utiliser %@";
+
+//Categories
+"Discover" = "Découvir";
+"Categories" = "Catégories";
+"Browsers" = "Navigateurs";
+"Productivity" = "Productivité";
+"Office Tools" = "Outils Bureautiques";
+"Menu Bar" = "Bar des Menus";
+"Utilities" = "Utilitaires";
+"Creative Tools" = "Outils de Création";
+"Media" = "Média";
+"Developer Tools" = "Outils de Développements";
+"Virtualization" = "Virtualisation";
+"Password Managers" = "Gestionaires de Mots de Passe";
+
+//Manage Brew
+"This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications." = "Cette application utilise le gestionnaire de packages [Homebrew](https://brew.sh/) (brew en abrégé) pour télécharger des applications. Homebrew est un utilitaire de ligne de commande gratuit et open source qui peut télécharger des outils de développement utiles ainsi que des applications de bureau.";
+"loading..." = "chargement...";
+"Homebrew version: %@" = "Version de Homebrew: %@";
+"**Number of apps installed:** %@" = "**Nombre d'applications installées:** %@";
+"Update Homebrew" = "Mettre à jour Homebrew";
+"**Warning:** All other app functions will be disabled during the update!" = "**Attention :** Toutes les autres fonctions de l'application seront désactivées pendant la mise à jour !";
+"**Note:** This will reinstall %@'s Homebrew installation at `~/Library/Application Support/%@/homebrew`" = "**Remarque :** Cela installera un Homebrew spécifiquement pour %@ dans `~/Library/Application Support/%@/homebrew`";
+
+"**Warning:** After reinstalling, all currently installed apps will be unlinked from %@. They won't be deleted, but you won't be able to update or uninstall them via %@." = "**Attention :** Après la réinstallation, toutes les applications actuellement installées seront dissociées de %@. Ils ne seront pas supprimés, mais vous ne pourrez pas les mettre à jour ou les désinstaller via %@.";
+"Reinstall Homebrew" = "Réinstaller Homebrew";
+"Install Separate Brew" = "Installer un Homebrew séparé";
+"Uninstall %@, related files and cache." = "Désinstallez %@, les fichiers associés ainsi que le cache.";
+
+"A new Homebrew installation will be installed into ~/Library/Application Support/%@" = "Une nouvelle installation Homebrew sera installée dans ~/Library/Application Support/%@";
+"All currently installed apps will be unlinked from %@." = "Toutes les applications actuellement installées seront dissociées de %@.";
+"Reinstall failed" = "Echec de la réinstallation";
+"Are you sure you wan't to %@install Homebrew?" = "Êtes-vous sûr de vouloir %@installer Homebrew ?";
+
+
+//General Settings
+"General" = "Général";
+"Appearance" = "Apparence";
+"Color Scheme:" = "Thèmes:";
+"System" = "Système";
+"Light" = "Clair";
+"Dark" = "Sombre";
+"Task completions" = "Tâches terminées";
+"Task errors" = "Erreurs de tâche";
+
+//Brew Path
+"Brew Path" = "Chemin d'accès";
+"Custom" = "Personnalisé";
+"Selected brew path is invalid!" = "Le chemin d'accès de Homebrew n'est pas valide!";
+"Brew path has been modified. Restart app for changes to take effect." = "Le chemin de Homebrew a été modifié. Redémarrez l'application pour que les modifications prennent effet.";
+
+//Applite Upadate
+"Updates" = "Mises à jour";
+"Check for Updates..." = "Rechercher des mises à jour...";
+"Current app version: %@ (%@)" = "Version de l'application: %@ (%@)";
+"Automatically check for updates" = "Rechercher automatiquement des mises à jour";
+"Automatically download updates" = "Télécharger automatiquement les mises à jour";
+
+//Unistall Applite
+"Uninstall %@" = "Désinstaller %@";
+"This will uninstall all files and cache associated with %@." = "Cela désinstallera tous les fichiers ainsi que le cache associés à %@.";
+"Delete Homebrew cache" = "Supprimer le cache de Homebrew";
+"**Warning**: Homebrew cache is shared between Homebrew installations. Deleting the cache will remove the cache for all installations!" = "**Attention** : Le cache Homebrew est partagé entre les installations Homebrew. La suppression du cache supprimera le cache pour toutes les installations !";
+

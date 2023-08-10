@@ -72,7 +72,7 @@ struct AppView: View {
                     showingBrewPathError = false
                 }
             } message: {
-                Text(BrewInstallation.brokenPathOrIstallMessage)
+                Text(NSLocalizedString(BrewInstallation.brokenPathOrIstallMessage, comment: ""))
             }
             
             if cask.progressState == .idle {
@@ -175,7 +175,7 @@ struct AppView: View {
                     .alert("Error", isPresented: $showingFailureAlert) {
                         Button("OK", role: .cancel) { }
                     } message: {
-                        Text(failureAlertMessage)
+                        Text(NSLocalizedString(failureAlertMessage, comment: "failureAlertMessage"))
                     }
                     
                 case .idle:
@@ -324,7 +324,10 @@ private struct DownloadButton: View {
         .popover(isPresented: $showingPopover) {
             VStack(alignment: .leading, spacing: 6) {
                 // Open homepage
-                Link("Show homepage", destination: cask.homepageURL)
+                Link(destination: cask.homepageURL, label: {
+                    Label("Homepage", systemImage: "house")
+                })
+                .foregroundColor(.primary)
                 
                 // Force install button
                 Button {

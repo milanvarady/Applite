@@ -41,10 +41,6 @@ FAQ on the [official website](https://aerolite.dev/applite).
 
 [Download DMG](https://github.com/milanvarady/applite/releases/latest/download/Applite.dmg)
 
-or
-
-`$ brew install --cask applite`
-
 Minimum OS version: **macOS 13+**
 
 ## Contact

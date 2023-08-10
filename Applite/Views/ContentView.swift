@@ -12,7 +12,7 @@ struct ContentView: View {
     @EnvironmentObject var caskData: CaskData
     
     /// Currently selected tab in the sidebar
-    @State var selection: String = "download"
+    @State var selection: String = "home"
     
     /// App search query
     @State var searchText = ""
@@ -34,19 +34,19 @@ struct ContentView: View {
             List(selection: $selection) {
                 Divider()
                 
-                Label("Download", systemImage: "arrow.down.app.fill")
-                    .tag("download")
+                Label("Discover", systemImage: "house.fill")
+                    .tag("home")
                 
-                Label("Update", systemImage: "arrow.clockwise.circle.fill")
+                Label("Updates", systemImage: "arrow.clockwise.circle.fill")
                     .badge(caskData.outdatedCasks.count)
-                    .tag("update")
+                    .tag("updates")
                 
                 Label("Installed", systemImage: "externaldrive.fill.badge.checkmark")
                     .tag("installed")
                 
                 Section("Categories") {
                     ForEach(categories) { category in
-                        Label(category.id, systemImage: category.sfSymbol)
+                        Label(NSLocalizedString(category.id, comment: "String Categorie") , systemImage: category.sfSymbol)
                             .tag(category.id)
                     }
                 }
@@ -60,7 +60,7 @@ struct ContentView: View {
             .disabled((caskData.casks.isEmpty && !brokenInstall) || modifyingBrew)
         } detail: {
             switch selection {
-            case "download":
+            case "home":
                 if !brokenInstall {
                     DownloadView(navigationSelection: $selection, searchText: $searchTextSubmitted)
                 } else {
@@ -81,7 +81,7 @@ struct ContentView: View {
                     .frame(maxWidth: 600)
                 }
                 
-            case "update":
+            case "updates":
                 UpdateView()
                 
             case "installed":
@@ -107,8 +107,8 @@ struct ContentView: View {
         .onSubmit(of: .search) {
             searchTextSubmitted = searchText
             
-            if !searchText.isEmpty && selection != "download" {
-                selection = "download"
+            if !searchText.isEmpty && selection != "home" {
+                selection = "home"
             }
         }
         .onChange(of: searchText) { newSearchText in
