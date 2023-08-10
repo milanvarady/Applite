@@ -10,9 +10,9 @@ User-friendly GUI macOS application for Homebrew Casks
 1. [Key Features](#key-features)
 2. [About](#about)
 3. [Screenshots](#screenshots)
-4. [Installation](#installation)
-5. [Acknowledgements](#acknowledgements)
-6. [Contact](#contact)
+4. [Download](#download)
+5. [Contact](#contact)
+6. [Acknowledgements](#acknowledgements)
 7. [License](#license)
 8. [Alternatives](#alternatives)
 
@@ -37,11 +37,17 @@ FAQ on the [official website](https://aerolite.dev/applite).
 ![Discover Page Screenshot](https://aerolite.dev/applite/assets/img/screenshots/discover-lg.png)
 ![Productivity Category Screenshot](https://aerolite.dev/applite/assets/img/screenshots/productivity-lg.png)
 
-## Installation
+## Download
 
-[Download latest release](https://github.com/milanvarady/applite/releases/latest/download/Applite.dmg)
+[Download DMG](https://github.com/milanvarady/applite/releases/latest/download/Applite.dmg)
 
 Minimum OS version: **macOS 13+**
+
+## Contact
+
+If you have any questions, feel free to e-mail me: [milan@aerolite.dev](mailto:milan@aerolite.dev)
+
+Or join the [Official Discord Server](https://discord.gg/ZgB6pRE8Qx).
 
 ## Acknowledgements
 
@@ -52,10 +58,6 @@ Minimum OS version: **macOS 13+**
  - [SwiftUI Circular Control](https://github.com/philptr/PZCircularControl), Phil Zakharchenko
  - [Sparkle](https://github.com/sparkle-project/Sparkle) - app updates
  - [Appcasks](https://github.com/App-Fair/appcasks/) ([App Fair](https://github.com/App-Fair/App) project) - app icons
-
-## Contact
-
-If you have any questions, feel free to e-mail me: [milan@aerolite.dev](mailto:milan@aerolite.dev)
 
 ## License
 
