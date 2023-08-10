@@ -46,7 +46,7 @@ private struct DiscoverSection: View {
                 Image(systemName: category.sfSymbol)
                     .font(.system(size: 24))
 
-                Text(category.id)
+                Text(NSLocalizedString(category.id, comment: "String Categorie"))
                     .font(.system(size: 24, weight: .bold))
 
                 Button("See All") {

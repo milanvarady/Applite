@@ -30,7 +30,7 @@ struct UninstallSelfView: View {
             Button {
                 showConfirmation = true
             } label: {
-                Label("Delete \(Bundle.main.appName)", systemImage: "trash.fill")
+                Label("Uninstall \(Bundle.main.appName)", systemImage: "trash.fill")
             }
             .bigButton(foregroundColor: .white, backgroundColor: .red)
             
