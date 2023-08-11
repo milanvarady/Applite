@@ -2,13 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>SUPublicEDKey</key>
-	<string>f86A7o96S0KaqAbZ0lKfk7CHCATKkpmRQIiBaSx9J44=</string>
-	<key>SUFeedURL</key>
-	<string>https://milanvarady.github.io/Applite/appcast.xml</string>
 	<key>SUEnableDownloaderService</key>
 	<true/>
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
+	<key>SUFeedURL</key>
+	<string>https://milanvarady.github.io/Applite/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>f86A7o96S0KaqAbZ0lKfk7CHCATKkpmRQIiBaSx9J44=</string>
 </dict>
 </plist>
