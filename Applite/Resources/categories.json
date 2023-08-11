@@ -41,7 +41,7 @@
     },
     {
         "id": "Developer Tools",
-        "casks": ["github", "docker", "fig", "rapidapi", "android-studio", "transmit"],
+        "casks": ["github", "docker", "fig", "rapidapi", "android-studio", "transmit", "tower"],
         "sfSymbol": "desktopcomputer"
     },
     {
