@@ -142,7 +142,6 @@
             "android-studio",
             "dash",
             "docker",
-            "fig",
             "fork",
             "github",
             "kaleidoscope",
@@ -159,10 +158,8 @@
             "clion",
             "dataspell",
             "goland",
-            "hyper",
             "intellij-idea",
             "intellij-idea-ce",
-            "iterm2",
             "nova",
             "phpstorm",
             "pycharm",
@@ -173,9 +170,24 @@
             "textmate",
             "visual-studio",
             "visual-studio-code",
-            "warp"
         ],
         "sfSymbol": "chevron.left.slash.chevron.right"
+    },
+    {
+        "id": "Terminals",
+        "casks": [
+            "iterm2",
+            "warp",
+            "tabby",
+            "hyper",
+            "kitty",
+            "macterm",
+            "zoc",
+            "wezterm",
+            "fig",
+            "alacritty"
+        ],
+        "sfSymbol": "terminal"
     },
     {
         "id": "Virtualization",
