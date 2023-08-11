@@ -1,16 +1,15 @@
-/* 
+/*
   Localizable.strings
   Applite
 
   Created by Tom Theret on 10/08/2023.
-  
+
 */
 
+// General Strings
 
 "Open" = "Ouvrir";
 "Relaunch" = "Relancer";
-
-
 
 "Install" = "Installer";
 "Installing" = "Installation";
@@ -46,14 +45,16 @@
 "%@ is already installed. If you want to add it to %@ click more options (chevron icon) and press Force Install." = "%@ est déjà installé. Si vous souhaitez l'ajouter à %@, cliquez sur plus d'options (icône en forme de chevron) et appuyez sur Forcer l'installation.";
 
 
+// Sorting
 
-//Sorting
 "Sorting Options" = "Trier";
 "Sort by" = "Trier par";
 "Most downloaded (default)" = "Plus téléchergé (par défaut)";
 "Hide apps with few downloads" = "Masquer les applications avec peu de téléchargements";
 
-//Setup view
+
+// Setup view
+
 "Welcome to %@" = "Bienvenue sur %@";
 "Download apps with ease" = "Téléchargez des applications en toute simplicité";
 "Download third party applications with a single click. No more \"Drag to Applications folder\"." = "Téléchargez des applications tierces en un seul clic. Plus besoin de \"Glisser dans le dossier Applications\".";
@@ -71,7 +72,9 @@
 "All set!" = "Tout est prêt!";
 "Start Using %@" = "Commancer à utiliser %@";
 
-//Categories
+
+// Categories
+
 "Discover" = "Découvir";
 "Categories" = "Catégories";
 "Browsers" = "Navigateurs";
@@ -85,7 +88,9 @@
 "Virtualization" = "Virtualisation";
 "Password Managers" = "Gestionaires de Mots de Passe";
 
-//Manage Brew
+
+// Manage Brew
+
 "This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications." = "Cette application utilise le gestionnaire de packages [Homebrew](https://brew.sh/) (brew en abrégé) pour télécharger des applications. Homebrew est un utilitaire de ligne de commande gratuit et open source qui peut télécharger des outils de développement utiles ainsi que des applications de bureau.";
 "loading..." = "chargement...";
 "Homebrew version: %@" = "Version de Homebrew: %@";
@@ -105,7 +110,8 @@
 "Are you sure you wan't to %@install Homebrew?" = "Êtes-vous sûr de vouloir %@installer Homebrew ?";
 
 
-//General Settings
+// General Settings
+
 "General" = "Général";
 "Appearance" = "Apparence";
 "Color Scheme:" = "Thèmes:";
@@ -115,22 +121,27 @@
 "Task completions" = "Tâches terminées";
 "Task errors" = "Erreurs de tâche";
 
-//Brew Path
+
+// Brew Path
+
 "Brew Path" = "Chemin d'accès";
 "Custom" = "Personnalisé";
 "Selected brew path is invalid!" = "Le chemin d'accès de Homebrew n'est pas valide!";
 "Brew path has been modified. Restart app for changes to take effect." = "Le chemin de Homebrew a été modifié. Redémarrez l'application pour que les modifications prennent effet.";
 
-//Applite Upadate
+
+// Applite Update
+
 "Updates" = "Mises à jour";
 "Check for Updates..." = "Rechercher des mises à jour...";
 "Current app version: %@ (%@)" = "Version de l'application: %@ (%@)";
 "Automatically check for updates" = "Rechercher automatiquement des mises à jour";
 "Automatically download updates" = "Télécharger automatiquement les mises à jour";
 
-//Unistall Applite
+
+// Uninstall Applite
+
 "Uninstall %@" = "Désinstaller %@";
 "This will uninstall all files and cache associated with %@." = "Cela désinstallera tous les fichiers ainsi que le cache associés à %@.";
 "Delete Homebrew cache" = "Supprimer le cache de Homebrew";
 "**Warning**: Homebrew cache is shared between Homebrew installations. Deleting the cache will remove the cache for all installations!" = "**Attention** : Le cache Homebrew est partagé entre les installations Homebrew. La suppression du cache supprimera le cache pour toutes les installations !";
-
