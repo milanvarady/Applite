@@ -122,8 +122,8 @@ struct SetupView: View {
         /// A feature of the app to be displayed in the Welcome view
         private struct Feature: View {
             let sfSymbol: String
-            let title: String
-            let description: String
+            let title: LocalizedStringKey
+            let description: LocalizedStringKey
             
             var body: some View {
                 HStack {
@@ -134,10 +134,10 @@ struct SetupView: View {
                         .foregroundStyle(.blue)
                     
                     VStack(alignment: .leading) {
-                        Text(NSLocalizedString(title, comment: ""))
+                        Text(title, comment: "Title")
                             .font(.system(size: 14, weight: .bold))
                         
-                        Text(NSLocalizedString(description, comment: ""))
+                        Text(description, comment: "Description")
                             .font(.system(size: 12, weight: .light))
                     }
                 }
