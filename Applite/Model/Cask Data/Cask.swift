@@ -88,12 +88,12 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             Self.logger.error("Failed to install cask \"\(self.id)\". Output: \(result.output)")
             
             await MainActor.run { progressState = .failed(output: result.output) }
-            sendNotification(title: "Failed to download \(self.name)", reason: .failure)
+            sendNotification(title: String(localized:"Failed to download \(self.name)"), reason: .failure)
         } else {
             Self.logger.info("Successfully installed cask \"\(self.id)\"")
             
             await MainActor.run { progressState = .success }
-            sendNotification(title: "\(self.name) successfully installed!", reason: .success)
+            sendNotification(title: String(localized:"\(self.name) successfully installed!"), reason: .success)
             
             await MainActor.run { self.isInstalled = true }
             
@@ -116,7 +116,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             }
         }
         else if output.contains("Installing") || output.contains("Moving") || output.contains("Linking") {
-            return .busy(withTask: "Installing")
+            return .busy(withTask: NSLocalizedString("Installing", comment: "Installing"))
         }
         else if output.contains("successfully installed") {
             return .success
@@ -132,8 +132,8 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         return await runBrewCommand(command: "uninstall",
                                     arguments: [self.id],
                                     taskDescription: "Uninstalling",
-                                    notificationSuccess: "\(self.name) successfully uninstalled",
-                                    notificationFailure: "Failed to uninstall \(self.name)",
+                                    notificationSuccess: String(localized:"\(self.name) successfully uninstalled"),
+                                    notificationFailure: String(localized:"Failed to uninstall \(self.name)"),
                                     onSuccess: { self.isInstalled = false })
     }
     
@@ -144,8 +144,8 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         return await runBrewCommand(command: "upgrade",
                                     arguments: [self.id],
                                     taskDescription: "Updating",
-                                    notificationSuccess: "\(self.name) successfully updated",
-                                    notificationFailure: "Failed to update \(self.name)",
+                                    notificationSuccess: String(localized:"\(self.name) successfully updated"),
+                                    notificationFailure: String(localized:"Failed to update \(self.name)"),
                                     onSuccess: {
             Task {
                 await MainActor.run {
@@ -163,8 +163,8 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         return await runBrewCommand(command: "reinstall",
                                     arguments: [self.id],
                                     taskDescription: "Reinstalling",
-                                    notificationSuccess: "\(self.name) successfully reinstalled",
-                                    notificationFailure: "Failed to reinstall \(self.name)")
+                                    notificationSuccess: String(localized:"\(self.name) successfully reinstalled"),
+                                    notificationFailure: String(localized:"Failed to reinstall \(self.name)"))
     }
     
     /// Runs a shell command with the currently selected brew path
@@ -180,7 +180,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     private func runBrewCommand(command: String, arguments: [String], taskDescription: String,
                                 notificationSuccess: String, notificationFailure: String, onSuccess: (() -> Void)? = nil) async -> Bool {
         
-        await MainActor.run { self.progressState = .busy(withTask: taskDescription) }
+        await MainActor.run { self.progressState = .busy(withTask: NSLocalizedString(taskDescription, comment: "taskDescription")) }
         
         let result = await shell("HOMEBREW_NO_AUTO_UPDATE=1 \(BrewPaths.currentBrewExecutable) \(command) --cask \(arguments.joined(separator: " "))")
         
