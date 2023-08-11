@@ -1,67 +1,217 @@
 [
     {
         "id": "Browsers",
-        "casks": ["google-chrome", "brave-browser", "firefox", "microsoft-edge", "opera", "opera-gx", "vivaldi", "arc", "librewolf", "tor-browser"],
+        "casks": [
+            "arc",
+            "brave-browser",
+            "firefox",
+            "google-chrome",
+            "librewolf",
+            "microsoft-edge",
+            "opera",
+            "opera-gx",
+            "tor-browser",
+            "vivaldi"
+        ],
         "sfSymbol": "network"
     },
     {
         "id": "Communication",
-        "casks": ["whatsapp", "messenger", "wechat", "telegram-desktop", "discord", "viber", "signal", "zoom", "skype", "microsoft-teams"],
+        "casks": [
+            "discord",
+            "messenger",
+            "signal",
+            "skype",
+            "telegram-desktop",
+            "viber",
+            "wechat",
+            "whatsapp",
+            "zoom"
+        ],
         "sfSymbol": "text.bubble"
     },
     {
         "id": "Productivity",
-        "casks": ["raycast", "alfred", "rectangle", "spectacle", "alt-tab", "cleanshot", "shottr", "notion", "evernote", "fantastical", "cheatsheet", "bettertouchtool", "numi", "clipy", "maccy", "soulver", "unclutter", "hazel", "hazeover"],
+        "casks": [
+            "alt-tab",
+            "bettertouchtool",
+            "cheatsheet",
+            "cleanshot",
+            "clipy",
+            "evernote",
+            "fantastical",
+            "hazel",
+            "hazeover",
+            "maccy",
+            "notion",
+            "numi",
+            "pastebot",
+            "raycast",
+            "rectangle",
+            "shottr",
+            "soulver",
+            "spectacle",
+            "unclutter"
+        ],
         "sfSymbol": "gauge.high"
     },
     {
         "id": "Office Tools",
-        "casks": ["slack", "asana", "microsoft-teams", "microsoft-word", "libreoffice", "dropbox", "onedrive", "microsoft-excel", "microsoft-outlook", "microsoft-powerpoint"],
+        "casks": [
+            "asana",
+            "dropbox",
+            "libreoffice",
+            "microsoft-excel",
+            "microsoft-outlook",
+            "microsoft-powerpoint",
+            "microsoft-teams",
+            "microsoft-word",
+            "onedrive",
+            "slack"
+        ],
         "sfSymbol": "doc.text"
     },
     {
         "id": "Menu Bar",
-        "casks": ["istat-menus", "stats", "bartender", "hiddenbar", "dozer", "caffeine", "amphetamine", "dropzone", "airbuddy", "ticktick", "tomatobar", "itsycal", "hot", "flux"],
+        "casks": [
+            "airbuddy",
+            "bartender",
+            "caffeine",
+            "dozer",
+            "flux",
+            "hiddenbar",
+            "hot",
+            "istat-menus",
+            "itsycal",
+            "stats",
+            "ticktick",
+            "tomatobar"
+        ],
         "sfSymbol": "menubar.rectangle"
     },
     {
         "id": "Utilities",
-        "casks": ["appcleaner", "the-unarchiver", "adobe-acrobat-reader", "balenaetcher", "transmission", "imageoptim", "handbrake", "obs", "daisydisk", "onyx", "pdf-expert", "downie"],
+        "casks": [
+            "adobe-acrobat-reader",
+            "appcleaner",
+            "balenaetcher",
+            "daisydisk",
+            "downie",
+            "handbrake",
+            "imageoptim",
+            "obs",
+            "onyx",
+            "pdf-expert",
+            "the-unarchiver",
+            "transmission"
+        ],
         "sfSymbol": "wrench.and.screwdriver"
     },
     {
         "id": "Creative Tools",
-        "casks": ["gimp", "figma", "inkscape", "krita", "audacity", "blender", "godot", "affinity-photo", "affinity-publisher", "affinity-designer", "acron", "sketch"],
+        "casks": [
+            "acron",
+            "affinity-designer",
+            "affinity-photo",
+            "affinity-publisher",
+            "audacity",
+            "blender",
+            "figma",
+            "gimp",
+            "godot",
+            "inkscape",
+            "krita",
+            "sketch"
+        ],
         "sfSymbol": "paintbrush.pointed"
     },
     {
         "id": "Media",
-        "casks": ["iina", "vlc", "spotify", "plex", "tidal"],
+        "casks": [
+            "iina",
+            "plex",
+            "spotify",
+            "tidal",
+            "vlc"
+        ],
         "sfSymbol": "play.tv"
     },
     {
         "id": "Developer Tools",
-        "casks": ["github", "docker", "fig", "rapidapi", "android-studio", "transmit", "tower"],
+        "casks": [
+            "android-studio",
+            "dash",
+            "docker",
+            "fig",
+            "fork",
+            "github",
+            "kaleidoscope",
+            "rapidapi",
+            "ssh-config-editor",
+            "tower",
+            "transmit"
+        ],
         "sfSymbol": "desktopcomputer"
     },
     {
         "id": "IDEs",
-        "casks": ["visual-studio-code", "sublime-text", "intellij-idea", "intellij-idea-ce", "pycharm", "pycharm-ce", "warp", "iterm2", "hyper", "dataspell", "phpstorm", "webstorm", "rider", "goland", "clion", "rubymine", "visual-studio", "textmate"],
+        "casks": [
+            "clion",
+            "dataspell",
+            "goland",
+            "hyper",
+            "intellij-idea",
+            "intellij-idea-ce",
+            "iterm2",
+            "nova",
+            "phpstorm",
+            "pycharm",
+            "pycharm-ce",
+            "rider",
+            "rubymine",
+            "sublime-text",
+            "textmate",
+            "visual-studio",
+            "visual-studio-code",
+            "warp"
+        ],
         "sfSymbol": "chevron.left.slash.chevron.right"
     },
     {
         "id": "Virtualization",
-        "casks": ["parallels", "utm", "virtualbox", "vmware-fusion"],
+        "casks": [
+            "parallels",
+            "utm",
+            "virtualbox",
+            "vmware-fusion"
+        ],
         "sfSymbol": "shippingbox"
     },
     {
         "id": "Gaming",
-        "casks": ["steam", "battle-net", "epic-games", "minecraft"],
+        "casks": [
+            "battle-net",
+            "epic-games",
+            "minecraft",
+            "steam",
+            "the-battle-for-wesnoth",
+            "widelands"
+        ],
         "sfSymbol": "gamecontroller"
     },
     {
         "id": "Password Managers",
-        "casks": ["1password", "bitwarden", "lastpass", "keeper-password-manager", "keepassxc", "nordpass", "enpass", "authy", "roboform"],
+        "casks": [
+            "1password",
+            "authy",
+            "bitwarden",
+            "enpass",
+            "keeper-password-manager",
+            "keepassxc",
+            "lastpass",
+            "nordpass",
+            "roboform"
+        ],
         "sfSymbol": "lock.square"
     }
 ]
