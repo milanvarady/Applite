@@ -54,7 +54,7 @@
 		41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 41C8FA282A7A598B000BB9A2 /* Sparkle */; };
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
 		41DF006729EAB285004EB7AE /* PZCircularControl in Frameworks */ = {isa = PBXBuildFile; productRef = 41DF006629EAB285004EB7AE /* PZCircularControl */; };
-		E2563CCE2A864638003F20FE /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E2563CCC2A864638003F20FE /* Localizable.strings */; };
+		BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BD7546562A868DA30083996B /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -104,9 +104,7 @@
 		4196C90128FAF57A00EADDDA /* AppliteDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppliteDebug.entitlements; sourceTree = "<group>"; };
 		4196C90328FC03A900EADDDA /* Shell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
 		41DF006329EAA094004EB7AE /* SendNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendNotification.swift; sourceTree = "<group>"; };
-		E2563CCD2A864638003F20FE /* base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = base; path = Applite/Resources/base.lproj/Localizable.strings; sourceTree = "<group>"; };
-		E2563CCF2A86465A003F20FE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Applite/Resources/en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		E2563CD02A864683003F20FE /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = Applite/Resources/fr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		BD7546562A868DA30083996B /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -182,7 +180,7 @@
 		414074E828DF53E80073EB22 = {
 			isa = PBXGroup;
 			children = (
-				E2563CCC2A864638003F20FE /* Localizable.strings */,
+				BD7546562A868DA30083996B /* Localizable.xcstrings */,
 				418F332728F1C95B0023D76F /* Packages */,
 				414074F328DF53E80073EB22 /* Applite */,
 				414074F228DF53E80073EB22 /* Products */,
@@ -405,8 +403,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				414074FC28DF53EB0073EB22 /* Preview Assets.xcassets in Resources */,
-				E2563CCE2A864638003F20FE /* Localizable.strings in Resources */,
 				41857B732911A2F2004A1894 /* categories.json in Resources */,
+				BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */,
 				414074F928DF53EB0073EB22 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -461,19 +459,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		E2563CCC2A864638003F20FE /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				E2563CCD2A864638003F20FE /* base */,
-				E2563CCF2A86465A003F20FE /* en */,
-				E2563CD02A864683003F20FE /* fr */,
-			);
-			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		414074FE28DF53EB0073EB22 /* Debug */ = {
@@ -605,7 +590,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Applite/Preview Content\"";
 				DEVELOPMENT_TEAM = 9CLTNBW4Z3;
@@ -640,7 +625,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Applite/Preview Content\"";
 				DEVELOPMENT_TEAM = 9CLTNBW4Z3;

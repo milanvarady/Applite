@@ -38,7 +38,7 @@ struct BrewPathSelectorView: View {
                 ForEach(BrewPaths.PathOption.allCases) { option in
                     if option != .custom {
                         HStack {
-                            Text("\(BrewPaths.getBrewExectuablePath(for: option, shellFriendly: false)) **(\(getPathDesctiption(for: option)))**")
+                            Text("\(BrewPaths.getBrewExectuablePath(for: option, shellFriendly: false)) (\(getPathDesctiption(for: option)))")
                                 .truncationMode(.middle)
                             
                             if option.rawValue == brewPathOption {
