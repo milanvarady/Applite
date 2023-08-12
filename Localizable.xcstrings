@@ -49,6 +49,16 @@
         }
       }
     },
+    "(%@)" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%@)"
+          }
+        }
+      }
+    },
     "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. %@ uses Homebrew under the hood to download and manage applications." : {
       "localizations" : {
         "fr" : {
@@ -206,6 +216,7 @@
       }
     },
     "%@ (%@)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1356,6 +1367,16 @@
         }
       }
     },
+    "Install will likely fail" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A telepítés valószínűleg sikertelen lesz"
+          }
+        }
+      }
+    },
     "Installation failed" : {
       "localizations" : {
         "fr" : {
@@ -1417,6 +1438,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Függőségek telepítése"
+          }
+        }
+      }
+    },
+    "Installing requires admin password and will most likely fail. We are working on a solution, in the meantime see troubleshooting for more information." : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A letöltéshez admin jelszóra lesz szükség, és valószínűleg sikertelen lesz. Már dolgozunk egy megoldáson, de addig is látogasson el a hibaelhárítási oldalra."
           }
         }
       }

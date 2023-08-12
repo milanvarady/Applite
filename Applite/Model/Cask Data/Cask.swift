@@ -24,6 +24,8 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     var downloadsIn365days: Int = 0
     /// Description of any caveats with the app
     let caveats: String?
+    /// If true app has a .pkg installer
+    let pkgInstaller: Bool
     
     /// Cask progress state when installing, updating or uninstalling
     public enum ProgressState: Equatable, Hashable {
@@ -51,6 +53,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         self.description = rawData.desc ?? "N/A"
         self.homepageURL = URL(string: rawData.homepage)!
         self.caveats = rawData.caveats
+        self.pkgInstaller = rawData.url.hasSuffix("pkg")
     }
     
     required init() {
@@ -59,6 +62,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         self.description = "An application to test this application"
         self.homepageURL = URL(string: "https://aerolite.dev/")!
         self.caveats = nil
+        self.pkgInstaller = false
     }
     
     /// Installs the cask
