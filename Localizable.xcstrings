@@ -8,6 +8,12 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
         }
       }
     },
@@ -341,6 +347,12 @@
     },
     "Active Tasks" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tâches Actives"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -722,6 +734,12 @@
     "Communication" : {
       "extractionState" : "manual",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Communications"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1032,6 +1050,12 @@
     },
     "Export a file containing all currently installed applications. This can be imported to another device." : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportez un fichier contenant toutes les applications actuellement installées. Le fichier peut être importé sur un autre appareil."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1042,6 +1066,12 @@
     },
     "Export apps to file" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporter des applications vers un fichier"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1052,6 +1082,12 @@
     },
     "Export failed" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Echec de l'export"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1062,6 +1098,12 @@
     },
     "Export/Import apps" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporter/Importer des apps"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1139,6 +1181,12 @@
     },
     "Failed to reinstall %@" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Echec de la réinstallation de %@"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1246,6 +1294,12 @@
     "IDEs" : {
       "extractionState" : "manual",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IDEs"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1256,6 +1310,12 @@
     },
     "Import cask file" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importer le fichier cask"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1266,6 +1326,12 @@
     },
     "Import failed" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Echec de l'importation"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1391,6 +1457,12 @@
     "Load error" : {
       "comment" : "CaskDataLoadError",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreur de chargement"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1501,6 +1573,12 @@
     },
     "No Active Tasks" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune tâches actives"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1949,6 +2027,12 @@
     "Terminals" : {
       "extractionState" : "manual",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminals"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
