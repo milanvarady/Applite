@@ -24,6 +24,8 @@ struct AppView: View {
     /// Role of the app, e.g. install, updated or uninstall
     var role: AppRole
     
+    @EnvironmentObject var caskData: CaskData
+    
     @State var mouseHover = false
     
     // Popover
@@ -209,7 +211,7 @@ struct AppView: View {
                                 return
                             }
                             
-                            await cask.install()
+                            await cask.install(caskData: caskData)
                         }
                     } label: {
                         Label {
@@ -275,6 +277,8 @@ private struct AppIcon: View {
 private struct DownloadButton: View {
     @ObservedObject var cask: Cask
     @Binding var showingAlert: Bool
+    
+    @EnvironmentObject var caskData: CaskData
     
     @State var showingPopover = false
     @State var isPresentingCaveats = false
@@ -362,7 +366,7 @@ private struct DownloadButton: View {
         }
         
         Task {
-            await cask.install(force: force)
+            await cask.install(caskData: caskData, force: force)
         }
     }
 }
@@ -372,6 +376,8 @@ private struct OpenAndManageAppView: View {
     @StateObject var cask: Cask
     let deleteButton: Bool
     let moreOptionsButton: Bool
+    
+    @EnvironmentObject var caskData: CaskData
     
     @State var appNotFoundShowing = false
     @State var showingPopover = false
@@ -408,7 +414,7 @@ private struct OpenAndManageAppView: View {
                     // Reinstall button
                     Button {
                         Task {
-                            await cask.reinstall()
+                            await cask.reinstall(caskData: caskData)
                         }
                     } label: {
                         Label("Reinstall", systemImage: "arrow.2.squarepath")
@@ -417,7 +423,7 @@ private struct OpenAndManageAppView: View {
                     // Uninstall button
                     Button(role: .destructive) {
                         Task {
-                            await cask.uninstall()
+                            await cask.uninstall(caskData: caskData)
                         }
                     } label: {
                         Label("Uninstall", systemImage: "trash")
@@ -452,6 +458,8 @@ private struct UpdateButton: View {
 private struct UninstallButton: View {
     @StateObject var cask: Cask
     
+    @EnvironmentObject var caskData: CaskData
+    
     @State var showingError = false
     
     var body: some View {
@@ -459,7 +467,7 @@ private struct UninstallButton: View {
             Task {
                 await MainActor.run { cask.progressState = .busy(withTask: "Uninstalling") }
                 
-                _ = await cask.uninstall()
+                _ = await cask.uninstall(caskData: caskData)
             }
         } label: {
             Image(systemName: "trash.fill")

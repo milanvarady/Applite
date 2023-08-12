@@ -66,13 +66,16 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     /// - Parameters:
     ///   - force: If `true` install will be run with the `--force` flag
     /// - Returns: `Void`
-    func install(force: Bool = false) async -> Void {
+    func install(caskData: CaskData, force: Bool = false) async -> Void {
         Self.logger.info("Cask \"\(self.id)\" installation started")
         
         var cancellables = Set<AnyCancellable>()
         let shellOutputStream = ShellOutputStream()
         
-        await MainActor.run { self.progressState = .busy(withTask: "") }
+        await MainActor.run {
+            self.progressState = .busy(withTask: "")
+            caskData.busyCasks.insert(self)
+        }
             
         shellOutputStream.outputPublisher
             .sink { output in
@@ -87,20 +90,29 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         if result.didFail {
             Self.logger.error("Failed to install cask \"\(self.id)\". Output: \(result.output)")
             
-            await MainActor.run { progressState = .failed(output: result.output) }
-            sendNotification(title: String(localized:"Failed to download \(self.name)"), reason: .failure)
+            await MainActor.run {
+                progressState = .failed(output: result.output)
+                caskData.busyCasks.remove(self)
+            }
+            
+            sendNotification(title: "Failed to download \(self.name)", reason: .failure)
         } else {
             Self.logger.info("Successfully installed cask \"\(self.id)\"")
             
-            await MainActor.run { progressState = .success }
-            sendNotification(title: String(localized:"\(self.name) successfully installed!"), reason: .success)
+            sendNotification(title: "\(self.name) successfully installed!", reason: .success)
             
-            await MainActor.run { self.isInstalled = true }
+            await MainActor.run {
+                progressState = .success
+                self.isInstalled = true
+            }
             
             // Show success for 2 seconds
             try? await Task.sleep(for: .seconds(2))
             
-            await MainActor.run { progressState = .idle }
+            await MainActor.run {
+                progressState = .idle
+                caskData.busyCasks.remove(self)
+            }
         }
     }
     
@@ -128,19 +140,36 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     /// Uninstalls the cask
     /// - Returns: Bool - Whether the task has failed or not
     @discardableResult
-    func uninstall() async -> Bool {
+    func uninstall(caskData: CaskData) async -> Bool {
+        _ = await MainActor.run {
+            caskData.busyCasks.insert(self)
+        }
+        
         return await runBrewCommand(command: "uninstall",
                                     arguments: [self.id],
                                     taskDescription: "Uninstalling",
-                                    notificationSuccess: String(localized:"\(self.name) successfully uninstalled"),
-                                    notificationFailure: String(localized:"Failed to uninstall \(self.name)"),
-                                    onSuccess: { self.isInstalled = false })
+                                    notificationSuccess: "\(self.name) successfully uninstalled",
+                                    notificationFailure: "Failed to uninstall \(self.name)",
+                                    onSuccess: {
+            
+            self.isInstalled = false
+            
+            Task {
+                await MainActor.run {
+                    caskData.busyCasks.remove(self)
+                }
+            }
+        })
     }
     
     /// Updates the cask
     /// - Returns: Bool - Whether the task has failed or not
     @discardableResult
     func update(caskData: CaskData) async -> Bool {
+        _ = await MainActor.run {
+            caskData.busyCasks.insert(self)
+        }
+        
         return await runBrewCommand(command: "upgrade",
                                     arguments: [self.id],
                                     taskDescription: "Updating",
@@ -151,6 +180,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
                 await MainActor.run {
                     self.isOutdated = false
                     caskData.outdatedCasks.remove(self)
+                    caskData.busyCasks.remove(self)
                 }
             }
         })
@@ -159,12 +189,24 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     /// Updates the cask
     /// - Returns: Bool - Whether the task has failed or not
     @discardableResult
-    func reinstall() async -> Bool {
+    func reinstall(caskData: CaskData) async -> Bool {
+        _ = await MainActor.run {
+            caskData.busyCasks.insert(self)
+        }
+        
         return await runBrewCommand(command: "reinstall",
                                     arguments: [self.id],
                                     taskDescription: "Reinstalling",
-                                    notificationSuccess: String(localized:"\(self.name) successfully reinstalled"),
-                                    notificationFailure: String(localized:"Failed to reinstall \(self.name)"))
+                                    notificationSuccess: "\(self.name) successfully reinstalled",
+                                    notificationFailure: "Failed to reinstall \(self.name)",
+                                    onSuccess: {
+            
+            Task {
+                await MainActor.run {
+                    caskData.busyCasks.remove(self)
+                }
+            }
+        })
     }
     
     /// Runs a shell command with the currently selected brew path

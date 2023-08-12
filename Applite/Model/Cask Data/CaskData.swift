@@ -15,6 +15,7 @@ typealias BrewAnalyticsDictionary = [String: Int]
 @MainActor
 final class CaskData: ObservableObject {
     @Published var casks: [Cask] = []
+    @Published var busyCasks: Set<Cask> = []
     @Published var outdatedCasks: Set<Cask> = []
     
     private static let cacheDirectory = URL.cachesDirectory

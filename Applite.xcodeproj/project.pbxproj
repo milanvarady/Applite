@@ -31,6 +31,7 @@
 		41524B9E295FA36E00D0046A /* DebounceObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41524B9D295FA36E00D0046A /* DebounceObject.swift */; };
 		4166EE7028F5D4C900CE305A /* Commands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4166EE6F28F5D4C900CE305A /* Commands.swift */; };
 		4166EE7D28F73B2300CE305A /* BrewAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */; };
+		4178CF922A8689AF0037F270 /* ExportCasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4178CF912A8689AF0037F270 /* ExportCasks.swift */; };
 		41857B732911A2F2004A1894 /* categories.json in Resources */ = {isa = PBXBuildFile; fileRef = 41857B722911A2F2004A1894 /* categories.json */; };
 		41857B752912D94A004A1894 /* CategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41857B742912D94A004A1894 /* CategoryView.swift */; };
 		418989AD2A33A5C4004AC23B /* BrewManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418989AC2A33A5C4004AC23B /* BrewManagementView.swift */; };
@@ -51,6 +52,8 @@
 		4196C8FE28F9E13600EADDDA /* UpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8FD28F9E13600EADDDA /* UpdateView.swift */; };
 		4196C90028F9E1F400EADDDA /* InstalledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8FF28F9E1F400EADDDA /* InstalledView.swift */; };
 		4196C90428FC03A900EADDDA /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C90328FC03A900EADDDA /* Shell.swift */; };
+		41B731372A8789D4008BF6B9 /* ImportCasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41B731362A8789D4008BF6B9 /* ImportCasks.swift */; };
+		41B731392A879353008BF6B9 /* ActiveTasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41B731382A879353008BF6B9 /* ActiveTasksView.swift */; };
 		41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 41C8FA282A7A598B000BB9A2 /* Sparkle */; };
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
 		41DF006729EAB285004EB7AE /* PZCircularControl in Frameworks */ = {isa = PBXBuildFile; productRef = 41DF006629EAB285004EB7AE /* PZCircularControl */; };
@@ -83,6 +86,7 @@
 		41524B9D295FA36E00D0046A /* DebounceObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebounceObject.swift; sourceTree = "<group>"; };
 		4166EE6F28F5D4C900CE305A /* Commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commands.swift; sourceTree = "<group>"; };
 		4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewAnalytics.swift; sourceTree = "<group>"; };
+		4178CF912A8689AF0037F270 /* ExportCasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCasks.swift; sourceTree = "<group>"; };
 		41857B722911A2F2004A1894 /* categories.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = categories.json; sourceTree = "<group>"; };
 		41857B742912D94A004A1894 /* CategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryView.swift; sourceTree = "<group>"; };
 		418989AC2A33A5C4004AC23B /* BrewManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewManagementView.swift; sourceTree = "<group>"; };
@@ -103,6 +107,8 @@
 		4196C8FF28F9E1F400EADDDA /* InstalledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledView.swift; sourceTree = "<group>"; };
 		4196C90128FAF57A00EADDDA /* AppliteDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppliteDebug.entitlements; sourceTree = "<group>"; };
 		4196C90328FC03A900EADDDA /* Shell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
+		41B731362A8789D4008BF6B9 /* ImportCasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportCasks.swift; sourceTree = "<group>"; };
+		41B731382A879353008BF6B9 /* ActiveTasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveTasksView.swift; sourceTree = "<group>"; };
 		41DF006329EAA094004EB7AE /* SendNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendNotification.swift; sourceTree = "<group>"; };
 		BD7546562A868DA30083996B /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -295,6 +301,7 @@
 			children = (
 				412635422A77FB0000155034 /* Brew Installation */,
 				4126353F2A77C71F00155034 /* Shell */,
+				41B731352A878993008BF6B9 /* Import Export */,
 				41062C942A3794EA00FD48EA /* BrewPaths.swift */,
 				41524B9D295FA36E00D0046A /* DebounceObject.swift */,
 				41DF006329EAA094004EB7AE /* SendNotification.swift */,
@@ -324,8 +331,18 @@
 				4196C8FF28F9E1F400EADDDA /* InstalledView.swift */,
 				41857B742912D94A004A1894 /* CategoryView.swift */,
 				418989AC2A33A5C4004AC23B /* BrewManagementView.swift */,
+				41B731382A879353008BF6B9 /* ActiveTasksView.swift */,
 			);
 			path = "Detail Views";
+			sourceTree = "<group>";
+		};
+		41B731352A878993008BF6B9 /* Import Export */ = {
+			isa = PBXGroup;
+			children = (
+				4178CF912A8689AF0037F270 /* ExportCasks.swift */,
+				41B731362A8789D4008BF6B9 /* ImportCasks.swift */,
+			);
+			path = "Import Export";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -440,6 +457,7 @@
 				412635492A7804E700155034 /* CaskDataLoadError.swift in Sources */,
 				41062C9B2A3E4AFA00FD48EA /* BundleExtension.swift in Sources */,
 				418989AF2A33B65A004AC23B /* SmallProgressView.swift in Sources */,
+				41B731392A879353008BF6B9 /* ActiveTasksView.swift in Sources */,
 				419506A62964A5EF00FE5802 /* BrewPathSelectorView.swift in Sources */,
 				4191392C29159B5C00F1D75D /* CaskDTO.swift in Sources */,
 				4196C90428FC03A900EADDDA /* Shell.swift in Sources */,
@@ -450,8 +468,10 @@
 				41483CCD29101C9900BB10C2 /* Category.swift in Sources */,
 				418F331C28EB3D540023D76F /* AppGridView.swift in Sources */,
 				41062C972A3A20F900FD48EA /* UninstallSelf.swift in Sources */,
+				41B731372A8789D4008BF6B9 /* ImportCasks.swift in Sources */,
 				4126354B2A79075900155034 /* ShellResult.swift in Sources */,
 				418F332628EC921D0023D76F /* CaskData.swift in Sources */,
+				4178CF922A8689AF0037F270 /* ExportCasks.swift in Sources */,
 				4196C8F928F9CDF700EADDDA /* DownloadView.swift in Sources */,
 				4120AB682A755B5A00F68EFE /* CheckForUpdatesView.swift in Sources */,
 				4120AB652A754B1700F68EFE /* AppliteAppView.swift in Sources */,

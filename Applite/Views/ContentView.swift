@@ -44,6 +44,10 @@ struct ContentView: View {
                 Label("Installed", systemImage: "externaldrive.fill.badge.checkmark")
                     .tag("installed")
                 
+                Label("Active Tasks", systemImage: "gearshape.arrow.triangle.2.circlepath")
+                    .badge(caskData.busyCasks.count)
+                    .tag("activeTasks")
+                
                 Section("Categories") {
                     ForEach(categories) { category in
                         Label(NSLocalizedString(category.id, comment: "String Categorie") , systemImage: category.sfSymbol)
@@ -86,6 +90,9 @@ struct ContentView: View {
                 
             case "installed":
                 InstalledView()
+                
+            case "activeTasks":
+                ActiveTasksView()
                 
             case "brew":
                 BrewManagementView(modifyingBrew: $modifyingBrew)
