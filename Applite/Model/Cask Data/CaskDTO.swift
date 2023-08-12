@@ -15,6 +15,7 @@ struct CaskDTO: Decodable {
     let nameArray: Array<String>
     let homepage: String
     let caveats: String?
+    let url: String
     
     enum CodingKeys: String, CodingKey {
         case token
@@ -22,5 +23,6 @@ struct CaskDTO: Decodable {
         case nameArray = "name"
         case homepage
         case caveats
+        case url
     }
 }

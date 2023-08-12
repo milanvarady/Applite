@@ -10,37 +10,36 @@ import SwiftUI
 /// Provides a picker so the user can select the brew executable path they want to use
 struct BrewPathSelectorView: View {
     @Binding var isSelectedPathValid: Bool
-    
+
     @StateObject var customBrewPathDebounced = DebounceObject()
-    
+
     @AppStorage("customUserBrewPath") var customUserBrewPath: String = BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon, shellFriendly: false)
     @AppStorage("brewPathOption") var brewPathOption = BrewPaths.PathOption.defaultAppleSilicon.rawValue
-    
-    private func getPathDesctiption(for option: BrewPaths.PathOption) -> String {
+
+    private func getPathDescription(for option: BrewPaths.PathOption) -> String {
         switch option {
         case .appPath:
             return "\(Bundle.main.appName)'s installation"
-            
+
         case .defaultAppleSilicon:
-            return "Apple Silicon mac"
-            
+            return "Apple Silicon Mac"
+
         case .defaultIntel:
-            return "Intel mac"
-            
+            return "Intel Mac"
+
         case .custom:
             return ""
         }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             Picker("", selection: $brewPathOption) {
                 ForEach(BrewPaths.PathOption.allCases) { option in
                     if option != .custom {
                         HStack {
-                            Text("\(BrewPaths.getBrewExectuablePath(for: option, shellFriendly: false)) (\(getPathDesctiption(for: option)))")
-                                .truncationMode(.middle)
-                            
+                            Text("\(getPathDescription(for: option))")
+                            Text("(\(BrewPaths.getBrewExectuablePath(for: option, shellFriendly: false)))").truncationMode(.middle).lineLimit(1).foregroundColor(.gray)
                             if option.rawValue == brewPathOption {
                                 if isSelectedPathValid {
                                     Image(systemName: "checkmark.circle")
@@ -58,7 +57,7 @@ struct BrewPathSelectorView: View {
                         VStack(alignment: .leading, spacing: 5) {
                             HStack {
                                 Text("Custom")
-                                
+
                                 if option.rawValue == brewPathOption {
                                     if isSelectedPathValid {
                                         Image(systemName: "checkmark.circle")
@@ -71,7 +70,7 @@ struct BrewPathSelectorView: View {
                                     }
                                 }
                             }
-                            
+
                             TextField("Custom brew path", text: $customBrewPathDebounced.text, prompt: Text("/path/to/brew"))
                                 .textFieldStyle(.roundedBorder)
                                 .frame(maxWidth: 300)
@@ -93,7 +92,7 @@ struct BrewPathSelectorView: View {
         }
         .onChange(of: customBrewPathDebounced.debouncedText) { newPath in
             customUserBrewPath = newPath
-            
+
             if brewPathOption == BrewPaths.PathOption.custom.rawValue {
                 isSelectedPathValid = isBrewPathValid(path: newPath)
             }
