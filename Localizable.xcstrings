@@ -18,6 +18,12 @@
             "state" : "translated",
             "value" : "- Attendez"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "- Várakozik"
+          }
         }
       }
     },
@@ -27,6 +33,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "\"%@\" ne correspond à aucune application. Soit il n'est pas disponible dans le catalogue Homebrew, soit vous l'avez mal orthographié."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nincs találat a(z) \"%@\" kifejezésre. Nem elérhető az alkalmazás a Homebrew-n, vagy rosszul írta."
           }
         }
       }
@@ -38,6 +50,12 @@
             "state" : "translated",
             "value" : "[Homebrew](https://brew.sh) est un outil de gestion de packages gratuit et open source qui facilite l'installation d'applications tierces. %@ utilise Homebrew sous le capot pour télécharger et gérer des applications."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az alkalmazás a [Homebrew](https://brew.sh) nevű csomagkezelőt használja az appok letöltéséhez. A Homebrew egy ingyenes és nyílt forráskódú szoftver, ami megkönnyíti az appok letöltését."
+          }
         }
       }
     },
@@ -47,6 +65,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Version de Homebrew: %@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Homebrew verzió:** %@"
           }
         }
       }
@@ -64,6 +88,12 @@
             "state" : "translated",
             "value" : "**Remarque :** Cela installera un Homebrew spécifiquement pour %1$@ dans `~/Library/Application Support/%2$@/homebrew`"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Megjegyzés:** Ez csak a `~/Library/Application Support/%2$@/homebrew` elérési útvonalon található Homebrew telepítést fogja újratelepíteni."
+          }
         }
       }
     },
@@ -73,6 +103,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "**Nombre d'applications installées:** %@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Letöltött alkalmazások száma:** %@"
           }
         }
       }
@@ -90,6 +126,12 @@
             "state" : "translated",
             "value" : "**Attention :** Après la réinstallation, toutes les applications actuellement installées seront dissociées de %1$@. Ils ne seront pas supprimés, mais vous ne pourrez pas les mettre à jour ou les désinstaller via %2$@."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Figyelem:** Az újratelepítés után az összes jelenleg letöltött alkalmazás nem lesz elérhető az %1$@ felületén. Nem törlődnek, de nem lehet majd őket frissíteni vagy letörölni az %2$@-on keresztül."
+          }
         }
       }
     },
@@ -99,6 +141,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "**Attention :** Toutes les autres fonctions de l'application seront désactivées pendant la mise à jour!"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Figyelem:** A frissítés alatt az alkalmazás minden más funkciója nem lesz elérhető!"
           }
         }
       }
@@ -110,6 +158,12 @@
             "state" : "translated",
             "value" : "**Attention** : Le cache Homebrew est partagé entre les installations Homebrew. La suppression du cache supprimera le cache pour toutes les installations!"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Figyelem:** A Homebrew cache tárhelye közös a telepítések között. Ha törli a cachet, az minden Homebrew telepítésre hatással lesz."
+          }
         }
       }
     },
@@ -120,12 +174,24 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/brew/elérési/útvonal"
+          }
         }
       }
     },
     "%@" : {
       "localizations" : {
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@"
@@ -146,6 +212,12 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ (%2$@)"
+          }
         }
       }
     },
@@ -162,6 +234,12 @@
             "state" : "translated",
             "value" : "%1$@ est déjà installé. Si vous souhaitez l'ajouter à %2$@, cliquez sur plus d'options (icône en forme de chevron) et appuyez sur Forcer l'installation."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A(z) %1$@ már telepítve van. Ha hozzá akarja adni az %2$@-hoz, kattintson a további opciók gombra, és válassza a Kényszerített telepítés opciót."
+          }
         }
       }
     },
@@ -171,6 +249,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ installé avec succès!"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ sikeresen telepítve!"
           }
         }
       }
@@ -182,6 +266,12 @@
             "state" : "translated",
             "value" : "%@ réinstaller avec succès!"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ sikeresen újratelepítve!"
+          }
         }
       }
     },
@@ -191,6 +281,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ déinstaller avec succès!"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ sikeresen törölve!"
           }
         }
       }
@@ -202,6 +298,12 @@
             "state" : "translated",
             "value" : "%@ mis à jour avec succès!"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ sikeresen frissítve!"
+          }
         }
       }
     },
@@ -211,6 +313,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Une nouvelle installation Homebrew sera installée dans ~/Library/Application Support/%@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egy új Homebrew telepítés fog kerülni a ~/Library/Application Support/%@ elérési helyre"
           }
         }
       }
@@ -222,6 +330,12 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cselekvések"
+          }
         }
       }
     },
@@ -231,6 +345,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toutes les applications actuellement installées seront dissociées de %@."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minden jelenleg letöltött alkalmazás nem lesz elérhető az %@-on keresztül."
           }
         }
       }
@@ -242,6 +362,12 @@
             "state" : "translated",
             "value" : "Tout est prêt!"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minden készen áll!"
+          }
         }
       }
     },
@@ -251,6 +377,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "L'application est introuvable"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nem található elérési útvonal az alkalmazáshoz"
           }
         }
       }
@@ -262,6 +394,12 @@
             "state" : "translated",
             "value" : "Erreur de chargement de l'application"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alkalmazás betöltési hiba"
+          }
         }
       }
     },
@@ -271,6 +409,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apparence"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Megjelenés"
           }
         }
       }
@@ -282,6 +426,12 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite"
+          }
         }
       }
     },
@@ -291,6 +441,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les applications avec peu de téléchargements sont masquées, pensez à désactiver ce filtre"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kevés letöltéssel rendelkező alkalmazások el vannak rejtve.  Fontolja meg ennek a szűrőnek a kikapcsolását."
           }
         }
       }
@@ -302,6 +458,12 @@
             "state" : "translated",
             "value" : "Voulez-vous vraiment %@installer Homebrew ?"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biztos telepíteni szeretné a Homebrew-t?"
+          }
         }
       }
     },
@@ -311,6 +473,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voulez-vous vraiment forcer l'installation de %@ ? Cela remplacera toute installation actuelle!"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biztos telepíteni szeretné a(z) %@ alkalmazást? A jelenlegi telepítés felül lesz írva."
           }
         }
       }
@@ -322,6 +490,12 @@
             "state" : "translated",
             "value" : "Êtes-vous sûr de vouloir désinstaller définitivement %@?"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biztos véglegesen törli az %@-tot?"
+          }
         }
       }
     },
@@ -331,6 +505,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rechercher automatiquement des mises à jour"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frissítések automatikus ellenőrzése"
           }
         }
       }
@@ -342,6 +522,12 @@
             "state" : "translated",
             "value" : "Télécharger automatiquement les mises à jour"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frissítések automatikus letöltése"
+          }
         }
       }
     },
@@ -351,6 +537,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retour"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vissza"
           }
         }
       }
@@ -362,6 +554,12 @@
             "state" : "translated",
             "value" : "Chemin d'accès de l'exécutable Homebrew"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew futtatható állomány (executable) elérési útja"
+          }
         }
       }
     },
@@ -371,6 +569,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chemin d'accès"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew elérési útja"
           }
         }
       }
@@ -382,6 +586,12 @@
             "state" : "translated",
             "value" : "Le chemin d'accès à Homebrew a été modifié. Redémarrez l'application pour que les modifications prennent effet."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Brew elérési útja megváltozott. Indítsa újra az alkalmazást, hogy a változtatás érvénybe lépjen."
+          }
         }
       }
     },
@@ -391,6 +601,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le chemin d'accès à Homebrew est cassé"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew elérési útvonal hiba"
           }
         }
       }
@@ -403,6 +619,12 @@
             "state" : "translated",
             "value" : "Parcourez une liste triée sur le volet d'applications géniales."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Válogasson egy gondosan kiválogatott alkalmazás listából"
+          }
         }
       }
     },
@@ -414,6 +636,12 @@
             "state" : "translated",
             "value" : "Navigateurs"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Böngészők"
+          }
         }
       }
     },
@@ -423,6 +651,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mégse"
           }
         }
       }
@@ -434,6 +668,12 @@
             "state" : "translated",
             "value" : "Catégories"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kategóriák"
+          }
         }
       }
     },
@@ -444,6 +684,12 @@
             "state" : "translated",
             "value" : "Rechercher des mises à jour..."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frissítések keresése..."
+          }
         }
       }
     },
@@ -453,6 +699,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Thème:"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Színséma"
+          }
+        }
+      }
+    },
+    "Communication" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kommunikáció"
           }
         }
       }
@@ -465,6 +728,12 @@
             "state" : "translated",
             "value" : "Erreur de simultanéité"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concurrency error"
+          }
         }
       }
     },
@@ -474,6 +743,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continuer"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tovább"
           }
         }
       }
@@ -485,6 +760,12 @@
             "state" : "translated",
             "value" : "Impossible de télécharger l'application. Pas de connexion Internet ou l'hôte est inaccessible."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alkalmazás letöltése sikertelen. Nincs internetkapcsolat, vagy a forrás nem elérhető."
+          }
         }
       }
     },
@@ -495,6 +776,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Outils de Création"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digitális alkotás"
           }
         }
       }
@@ -512,6 +799,12 @@
             "state" : "translated",
             "value" : "Version actuelle de l'application: %1$@ (%2$@)"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jelenlegi verzió: %1$@ (%2$@)"
+          }
         }
       }
     },
@@ -521,6 +814,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chemin d'accès actuel à Homebrew n'est pas valide"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kiválasztott elérési útvonal helytelen"
           }
         }
       }
@@ -532,6 +831,12 @@
             "state" : "translated",
             "value" : "Personnalisé"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saját"
+          }
         }
       }
     },
@@ -541,6 +846,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chemin d'accès à Homebrew personnalisé"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saját brew elérési útvonal"
           }
         }
       }
@@ -553,6 +864,12 @@
             "state" : "translated",
             "value" : "Sombre"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sötét"
+          }
         }
       }
     },
@@ -562,6 +879,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer le cache de Homebrew"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew cache törlése"
           }
         }
       }
@@ -574,6 +897,12 @@
             "state" : "translated",
             "value" : "Outils de Développement"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fejlesztői eszközök"
+          }
         }
       }
     },
@@ -583,6 +912,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Découvrir"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letöltés"
           }
         }
       }
@@ -594,6 +929,12 @@
             "state" : "translated",
             "value" : "Avez-vous déjà installé Homebrew ?"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ön már rendelkezik a Homebrew csomagkezelővel?"
+          }
         }
       }
     },
@@ -604,6 +945,12 @@
             "state" : "translated",
             "value" : "Télécharger"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letöltés"
+          }
         }
       }
     },
@@ -613,6 +960,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Télécharger quand même"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telepítés mindenképp"
           }
         }
       }
@@ -625,6 +978,12 @@
             "state" : "translated",
             "value" : "Téléchargez des applications en toute simplicité"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alkalmazások letöltése könnyedén"
+          }
         }
       }
     },
@@ -636,6 +995,12 @@
             "state" : "translated",
             "value" : "Téléchargez des applications tierces en un seul clic. Plus besoin de \"Glisser dans le dossier Applications\"."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Harmadik féltől származó alkalmazások letöltése egyetlen kattintással. Nincs többé \"Húzd az applikációk mappába\"."
+          }
         }
       }
     },
@@ -645,6 +1010,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Erreur"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiba"
           }
         }
       }
@@ -657,6 +1028,12 @@
             "state" : "translated",
             "value" : "Échec de la récupération des informations de cask à partir de l'exécutable de Homebrew sélectionné"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nem sikerült cask információt szerezni a kiválasztott brew executable révén"
+          }
         }
       }
     },
@@ -668,6 +1045,12 @@
             "state" : "translated",
             "value" : "Impossible de décoder les données json de l'API Homebrew"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nem sikerült dekódolni a Homebrew API-ról érkezett információt"
+          }
         }
       }
     },
@@ -677,6 +1060,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Echec du téléchargement de %@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ letöltése sikertelen"
           }
         }
       }
@@ -689,6 +1078,12 @@
             "state" : "translated",
             "value" : "Échec du chargement des données de cask à partir du cache"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nem sikerült betölteni a cask adatait a cache-ből"
+          }
         }
       }
     },
@@ -698,6 +1093,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Echec de la réinstallation de %@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ újratelepítése sikertelen"
           }
         }
       }
@@ -709,6 +1110,12 @@
             "state" : "translated",
             "value" : "Echec de la désinstallation de %@"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ törlése sikertelen"
+          }
         }
       }
     },
@@ -718,6 +1125,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Echec de la mise à jour de %@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ letöltése sikertelen"
           }
         }
       }
@@ -729,6 +1142,12 @@
             "state" : "translated",
             "value" : "Forcer l'installation"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kényszerített telepítés"
+          }
         }
       }
     },
@@ -738,6 +1157,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Général"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Általános"
           }
         }
       }
@@ -749,6 +1174,12 @@
             "state" : "translated",
             "value" : "Masquer les applications avec peu de téléchargements"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kevés letöltéssel rendelkező alkalmazások elrejtése"
+          }
         }
       }
     },
@@ -758,6 +1189,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew"
           }
         }
       }
@@ -769,6 +1206,23 @@
             "state" : "translated",
             "value" : "Page d'accueil"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Honlap"
+          }
+        }
+      }
+    },
+    "IDEs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IDE-k"
+          }
         }
       }
     },
@@ -778,6 +1232,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Infó"
           }
         }
       }
@@ -789,6 +1249,12 @@
             "state" : "translated",
             "value" : "Installer un Homebrew séparé"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Külön brew telepítése"
+          }
         }
       }
     },
@@ -799,6 +1265,12 @@
             "state" : "translated",
             "value" : "Echec de l'installation"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telepítés sikertelen"
+          }
         }
       }
     },
@@ -808,6 +1280,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installé"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telepítve"
           }
         }
       }
@@ -820,6 +1298,12 @@
             "state" : "translated",
             "value" : "Installation"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telepítés"
+          }
         }
       }
     },
@@ -829,6 +1313,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installation des dépendances"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Függőségek telepítése"
           }
         }
       }
@@ -841,6 +1331,23 @@
             "state" : "translated",
             "value" : "Clair"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Világos"
+          }
+        }
+      }
+    },
+    "Load error" : {
+      "comment" : "CaskDataLoadError",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Betöltési hiba"
+          }
         }
       }
     },
@@ -852,6 +1359,12 @@
             "state" : "translated",
             "value" : "Gérer vos applications"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alkalmazások kezelése"
+          }
         }
       }
     },
@@ -862,6 +1375,12 @@
             "state" : "translated",
             "value" : "Gérer Homebrew"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Homebrew kezelése"
+          }
         }
       }
     },
@@ -869,6 +1388,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Média"
+          }
+        },
+        "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Média"
@@ -884,6 +1409,12 @@
             "state" : "translated",
             "value" : "Bar des Menus"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menüsáv"
+          }
         }
       }
     },
@@ -895,6 +1426,12 @@
             "state" : "translated",
             "value" : "Plus téléchergé (par défaut)"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legtöbb letöltés (alapértelmezett)"
+          }
         }
       }
     },
@@ -904,6 +1441,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Non (je ne sais pas ce que c'est)"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nem (nem tudom mi az)"
           }
         }
       }
@@ -915,6 +1458,12 @@
             "state" : "translated",
             "value" : "Aucune sélection"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nincs kiválasztás"
+          }
         }
       }
     },
@@ -925,6 +1474,12 @@
             "state" : "translated",
             "value" : "Aucune mise à jour disponible"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nincs elérhető frissítés"
+          }
         }
       }
     },
@@ -934,6 +1489,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Értesítések"
           }
         }
       }
@@ -946,6 +1507,12 @@
             "state" : "translated",
             "value" : "Outils Bureautiques"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Irodai eszközök"
+          }
         }
       }
     },
@@ -955,6 +1522,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ok"
           }
         }
       }
@@ -966,16 +1539,11 @@
             "state" : "translated",
             "value" : "Ouvrir"
           }
-        }
-      }
-    },
-    "Password is too short" : {
-      "comment" : "CaskDataLoadError",
-      "localizations" : {
-        "fr" : {
+        },
+        "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le mot de passe est trop court"
+            "value" : "Megnyit"
           }
         }
       }
@@ -988,6 +1556,12 @@
             "state" : "translated",
             "value" : "Gestionnaires de Mots de Passe"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jelszókezelők"
+          }
         }
       }
     },
@@ -999,6 +1573,12 @@
             "state" : "translated",
             "value" : "Productivité"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hatékonyság"
+          }
         }
       }
     },
@@ -1008,6 +1588,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Donner le chemin d'accès de Homebrew"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adja meg a brew elérési útvonalát"
           }
         }
       }
@@ -1019,6 +1605,12 @@
             "state" : "translated",
             "value" : "Quitter"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kilépés"
+          }
         }
       }
     },
@@ -1028,6 +1620,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réinstaller"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Újratelepítés"
           }
         }
       }
@@ -1039,6 +1637,12 @@
             "state" : "translated",
             "value" : "Echec de la réinstallation"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Újratelepítés sikertelen"
+          }
         }
       }
     },
@@ -1048,6 +1652,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réinstaller Homebrew"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew újratelepítése"
           }
         }
       }
@@ -1060,6 +1670,12 @@
             "state" : "translated",
             "value" : "Réinstallation"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Újratelepítés"
+          }
         }
       }
     },
@@ -1069,6 +1685,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Relancer"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Újraindítás"
           }
         }
       }
@@ -1080,6 +1702,12 @@
             "state" : "translated",
             "value" : "Réessayer"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próbáld újra"
+          }
         }
       }
     },
@@ -1089,6 +1717,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retry Install"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próbálja meg újra a telepítést"
           }
         }
       }
@@ -1100,6 +1734,12 @@
             "state" : "translated",
             "value" : "Réessayez de charger"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próbálja meg újra a betöltést"
+          }
         }
       }
     },
@@ -1109,6 +1749,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réessayez l'installation ou visitez la page de dépannage."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próbálja meg újra a telepítést, vagy látogasson el a hibaelhárítási oldalra."
           }
         }
       }
@@ -1120,6 +1766,12 @@
             "state" : "translated",
             "value" : "Voir tout"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mutasd mindet"
+          }
         }
       }
     },
@@ -1129,6 +1781,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le chemin d'accès de Homebrew n'est pas valide!"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kiválasztott brew elérési útvonal helytelen!"
           }
         }
       }
@@ -1140,6 +1798,12 @@
             "state" : "translated",
             "value" : "Trier par"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rendezés"
+          }
         }
       }
     },
@@ -1150,6 +1814,12 @@
             "state" : "translated",
             "value" : "Trier"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rendezési opciók"
+          }
         }
       }
     },
@@ -1159,6 +1829,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Commence à utiliser %@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kezdjünk bele!"
           }
         }
       }
@@ -1171,6 +1847,12 @@
             "state" : "translated",
             "value" : "Système"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rendszer"
+          }
         }
       }
     },
@@ -1180,6 +1862,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tâches terminées"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sikeres akció"
           }
         }
       }
@@ -1191,6 +1879,23 @@
             "state" : "translated",
             "value" : "Erreurs de tâche"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sikertelen akció"
+          }
+        }
+      }
+    },
+    "Terminals" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminálok"
+          }
         }
       }
     },
@@ -1200,6 +1905,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cette app"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az alakalmazás"
           }
         }
       }
@@ -1211,6 +1922,12 @@
             "state" : "translated",
             "value" : "Cette application utilise le gestionnaire de packages [Homebrew](https://brew.sh/) (brew en abrégé) pour télécharger des applications. Homebrew est un utilitaire de ligne de commande gratuit et open source qui peut télécharger des outils de développement utiles ainsi que des applications de bureau."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az alkalmazás a [Homebrew](https://brew.sh/) (röviden brew) csomagkezelőt használja az alkalmazások letöltéséhez. A Homebrew egy ingyenes és nyílt forráskódú parancssoros segédprogram, amellyel hasznos fejlesztői eszközöket, valamint asztali alkalmazásokat tölthetünk le."
+          }
         }
       }
     },
@@ -1220,6 +1937,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cette application utilise le gestionnaire de packages gratuit et open source [Homebrew](https://brew.sh/) pour télécharger et gérer les applications. Si vous l'avez déjà installé sur votre système, vous pouvez l'utiliser immédiatement. Si vous n'avez pas installé Homebrew ou si vous ne savez pas ce que c'est, sélectionnez **Non**. Cela créera une nouvelle installation de Homebrew juste pour %@."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az alkalmazás az ingyenes és nyílt forráskódú [Homebrew](https://brew.sh/) csomagkezelőt használja az alkalmazások letöltésére és kezelésére. Ha már telepítve van a számítógépére, használhatja azt. Ha nincs telepítve a brew, vagy nem tudja, mi az, válassza a **Nem** lehetőséget. Ez egy új brew telepítést hoz létre csak az %@ számára."
           }
         }
       }
@@ -1231,6 +1954,12 @@
             "state" : "translated",
             "value" : "Cela désinstallera tous les fichiers ainsi que le cache associés à %@."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az %@-al kapcsolatos összes fájlt és cachet törölni fogja."
+          }
         }
       }
     },
@@ -1240,6 +1969,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dépannage"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibaelhárítás"
           }
         }
       }
@@ -1251,6 +1986,12 @@
             "state" : "translated",
             "value" : "Désactiver le filtre téléchargements minoritaire"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kevés letöltés szűrő kikapcsolása"
+          }
         }
       }
     },
@@ -1260,6 +2001,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Désinstaller"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Törlés"
           }
         }
       }
@@ -1271,6 +2018,12 @@
             "state" : "translated",
             "value" : "Désinstaller %@"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ törlése"
+          }
         }
       }
     },
@@ -1281,6 +2034,12 @@
             "state" : "translated",
             "value" : "Désinstallez %@, les fichiers associés ainsi que le cache."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az %@ és minden kapcsolatos fájl törlése."
+          }
         }
       }
     },
@@ -1290,6 +2049,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Désinstaller..."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Törlés..."
           }
         }
       }
@@ -1302,6 +2067,12 @@
             "state" : "translated",
             "value" : "Désinstallation"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trörlés"
+          }
         }
       }
     },
@@ -1312,6 +2083,12 @@
             "state" : "translated",
             "value" : "Mettre à jour"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frissítés"
+          }
         }
       }
     },
@@ -1321,6 +2098,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tout mettre à jour"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Összes frissítése"
           }
         }
       }
@@ -1333,6 +2116,12 @@
             "state" : "translated",
             "value" : "Mettez à jour et désinstallez vos applications. Fini les résidus des applications supprimées."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frissítse és törölje az alkalmazásait. Nincsenek többé hátramaradt fájlok a törölt alkalmazások után."
+          }
         }
       }
     },
@@ -1342,6 +2131,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Echec de la mise à jour"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firssítés sikertelen"
           }
         }
       }
@@ -1353,6 +2148,12 @@
             "state" : "translated",
             "value" : "Mettre à jour Homebrew"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Homebrew frissítése"
+          }
         }
       }
     },
@@ -1362,6 +2163,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mises à jour"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frissítések"
           }
         }
       }
@@ -1374,6 +2181,12 @@
             "state" : "translated",
             "value" : "Mise à jour"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firssítés"
+          }
         }
       }
     },
@@ -1384,6 +2197,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Utilitaires"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eszközök"
           }
         }
       }
@@ -1396,6 +2215,12 @@
             "state" : "translated",
             "value" : "Virtualisation"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Virtualizáció"
+          }
         }
       }
     },
@@ -1405,6 +2230,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Site web"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weboldal"
           }
         }
       }
@@ -1416,6 +2247,12 @@
             "state" : "translated",
             "value" : "Bienvenue sur %@"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üdvözöljük a %@-on"
+          }
         }
       }
     },
@@ -1425,6 +2262,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Outils de ligne de commande Xcode"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xcode Command Line Tools"
           }
         }
       }
@@ -1436,6 +2279,12 @@
             "state" : "translated",
             "value" : "Oui"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Igen"
+          }
         }
       }
     },
@@ -1446,6 +2295,12 @@
             "state" : "translated",
             "value" : "Vous serez invité à installer les outils de ligne de commande Xcode. Veuillez sélectionner \"Installer\" car ils sont nécessaires pour que cette application fonctionne."
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A program kérni fogja az Xcode Command Line Tools telepítését, kérjük, kattintson a \"Telepítés\" gombra, mivel ez szükséges az alkalmazás működéséhez. Ez néhány percet vesz igénybe, a telepítés előrehaladását a telepítési ablakban láthatja."
+          }
         }
       }
     },
@@ -1455,6 +2310,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vous serez invité à installer les outils de ligne de commande Xcode. Veuillez sélectionner \"Installer\" car ils sont nécessaires pour que cette application fonctionne."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A program kérni fogja az Xcode Command Line Tools telepítését. Kérjük, válassza a \"Telepítés\" lehetőséget, mivel ez szükséges az alkalmazás működéséhez."
           }
         }
       }

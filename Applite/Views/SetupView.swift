@@ -24,7 +24,7 @@ struct SetupView: View {
     @State var isBrewInstallDone = false
     
     var body: some View {
-        VStack() {
+        VStack {
             switch page {
             case .welcome:
                 Welcome()
@@ -117,6 +117,7 @@ struct SetupView: View {
                             description: "Browse through a handpicked list of awesome apps.")
                 }
             }
+            .frame(maxWidth: 500)
         }
         
         /// A feature of the app to be displayed in the Welcome view
