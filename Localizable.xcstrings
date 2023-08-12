@@ -339,6 +339,16 @@
         }
       }
     },
+    "Active Tasks" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktív feladatok"
+          }
+        }
+      }
+    },
     "All currently installed apps will be unlinked from %@." : {
       "localizations" : {
         "fr" : {
@@ -1020,6 +1030,46 @@
         }
       }
     },
+    "Export a file containing all currently installed applications. This can be imported to another device." : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az összes jelenleg telepített alkalmazást tartalmazó fájl exportálása. Ez importálható egy másik eszközre."
+          }
+        }
+      }
+    },
+    "Export apps to file" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alakalmazások exportálása fájlba"
+          }
+        }
+      }
+    },
+    "Export failed" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportálás sikertelen"
+          }
+        }
+      }
+    },
+    "Export/Import apps" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alkalmazások exportálása/importálása"
+          }
+        }
+      }
+    },
     "Faild to retrieve cask information from selected brew executable" : {
       "comment" : "CaskDataLoadError",
       "localizations" : {
@@ -1089,32 +1139,10 @@
     },
     "Failed to reinstall %@" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Echec de la réinstallation de %@"
-          }
-        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ újratelepítése sikertelen"
-          }
-        }
-      }
-    },
-    "Failed to uninstall %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Echec de la désinstallation de %@"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ törlése sikertelen"
+            "value" : "Újratelepítés sikertelen"
           }
         }
       }
@@ -1222,6 +1250,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "IDE-k"
+          }
+        }
+      }
+    },
+    "Import cask file" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask fájl importálása"
+          }
+        }
+      }
+    },
+    "Import failed" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importálás sikertelen"
           }
         }
       }
@@ -1447,6 +1495,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nem (nem tudom mi az)"
+          }
+        }
+      }
+    },
+    "No Active Tasks" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nincs aktív feladat"
           }
         }
       }

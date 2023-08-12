@@ -95,11 +95,11 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
                 caskData.busyCasks.remove(self)
             }
             
-            sendNotification(title: "Failed to download \(self.name)", reason: .failure)
+            sendNotification(title: String(localized: "Failed to download \(self.name)"), reason: .failure)
         } else {
             Self.logger.info("Successfully installed cask \"\(self.id)\"")
             
-            sendNotification(title: "\(self.name) successfully installed!", reason: .success)
+            sendNotification(title: String(localized: "\(self.name) successfully installed!"), reason: .success)
             
             await MainActor.run {
                 progressState = .success
@@ -148,7 +148,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         return await runBrewCommand(command: "uninstall",
                                     arguments: [self.id],
                                     taskDescription: "Uninstalling",
-                                    notificationSuccess: "\(self.name) successfully uninstalled",
+                                    notificationSuccess: String(localized:"\(self.name) successfully uninstalled"),
                                     notificationFailure: "Failed to uninstall \(self.name)",
                                     onSuccess: {
             
@@ -173,8 +173,8 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         return await runBrewCommand(command: "upgrade",
                                     arguments: [self.id],
                                     taskDescription: "Updating",
-                                    notificationSuccess: String(localized:"\(self.name) successfully updated"),
-                                    notificationFailure: String(localized:"Failed to update \(self.name)"),
+                                    notificationSuccess: String(localized: "\(self.name) successfully updated"),
+                                    notificationFailure: String(localized: "Failed to update \(self.name)"),
                                     onSuccess: {
             Task {
                 await MainActor.run {
@@ -197,8 +197,8 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         return await runBrewCommand(command: "reinstall",
                                     arguments: [self.id],
                                     taskDescription: "Reinstalling",
-                                    notificationSuccess: "\(self.name) successfully reinstalled",
-                                    notificationFailure: "Failed to reinstall \(self.name)",
+                                    notificationSuccess: String(localized: "\(self.name) successfully reinstalled"),
+                                    notificationFailure: String(localized:"Failed to reinstall \(self.name)"),
                                     onSuccess: {
             
             Task {
