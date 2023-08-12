@@ -128,7 +128,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             }
         }
         else if output.contains("Installing") || output.contains("Moving") || output.contains("Linking") {
-            return .busy(withTask: "Installing")
+            return .busy(withTask: NSLocalizedString("Installing", comment: "Installing"))
         }
         else if output.contains("successfully installed") {
             return .success
@@ -173,8 +173,8 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         return await runBrewCommand(command: "upgrade",
                                     arguments: [self.id],
                                     taskDescription: "Updating",
-                                    notificationSuccess: "\(self.name) successfully updated",
-                                    notificationFailure: "Failed to update \(self.name)",
+                                    notificationSuccess: String(localized:"\(self.name) successfully updated"),
+                                    notificationFailure: String(localized:"Failed to update \(self.name)"),
                                     onSuccess: {
             Task {
                 await MainActor.run {
@@ -222,7 +222,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     private func runBrewCommand(command: String, arguments: [String], taskDescription: String,
                                 notificationSuccess: String, notificationFailure: String, onSuccess: (() -> Void)? = nil) async -> Bool {
         
-        await MainActor.run { self.progressState = .busy(withTask: taskDescription) }
+        await MainActor.run { self.progressState = .busy(withTask: NSLocalizedString(taskDescription, comment: "taskDescription")) }
         
         let result = await shell("HOMEBREW_NO_AUTO_UPDATE=1 \(BrewPaths.currentBrewExecutable) \(command) --cask \(arguments.joined(separator: " "))")
         
