@@ -12,20 +12,7 @@ import os
 struct BrewManagementView: View {
     @Binding var modifyingBrew: Bool
     
-    @State var updateDone = false
-    @State var reinstallDone = false
-    
-    // These will be loaded in asynchronously
-    @State var homebrewVersion = "loading..."
-    @State var numberOfCasks = "loading..."
-    @State var isAppBrewInstalled = false
-    
-    @State var isPresentingReinstallConfirm = false
-    
-    @State var updateFailed = false
-    @State var reinstallFailed = false
-    
-    let logger = Logger()
+    static let logger = Logger()
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -36,6 +23,27 @@ struct BrewManagementView: View {
             Text("This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications.")
                 .padding(.bottom)
             
+            InfoView()
+            
+            Divider()
+            
+            ActionsView(modifyingBrew: $modifyingBrew)
+            
+            Divider()
+            
+            ExportView()
+            
+            Spacer()
+        }
+        .frame(maxWidth: 800)
+        .padding(12)
+    }
+    
+    struct InfoView: View {
+        @State var homebrewVersion = "loading..."
+        @State var numberOfCasks = "loading..."
+        
+        var body: some View {
             // Info section
             Text("Info")
                 .font(.title)
@@ -45,7 +53,40 @@ struct BrewManagementView: View {
                 Text("**Homebrew version:** \(NSLocalizedString(homebrewVersion, comment: "homebrewVersion"))")
                 Text("**Number of apps installed:** \(NSLocalizedString(numberOfCasks, comment: "numberOfCasks installed"))")
             }
-            
+            .task {
+                // Get version
+                let versionOutput = await shell("\(BrewPaths.currentBrewExecutable) --version").output
+                
+                if let version = versionOutput.firstMatch(of: /Homebrew ([\d\.]+)/) {
+                    homebrewVersion = String(version.1)
+                } else {
+                    homebrewVersion = "N/a"
+                    numberOfCasks = "N/a"
+                    return
+                }
+                
+                // Get number of installed casks
+                let countOutput = await shell("\(BrewPaths.currentBrewExecutable) list --cask | wc -w").output
+                
+                numberOfCasks = countOutput.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+        }
+    }
+    
+    struct ActionsView: View {
+        @Binding var modifyingBrew: Bool
+        
+        @State var updateDone = false
+        @State var reinstallDone = false
+        
+        @State var isAppBrewInstalled = false
+        
+        @State var isPresentingReinstallConfirm = false
+        
+        @State var updateFailed = false
+        @State var reinstallFailed = false
+        
+        var body: some View {
             // Actions section
             HStack {
                 Text("Actions")
@@ -86,7 +127,6 @@ struct BrewManagementView: View {
                     } label: {
                         Label("Update Homebrew", systemImage: "arrow.uturn.down.circle")
                     }
-                    .bigButton()
                     .disabled(modifyingBrew)
                     .padding(.trailing, 3)
                     .alert("Update failed", isPresented: $updateFailed, actions: {})
@@ -109,7 +149,6 @@ struct BrewManagementView: View {
                     } label: {
                         Label(isAppBrewInstalled ? "Reinstall Homebrew" : "Install Separate Brew", systemImage: "wrench.and.screwdriver")
                     }
-                    .bigButton(foregroundColor: .orange)
                     .disabled(modifyingBrew)
                     .confirmationDialog("Are you sure you wan't to \(isAppBrewInstalled ? "re" : "")install Homebrew?", isPresented: $isPresentingReinstallConfirm) {
                         Button("Yes") {
@@ -154,30 +193,86 @@ struct BrewManagementView: View {
                 
                 Text("**Warning:** After reinstalling, all currently installed apps will be unlinked from \(Bundle.main.appName). They won't be deleted, but you won't be able to update or uninstall them via \(Bundle.main.appName).")
             }
-            
-            Spacer()
-        }
-        .frame(maxWidth: 800)
-        .padding(12)
-        .task {
-            // Check if brew is installed in application support
-            isAppBrewInstalled = isBrewPathValid(path: BrewPaths.getBrewExectuablePath(for: .appPath))
-            
-            // Get version
-            let versionOutput = await shell("\(BrewPaths.currentBrewExecutable) --version").output
-            
-            if let version = versionOutput.firstMatch(of: /Homebrew ([\d\.]+)/) {
-                homebrewVersion = String(version.1)
-            } else {
-                homebrewVersion = "N/a"
-                numberOfCasks = "N/a"
-                return
+            .task {
+                // Check if brew is installed in application support
+                isAppBrewInstalled = isBrewPathValid(path: BrewPaths.getBrewExectuablePath(for: .appPath))
             }
+        }
+    }
+    
+    struct ExportView: View {
+        @EnvironmentObject var caskData: CaskData
+        
+        @State private var fileExporterPresented = false
+        @State private var fileImporterPresented = false
+        
+        @State var showingExportError = false
+        @State var showingImportError = false
+        
+        var body: some View {
+            VStack(alignment: .leading) {
+                Text("Export/Import apps")
+                    .font(.title)
+                
+                Text("Export a file containing all currently installed applications. This can be imported to another device.")
             
-            // Get number of installed casks
-            let countOutput = await shell("\(BrewPaths.currentBrewExecutable) list --cask | wc -w").output
             
-            numberOfCasks = countOutput.trimmingCharacters(in: .whitespacesAndNewlines)
+                Button("Export apps to file") {
+                    fileExporterPresented = true
+                }
+                .fileImporter(
+                    isPresented: $fileExporterPresented,
+                    allowedContentTypes: [.folder],
+                    allowsMultipleSelection: false
+                ) { result in
+                    switch result {
+                    case .success(let url):
+                        var result = ""
+                        
+                        do {
+                            result = try exportCasks(url: url[0])
+                        } catch {
+                            logger.error("Failed to export casks, output: \(result)")
+                            showingExportError = true
+                        }
+                    case .failure(let error):
+                        logger.error("\(error.localizedDescription)")
+                    }
+                }
+                .alert("Export failed", isPresented: $showingExportError, actions: {})
+                
+                Button("Import cask file") {
+                    fileImporterPresented = true
+                }
+                .fileImporter(
+                    isPresented: $fileImporterPresented,
+                    allowedContentTypes: [.plainText],
+                    allowsMultipleSelection: false
+                ) { result in
+                    var caskText = ""
+                    
+                    switch result {
+                    case .success(let url):
+                        do {
+                            caskText = try readCaskFile(url: url[0])
+                            
+                            installImported(caskText: caskText)
+                        } catch {
+                            logger.error("Failed to import cask")
+                        }
+                    case .failure(let error):
+                        logger.error("\(error.localizedDescription)")
+                        showingImportError = true
+                    }
+                }
+                .alert("Import failed", isPresented: $showingImportError, actions: {})
+            }
+        }
+        
+        func installImported(caskText: String) {
+            Task {
+                await installImportedCasks(caskText: caskText, caskData: caskData)
+            }
         }
     }
 }
