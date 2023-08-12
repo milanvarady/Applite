@@ -966,22 +966,6 @@
         }
       }
     },
-    "Download" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Télécharger"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Letöltés"
-          }
-        }
-      }
-    },
     "Download Anyway" : {
       "localizations" : {
         "fr" : {
