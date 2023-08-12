@@ -1306,6 +1306,9 @@
         }
       }
     },
+    "Install will likely fail" : {
+
+    },
     "Installation failed" : {
       "localizations" : {
         "fr" : {
@@ -1370,6 +1373,9 @@
           }
         }
       }
+    },
+    "Installing requires admin password and will most likely fail. We are working on a solution, in the meantime see troubleshooting for more information." : {
+
     },
     "Light" : {
       "extractionState" : "manual",

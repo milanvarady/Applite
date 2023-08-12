@@ -36,6 +36,7 @@ struct AppView: View {
     @State var showingDownloadAlert = false
     @State var failureAlertMessage = ""
     @State var showingFailureAlert = false
+    @State var showingPkgAlert = false
     
     // Success animation
     @State var successCheckmarkScale = 0.0001
@@ -211,6 +212,11 @@ struct AppView: View {
                                 return
                             }
                             
+                            if cask.pkgInstaller {
+                                showingPkgAlert = true
+                                return
+                            }
+                            
                             await cask.install(caskData: caskData)
                         }
                     } label: {
@@ -238,6 +244,23 @@ struct AppView: View {
             .font(.system(size: 14, weight: .bold))
             .padding(10)
         }
+        .alert("Install will likely fail", isPresented: $showingPkgAlert, actions: {
+            Button("Download Anyway") {
+                Task {
+                    await cask.install(caskData: caskData)
+                }
+            }
+            
+            Button("Troubleshooting") {
+                if let url = URL(string: "https://aerolite.dev/applite/troubleshooting.html") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
+
+            Button("Cancel", role: .cancel) { }
+        }, message: {
+            Text("Installing requires admin password and will most likely fail. We are working on a solution, in the meantime see troubleshooting for more information.")
+        })
     }
 }
 
@@ -284,6 +307,7 @@ private struct DownloadButton: View {
     @State var isPresentingCaveats = false
     @State var isPresentingBrewError = false
     @State var isPresentingForceInstallConfirmation = false
+    @State var showingPkgAlert = false
     
     var body: some View {
         /// Download button
@@ -292,9 +316,16 @@ private struct DownloadButton: View {
                 // Present caveats dialog
                 isPresentingCaveats = true
                 showingAlert = true
-            } else {
-                download()
+                return
             }
+            
+            if cask.pkgInstaller {
+                showingPkgAlert = true
+                showingAlert = true
+                return
+            }
+            
+            download()
         } label: {
             Image(systemName: "arrow.down.to.line.circle.fill")
                 .font(.system(size: 22))
@@ -317,6 +348,27 @@ private struct DownloadButton: View {
         } message: {
             Text(BrewInstallation.brokenPathOrIstallMessage)
         }
+        .alert("Install will likely fail", isPresented: $showingPkgAlert, actions: {
+            Button("Download Anyway") {
+                showingAlert = false
+                
+                Task {
+                    download()
+                }
+            }
+            
+            Button("Troubleshooting") {
+                showingAlert = false
+                
+                if let url = URL(string: "https://aerolite.dev/applite/troubleshooting.html") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
+
+            Button("Cancel", role: .cancel) { showingAlert = false }
+        }, message: {
+            Text("Installing requires admin password and will most likely fail. We are working on a solution, in the meantime see troubleshooting for more information.")
+        })
         
         // More actions popover
         Button() {
