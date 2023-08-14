@@ -346,6 +346,16 @@
         }
       }
     },
+    "About %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À propos de %@"
+          }
+        }
+      }
+    },
     "Actions" : {
       "localizations" : {
         "fr" : {
@@ -951,6 +961,16 @@
         }
       }
     },
+    "Discord" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        }
+      }
+    },
     "Discover" : {
       "localizations" : {
         "fr" : {
@@ -1240,6 +1260,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Általános"
+          }
+        }
+      }
+    },
+    "Github" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
           }
         }
       }
