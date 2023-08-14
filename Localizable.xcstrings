@@ -962,14 +962,7 @@
       }
     },
     "Discord" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        }
-      }
+
     },
     "Discover" : {
       "localizations" : {
@@ -1265,14 +1258,7 @@
       }
     },
     "Github" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        }
-      }
+
     },
     "Hide apps with few downloads" : {
       "localizations" : {
