@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 
 fileprivate let shellPath = "/bin/zsh"
 
@@ -19,6 +20,7 @@ fileprivate let shellPath = "/bin/zsh"
 func shell(_ command: String) -> ShellResult {
     let task = Process()
     let pipe = Pipe()
+    let logger = Logger()
     
     task.standardOutput = pipe
     task.standardError = pipe
@@ -29,15 +31,20 @@ func shell(_ command: String) -> ShellResult {
     do {
         try task.run()
     } catch {
+        logger.error("Shell run error. Failed to run shell(\(command)).")
         return ShellResult(output: "", didFail: true)
     }
     
     task.waitUntilExit()
     
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
-    let output = String(data: data, encoding: .utf8)!
     
-    return ShellResult(output: output, didFail: task.terminationStatus != 0)
+    if let output = String(data: data, encoding: .utf8) {
+        return ShellResult(output: output, didFail: task.terminationStatus != 0)
+    } else {
+        logger.error("Shell data error. Failed to get shell(\(command)) output. Most likely due to a UTF-8 decoding failure.")
+        return ShellResult(output: "Error: Invalid UTF-8 data", didFail: true)
+    }
 }
 
 /// Async version of shell command

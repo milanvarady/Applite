@@ -111,6 +111,7 @@ fileprivate struct BrewPathView: View {
             if previousBrewOption != brewPathOption && isSelectedBrewPathValid {
                 Text("Brew path has been modified. Restart app for changes to take effect.")
                     .foregroundColor(.red)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Button("Relaunch", role: .destructive) {
                     Task {
