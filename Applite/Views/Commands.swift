@@ -47,6 +47,9 @@ struct CommandsMenu: Commands {
             Divider()
         }
         
+        CommandGroup(replacing: .newItem) {}
+        
+        
         CommandGroup(replacing: .help) {
             Link("Website", destination: URL(string: "https://aerolite.dev/applite")!)
             Link("Troubleshooting", destination: URL(string: "https://aerolite.dev/applite/troubleshooting.html")!)
