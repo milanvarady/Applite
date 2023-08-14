@@ -21,6 +21,7 @@
         "casks": [
             "discord",
             "messenger",
+            "microsoft-teams",
             "signal",
             "skype",
             "telegram-desktop",
@@ -68,6 +69,7 @@
             "microsoft-teams",
             "microsoft-word",
             "onedrive",
+            "openoffice",
             "slack"
         ],
         "sfSymbol": "doc.text"
@@ -86,7 +88,8 @@
             "itsycal",
             "stats",
             "ticktick",
-            "tomatobar"
+            "tomatobar",
+            "vanilla"
         ],
         "sfSymbol": "menubar.rectangle"
     },
@@ -95,16 +98,23 @@
         "casks": [
             "adobe-acrobat-reader",
             "appcleaner",
+            "android-file-transfer",
+            "altserver",
             "balenaetcher",
+            "cleanmymac",
+            "couleurs",
             "daisydisk",
             "downie",
+            "fing",
             "handbrake",
             "imageoptim",
             "obs",
             "onyx",
             "pdf-expert",
+            "raspberry-pi-imager",
             "the-unarchiver",
-            "transmission"
+            "transmission",
+            "xcodes"
         ],
         "sfSymbol": "wrench.and.screwdriver"
     },
@@ -112,6 +122,7 @@
         "id": "Creative Tools",
         "casks": [
             "acron",
+            "adobe-creative-cloud",
             "affinity-designer",
             "affinity-photo",
             "affinity-publisher",
@@ -129,7 +140,11 @@
     {
         "id": "Media",
         "casks": [
+            "deezer",
             "iina",
+            "jellyfin-media-player",
+            "kodi",
+            "netnewswire",
             "plex",
             "spotify",
             "tidal",
@@ -144,8 +159,11 @@
             "dash",
             "docker",
             "fork",
+            "forklift",
             "github",
+            "gitkraken",
             "kaleidoscope",
+            "postman",
             "rapidapi",
             "ssh-config-editor",
             "tower",
@@ -171,6 +189,7 @@
             "textmate",
             "visual-studio",
             "visual-studio-code",
+            "vscodium"
         ],
         "sfSymbol": "chevron.left.slash.chevron.right"
     },
@@ -193,6 +212,7 @@
     {
         "id": "Virtualization",
         "casks": [
+            "multipass",
             "parallels",
             "utm",
             "virtualbox",
@@ -203,14 +223,31 @@
     {
         "id": "Gaming",
         "casks": [
+            "chiaki",
+            "gog-galaxy",
             "battle-net",
             "epic-games",
+            "openemu",
+            "league-of-legends",
             "minecraft",
+            "prismlauncher",
             "steam",
             "the-battle-for-wesnoth",
             "widelands"
         ],
         "sfSymbol": "gamecontroller"
+    },
+    {
+        "id": "VPN",
+        "casks": [
+            "cyberghost-vpn",
+            "nordvpn",
+            "openvpn-connect",
+            "protonvpn",
+            "tunnelbear",
+            "vpn-by-google-one"
+        ],
+        "sfSymbol": "externaldrive.badge.icloud"
     },
     {
         "id": "Password Managers",

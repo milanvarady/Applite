@@ -29,7 +29,6 @@ struct AppView: View {
     @State var mouseHover = false
     
     // Popover
-    @State var showingPopover = false
     @State var showingBrewPathError = false
     
     // Alerts
@@ -65,11 +64,6 @@ struct AppView: View {
                 Spacer()
             }
             .contentShape(Rectangle())
-            .onTapGesture {
-                if (role == .installAndManage || role == .installed) && cask.progressState == .idle {
-                    showingPopover = true
-                }
-            }
             .alert("Broken Brew Path", isPresented: $showingBrewPathError) {
                 Button("OK", role: .cancel) {
                     showingBrewPathError = false
@@ -193,74 +187,6 @@ struct AppView: View {
             }
         }
         .frame(width: Self.dimensions.width, height: Self.dimensions.height)
-        .popover(isPresented: $showingPopover) {
-            VStack(alignment: .leading, spacing: 5) {
-                if cask.isInstalled {
-                    // Open popover
-                    Button("Open") {
-                        cask.launchApp()
-                    }
-                    .buttonStyle(.plain)
-                } else {
-                    // Install popover
-                    Button {
-                        showingPopover = false
-                        
-                        Task {
-                            if !BrewPaths.isSelectedBrewPathValid() {
-                                showingBrewPathError = true
-                                return
-                            }
-                            
-                            if cask.pkgInstaller {
-                                showingPkgAlert = true
-                                return
-                            }
-                            
-                            await cask.install(caskData: caskData)
-                        }
-                    } label: {
-                        Label {
-                            Text("Download")
-                        } icon: {
-                            Image(systemName: "arrow.down.to.line.circle.fill")
-                                .renderingMode(.template)
-                                .foregroundColor(.blue)
-                                .font(.system(size: 16))
-                        }
-                    }
-                    .padding(8)
-                    .padding(.trailing, 4)
-                    .background(.quaternary)
-                    .clipShape(Capsule())
-                    .buttonStyle(.plain)
-                    
-                    Link(destination: cask.homepageURL, label: {
-                        Label("Homepage", systemImage: "house")
-                    })
-                    .foregroundColor(.secondary)
-                }
-            }
-            .font(.system(size: 14, weight: .bold))
-            .padding(10)
-        }
-        .alert("Install will likely fail", isPresented: $showingPkgAlert, actions: {
-            Button("Download Anyway") {
-                Task {
-                    await cask.install(caskData: caskData)
-                }
-            }
-            
-            Button("Troubleshooting") {
-                if let url = URL(string: "https://aerolite.dev/applite/troubleshooting.html") {
-                    NSWorkspace.shared.open(url)
-                }
-            }
-
-            Button("Cancel", role: .cancel) { }
-        }, message: {
-            Text("Installing requires admin password and will most likely fail. We are working on a solution, in the meantime see troubleshooting for more information.")
-        })
     }
 }
 

@@ -51,6 +51,12 @@
     },
     "(%@)" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%@)"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -977,22 +983,6 @@
         }
       }
     },
-    "Download" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Télécharger"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Letöltés"
-          }
-        }
-      }
-    },
     "Download Anyway" : {
       "localizations" : {
         "fr" : {
@@ -1385,6 +1375,12 @@
     },
     "Install will likely fail" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'installation échouera probablement"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1460,6 +1456,12 @@
     },
     "Installing requires admin password and will most likely fail. We are working on a solution, in the meantime see troubleshooting for more information." : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'installation nécessite un mot de passe administrateur et échouera très probablement. Nous travaillons sur une solution, en attendant vous pouvez consulter la page de dépannage pour plus d'informations."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1558,7 +1560,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bar des Menus"
+            "value" : "Barre des Menus"
           }
         },
         "hu" : {
