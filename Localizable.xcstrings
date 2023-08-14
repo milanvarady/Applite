@@ -346,6 +346,16 @@
         }
       }
     },
+    "About %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À propos de %@"
+          }
+        }
+      }
+    },
     "Actions" : {
       "localizations" : {
         "fr" : {
@@ -951,6 +961,9 @@
         }
       }
     },
+    "Discord" : {
+
+    },
     "Discover" : {
       "localizations" : {
         "fr" : {
@@ -1243,6 +1256,9 @@
           }
         }
       }
+    },
+    "Github" : {
+
     },
     "Hide apps with few downloads" : {
       "localizations" : {
