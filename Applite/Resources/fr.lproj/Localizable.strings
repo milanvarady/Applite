@@ -34,7 +34,7 @@
 "Xcode Command Line Tools" = "Outils de ligne de commande Xcode";
 "Retry the installation or visit the troubleshooting page." = "Réessayez l'installation ou visitez la page de dépannage.";
 "Troubleshooting" = "Dépanage";
-"Installation failed" = "Echec de l'installation";
+"Installation failed" = "Échec de l'installation";
 "Broken Brew Path" = "Le chemin d'accès de Homebrew est cassé";
 "This app" = "Cette app";
 "Retry load" = "Réessayer de charger";
@@ -49,7 +49,7 @@
 
 "Sorting Options" = "Trier";
 "Sort by" = "Trier par";
-"Most downloaded (default)" = "Plus téléchergé (par défaut)";
+"Most downloaded (default)" = "Plus téléchargé (par défaut)";
 "Hide apps with few downloads" = "Masquer les applications avec peu de téléchargements";
 
 
@@ -59,7 +59,7 @@
 "Download apps with ease" = "Téléchargez des applications en toute simplicité";
 "Download third party applications with a single click. No more \"Drag to Applications folder\"." = "Téléchargez des applications tierces en un seul clic. Plus besoin de \"Glisser dans le dossier Applications\".";
 "Manage applications" = "Gérer vos applications";
-"Update and uninstall your applications. No more leftover files from deleted applications." = "Mettez à jour et désinstallez vos applications. Fini les résidus des applications supprimées.";
+"Update and uninstall your applications. No more leftover files from deleted applications." = "Mettez à jour et désinstallez vos applications. Fini les résidus d'applications supprimées.";
 "Browse through a handpicked list of awesome apps." = "Parcourez une liste triée sur le volet d'applications géniales.";
 "Do you already have Homebrew installed?" = "Avez-vous déjà installé Homebrew ?";
 "No (I don't know what it is)" = "Non (je ne sais pas ce que c'est)";
@@ -75,18 +75,18 @@
 
 // Categories
 
-"Discover" = "Découvir";
+"Discover" = "Découvrir";
 "Categories" = "Catégories";
 "Browsers" = "Navigateurs";
 "Productivity" = "Productivité";
 "Office Tools" = "Outils Bureautiques";
-"Menu Bar" = "Bar des Menus";
+"Menu Bar" = "Barres de menu";
 "Utilities" = "Utilitaires";
-"Creative Tools" = "Outils de Création";
+"Creative Tools" = "Outils de création";
 "Media" = "Média";
-"Developer Tools" = "Outils de Développements";
+"Developer Tools" = "Outils de développements";
 "Virtualization" = "Virtualisation";
-"Password Managers" = "Gestionaires de Mots de Passe";
+"Password Managers" = "Gestionaires de mots de passe";
 
 
 // Manage Brew
@@ -119,7 +119,7 @@
 "Light" = "Clair";
 "Dark" = "Sombre";
 "Task completions" = "Tâches terminées";
-"Task errors" = "Erreurs de tâche";
+"Task errors" = "Erreurs de tâches";
 
 
 // Brew Path
