@@ -61,7 +61,7 @@ struct ContentView: View {
                     })
                 }
             }
-            .disabled((caskData.casks.isEmpty && !brokenInstall) || modifyingBrew)
+            .disabled(modifyingBrew)
         } detail: {
             switch selection {
             case "home":
@@ -164,6 +164,7 @@ brew --version output: \(output)
             brokenInstall = false
         } catch {
             errorMessage = "Couldn't load app catalog. Check internet your connection, or try restarting the app."
+            
             loadAlertShowing = true
             
             logger.error("Initial cask load failure. Reason: \(error.localizedDescription)")

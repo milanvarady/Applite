@@ -221,29 +221,6 @@
         }
       }
     },
-    "%@ (%@)" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ (%2$@)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ (%2$@)"
-          }
-        }
-      }
-    },
     "%@ is already installed. If you want to add it to %@ click more options (chevron icon) and press Force Install." : {
       "localizations" : {
         "en" : {
@@ -352,6 +329,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "À propos de %@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite Infó"
           }
         }
       }
