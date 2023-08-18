@@ -334,7 +334,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applite Infó"
+            "value" : "Az Applite névjegye"
           }
         }
       }
@@ -736,7 +736,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Színséma"
+            "value" : "Színséma:"
           }
         }
       }
@@ -1737,7 +1737,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Megnyit"
+            "value" : "Megnyitás"
           }
         }
       }
@@ -1964,7 +1964,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mutasd mindet"
+            "value" : "Összes"
           }
         }
       }
