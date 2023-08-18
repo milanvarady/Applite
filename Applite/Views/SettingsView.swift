@@ -58,9 +58,9 @@ struct SettingsView: View {
 }
 
 fileprivate struct GeneralSettingsView: View {
-    @AppStorage("colorSchemePreference") var colorSchemePreference: ColorSchemePreference = .system
-    @AppStorage("notificationSuccess") var notificationOnSuccess: Bool = false
-    @AppStorage("notificationFailure") var notificationOnFailure: Bool = true
+    @AppStorage(Preferences.colorSchemePreference.rawValue) var colorSchemePreference: ColorSchemePreference = .system
+    @AppStorage(Preferences.notificationSuccess.rawValue) var notificationOnSuccess: Bool = false
+    @AppStorage(Preferences.notificationFailure.rawValue) var notificationOnFailure: Bool = true
 
     /// Needed for a workaround for changing the color scheme
     @State var fixingColor = false
@@ -116,8 +116,8 @@ fileprivate struct GeneralSettingsView: View {
 }
 
 fileprivate struct BrewPathView: View {
-    @AppStorage("customUserBrewPath") var customUserBrewPath: String = "/opt/homebrew/bin/brew"
-    @AppStorage("brewPathOption") var brewPathOption = BrewPaths.PathOption.appPath.rawValue
+    @AppStorage(Preferences.customUserBrewPath.rawValue) var customUserBrewPath: String = "/opt/homebrew/bin/brew"
+    @AppStorage(Preferences.brewPathOption.rawValue) var brewPathOption = BrewPaths.PathOption.appPath.rawValue
 
     @State var isSelectedBrewPathValid = false
 

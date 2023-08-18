@@ -361,7 +361,7 @@ struct SetupView: View {
     
     /// Page shown when setup is complete
     private struct AllSet: View {
-        @AppStorage("setupComplete") var setupComplete = false
+        @AppStorage(Preferences.setupComplete.rawValue) var setupComplete = false
         
         var body: some View {
             Text("All set!")

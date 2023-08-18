@@ -13,8 +13,8 @@ struct BrewPathSelectorView: View {
 
     @StateObject var customBrewPathDebounced = DebounceObject()
 
-    @AppStorage("customUserBrewPath") var customUserBrewPath: String = BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon, shellFriendly: false)
-    @AppStorage("brewPathOption") var brewPathOption = BrewPaths.PathOption.defaultAppleSilicon.rawValue
+    @AppStorage(Preferences.customUserBrewPath.rawValue) var customUserBrewPath: String = BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon, shellFriendly: false)
+    @AppStorage(Preferences.brewPathOption.rawValue) var brewPathOption = BrewPaths.PathOption.defaultAppleSilicon.rawValue
 
     private func getPathDescription(for option: BrewPaths.PathOption) -> String {
         switch option {
