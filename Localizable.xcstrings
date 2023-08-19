@@ -403,6 +403,16 @@
         }
       }
     },
+    "App caveats" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az alkalmazással kapcsolatos fenntartások"
+          }
+        }
+      }
+    },
     "App coundn't be located" : {
       "localizations" : {
         "fr" : {
