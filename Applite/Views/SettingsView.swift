@@ -72,7 +72,7 @@ fileprivate struct GeneralSettingsView: View {
 
             Picker("Color Scheme:", selection: $colorSchemePreference) {
                 ForEach(ColorSchemePreference.allCases) { color in
-                    Text(NSLocalizedString(color.rawValue.capitalized, comment: "Color scheme names"))
+                    Text(LocalizedStringKey(color.rawValue.capitalized))
                 }
             }
             .pickerStyle(.segmented)
@@ -125,7 +125,7 @@ fileprivate struct BrewPathView: View {
     @State var previousBrewOption: Int = 0
 
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Text("Brew Executable Path")
                 .bold()
 
@@ -135,6 +135,7 @@ fileprivate struct BrewPathView: View {
                 .foregroundColor(.red)
                 .opacity(isSelectedBrewPathValid ? 0 : 1)
 
+            // Brew path changed
             if previousBrewOption != brewPathOption && isSelectedBrewPathValid {
                 Text("Brew path has been modified. Restart app for changes to take effect.")
                     .foregroundColor(.red)
@@ -146,6 +147,14 @@ fileprivate struct BrewPathView: View {
                     }
                 }
             }
+            
+            Divider()
+                .padding(.vertical, 8)
+            
+            Text("Appdir")
+                .bold()
+            
+            AppdirSelectorView()
         }
         .onAppear {
             previousBrewOption = BrewPaths.selectedBrewOption.rawValue

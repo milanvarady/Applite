@@ -203,6 +203,11 @@ struct SetupView: View {
                     Text("Selected brew path is invalid!")
                         .foregroundColor(.red)
                         .opacity(isBrewPathValid ? 0 : 1)
+                    
+                    Text("Appdir (optional)")
+                        .font(.system(size: 16, weight: .bold))
+                    
+                    AppdirSelectorView()
                 }
                 .frame(width: 500)
                 

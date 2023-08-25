@@ -30,6 +30,9 @@
 		41483CCD29101C9900BB10C2 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41483CCC29101C9900BB10C2 /* Category.swift */; };
 		41524B99295E352200D0046A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41524B98295E352200D0046A /* SettingsView.swift */; };
 		41524B9E295FA36E00D0046A /* DebounceObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41524B9D295FA36E00D0046A /* DebounceObject.swift */; };
+		415563A02A9265CE00AE2F2E /* CaskExportType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4155639F2A9265CE00AE2F2E /* CaskExportType.swift */; };
+		415563A22A98BB2500AE2F2E /* ErrorWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */; };
+		415563A42A98C54300AE2F2E /* AppdirSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */; };
 		4166EE7028F5D4C900CE305A /* Commands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4166EE6F28F5D4C900CE305A /* Commands.swift */; };
 		4166EE7D28F73B2300CE305A /* BrewAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */; };
 		4178CF922A8689AF0037F270 /* ExportCasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4178CF912A8689AF0037F270 /* ExportCasks.swift */; };
@@ -86,6 +89,9 @@
 		41483CCC29101C9900BB10C2 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		41524B98295E352200D0046A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		41524B9D295FA36E00D0046A /* DebounceObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebounceObject.swift; sourceTree = "<group>"; };
+		4155639F2A9265CE00AE2F2E /* CaskExportType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskExportType.swift; sourceTree = "<group>"; };
+		415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorWindowView.swift; sourceTree = "<group>"; };
+		415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppdirSelectorView.swift; sourceTree = "<group>"; };
 		4166EE6F28F5D4C900CE305A /* Commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commands.swift; sourceTree = "<group>"; };
 		4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewAnalytics.swift; sourceTree = "<group>"; };
 		4178CF912A8689AF0037F270 /* ExportCasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCasks.swift; sourceTree = "<group>"; };
@@ -170,6 +176,7 @@
 			isa = PBXGroup;
 			children = (
 				419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */,
+				415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */,
 				418989AE2A33B65A004AC23B /* SmallProgressView.swift */,
 				4120AB662A755B0700F68EFE /* Sparkle Updater */,
 			);
@@ -249,6 +256,7 @@
 				4166EE6F28F5D4C900CE305A /* Commands.swift */,
 				4196C8F628F9CB4100EADDDA /* App Views */,
 				4196C8F728F9CB5200EADDDA /* Detail Views */,
+				415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -352,6 +360,7 @@
 			children = (
 				4178CF912A8689AF0037F270 /* ExportCasks.swift */,
 				41B731362A8789D4008BF6B9 /* ImportCasks.swift */,
+				4155639F2A9265CE00AE2F2E /* CaskExportType.swift */,
 			);
 			path = "Import Export";
 			sourceTree = "<group>";
@@ -446,6 +455,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4196C90028F9E1F400EADDDA /* InstalledView.swift in Sources */,
+				415563A42A98C54300AE2F2E /* AppdirSelectorView.swift in Sources */,
 				4140750528DF5FA60073EB22 /* AppView.swift in Sources */,
 				418F332428EC8BA10023D76F /* Cask.swift in Sources */,
 				4126353E2A77C6EF00155034 /* ArrayExtension.swift in Sources */,
@@ -462,7 +472,9 @@
 				418989B42A35D67C004AC23B /* isCommandLineToolsInstalled.swift in Sources */,
 				419506A42964A27F00FE5802 /* SetupView.swift in Sources */,
 				41524B99295E352200D0046A /* SettingsView.swift in Sources */,
+				415563A02A9265CE00AE2F2E /* CaskExportType.swift in Sources */,
 				41524B9E295FA36E00D0046A /* DebounceObject.swift in Sources */,
+				415563A22A98BB2500AE2F2E /* ErrorWindowView.swift in Sources */,
 				4196C8FE28F9E13600EADDDA /* UpdateView.swift in Sources */,
 				41062C992A3A263F00FD48EA /* UninstallSelfView.swift in Sources */,
 				414074F528DF53E80073EB22 /* AppliteApp.swift in Sources */,

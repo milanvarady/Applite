@@ -50,7 +50,7 @@ struct ContentView: View {
                 
                 Section("Categories") {
                     ForEach(categories) { category in
-                        Label(NSLocalizedString(category.id, comment: "String Categorie") , systemImage: category.sfSymbol)
+                        Label(LocalizedStringKey(category.id), systemImage: category.sfSymbol)
                             .tag(category.id)
                     }
                 }

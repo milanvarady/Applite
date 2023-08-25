@@ -14,4 +14,6 @@ enum Preferences: String {
     case notificationFailure
     case brewPathOption
     case customUserBrewPath
+    case appdirOn
+    case appdirPath
 }

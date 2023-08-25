@@ -64,5 +64,9 @@ struct AppliteApp: App {
                 .preferredColorScheme(selectedColorScheme)
         }
         .windowResizability(.contentSize)
+        
+        WindowGroup("Shell Output", for: String.self) { $errorString in
+            ErrorWindowView(errorString: errorString ?? "N/a")
+        }
     }
 }

@@ -15,6 +15,8 @@ struct BrewPathSelectorView: View {
 
     @AppStorage(Preferences.customUserBrewPath.rawValue) var customUserBrewPath: String = BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon, shellFriendly: false)
     @AppStorage(Preferences.brewPathOption.rawValue) var brewPathOption = BrewPaths.PathOption.defaultAppleSilicon.rawValue
+    
+    @State var choosingCustomFolder = false
 
     private func getPathDescription(for option: BrewPaths.PathOption) -> String {
         switch option {
@@ -70,12 +72,29 @@ struct BrewPathSelectorView: View {
                                     }
                                 }
                             }
-
-                            TextField("Custom brew path", text: $customBrewPathDebounced.text, prompt: Text("/path/to/brew"))
-                                .textFieldStyle(.roundedBorder)
-                                .frame(maxWidth: 300)
-                                .autocorrectionDisabled()
-                                .disabled(brewPathOption != BrewPaths.PathOption.custom.rawValue)
+                            
+                            HStack {
+                                TextField("Custom brew path", text: $customBrewPathDebounced.text, prompt: Text("/path/to/brew"))
+                                    .textFieldStyle(.roundedBorder)
+                                    .frame(maxWidth: 300)
+                                    .autocorrectionDisabled()
+                                
+                                Button("Browse") {
+                                    choosingCustomFolder = true
+                                }
+                                .fileImporter(
+                                    isPresented: $choosingCustomFolder,
+                                    allowedContentTypes: [.unixExecutable]
+                                ) { result in
+                                    switch result {
+                                    case .success(let file):
+                                        customBrewPathDebounced.text = file.path
+                                    case .failure(let error):
+                                        print(error.localizedDescription)
+                                    }
+                                }
+                            }
+                            .disabled(brewPathOption != BrewPaths.PathOption.custom.rawValue)
                         }
                         .tag(option.rawValue)
                     }

@@ -88,7 +88,7 @@ struct DownloadView: View {
                 Menu {
                     Picker("Sort by", selection: $sortBy) {
                         ForEach(SortingOptions.allCases) { option in
-                            Text(NSLocalizedString(option.rawValue, comment: "case string") ).tag(option)
+                            Text(LocalizedStringKey(option.rawValue)).tag(option)
                         }
                     }
                     .pickerStyle(.inline)

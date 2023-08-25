@@ -75,6 +75,9 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         
         var cancellables = Set<AnyCancellable>()
         let shellOutputStream = ShellOutputStream()
+        let appdirOn = UserDefaults.standard.bool(forKey: Preferences.appdirOn.rawValue)
+        let appdirPath = UserDefaults.standard.string(forKey: Preferences.appdirPath.rawValue)
+        let appdirArgument = "--appdir=\"\(appdirPath ?? "/Applications")\""
         
         await MainActor.run {
             self.progressState = .busy(withTask: "")
@@ -89,10 +92,10 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             }
             .store(in: &cancellables)
         
-        let result = await shellOutputStream.run("\(BrewPaths.currentBrewExecutable) install --cask \(force ? "--force" : "") \(self.id)", environmentVariables: "HOMEBREW_NO_AUTO_UPDATE=1")
+        let result = await shellOutputStream.run("\(BrewPaths.currentBrewExecutable) install --cask \(force ? "--force" : "") \(self.id) \(appdirOn ? appdirArgument : "")", environmentVariables: "HOMEBREW_NO_AUTO_UPDATE=1")
         
         if result.didFail {
-            Self.logger.error("Failed to install cask \"\(self.id)\". Output: \(result.output)")
+            Self.logger.error("Failed to install cask \(self.id). Output: \(result.output)")
             
             await MainActor.run {
                 progressState = .failed(output: result.output)
@@ -101,7 +104,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             
             sendNotification(title: String(localized: "Failed to download \(self.name)"), reason: .failure)
         } else {
-            Self.logger.info("Successfully installed cask \"\(self.id)\"")
+            Self.logger.info("Successfully installed cask \(self.id)")
             
             sendNotification(title: String(localized: "\(self.name) successfully installed!"), reason: .success)
             
@@ -132,7 +135,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             }
         }
         else if output.contains("Installing") || output.contains("Moving") || output.contains("Linking") {
-            return .busy(withTask: NSLocalizedString("Installing", comment: "Installing"))
+            return .busy(withTask: String(localized: "Installing"))
         }
         else if output.contains("successfully installed") {
             return .success
@@ -226,7 +229,10 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     private func runBrewCommand(command: String, arguments: [String], taskDescription: String,
                                 notificationSuccess: String, notificationFailure: String, onSuccess: (() -> Void)? = nil) async -> Bool {
         
-        await MainActor.run { self.progressState = .busy(withTask: NSLocalizedString(taskDescription, comment: "taskDescription")) }
+        await MainActor.run {
+            let localizedTaskDescription = String.LocalizationValue(stringLiteral: taskDescription)
+            self.progressState = .busy(withTask: String(localized: localizedTaskDescription))
+        }
         
         let result = await shell("HOMEBREW_NO_AUTO_UPDATE=1 \(BrewPaths.currentBrewExecutable) \(command) --cask \(arguments.joined(separator: " "))")
         

@@ -24,12 +24,12 @@ struct AppView: View {
     /// Role of the app, e.g. install, updated or uninstall
     var role: AppRole
     
+    @Environment(\.openWindow) var openWindow
+    
     @EnvironmentObject var caskData: CaskData
     
-    // Popover
-    @State var showingBrewPathError = false
-    
     // Alerts
+    @State var showingBrewPathError = false
     @State var failureAlertMessage = ""
     @State var showingFailureAlert = false
     
@@ -102,7 +102,7 @@ struct AppView: View {
                 showingBrewPathError = false
             }
         } message: {
-            Text(NSLocalizedString(BrewInstallation.brokenPathOrIstallMessage, comment: ""))
+            Text(LocalizedStringKey(BrewInstallation.brokenPathOrIstallMessage))
         }
     }
     
@@ -184,12 +184,15 @@ struct AppView: View {
                 
             case .failed(let output):
                 HStack {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.red)
-                    
                     Text("Error")
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
+                    
+                    Button {
+                        openWindow(value: output)
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                    .buttonStyle(.bordered)
                     
                     Button("OK") {
                         cask.progressState = .idle
@@ -381,7 +384,7 @@ struct AppView: View {
                         .contentShape(Rectangle())
                 }
                 .popover(isPresented: $showingPopover) {
-                    VStack(spacing: 6) {
+                    VStack(alignment: .leading, spacing: 6) {
                         // Reinstall button
                         Button {
                             Task {

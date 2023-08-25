@@ -33,6 +33,22 @@
         }
       }
     },
+    ": " : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ": "
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ": "
+          }
+        }
+      }
+    },
     "\"%@\" didn't match any app. Either it's not available in the Homebrew catalog or you misspelled it." : {
       "localizations" : {
         "fr" : {
@@ -81,98 +97,6 @@
         }
       }
     },
-    "**Homebrew version:** %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version de Homebrew: %@"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Homebrew verzió:** %@"
-          }
-        }
-      }
-    },
-    "**Note:** This will reinstall %@'s Homebrew installation at `~/Library/Application Support/%@/homebrew`" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "**Note:** This will reinstall %1$@'s Homebrew installation at `~/Library/Application Support/%2$@/homebrew`"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Remarque :** Cela installera un Homebrew spécifiquement pour %1$@ dans `~/Library/Application Support/%2$@/homebrew`"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Megjegyzés:** Ez csak a `~/Library/Application Support/%2$@/homebrew` elérési útvonalon található Homebrew telepítést fogja újratelepíteni."
-          }
-        }
-      }
-    },
-    "**Number of apps installed:** %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Nombre d'applications installées:** %@"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Letöltött alkalmazások száma:** %@"
-          }
-        }
-      }
-    },
-    "**Warning:** After reinstalling, all currently installed apps will be unlinked from %@. They won't be deleted, but you won't be able to update or uninstall them via %@." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "**Warning:** After reinstalling, all currently installed apps will be unlinked from %1$@. They won't be deleted, but you won't be able to update or uninstall them via %2$@."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Attention :** Après la réinstallation, toutes les applications actuellement installées seront dissociées de %1$@. Ils ne seront pas supprimés, mais vous ne pourrez pas les mettre à jour ou les désinstaller via %2$@."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Figyelem:** Az újratelepítés után az összes jelenleg letöltött alkalmazás nem lesz elérhető az %1$@ felületén. Nem törlődnek, de nem lehet majd őket frissíteni vagy letörölni az %2$@-on keresztül."
-          }
-        }
-      }
-    },
-    "**Warning:** All other app functions will be disabled during the update!" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Attention :** Toutes les autres fonctions de l'application seront désactivées pendant la mise à jour!"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Figyelem:** A frissítés alatt az alkalmazás minden más funkciója nem lesz elérhető!"
-          }
-        }
-      }
-    },
     "**Warning**: Homebrew cache is shared between Homebrew installations. Deleting the cache will remove the cache for all installations!" : {
       "localizations" : {
         "fr" : {
@@ -185,6 +109,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "**Figyelem:** A Homebrew cache tárhelye közös a telepítések között. Ha törli a cachet, az minden Homebrew telepítésre hatással lesz."
+          }
+        }
+      }
+    },
+    "/path/do/dir/" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/elérési/útvonal"
           }
         }
       }
@@ -204,6 +139,9 @@
           }
         }
       }
+    },
+    "/path/to/dir" : {
+
     },
     "%@" : {
       "localizations" : {
@@ -350,7 +288,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cselekvések"
+            "value" : "Módosítás"
           }
         }
       }
@@ -371,6 +309,28 @@
         }
       }
     },
+    "After reinstalling, all currently installed apps will be unlinked from %@. They won't be deleted, but you won't be able to update or uninstall them via %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "After reinstalling, all currently installed apps will be unlinked from %1$@. They won't be deleted, but you won't be able to update or uninstall them via %2$@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Après la réinstallation, toutes les applications actuellement installées seront dissociées de %1$@. Ils ne seront pas supprimés, mais vous ne pourrez pas les mettre à jour ou les désinstaller via %2$@."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az újratelepítés után az összes jelenleg letöltött alkalmazás nem lesz elérhető az %1$@ felületén. Nem törlődnek, de nem lehet majd őket frissíteni vagy letörölni az %2$@-on keresztül."
+          }
+        }
+      }
+    },
     "All currently installed apps will be unlinked from %@." : {
       "localizations" : {
         "fr" : {
@@ -383,6 +343,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Minden jelenleg letöltött alkalmazás nem lesz elérhető az %@-on keresztül."
+          }
+        }
+      }
+    },
+    "All other app functions will be disabled during the update!" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les autres fonctions de l'application seront désactivées pendant la mise à jour!"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A frissítés közben az alkalmazás minden más funkciója nem lesz elérhető!"
           }
         }
       }
@@ -441,6 +417,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alkalmazás betöltési hiba"
+          }
+        }
+      }
+    },
+    "Appdir" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appdir"
+          }
+        }
+      }
+    },
+    "Appdir (optional)" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appdir (nem kötelező)"
           }
         }
       }
@@ -653,6 +649,16 @@
         }
       }
     },
+    "Browse" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tallózás"
+          }
+        }
+      }
+    },
     "Browse through a handpicked list of awesome apps." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -699,6 +705,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mégse"
+          }
+        }
+      }
+    },
+    "Cask list (.txt file)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask lista (.txt fájl)"
           }
         }
       }
@@ -900,6 +917,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saját brew elérési útvonal"
+          }
+        }
+      }
+    },
+    "Custom Installation Directory" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saját telepítési mappa"
           }
         }
       }
@@ -1116,18 +1143,12 @@
         }
       }
     },
-    "Export/Import apps" : {
+    "Export file type" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exporter/Importer des apps"
-          }
-        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alkalmazások exportálása/importálása"
+            "value" : "Exportált fálj formátum"
           }
         }
       }
@@ -1300,13 +1321,29 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "Homebrew"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew"
+          }
+        }
+      }
+    },
+    "Homebrew version: " : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version Homebrew: "
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew verzió: "
           }
         }
       }
@@ -1344,18 +1381,12 @@
         }
       }
     },
-    "Import cask file" : {
+    "Import apps" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importer le fichier cask"
-          }
-        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cask fájl importálása"
+            "value" : "Alkalmazások importálása"
           }
         }
       }
@@ -1372,6 +1403,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Importálás sikertelen"
+          }
+        }
+      }
+    },
+    "Import/Export apps" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alkalmazások importálása/exportálása"
+          }
+        }
+      }
+    },
+    "In progress..." : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folyamatban..."
           }
         }
       }
@@ -1687,6 +1738,23 @@
         }
       }
     },
+    "Note" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remarque"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Megjegyzés"
+          }
+        }
+      }
+    },
     "Notifications" : {
       "localizations" : {
         "fr" : {
@@ -1699,6 +1767,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Értesítések"
+          }
+        }
+      }
+    },
+    "Number of apps installed: " : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre d'applications installées:"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letöltött alkalmazások száma: "
           }
         }
       }
@@ -1979,6 +2063,16 @@
         }
       }
     },
+    "Select Folder" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mappa tallózása"
+          }
+        }
+      }
+    },
     "Selected brew path is invalid!" : {
       "localizations" : {
         "fr" : {
@@ -1991,6 +2085,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A kiválasztott brew elérési útvonal helytelen!"
+          }
+        }
+      }
+    },
+    "Shell Output" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell kimenete"
           }
         }
       }
@@ -2157,6 +2261,28 @@
         }
       }
     },
+    "This will (re)install %@'s Homebrew installation at: ~/Library/Application Support/%@/homebrew" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "This will (re)install %1$@'s Homebrew installation at: ~/Library/Application Support/%2$@/homebrew"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cela installera un Homebrew spécifiquement pour %1$@ dans ~/Library/Application Support/%2$@/homebrew"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez a ~/Library/Application Support/%2$@/homebrew elérési útvonalon található Homebrew telepítést fogja (újra)telepíteni."
+          }
+        }
+      }
+    },
     "This will uninstall all files and cache associated with %@." : {
       "localizations" : {
         "fr" : {
@@ -2281,7 +2407,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trörlés"
+            "value" : "Törlés"
           }
         }
       }
@@ -2400,6 +2526,16 @@
         }
       }
     },
+    "Use Custom Installation Directory" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saját telepítési mappa használata"
+          }
+        }
+      }
+    },
     "Utilities" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2434,6 +2570,23 @@
         }
       }
     },
+    "Warning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attention"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Figyelem"
+          }
+        }
+      }
+    },
     "Website" : {
       "localizations" : {
         "fr" : {
@@ -2462,6 +2615,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Üdvözöljük a %@-on"
+          }
+        }
+      }
+    },
+    "When importing a Brewfile only casks will be installed. Other items like formulae and taps will be skipped." : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Brewfile importálásakor csak a cask-ok kerülnek telepítésre. A többi elem, mint például a formulák és a tapok mellőzve lesznek."
           }
         }
       }
