@@ -113,17 +113,6 @@
         }
       }
     },
-    "/path/do/dir/" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/elérési/útvonal"
-          }
-        }
-      }
-    },
     "/path/to/brew" : {
       "localizations" : {
         "fr" : {
@@ -141,7 +130,20 @@
       }
     },
     "/path/to/dir" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        }
+      }
     },
     "%@" : {
       "localizations" : {
@@ -381,6 +383,12 @@
     },
     "App caveats" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mises en garde concernant l'application"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -423,6 +431,12 @@
     },
     "Appdir" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -433,6 +447,12 @@
     },
     "Appdir (optional)" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appdir (Optionnel)"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -651,6 +671,12 @@
     },
     "Browse" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parcourir"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -712,6 +738,12 @@
     "Cask list (.txt file)" : {
       "extractionState" : "manual",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste Cask (fichier .txt)"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -923,6 +955,12 @@
     },
     "Custom Installation Directory" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répertoire d'installation personnalisé"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1145,6 +1183,12 @@
     },
     "Export file type" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type de fichier d'exportation"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1383,6 +1427,12 @@
     },
     "Import apps" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importer des applications"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1409,6 +1459,12 @@
     },
     "Import/Export apps" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importer/Exporter des applications"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1419,6 +1475,12 @@
     },
     "In progress..." : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En cours..."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2065,6 +2127,12 @@
     },
     "Select Folder" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionner le dossier"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2091,6 +2159,12 @@
     },
     "Shell Output" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2528,6 +2602,12 @@
     },
     "Use Custom Installation Directory" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utiliser le répertoire d'installation personnalisé"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2621,6 +2701,12 @@
     },
     "When importing a Brewfile only casks will be installed. Other items like formulae and taps will be skipped." : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lors de l'importation d'un Brewfile, seuls les casks seront installés. D'autres éléments tels que les formules et les taps seront ignorés."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
