@@ -22,8 +22,19 @@ func shell(_ command: String) -> ShellResult {
     let pipe = Pipe()
     let logger = Logger()
     
+    // Get pinentry script for sudo askpass
+    guard let pinentryScript = Bundle.main.path(forResource: "pinentry", ofType: "ksh") else {
+        return ShellResult(output: "pinentry.ksh not found", didFail: true)
+    }
+    
+    // Verify pinentry script checksum
+    if URL(string: pinentryScript)?.checksumInBase64() != pinentryScriptHash {
+        return ShellResult(output: "pinentry.ksh checksum mismatch. The file has been modified.", didFail: true)
+    }
+    
     task.standardOutput = pipe
     task.standardError = pipe
+    task.environment = ["SUDO_ASKPASS": pinentryScript]
     task.arguments = ["-l", "-c", command]
     task.executableURL = URL(fileURLWithPath: shellPath)
     task.standardInput = nil
@@ -40,7 +51,8 @@ func shell(_ command: String) -> ShellResult {
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
     
     if let output = String(data: data, encoding: .utf8) {
-        return ShellResult(output: output, didFail: task.terminationStatus != 0)
+        let cleanOutput = output.replacingOccurrences(of: "\\\u{001B}\\[[0-9;]*[a-zA-Z]", with: "", options: .regularExpression)
+        return ShellResult(output: cleanOutput, didFail: task.terminationStatus != 0)
     } else {
         logger.error("Shell data error. Failed to get shell(\(command)) output. Most likely due to a UTF-8 decoding failure.")
         return ShellResult(output: "Error: Invalid UTF-8 data", didFail: true)

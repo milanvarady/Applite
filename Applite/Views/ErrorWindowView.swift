@@ -14,6 +14,7 @@ struct ErrorWindowView: View {
         ScrollView {
             VStack {
                 Text(errorString)
+                    .monospaced()
                     .textSelection(.enabled)
             }
             .padding()

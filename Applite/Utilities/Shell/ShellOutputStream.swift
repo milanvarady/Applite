@@ -23,10 +23,22 @@ public class ShellOutputStream {
     ///  - environmentVariables: (optional) Environment varables to include in the command
     ///
     /// - Returns: A ``ShellResult`` containing the output and exit status of command
-    public func run(_ command: String, environmentVariables: String = "") async -> ShellResult {
+    func run(_ command: String) async -> ShellResult {
         self.task = Process()
+        
+        // Get pinentry script for sudo askpass
+        guard let pinentryScript = Bundle.main.path(forResource: "pinentry", ofType: "ksh") else {
+            return ShellResult(output: "pinentry.ksh not found", didFail: true)
+        }
+        
+        // Verify pinentry script checksum
+        if URL(string: pinentryScript)?.checksumInBase64() != pinentryScriptHash {
+            return ShellResult(output: "pinentry.ksh checksum mismatch. The file has been modified.", didFail: true)
+        }
+        
         self.task?.launchPath = "/bin/zsh"
-        self.task?.arguments = ["-l", "-c", "\(!environmentVariables.isEmpty ? environmentVariables : "") script -q /dev/null \(command)"]
+        self.task?.environment = ["SUDO_ASKPASS": pinentryScript]
+        self.task?.arguments = ["-l", "-c", "script -q /dev/null \(command)"]
         
         let pipe = Pipe()
         self.task?.standardOutput = pipe
@@ -39,13 +51,14 @@ public class ShellOutputStream {
             
             if data.count > 0 {
                 let text = String(data: data, encoding: .utf8) ?? ""
+                let cleanOutput = text.replacingOccurrences(of: "\\\u{001B}\\[[0-9;]*[a-zA-Z]", with: "", options: .regularExpression)
                 
                 // Send new changes
                 Task { @MainActor in
-                    self.outputPublisher.send(text)
+                    self.outputPublisher.send(cleanOutput)
                 }
                 
-                self.output += text
+                self.output += cleanOutput
             } else if !(self.task?.isRunning ?? false) {
                 self.fileHandle?.readabilityHandler = nil
             }

@@ -12,6 +12,10 @@
 		41062C972A3A20F900FD48EA /* UninstallSelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C962A3A20F900FD48EA /* UninstallSelf.swift */; };
 		41062C992A3A263F00FD48EA /* UninstallSelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C982A3A263F00FD48EA /* UninstallSelfView.swift */; };
 		41062C9B2A3E4AFA00FD48EA /* BundleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C9A2A3E4AFA00FD48EA /* BundleExtension.swift */; };
+		411EDDD52A9F56020051E07B /* pinentry.ksh in Resources */ = {isa = PBXBuildFile; fileRef = 411EDDD22A9DD5F40051E07B /* pinentry.ksh */; };
+		411EDDD72A9F58180051E07B /* URLExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411EDDD62A9F58180051E07B /* URLExtension.swift */; };
+		411EDDD92A9F7E220051E07B /* PinentryScriptHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411EDDD82A9F7E220051E07B /* PinentryScriptHash.swift */; };
+		411EDDDB2AA4A0D80051E07B /* PinentryError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411EDDDA2AA4A0D80051E07B /* PinentryError.swift */; };
 		4120AB652A754B1700F68EFE /* AppliteAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4120AB642A754B1700F68EFE /* AppliteAppView.swift */; };
 		4120AB682A755B5A00F68EFE /* CheckForUpdatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4120AB672A755B5A00F68EFE /* CheckForUpdatesView.swift */; };
 		4125BB8A29539907000FBD25 /* PlaceholderAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4125BB8929539907000FBD25 /* PlaceholderAppView.swift */; };
@@ -20,7 +24,7 @@
 		412635492A7804E700155034 /* CaskDataLoadError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412635482A7804E700155034 /* CaskDataLoadError.swift */; };
 		4126354B2A79075900155034 /* ShellResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4126354A2A79075900155034 /* ShellResult.swift */; };
 		4129FFD92A7A613E00CFE392 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = 4129FFD82A7A613E00CFE392 /* Fuse */; };
-		413F77A52972B2E70053349A /* BrewInstallation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F77A42972B2E70053349A /* BrewInstallation.swift */; };
+		413F77A52972B2E70053349A /* DependencyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F77A42972B2E70053349A /* DependencyManager.swift */; };
 		413F77A72972C8000053349A /* ShellOutputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F77A62972C8000053349A /* ShellOutputStream.swift */; };
 		414074F528DF53E80073EB22 /* AppliteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F428DF53E80073EB22 /* AppliteApp.swift */; };
 		414074F728DF53E80073EB22 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F628DF53E80073EB22 /* ContentView.swift */; };
@@ -70,6 +74,10 @@
 		41062C962A3A20F900FD48EA /* UninstallSelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallSelf.swift; sourceTree = "<group>"; };
 		41062C982A3A263F00FD48EA /* UninstallSelfView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallSelfView.swift; sourceTree = "<group>"; };
 		41062C9A2A3E4AFA00FD48EA /* BundleExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtension.swift; sourceTree = "<group>"; };
+		411EDDD22A9DD5F40051E07B /* pinentry.ksh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = pinentry.ksh; sourceTree = "<group>"; };
+		411EDDD62A9F58180051E07B /* URLExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtension.swift; sourceTree = "<group>"; };
+		411EDDD82A9F7E220051E07B /* PinentryScriptHash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinentryScriptHash.swift; sourceTree = "<group>"; };
+		411EDDDA2AA4A0D80051E07B /* PinentryError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinentryError.swift; sourceTree = "<group>"; };
 		4120AB642A754B1700F68EFE /* AppliteAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppliteAppView.swift; sourceTree = "<group>"; };
 		4120AB672A755B5A00F68EFE /* CheckForUpdatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckForUpdatesView.swift; sourceTree = "<group>"; };
 		4125BB8929539907000FBD25 /* PlaceholderAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderAppView.swift; sourceTree = "<group>"; };
@@ -77,7 +85,7 @@
 		412635432A77FB1600155034 /* BrewInstallationProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewInstallationProgress.swift; sourceTree = "<group>"; };
 		412635482A7804E700155034 /* CaskDataLoadError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskDataLoadError.swift; sourceTree = "<group>"; };
 		4126354A2A79075900155034 /* ShellResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellResult.swift; sourceTree = "<group>"; };
-		413F77A42972B2E70053349A /* BrewInstallation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewInstallation.swift; sourceTree = "<group>"; };
+		413F77A42972B2E70053349A /* DependencyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyManager.swift; sourceTree = "<group>"; };
 		413F77A62972C8000053349A /* ShellOutputStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellOutputStream.swift; sourceTree = "<group>"; };
 		414074F128DF53E80073EB22 /* Applite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Applite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		414074F428DF53E80073EB22 /* AppliteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppliteApp.swift; sourceTree = "<group>"; };
@@ -159,6 +167,7 @@
 				4196C90328FC03A900EADDDA /* Shell.swift */,
 				413F77A62972C8000053349A /* ShellOutputStream.swift */,
 				4126354A2A79075900155034 /* ShellResult.swift */,
+				411EDDD82A9F7E220051E07B /* PinentryScriptHash.swift */,
 			);
 			path = Shell;
 			sourceTree = "<group>";
@@ -168,6 +177,7 @@
 			children = (
 				41062C9A2A3E4AFA00FD48EA /* BundleExtension.swift */,
 				4126353D2A77C6EF00155034 /* ArrayExtension.swift */,
+				411EDDD62A9F58180051E07B /* URLExtension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -186,7 +196,7 @@
 		412635422A77FB0000155034 /* Brew Installation */ = {
 			isa = PBXGroup;
 			children = (
-				413F77A42972B2E70053349A /* BrewInstallation.swift */,
+				413F77A42972B2E70053349A /* DependencyManager.swift */,
 				412635432A77FB1600155034 /* BrewInstallationProgress.swift */,
 			);
 			path = "Brew Installation";
@@ -265,6 +275,7 @@
 			isa = PBXGroup;
 			children = (
 				41857B722911A2F2004A1894 /* categories.json */,
+				411EDDD22A9DD5F40051E07B /* pinentry.ksh */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -277,6 +288,7 @@
 				4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */,
 				4191392B29159B5C00F1D75D /* CaskDTO.swift */,
 				412635482A7804E700155034 /* CaskDataLoadError.swift */,
+				411EDDDA2AA4A0D80051E07B /* PinentryError.swift */,
 			);
 			path = "Cask Data";
 			sourceTree = "<group>";
@@ -440,6 +452,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				411EDDD52A9F56020051E07B /* pinentry.ksh in Resources */,
 				414074FC28DF53EB0073EB22 /* Preview Assets.xcassets in Resources */,
 				41857B732911A2F2004A1894 /* categories.json in Resources */,
 				BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */,
@@ -466,9 +479,10 @@
 				4189CE41293C980E009C836D /* BigButtonStyle.swift in Sources */,
 				41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */,
 				41857B752912D94A004A1894 /* CategoryView.swift in Sources */,
+				411EDDDB2AA4A0D80051E07B /* PinentryError.swift in Sources */,
 				4196C8F528F9CB2600EADDDA /* DiscoverView.swift in Sources */,
 				4125BB8A29539907000FBD25 /* PlaceholderAppView.swift in Sources */,
-				413F77A52972B2E70053349A /* BrewInstallation.swift in Sources */,
+				413F77A52972B2E70053349A /* DependencyManager.swift in Sources */,
 				418989B42A35D67C004AC23B /* isCommandLineToolsInstalled.swift in Sources */,
 				419506A42964A27F00FE5802 /* SetupView.swift in Sources */,
 				41524B99295E352200D0046A /* SettingsView.swift in Sources */,
@@ -482,6 +496,7 @@
 				41062C9B2A3E4AFA00FD48EA /* BundleExtension.swift in Sources */,
 				418989AF2A33B65A004AC23B /* SmallProgressView.swift in Sources */,
 				41B731392A879353008BF6B9 /* ActiveTasksView.swift in Sources */,
+				411EDDD72A9F58180051E07B /* URLExtension.swift in Sources */,
 				419506A62964A5EF00FE5802 /* BrewPathSelectorView.swift in Sources */,
 				4191392C29159B5C00F1D75D /* CaskDTO.swift in Sources */,
 				4196C90428FC03A900EADDDA /* Shell.swift in Sources */,
@@ -494,6 +509,7 @@
 				41062C972A3A20F900FD48EA /* UninstallSelf.swift in Sources */,
 				41B731372A8789D4008BF6B9 /* ImportCasks.swift in Sources */,
 				4126354B2A79075900155034 /* ShellResult.swift in Sources */,
+				411EDDD92A9F7E220051E07B /* PinentryScriptHash.swift in Sources */,
 				418F332628EC921D0023D76F /* CaskData.swift in Sources */,
 				4178CF922A8689AF0037F270 /* ExportCasks.swift in Sources */,
 				4196C8F928F9CDF700EADDDA /* DownloadView.swift in Sources */,

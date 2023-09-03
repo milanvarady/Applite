@@ -37,6 +37,6 @@ func uninstallSelf(deleteBrewCache: Bool) {
     // Quit the app and remove it
     let process = Process()
     process.launchPath = "/bin/bash"
-    process.arguments = ["-c", "osascript -e 'tell application \"\(Bundle.main.appName)\" to quit' && sleep 2 && rm -rf \"/Applications/\(Bundle.main.appName).app\" && defaults write \(Bundle.main.bundleIdentifier!) setupComplete 0"]
+    process.arguments = ["-c", "osascript -e 'tell application \"\(Bundle.main.appName)\" to quit' && sleep 2 && rm -rf \"\(Bundle.main.bundlePath)\" && defaults write \(Bundle.main.bundleIdentifier!) setupComplete 0"]
     process.launch()
 }

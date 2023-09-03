@@ -102,7 +102,7 @@ struct AppView: View {
                 showingBrewPathError = false
             }
         } message: {
-            Text(LocalizedStringKey(BrewInstallation.brokenPathOrIstallMessage))
+            Text(LocalizedStringKey(DependencyManager.brokenPathOrIstallMessage))
         }
     }
     
@@ -231,7 +231,6 @@ struct AppView: View {
         @State var isPresentingCaveats = false
         @State var isPresentingBrewError = false
         @State var isPresentingForceInstallConfirmation = false
-        @State var showingPkgAlert = false
         
         @State var buttonFill = false
         
@@ -241,12 +240,6 @@ struct AppView: View {
                 if cask.caveats != nil {
                     // Show caveats dialog
                     isPresentingCaveats = true
-                    return
-                }
-                
-                if cask.pkgInstaller {
-                    // Show pkg installer alert
-                    showingPkgAlert = true
                     return
                 }
                 
@@ -275,25 +268,8 @@ struct AppView: View {
             .alert("Broken Brew Path", isPresented: $isPresentingBrewError) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text(BrewInstallation.brokenPathOrIstallMessage)
+                Text(DependencyManager.brokenPathOrIstallMessage)
             }
-            .alert("Install will likely fail", isPresented: $showingPkgAlert, actions: {
-                Button("Download Anyway") {
-                    Task {
-                        download()
-                    }
-                }
-                
-                Button("Troubleshooting") {
-                    if let url = URL(string: "https://aerolite.dev/applite/troubleshooting.html") {
-                        NSWorkspace.shared.open(url)
-                    }
-                }
-                
-                Button("Cancel", role: .cancel) { }
-            }, message: {
-                Text("Installing requires admin password and will most likely fail. We are working on a solution, in the meantime see troubleshooting for more information.")
-            })
             
             // More actions popover
             Button() {

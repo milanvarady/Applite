@@ -17,22 +17,6 @@
         }
       }
     },
-    "- Waiting" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "- Attendez"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "- Várakozik"
-          }
-        }
-      }
-    },
     ": " : {
       "localizations" : {
         "fr" : {
@@ -113,17 +97,6 @@
         }
       }
     },
-    "/path/do/dir/" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/elérési/útvonal"
-          }
-        }
-      }
-    },
     "/path/to/brew" : {
       "localizations" : {
         "fr" : {
@@ -141,7 +114,14 @@
       }
     },
     "/path/to/dir" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/elérési/útvonal"
+          }
+        }
+      }
     },
     "%@" : {
       "localizations" : {
@@ -453,6 +433,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Megjelenés"
+          }
+        }
+      }
+    },
+    "Applications that require an admin password to install will fail to install." : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A telepítéshez admin jelszót igénylő alkalmazások telepítése sikertelen lesz."
           }
         }
       }
@@ -1364,6 +1354,16 @@
         }
       }
     },
+    "I Understand" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Értem"
+          }
+        }
+      }
+    },
     "IDEs" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1460,6 +1460,7 @@
       }
     },
     "Install will likely fail" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1541,6 +1542,7 @@
       }
     },
     "Installing requires admin password and will most likely fail. We are working on a solution, in the meantime see troubleshooting for more information." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1849,6 +1851,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jelszókezelők"
+          }
+        }
+      }
+    },
+    "Pinentry" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinentry"
+          }
+        }
+      }
+    },
+    "Pinentry is used to securely prompt for the admin password when it is required during the installation of an application." : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Pinentry segít biztonságosan elkérni a admin jelszót olyan alkalmazásoknál, amelyeknek szükségük van rá a telepítéshez."
+          }
+        }
+      }
+    },
+    "PINEntry not installed correctly" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A PINEntry nincs letöltve"
           }
         }
       }

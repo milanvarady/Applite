@@ -7,15 +7,16 @@
 
 import Foundation
 
+public enum InstallPhase: Int {
+    case waitingForXcodeCommandLineTools = 0
+    case fetchingHomebrew = 1
+    case installingPinentry = 2
+    case done = 3
+}
+
 /// Keeps track of current brew installation progress
 ///
-/// Used by the ``BrewInstallation`` struct
+/// Used by the ``DependencyManager`` struct
 public final class BrewInstallationProgress: ObservableObject {
-    public enum InstallPhase {
-        case waitingForXcodeCommandLineTools
-        case fetchingHomebrew
-        case done
-    }
-    
     @Published var phase: InstallPhase = .waitingForXcodeCommandLineTools
 }

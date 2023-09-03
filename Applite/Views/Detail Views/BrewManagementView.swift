@@ -232,7 +232,7 @@ struct BrewManagementView: View {
                     
                     Task {
                         do {
-                            try await BrewInstallation.installHomebrew()
+                            try await DependencyManager.installHomebrew()
                         } catch {
                             reinstallFailed = true
                         }

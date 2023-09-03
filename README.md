@@ -65,6 +65,7 @@ Or join the [Official Discord Server](https://discord.gg/ZgB6pRE8Qx).
  - [SwiftUI Circular Control](https://github.com/philptr/PZCircularControl), Phil Zakharchenko
  - [Sparkle](https://github.com/sparkle-project/Sparkle) - app updates
  - [Appcasks](https://github.com/App-Fair/appcasks/) ([App Fair](https://github.com/App-Fair/App) project) - app icons
+ - [pinentry-mac](https://github.com/GPGTools/pinentry), GPGTools - for secure admin password retrieval
 
 ## License
 

@@ -231,62 +231,60 @@ struct SetupView: View {
         
         @StateObject var installationProgress = BrewInstallationProgress()
         
+        enum SetupInstallError: Error {
+            case homebrew
+            case pinentry
+        }
+        
         var body: some View {
-            Text("Installing dependencies")
-                .font(.system(size: 32, weight: .bold))
-                .padding(.top)
-                .padding(.bottom, 30)
-            
-            // Xcode Command Line Tools
-            VStack(alignment: .leading, spacing: 30) {
-                VStack(alignment: .leading) {
-                    HStack {
-                        Text("Xcode Command Line Tools")
-                            .font(.system(size: 20, weight: .bold))
-                            .padding(.trailing, 4)
-                        
-                        if !failed {
-                            if installationProgress.phase == .waitingForXcodeCommandLineTools {
-                                SmallProgressView()
-                            } else {
-                                InstalledBadge()
-                            }
-                        } else {
-                            Image(systemName: "xmark.circle")
-                                .font(.system(size: 18))
-                                .foregroundColor(.red)
-                        }
-                    }
-                    
-                    Text("You will be prompted to install the Xcode Command Line Tools, please click \"Install\" as it is required for this application to work. It will take a few minutes, you can see the progress on the installation window.")
-                }
+            VStack {
+                Text("Installing dependencies")
+                    .font(.system(size: 32, weight: .bold))
+                    .padding(.vertical)
                 
-                // Homebrew
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Homebrew")
-                            .font(.system(size: 20, weight: .bold))
-                        
-                        if !failed {
-                            if installationProgress.phase == .waitingForXcodeCommandLineTools {
-                                Text("- Waiting")
-                            } else if installationProgress.phase == .done {
-                                InstalledBadge()
-                            }
-                        } else {
-                            Image(systemName: "xmark.circle")
-                                .font(.system(size: 18))
-                                .foregroundColor(.red)
-                        }
-                    }
+                // Xcode Command Line Tools
+                VStack(alignment: .leading, spacing: 20) {
+                    // Xcode Command Line Tools
+                    dependencyView(title: "Xcode Command Line Tools",
+                                   description: "You will be prompted to install the Xcode Command Line Tools, please click \"Install\" as it is required for this application to work. It will take a few minutes, you can see the progress on the installation window.",
+                                   progressOrder: .waitingForXcodeCommandLineTools)
                     
-                    Text("[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. \(Bundle.main.appName) uses Homebrew under the hood to download and manage applications.")
-                        .frame(minHeight: 34)
-                }
-                .onChange(of: installationProgress.phase) { newPhase in
-                    if newPhase == .done {
-                        isDone = true
+                    
+                    // Homebrew
+                    dependencyView(title: "Homebrew",
+                                   description: "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. \(Bundle.main.appName) uses Homebrew under the hood to download and manage applications.",
+                                   progressOrder: .fetchingHomebrew)
+                    
+                    // Pinentry
+                    dependencyView(title: "Pinentry",
+                                   description: "Pinentry is used to securely prompt for the admin password when it is required during the installation of an application.",
+                                   progressOrder: .installingPinentry)
+                    
+                    // Retry button
+                    if failed {
+                        Button {
+                            Task {
+                                await installDependencies()
+                            }
+                        } label: {
+                            Label("Retry Install", systemImage: "arrow.clockwise.circle")
+                        }
+                        .bigButton(backgroundColor: .accentColor)
                     }
+                }
+                .frame(width: 440)
+                .task {
+                    // Start installation when view loads
+                    await installDependencies()
+                }
+                .onAppear() {
+                    if !isCommandLineToolsInstalled() {
+                        showingCommandLineToolsAlert = true
+                    }
+                }
+                .alert(isPresented: $showingCommandLineToolsAlert) {
+                    Alert(title: Text("Xcode Command Line Tools"),
+                          message: Text("You will be prompted to install Xcode Command Line Tools. Please select \"Install\" as it is required for this application to work."))
                 }
                 .alert("Installation failed", isPresented: $showingAlert, actions: {
                     Button("Troubleshooting") {
@@ -296,71 +294,66 @@ struct SetupView: View {
                     }
                     
                     Button("Retry") {
-                        Task {
-                            await installBrew()
-                        }
+                        
                     }
                     
                     Button("Quit", role: .destructive) { NSApplication.shared.terminate(self) }
                 }, message: {
                     Text("Retry the installation or visit the troubleshooting page.")
                 })
-                
-                // Retry button
-                if failed {
-                    Button {
-                        Task {
-                            await installBrew()
-                        }
-                    } label: {
-                        Label("Retry Install", systemImage: "arrow.clockwise.circle")
-                    }
-                    .bigButton(backgroundColor: .accentColor)
-                }
-            }
-            .frame(width: 440)
-            .task {
-                // Start installation when view loads
-                await installBrew()
-            }
-            .onAppear() {
-                if !isCommandLineToolsInstalled() {
-                    showingCommandLineToolsAlert = true
-                }
-            }
-            .alert(isPresented: $showingCommandLineToolsAlert) {
-                Alert(title: Text("Xcode Command Line Tools"),
-                      message: Text("You will be prompted to install Xcode Command Line Tools. Please select \"Install\" as it is required for this application to work."))
             }
         }
         
-        /// Installs brew and alerts on failure
-        private func installBrew() async -> Void {
+        private func dependencyView(title: LocalizedStringKey, description: LocalizedStringKey, progressOrder: InstallPhase) -> some View {
+            VStack(alignment: .leading) {
+                HStack {
+                    Text(title)
+                        .font(.system(size: 16, weight: .bold))
+                        .padding(.trailing, 4)
+                    
+                    if !failed {
+                        if installationProgress.phase.rawValue > progressOrder.rawValue {
+                            installedBadge
+                        } else {
+                            SmallProgressView()
+                        }
+                    } else {
+                        Image(systemName: "xmark.circle")
+                            .font(.system(size: 18))
+                            .foregroundColor(.red)
+                    }
+                }
+             
+                Text(description)
+            }
+        }
+        
+        private func installDependencies() async {
             // Reset progress
-            installationProgress.phase = .waitingForXcodeCommandLineTools
             failed = false
+            installationProgress.phase = .waitingForXcodeCommandLineTools
             
             do {
-                try await BrewInstallation.install(progressObject: installationProgress)
+                try await DependencyManager.install(progressObject: installationProgress)
             } catch {
                 failed = true
-                showingAlert = true
+            }
+            
+            if !failed {
+                self.isDone = true
             }
         }
         
         /// A little bagde that says "Installed"
-        private struct InstalledBadge: View {
-            var body: some View {
-                HStack {
-                    Image(systemName: "checkmark")
-                    Text("Installed")
-                }
-                .padding(3)
-                .fontWeight(.black)
-                .foregroundColor(.white)
-                .background(.green)
-                .cornerRadius(4)
+        private var installedBadge: some View {
+            HStack {
+                Image(systemName: "checkmark")
+                Text("Installed")
             }
+            .padding(3)
+            .foregroundColor(.white)
+            .background(.green)
+            .cornerRadius(4)
         }
     }
     

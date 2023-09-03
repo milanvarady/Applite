@@ -1,5 +1,5 @@
 //
-//  BrewInstallation.swift
+//  DependencyManager.swift
 //  Applite
 //
 //  Created by Milán Várady on 2023. 01. 14..
@@ -8,13 +8,13 @@
 import Foundation
 import os
 
-/// Installs Homebrew and Xcode command line tools
+/// Installs app dependecies: Homebrew, Xcode Command Line Tools and PINEntry
 ///
 /// Reports the current progress of the installation through a ``BrewInstallationProgress`` observable object
-public struct BrewInstallation {
+public struct DependencyManager {
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
-        category: String(describing: BrewInstallation.self)
+        category: String(describing: DependencyManager.self)
     )
     
     /// Installation errors
@@ -22,6 +22,7 @@ public struct BrewInstallation {
         case CommandLineToolsError
         case DirectoryError
         case BrewFetchError
+        case PinentryError
     }
     
     /// Extracts percentage from shell output when installing brew
@@ -30,7 +31,7 @@ public struct BrewInstallation {
     /// Message shown when brew path is broken
     static public var brokenPathOrIstallMessage = "Error. Broken brew path, or damaged installation. Check brew path in settings, or try reinstalling Homebrew (Manage Homebrew->Reinstall)"
     
-    /// Installs Xcode Command Line Tools and Homebrew and  to `~/Library/Application Support/Applite/homebrew/`
+    /// Installs dependencies to `~/Library/Application Support/Applite/homebrew/`
     ///
     /// - Parameters:
     ///   - progressObject: Progress will be reported here
@@ -85,8 +86,12 @@ public struct BrewInstallation {
         // Install brew
         try await Self.installHomebrew()
         
+        // Install Pinentry
+        progressObject.phase = .installingPinentry
+        try await Self.installPinentry()
+        
         progressObject.phase = .done
-        Self.logger.info("Brew installed successfully!")
+        Self.logger.notice("Dependencies installed successfully!")
     }
     
     /// Installs Homebrew
@@ -124,5 +129,38 @@ public struct BrewInstallation {
         } else {
             Self.logger.info("Brew install done")
         }
+    }
+    
+    /// Installs the `pinentry-mac` package for sudo askpass
+    static func installPinentry(forceInstall: Bool = false) async throws {
+        Self.logger.info("Installing pinentry-mac\(forceInstall ? " with --force flag" : "")")
+        
+        if await BrewPaths.isPinentryInstalled() {
+            Self.logger.notice("pinentry-mac already installed. Skipping...")
+            return
+        }
+        
+        // Install gettext and libgpg-error first with the --force-bottle flag
+        // gettext and libgpg-error are dependencies for pinentry-mac but if we do a normal install
+        // it will fail when clang tries to find the cellar folder, because the path may have spaces in it. (e.g. Application Support)
+        // So we can bypass bulding from source with the --force-bottle to download only the binraies
+        Self.logger.info("Installing gettext and libgpg-error with --force-bottle flag")
+        let dependencyResult = await shell("\(BrewPaths.currentBrewExecutable) install --force-bottle \(forceInstall ? "--force" : "") gettext libgpg-error")
+        
+        if dependencyResult.didFail {
+            Self.logger.error("Failed to install gettext and libgpg-error with --force-bottle flag")
+            throw BrewInstallationError.PinentryError
+        }
+        
+        // Install pinentry-mac
+        Self.logger.info("Installing pinentry-mac")
+        let pinentryResult = await shell("\(BrewPaths.currentBrewExecutable) install \(forceInstall ? "--force" : "") pinentry-mac")
+        
+        if pinentryResult.didFail {
+            Self.logger.error("Failed to install pinentry-mac")
+            throw BrewInstallationError.PinentryError
+        }
+        
+        Self.logger.info("pinentry-mac installation successfull")
     }
 }

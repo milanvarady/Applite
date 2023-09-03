@@ -22,6 +22,8 @@ struct ContentView: View {
     @State var loadAlertShowing = false
     @State var errorMessage = ""
     
+    @State var pinentryErrorShowing = false
+    
     @State var brokenInstall = false
     
     /// If true the sidebar is disabled
@@ -70,7 +72,7 @@ struct ContentView: View {
                 } else {
                     // Broken install
                     VStack(alignment: .center) {
-                        Text(BrewInstallation.brokenPathOrIstallMessage)
+                        Text(DependencyManager.brokenPathOrIstallMessage)
                         
                         Button {
                             Task {
@@ -109,6 +111,7 @@ struct ContentView: View {
         }
         .task {
             await loadCasks()
+            await checkPinentry()
         }
         .searchable(text: $searchText, placement: .sidebar)
         .onSubmit(of: .search) {
@@ -140,11 +143,16 @@ struct ContentView: View {
         } message: {
             Text(errorMessage)
         }
+        .alert("PINEntry not installed correctly", isPresented: $pinentryErrorShowing) {
+            Button("I Understand", role: .cancel) { }
+        } message: {
+            Text("Applications that require an admin password to install will fail to install.")
+        }
     }
     
     private func loadCasks() async {
         if !BrewPaths.isSelectedBrewPathValid() {
-            errorMessage = BrewInstallation.brokenPathOrIstallMessage
+            errorMessage = DependencyManager.brokenPathOrIstallMessage
             loadAlertShowing = true
             brokenInstall = true
             
@@ -168,6 +176,20 @@ brew --version output: \(output)
             loadAlertShowing = true
             
             logger.error("Initial cask load failure. Reason: \(error.localizedDescription)")
+        }
+    }
+    
+    /// Checks if pinentry-mac is correctly installed, if not it installes it
+    private func checkPinentry() async {
+        // Return if installed
+        if await BrewPaths.isPinentryInstalled() { return }
+        
+        logger.notice("pinentry-mac is not installed. Installing now...")
+        
+        do {
+            try await DependencyManager.installPinentry(forceInstall: true)
+        } catch {
+            pinentryErrorShowing = true
         }
     }
 }

@@ -106,4 +106,8 @@ struct BrewPaths {
     static public func isSelectedBrewPathValid() -> Bool {
         return isBrewPathValid(path: Self.currentBrewExecutable)
     }
+    
+    static public func isPinentryInstalled() async -> Bool {
+        return await shell("\(Self.currentBrewExecutable) list --formula").output.contains("pinentry-mac")
+    }
 }
