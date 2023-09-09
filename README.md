@@ -62,7 +62,7 @@ Or join the [Official Discord Server](https://discord.gg/ZgB6pRE8Qx).
  - [Fuse](https://github.com/krisk/fuse-swift), Kiro Risk - search result filtering
  - [SwiftUI CachedAsyncImage](https://github.com/lorenzofiamingo/swiftui-cached-async-image), Lorenzo Fiamingo
  - [SwiftUI-Shimmer](https://github.com/markiv/SwiftUI-Shimmer), Vikram Kriplaney
- - [SwiftUI Circular Control](https://github.com/philptr/PZCircularControl), Phil Zakharchenko
+ - [CircularProgressSwiftUI](https://github.com/ArnavMotwani/CircularProgressSwiftUI), Arnav Motwani
  - [Sparkle](https://github.com/sparkle-project/Sparkle) - app updates
  - [Appcasks](https://github.com/App-Fair/appcasks/) ([App Fair](https://github.com/App-Fair/App) project) - app icons
  - [pinentry-mac](https://github.com/GPGTools/pinentry), GPGTools - for secure admin password retrieval

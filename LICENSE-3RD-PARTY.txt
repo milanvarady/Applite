@@ -4,7 +4,7 @@
         - Fuse, Kiro Risk (https://github.com/krisk/fuse-swift)
         - SwiftUI CachedAsyncImage, Lorenzo Fiamingo (https://github.com/lorenzofiamingo/swiftui-cached-async-image)
         - SwiftUI-Shimmer, Vikram Kriplaney (https://github.com/markiv/SwiftUI-Shimmer)
-	- SwiftUI Circular Control, Phil Zakharchenko (https://github.com/philptr/PZCircularControl)
+        - CircularProgressSwiftUI, Arnav Motwani (https://github.com/ArnavMotwani/CircularProgressSwiftUI)
 --------------------------------------------------------------------------------------------------------------------
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:

@@ -49,6 +49,7 @@
 		4189CE362937C96D009C836D /* CachedAsyncImage in Frameworks */ = {isa = PBXBuildFile; productRef = 4189CE352937C96D009C836D /* CachedAsyncImage */; };
 		4189CE392937CD41009C836D /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 4189CE382937CD41009C836D /* Shimmer */; };
 		4189CE41293C980E009C836D /* BigButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4189CE40293C980E009C836D /* BigButtonStyle.swift */; };
+		418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */ = {isa = PBXBuildFile; productRef = 418E9EF32AACD9C000046A58 /* CircularProgress */; };
 		418F331C28EB3D540023D76F /* AppGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F331B28EB3D540023D76F /* AppGridView.swift */; };
 		418F332428EC8BA10023D76F /* Cask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F332328EC8BA10023D76F /* Cask.swift */; };
 		418F332628EC921D0023D76F /* CaskData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F332528EC921D0023D76F /* CaskData.swift */; };
@@ -64,7 +65,6 @@
 		41B731392A879353008BF6B9 /* ActiveTasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41B731382A879353008BF6B9 /* ActiveTasksView.swift */; };
 		41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 41C8FA282A7A598B000BB9A2 /* Sparkle */; };
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
-		41DF006729EAB285004EB7AE /* PZCircularControl in Frameworks */ = {isa = PBXBuildFile; productRef = 41DF006629EAB285004EB7AE /* PZCircularControl */; };
 		BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BD7546562A868DA30083996B /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
@@ -136,7 +136,7 @@
 			files = (
 				41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */,
 				4189CE392937CD41009C836D /* Shimmer in Frameworks */,
-				41DF006729EAB285004EB7AE /* PZCircularControl in Frameworks */,
+				418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */,
 				4129FFD92A7A613E00CFE392 /* Fuse in Frameworks */,
 				4189CE362937C96D009C836D /* CachedAsyncImage in Frameworks */,
 			);
@@ -396,9 +396,9 @@
 			packageProductDependencies = (
 				4189CE352937C96D009C836D /* CachedAsyncImage */,
 				4189CE382937CD41009C836D /* Shimmer */,
-				41DF006629EAB285004EB7AE /* PZCircularControl */,
 				41C8FA282A7A598B000BB9A2 /* Sparkle */,
 				4129FFD82A7A613E00CFE392 /* Fuse */,
+				418E9EF32AACD9C000046A58 /* CircularProgress */,
 			);
 			productName = Applite;
 			productReference = 414074F128DF53E80073EB22 /* Applite.app */;
@@ -434,9 +434,9 @@
 			packageReferences = (
 				4189CE342937C96D009C836D /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */,
 				4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
-				41DF006529EAB285004EB7AE /* XCRemoteSwiftPackageReference "PZCircularControl" */,
 				41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				4129FFD72A7A613E00CFE392 /* XCRemoteSwiftPackageReference "fuse-swift" */,
+				418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */,
 			);
 			productRefGroup = 414074F228DF53E80073EB22 /* Products */;
 			projectDirPath = "";
@@ -761,20 +761,20 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ArnavMotwani/CircularProgressSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.1;
+			};
+		};
 		41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.0.0;
-			};
-		};
-		41DF006529EAB285004EB7AE /* XCRemoteSwiftPackageReference "PZCircularControl" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/philptr/PZCircularControl";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -795,15 +795,15 @@
 			package = 4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
 			productName = Shimmer;
 		};
+		418E9EF32AACD9C000046A58 /* CircularProgress */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */;
+			productName = CircularProgress;
+		};
 		41C8FA282A7A598B000BB9A2 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
-		};
-		41DF006629EAB285004EB7AE /* PZCircularControl */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 41DF006529EAB285004EB7AE /* XCRemoteSwiftPackageReference "PZCircularControl" */;
-			productName = PZCircularControl;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

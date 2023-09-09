@@ -8,7 +8,7 @@
 import SwiftUI
 import CachedAsyncImage
 import Shimmer
-import PZCircularControl
+import CircularProgress
 
 /// App view role
 enum AppRole {
@@ -146,20 +146,13 @@ struct AppView: View {
                 .scaleEffect(0.8)
                 
             case .downloading(let percent):
-                PZCircularControl(
-                    PZCircularControlParams(
-                        innerBackgroundColor: Color.clear,
-                        outerBackgroundColor: Color.gray.opacity(0.5),
-                        tintColor: LinearGradient(gradient: Gradient(colors: [.blue, .purple]), startPoint: .bottomLeading, endPoint: .topLeading),
-                        textColor: .blue,
-                        barWidth: 4.0,
-                        glowDistance: 10.0,
-                        font: .system(size: 10),
-                        initialValue: CGFloat(percent)
-                    )
-                )
-                .font(.system(size: 10))
-                .frame(width: 54, height: 54)
+                CircularProgressView(count: Int(percent * 100),
+                                     total: 100,
+                                     progress: CGFloat(percent),
+                                     fontOne: Font.system(size: 16).bold(),
+                                     lineWidth: 6,
+                                     showBottomText: false)
+                    .frame(width: 40, height: 40)
                 
             case .success:
                 Image(systemName: "checkmark")
