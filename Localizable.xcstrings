@@ -115,6 +115,12 @@
     },
     "/path/to/dir" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -457,6 +463,12 @@
     },
     "Applications that require an admin password to install will fail to install." : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les applications qui nécessitent un mot de passe administrateur pour s'installer ne pourront pas s'installer."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1398,6 +1410,12 @@
     },
     "I Understand" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'ai compris"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1883,6 +1901,12 @@
     },
     "Pinentry" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1893,6 +1917,12 @@
     },
     "Pinentry is used to securely prompt for the admin password when it is required during the installation of an application." : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PINEntry est utilisé pour demander en toute sécurité le mot de passe administrateur lorsqu'il est requis lors de l'installation d'une application."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1903,6 +1933,12 @@
     },
     "PINEntry not installed correctly" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PINEntry n’est pas installé correctement"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
