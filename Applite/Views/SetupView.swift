@@ -198,11 +198,11 @@ struct SetupView: View {
                 
                 VStack(alignment: .leading) {
                     BrewPathSelectorView(isSelectedPathValid: $isBrewPathValid)
-                        .padding(.bottom)
                     
                     Text("Selected brew path is invalid!")
                         .foregroundColor(.red)
                         .opacity(isBrewPathValid ? 0 : 1)
+                        .padding(.bottom)
                     
                     Text("Appdir (optional)")
                         .font(.system(size: 16, weight: .bold))

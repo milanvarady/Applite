@@ -281,7 +281,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
                 }
             }
             
-            appPath = "\(applicationsDirectory)/\(self.name).app"
+            appPath = "\"\(applicationsDirectory)/\(self.name).app\""
         } else {
             // Open normal app
             let brewDirectory = BrewPaths.currentBrewDirectory
@@ -289,7 +289,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             appPath = "\(brewDirectory.replacingOccurrences(of: " ", with: "\\ ") )/Caskroom/\(self.id)/*/*.app"
         }
         
-        let result = shell("open \"\(appPath)\"")
+        let result = shell("open \(appPath)")
         
         if result.didFail {
             Self.logger.error("Couldn't launch app at path: \(appPath). Output: \(result.output)")

@@ -16,33 +16,36 @@ struct BrewManagementView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading) {
-                // Title
-                Text("Manage Homebrew")
-                    .font(.system(size: 32, weight: .bold))
-                
-                Text("This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications.")
+            VStack {
+                VStack(alignment: .leading) {
+                    // Title
+                    Text("Manage Homebrew")
+                        .font(.system(size: 32, weight: .bold))
+                    
+                    Text("This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications.")
+                        .padding(.bottom)
+                    
+                    section(title: "Info") {
+                        InfoView()
+                    }
                     .padding(.bottom)
-                
-                section(title: "Info") {
-                    InfoView()
+                    
+                    section(title: "Actions") {
+                        ActionsView(modifyingBrew: $modifyingBrew)
+                    }
+                    .padding(.bottom)
+                    
+                    section(title: "Import/Export apps") {
+                        ExportView()
+                    }
+                    
+                    Spacer()
                 }
-                .padding(.bottom)
-                
-                section(title: "Actions") {
-                    ActionsView(modifyingBrew: $modifyingBrew)
-                }
-                .padding(.bottom)
-                
-                section(title: "Import/Export apps") {
-                    ExportView()
-                }
-                
-                Spacer()
+                .frame(maxWidth: 800)
+                .padding(12)
             }
-            .padding(12)
+            .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: 800)
     }
     
     func section<Content: View>(title: LocalizedStringKey, @ViewBuilder content: ()->Content) -> some View {
@@ -151,6 +154,10 @@ struct BrewManagementView: View {
             // Reinstall brew button
             HStack {
                 reinstallButton
+                    .task {
+                        // Check if brew is installed in application support
+                        isAppBrewInstalled = isBrewPathValid(path: BrewPaths.getBrewExectuablePath(for: .appPath))
+                    }
                 
                 if reinstallDone {
                     Image(systemName: "checkmark")
@@ -171,14 +178,6 @@ struct BrewManagementView: View {
                         .bold()
                     SmallProgressView()
                 }
-            }
-            
-            EmptyView()
-            .task {
-                // Check if brew is installed in application support
-                print("checking \(BrewPaths.getBrewExectuablePath(for: .appPath))")
-                isAppBrewInstalled = isBrewPathValid(path: BrewPaths.getBrewExectuablePath(for: .appPath))
-                print("result \(isAppBrewInstalled)")
             }
         }
         
@@ -327,8 +326,6 @@ struct BrewManagementView: View {
                     case .success(let url):
                         do {
                             let casks = try readCaskFile(url: url[0])
-                            
-                            print(casks)
                             
                             installImported(casks: casks)
                         } catch {

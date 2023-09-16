@@ -102,11 +102,11 @@ fileprivate struct GeneralSettingsView: View {
                     // Set color scheme to system
                     colorSchemePreference = darkMode ? .dark : .light
                     // Wait
-                    try? await Task.sleep(for: .seconds(0.001))
+                    try? await Task.sleep(for: .seconds(0.1))
                     // Set it back to nil (.system)
                     colorSchemePreference = .system
                     // Wait
-                    try? await Task.sleep(for: .seconds(0.001))
+                    try? await Task.sleep(for: .seconds(0.1))
                     // Set fixing color back to false
                     await MainActor.run { self.fixingColor = false }
                 }
