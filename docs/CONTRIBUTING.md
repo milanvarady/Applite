@@ -1,22 +1,31 @@
 # Applite Contribution Guide
 
+## Table of Contents
+
+1. [Project goal](#project-goal)
+2. [If you found a bug](#if-you-found-a-bug)
+   - [Finding logs in `Console.app`](#finding-logs-in-consoleapp)
+3. [If you want to suggest a feature](#if-you-want-to-suggest-a-feature)
+4. [If you want to contribute code](#if-you-want-to-contribute-code)
+
+
 ## Project Goal
 
 > TL;DR
 > Applite aims to be simple in every way
 
-The goal of Applite is to bring to convininence of Homebrew casks to the average user. It aims to be as simple as possible in every aspect. Easy setup, simple UI that can be understood at a glance, and no technical knowledge required.
+The goal of Applite is to bring to convenience of Homebrew casks to the average user. It aims to be as simple as possible in every aspect. Easy setup, simple UI that can be understood at a glance, and no technical knowledge required.
 
 Applite has features aimed at more experienced users (e.g. custom brew path and installation directory), but these are not part of the main interface by design.
 
-## You found a bug
+## If you found a bug
 
 > TL;DL
 > - Open a new issue 
 > - Describe what the problem is
-> - Describe the steps you took before it occured
+> - Describe the steps you took before it occurred
 > - Include error messages, logs
-> - Provide app version and device information (e.g. Applite: v1.2, macbook air M2)
+> - Provide app version and device information (e.g. Applite: v1.2, MacBook air M2)
 
 If the problem is related to application actions, e.g. installing, updating or uninstalling. Be sure to check if you can find the error message. When an app encounters an error it should look like this:
 
@@ -30,15 +39,15 @@ If you are familiar with the console, you can check the Applite logs. Here is wh
 
 - Click on your device in the `Console.app` 
 - Click on the **Start** button to begin collecting logs
-- After the bug has occured pause log collection
+- After the bug has occurred pause log collection
 - Filter for "applite" process in the search bar
 - Look for the log entry that describes the error
 
-![cosole.app interface](https://i.imgur.com/04FHa9l.png)
+![Console.app interface](https://i.imgur.com/04FHa9l.png)
 
 If the command output is shown as `<private>`, as in the image above, follow [this stack exchange post](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log/1532052#1532052) to reveal it.
 
-## If you want to propose a feature
+## If you want to suggest a feature
 
 - Open a new issue, or a discussion if the feature is more open ended
 - Describe what you miss and why
@@ -46,7 +55,7 @@ If the command output is shown as `<private>`, as in the image above, follow [th
 
 Your suggestion is likely to be rejected if it doesn't align with the [project goal](#project-goal).
 
-## If you want to contribue code
+## If you want to contribute code
 
 >TL;DR
 > - If you find a typo or a minor bug, feel free to create a pull request right away
