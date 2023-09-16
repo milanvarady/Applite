@@ -3,28 +3,25 @@
     <channel>
         <title>Applite</title>
         <item>
+            <title>1.2</title>
+            <pubDate>Sat, 16 Sep 2023 15:05:16 +0200</pubDate>
+            <sparkle:version>6</sparkle:version>
+            <sparkle:shortVersionString>1.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <sparkle:releaseNotesLink>
+                https://aerolite.dev/applite/releases/1.2.html
+            </sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/milanvarady/Applite/releases/download/v1.2/Applite.dmg" length="2619967" type="application/octet-stream" sparkle:edSignature="S0QZaUojkmYcpWaGXbE03QU55GSiVABwtH6Wijy0ftj6nA02FL1ljHvucDavKSVnqKaPgiao6kgiPBFVAk4HBQ=="/>
+        </item>
+        <item>
             <title>1.1</title>
             <pubDate>Sat, 12 Aug 2023 16:17:31 +0200</pubDate>
             <sparkle:version>5</sparkle:version>
             <sparkle:shortVersionString>1.1</sparkle:shortVersionString>
-            <description><![CDATA[
-                <h2>New Features</h2>
-
-                <ul>
-                    <li>Applite can now be installed with Homebrew</li>
-                    <li>New languages: French and Hungarian</li>
-                    <li>New &quot;Terminals&quot; category is now available</li>
-                    <li>Installed apps can now be exported to a file. Import it on another device to install all exported apps. You can find this option in the &quot;Manage Homebrew&quot; section</li>
-                    <li>New &quot;Active Tasks&quot; section where you can view actively installing apps</li>
-                </ul>
-
-                <h2>Known Issues</h2>
-
-                <p>Apps installed with .pkg installers require an admin password to complete. This is not currently supported by Applite. We are working on a fix, but in the meantime, see <a href="https://aerolite.dev/applite/troubleshooting.html">Troubleshooting</a> for a possible workaround.
-                </p>
-            ]]>
-            </description>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <sparkle:releaseNotesLink>
+                https://aerolite.dev/applite/releases/1.1.html
+            </sparkle:releaseNotesLink>
             <enclosure url="https://github.com/milanvarady/Applite/releases/download/v1.1/Applite.dmg" length="2611883" type="application/octet-stream" sparkle:edSignature="AsiGMXrQX3oQ8VFojqlVz+0MLjGzKUVq5ClQMAFonklXoGochcIoz7hSFvqc35ye+BWeUE4STDCSdRCJhwqoDA=="/>
         </item>
         <item>
