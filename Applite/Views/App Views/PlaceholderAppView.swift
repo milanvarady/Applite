@@ -11,9 +11,12 @@ import SwiftUI
 struct PlaceholderAppView: View {
     var body: some View {
         HStack {
-            PlaceholderAppIcon()
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(.gray, lineWidth: 3)
+                .frame(width: 40, height: 40)
                 .padding(.leading)
             
+            // Placeholder text lines
             VStack(alignment: .leading) {
                 Rectangle()
                     .fill(.gray)
@@ -31,15 +34,7 @@ struct PlaceholderAppView: View {
             
             Spacer()
         }
-    }
-}
-
-/// A placeholder app icon if loading from the API fails
-public struct PlaceholderAppIcon: View {
-    public var body: some View {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
-            .stroke(.gray, lineWidth: 3)
-            .frame(width: 44, height: 44)
+        .frame(width: AppView.dimensions.width, height: AppView.dimensions.height)
     }
 }
 

@@ -67,10 +67,20 @@ struct AppView: View {
                                 image
                                     .resizable()
                             } else if phase.error != nil {
-                                PlaceholderAppIcon()
+                                // App icon not found
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .stroke(.gray, lineWidth: 3)
+                                    
+                                    Text("?")
+                                        .font(.system(size: 24, weight: .light))
+                                }
+                                .foregroundStyle(.gray)
+                                .frame(width: 40, height: 40)
                             }
                         }
                     } else {
+                        // Loading app icon
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
                             .fill(.gray)
                             .shimmering()
