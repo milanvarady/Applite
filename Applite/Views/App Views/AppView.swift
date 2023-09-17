@@ -181,6 +181,7 @@ struct AppView: View {
                         .foregroundStyle(.red)
                     
                     Button {
+                        // Open new window with shell output
                         openWindow(value: output)
                     } label: {
                         Image(systemName: "info.circle")
@@ -198,12 +199,18 @@ struct AppView: View {
                         failureAlertMessage = String(localized: "\(cask.name) is already installed. If you want to add it to \(Bundle.main.appName) click more options (chevron icon) and press Force Install.")
                         showingFailureAlert = true
                     } else if output.contains("Could not resolve host") {
-                        failureAlertMessage = String(localized:"Couldn't download app. No internet connection, or host is unreachable.")
+                        failureAlertMessage = String(localized: "Couldn't download app. No internet connection, or host is unreachable.")
                         showingFailureAlert = true
                     }
                 }
                 .alert("Error", isPresented: $showingFailureAlert) {
-                    Button("OK", role: .cancel) { }
+                    Button("OK") { }
+                    
+                    Button("View Error") {
+                        // Open new window with shell output
+                        openWindow(value: output)
+                        cask.progressState = .idle
+                    }
                 } message: {
                     Text(failureAlertMessage)
                 }

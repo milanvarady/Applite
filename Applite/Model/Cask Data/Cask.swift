@@ -70,7 +70,8 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     /// - Parameters:
     ///   - force: If `true` install will be run with the `--force` flag
     /// - Returns: `Void`
-    func install(caskData: CaskData, force: Bool = false) async -> Void {
+    @discardableResult
+    func install(caskData: CaskData, force: Bool = false) async -> ShellResult {
         defer {
             resetProgressState(caskData: caskData)
         }
@@ -78,7 +79,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         Self.logger.info("Cask \"\(self.id)\" installation started")
         
         // Check if pinentry is installed
-        guard ((try? await checkPinentry()) != nil) else { return }
+        guard ((try? await checkPinentry()) != nil) else { return ShellResult(output: "Pinentry check error", didFail: true) }
         
         var cancellables = Set<AnyCancellable>()
         let shellOutputStream = ShellOutputStream()
@@ -123,6 +124,8 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             // Show success for 2 seconds
             try? await Task.sleep(for: .seconds(2))
         }
+        
+        return result
     }
     
     /// Parses the shell output when installing a cask
@@ -327,8 +330,12 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     private func resetProgressState(caskData: CaskData) {
         Task {
             await MainActor.run {
-                self.progressState = .idle
-                caskData.busyCasks.remove(self)
+                if case .failed(_) = self.progressState {
+                } else {
+                    // Only reset state if it's not failed
+                    self.progressState = .idle
+                    caskData.busyCasks.remove(self)
+                }
             }
         }
     }

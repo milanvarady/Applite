@@ -2665,6 +2665,22 @@
         }
       }
     },
+    "View Error" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir l'erreur"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiba Megtekintése"
+          }
+        }
+      }
+    },
     "Virtualization" : {
       "extractionState" : "manual",
       "localizations" : {
