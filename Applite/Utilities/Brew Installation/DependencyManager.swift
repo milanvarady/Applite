@@ -17,14 +17,6 @@ public struct DependencyManager {
         category: String(describing: DependencyManager.self)
     )
     
-    /// Installation errors
-    enum BrewInstallationError: Error {
-        case CommandLineToolsError
-        case DirectoryError
-        case BrewFetchError
-        case PinentryError
-    }
-    
     /// Extracts percentage from shell output when installing brew
     static let percentageRegex = try! NSRegularExpression(pattern: #"(Receiving|Resolving).+:\s+(\d{1,3})%"#)
     
@@ -51,7 +43,7 @@ public struct DependencyManager {
             if result.didFail {
                 Self.logger.error("Failed to request Xcode Command Line Tools install")
                 Self.logger.error("\(result.output)")
-                throw BrewInstallationError.CommandLineToolsError
+                throw DependencyInstallationError.CommandLineToolsError
             }
             
             // Wait for command line tools installation with a 30 minute timeout
@@ -68,7 +60,7 @@ public struct DependencyManager {
             
             if !didBreak {
                 Self.logger.error("Command Line Tools Install timeout")
-                throw BrewInstallationError.CommandLineToolsError
+                throw DependencyInstallationError.CommandLineToolsError
             }
         } else {
             Self.logger.info("Xcode Command Line Tool are already installed. Skipping...")
@@ -114,7 +106,7 @@ public struct DependencyManager {
             }
         } catch {
             Self.logger.error("Couldn't create or remove Homebrew directory in Application Support")
-            throw BrewInstallationError.DirectoryError
+            throw DependencyInstallationError.DirectoryError
         }
         
         // Fetch Homebrew tarball
@@ -125,7 +117,7 @@ public struct DependencyManager {
         if brewFetchResult.didFail {
             Self.logger.error("Failed to fetch and unpack tarball")
             Self.logger.error("\(brewFetchResult.output)")
-            throw BrewInstallationError.BrewFetchError
+            throw DependencyInstallationError.BrewFetchError
         } else {
             Self.logger.info("Brew install done")
         }
@@ -148,8 +140,8 @@ public struct DependencyManager {
         let dependencyResult = await shell("\(BrewPaths.currentBrewExecutable) install --force-bottle \(forceInstall ? "--force" : "") gettext libgpg-error")
         
         if dependencyResult.didFail {
-            Self.logger.error("Failed to install gettext and libgpg-error with --force-bottle flag")
-            throw BrewInstallationError.PinentryError
+            Self.logger.error("Failed to install gettext and libgpg-error with --force-bottle flag. Output: \(dependencyResult.output)")
+            throw DependencyInstallationError.PinentryError
         }
         
         // Install pinentry-mac
@@ -157,8 +149,8 @@ public struct DependencyManager {
         let pinentryResult = await shell("\(BrewPaths.currentBrewExecutable) install \(forceInstall ? "--force" : "") pinentry-mac")
         
         if pinentryResult.didFail {
-            Self.logger.error("Failed to install pinentry-mac")
-            throw BrewInstallationError.PinentryError
+            Self.logger.error("Failed to install pinentry-mac. Output: \(pinentryResult.output)")
+            throw DependencyInstallationError.PinentryError
         }
         
         Self.logger.info("pinentry-mac installation successfull")

@@ -211,6 +211,9 @@ struct AppView: View {
                     } else if output.contains("Could not resolve host") {
                         failureAlertMessage = String(localized: "Couldn't download app. No internet connection, or host is unreachable.")
                         showingFailureAlert = true
+                    } else if output.lowercased().contains("pinentry") {
+                        failureAlertMessage = output
+                        showingFailureAlert = true
                     }
                 }
                 .alert("Error", isPresented: $showingFailureAlert) {
@@ -237,10 +240,11 @@ struct AppView: View {
         
         @EnvironmentObject var caskData: CaskData
         
+        // Alerts
         @State var showingPopover = false
-        @State var isPresentingCaveats = false
-        @State var isPresentingBrewError = false
-        @State var isPresentingForceInstallConfirmation = false
+        @State var showingCaveats = false
+        @State var showingBrewError = false
+        @State var showingForceInstallConfirmation = false
         
         @State var buttonFill = false
         
@@ -249,7 +253,7 @@ struct AppView: View {
             Button {
                 if cask.caveats != nil {
                     // Show caveats dialog
-                    isPresentingCaveats = true
+                    showingCaveats = true
                     return
                 }
                 
@@ -266,7 +270,7 @@ struct AppView: View {
                     buttonFill = isHovering
                 }
             }
-            .alert("App caveats", isPresented: $isPresentingCaveats) {
+            .alert("App caveats", isPresented: $showingCaveats) {
                 Button("Download Anyway") {
                     download()
                 }
@@ -275,7 +279,7 @@ struct AppView: View {
             } message: {
                 Text(cask.caveats ?? "")
             }
-            .alert("Broken Brew Path", isPresented: $isPresentingBrewError) {
+            .alert("Broken Brew Path", isPresented: $showingBrewError) {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(DependencyManager.brokenPathOrIstallMessage)
@@ -299,7 +303,7 @@ struct AppView: View {
                     
                     // Force install button
                     Button {
-                        isPresentingForceInstallConfirmation = true
+                        showingForceInstallConfirmation = true
                     } label: {
                         Label("Force Install", systemImage: "bolt.trianglebadge.exclamationmark.fill")
                     }
@@ -307,7 +311,7 @@ struct AppView: View {
                 .padding(8)
                 .buttonStyle(.plain)
             }
-            .confirmationDialog("Are you sure you want to force install \(cask.name)? This will override any current installation!", isPresented: $isPresentingForceInstallConfirmation) {
+            .confirmationDialog("Are you sure you want to force install \(cask.name)? This will override any current installation!", isPresented: $showingForceInstallConfirmation) {
                 Button("Yes") {
                     download(force: true)
                 }
@@ -319,7 +323,7 @@ struct AppView: View {
         private func download(force: Bool = false) {
             // Check if brew path is valid
             if !BrewPaths.isSelectedBrewPathValid() {
-                isPresentingBrewError = true
+                showingBrewError = true
                 return
             }
             

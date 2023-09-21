@@ -1250,6 +1250,9 @@
         }
       }
     },
+    "Failed to install pinentry" : {
+
+    },
     "Failed to load cask data from cache" : {
       "comment" : "CaskDataLoadError",
       "localizations" : {
@@ -2797,6 +2800,9 @@
           }
         }
       }
+    },
+    "You can safely continue, but you won't be able to install apps with .pkg installers." : {
+
     },
     "You will be prompted to install the Xcode Command Line Tools, please click \"Install\" as it is required for this application to work. It will take a few minutes, you can see the progress on the installation window." : {
       "localizations" : {

@@ -228,6 +228,7 @@ struct SetupView: View {
         // Alerts
         @State var showingAlert = false
         @State var showingCommandLineToolsAlert = false
+        @State var showingPinentryAlert = false
         
         @StateObject var installationProgress = BrewInstallationProgress()
         
@@ -301,6 +302,17 @@ struct SetupView: View {
                 }, message: {
                     Text("Retry the installation or visit the troubleshooting page.")
                 })
+                .alert("Failed to install pinentry", isPresented: $showingPinentryAlert, actions: {
+                    Button("OK") { }
+                    
+                    Button("Troubleshooting") {
+                        if let url = URL(string: "https://aerolite.dev/applite/troubleshooting.html") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    }
+                }, message: {
+                    Text("You can safely continue, but you won't be able to install apps with .pkg installers.")
+                })
             }
         }
         
@@ -335,6 +347,9 @@ struct SetupView: View {
             
             do {
                 try await DependencyManager.install(progressObject: installationProgress)
+            } catch DependencyInstallationError.PinentryError {
+                showingPinentryAlert = true
+                installationProgress.phase = .done
             } catch {
                 failed = true
             }
