@@ -34,7 +34,20 @@
       }
     },
     "?" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "?"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "?"
+          }
+        }
+      }
     },
     "\"%@\" didn't match any app. Either it's not available in the Homebrew catalog or you misspelled it." : {
       "localizations" : {
@@ -1251,7 +1264,20 @@
       }
     },
     "Failed to install pinentry" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de l'installation de pinentry"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nem sikerült a Pinentry telepítése"
+          }
+        }
+      }
     },
     "Failed to load cask data from cache" : {
       "comment" : "CaskDataLoadError",
@@ -2802,7 +2828,20 @@
       }
     },
     "You can safely continue, but you won't be able to install apps with .pkg installers." : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous pouvez continuer en toute sécurité, mais vous ne pourrez pas installer d'applications avec des installateurs .pkg."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Továbbléphet, de a .pkg telepítőkkel rendelkező alkalmazásokat nem fogja tudni telepíteni."
+          }
+        }
+      }
     },
     "You will be prompted to install the Xcode Command Line Tools, please click \"Install\" as it is required for this application to work. It will take a few minutes, you can see the progress on the installation window." : {
       "localizations" : {

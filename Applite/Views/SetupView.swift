@@ -327,7 +327,8 @@ struct SetupView: View {
                         if installationProgress.phase.rawValue > progressOrder.rawValue {
                             installedBadge
                         } else {
-                            SmallProgressView()
+                            ProgressView()
+                                .controlSize(.small)
                         }
                     } else {
                         Image(systemName: "xmark.circle")
@@ -335,6 +336,7 @@ struct SetupView: View {
                             .foregroundColor(.red)
                     }
                 }
+                .frame(height: 30)
              
                 Text(description)
             }
