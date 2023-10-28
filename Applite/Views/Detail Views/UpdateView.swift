@@ -18,6 +18,8 @@ struct UpdateView: View {
     @State var updateAllFinished = false
     @State var updateAllButtonRotation = 0.0
     
+    @State var showingGreedyUpdateConfirm = false
+    
     // Filter outdated casks
     var casks: [Cask] {
         var filteredCasks = caskData.casks.filter { $0.isOutdated }
@@ -73,8 +75,8 @@ struct UpdateView: View {
                         Text("Update All")
                     }
                 }
-                .bigButton()
-                .padding(.top)
+                .bigButton(backgroundColor: .accentColor)
+                .padding(.vertical)
                 .disabled(isUpdatingAll)
             }
             
@@ -92,6 +94,26 @@ struct UpdateView: View {
         }
         .searchable(text: $searchText)
         .toolbar {
+            Button {
+                showingGreedyUpdateConfirm = true
+            } label: {
+                Label("Show All Updates", systemImage: "eye")
+            }
+            .labelStyle(.titleAndIcon)
+            .alert("Notice", isPresented: $showingGreedyUpdateConfirm) {
+                Button("Show All") {
+                    Task {
+                        await caskData.refreshOutdatedApps(greedy: true)
+                    }
+                }
+                
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                VStack {
+                    Text("This will show updates from applications that have auto-update turned off, i.e., applications that are taking care of their own updates.")
+                }
+            }
+            
             // Refresh outdated casks
             if refreshing {
                 SmallProgressView()

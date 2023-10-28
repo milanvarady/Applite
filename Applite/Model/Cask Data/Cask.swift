@@ -150,9 +150,12 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     }
 
     /// Uninstalls the cask
+    /// - Parameters:
+    ///     - caskData: ``CaskData`` object
+    ///     - zap: If true the app will be uninstalled completely using the brew --zap flag
     /// - Returns: Bool - Whether the task has failed or not
     @discardableResult
-    func uninstall(caskData: CaskData) async -> Bool {
+    func uninstall(caskData: CaskData, zap: Bool = false) async -> Bool {
         defer {
             resetProgressState(caskData: caskData)
         }
@@ -161,8 +164,10 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             caskData.busyCasks.insert(self)
         }
         
+        let arguments: [String] = if zap { ["--zap", self.id] } else { [self.id] }
+        
         return await runBrewCommand(command: "uninstall",
-                                    arguments: [self.id],
+                                    arguments: arguments,
                                     taskDescription: "Uninstalling",
                                     notificationSuccess: String(localized:"\(self.name) successfully uninstalled"),
                                     notificationFailure: "Failed to uninstall \(self.name)",
@@ -254,10 +259,13 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         
         // Log and Notify
         if result.didFail {
-            sendNotification(title: notificationFailure, reason: .failure)
             Self.logger.error("Failed to run brew command \"\(command)\" with arguments \"\(arguments)\", output: \(result.output)")
+            
+            sendNotification(title: notificationFailure, reason: .failure)
             await MainActor.run { self.progressState = .failed(output: result.output) }
         } else {
+            Self.logger.notice("Successfully run brew command \"\(command)\" with arguments \"\(arguments)\", output: \(result.output)")
+            
             sendNotification(title: notificationSuccess, reason: .success)
             await MainActor.run { self.progressState = .success }
             try? await Task.sleep(for: .seconds(2))
@@ -330,11 +338,14 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     private func resetProgressState(caskData: CaskData) {
         Task {
             await MainActor.run {
+                // Only reset state if it's not failed
                 if case .failed(_) = self.progressState {
                 } else {
-                    // Only reset state if it's not failed
                     self.progressState = .idle
                     caskData.busyCasks.remove(self)
+                    
+                    // Filter busy casks to make sure
+                    caskData.filterBusyCasks()
                 }
             }
         }

@@ -247,8 +247,8 @@ final class CaskData: ObservableObject {
         (casksByCategory, casksByCategoryCoupled) = fillCategoryDicts()
     }
 
-    func refreshOutdatedApps() async -> Void {
-        let outdatedCaskIDs = await shell("\(BrewPaths.currentBrewExecutable) outdated --cask -q").output
+    func refreshOutdatedApps(greedy: Bool = false) async -> Void {
+        let outdatedCaskIDs = await shell("\(BrewPaths.currentBrewExecutable) outdated --cask \(greedy ? "-g" : "") -q").output
             .components(separatedBy: "\n")
             .filter({ $0.count > 0 })                                       // Remove empty strings
             .map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) })    // Trim whitespace
@@ -261,5 +261,12 @@ final class CaskData: ObservableObject {
         }
           
         Self.logger.info("Outdated apps refreshed")
+    }
+    
+    /// Filters busy casks
+    func filterBusyCasks() {
+        self.busyCasks = self.busyCasks.filter {
+            $0.progressState != .idle
+        }
     }
 }

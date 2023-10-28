@@ -17,26 +17,26 @@ struct CommandsMenu: Commands {
         SidebarCommands()
         
         CommandGroup(replacing: .appInfo) {
-                        Button("About \(Bundle.main.appName)") {
-                            NSApplication.shared.orderFrontStandardAboutPanel(
-                                options: [
-                                    NSApplication.AboutPanelOptionKey.credits: NSAttributedString(
-                                        string: "MIT Licence",
-                                        attributes: [
-                                            NSAttributedString.Key.font: NSFont.systemFont(
-                                                ofSize: NSFont.smallSystemFontSize)
-                                        ]
-                                    ),
-                                    NSApplication.AboutPanelOptionKey(
-                                        rawValue: "Copyright"
-                                    ): "© 2023 Milán Várady"
+            Button("About \(Bundle.main.appName)") {
+                NSApplication.shared.orderFrontStandardAboutPanel(
+                    options: [
+                        NSApplication.AboutPanelOptionKey.credits: NSAttributedString(
+                            string: "MIT Licence",
+                            attributes: [
+                                NSAttributedString.Key.font: NSFont.systemFont(
+                                    ofSize: NSFont.smallSystemFontSize)
                                 ]
-                            )
-                        }
-                    }
+                        ),
+                        NSApplication.AboutPanelOptionKey(
+                            rawValue: "Copyright"
+                        ): "© 2023 Milán Várady"
+                    ]
+                )
+            }
+        }
         
         CommandGroup(before: .systemServices) {
-            Button("Uninstall...") {
+            Button("Uninstall Applite...") {
                 openWindow(id: "uninstall-self")
             }
             

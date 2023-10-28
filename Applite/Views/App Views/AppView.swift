@@ -124,7 +124,7 @@ struct AppView: View {
                 switch role {
                 case .installAndManage:
                     if cask.isInstalled {
-                        OpenAndManageAppView(cask: cask, deleteButton: false, moreOptionsButton: true)
+                        OpenAndManageAppView(cask: cask, deleteButton: false)
                     } else {
                         DownloadButton(cask: cask)
                             .padding(.trailing, 5)
@@ -134,7 +134,7 @@ struct AppView: View {
                     UpdateButton(cask: cask)
                     
                 case .installed:
-                    OpenAndManageAppView(cask: cask, deleteButton: true, moreOptionsButton: false)
+                    OpenAndManageAppView(cask: cask, deleteButton: true)
                         .padding(.trailing, 5)
                 }
             } else {
@@ -337,12 +337,13 @@ struct AppView: View {
     private struct OpenAndManageAppView: View {
         @StateObject var cask: Cask
         let deleteButton: Bool
-        let moreOptionsButton: Bool
         
         @EnvironmentObject var caskData: CaskData
         
         @State var appNotFoundShowing = false
         @State var showingPopover = false
+        
+        @State private var isOptionKeyDown = false
         
         var body: some View {
             // Lauch app
@@ -364,38 +365,47 @@ struct AppView: View {
                 UninstallButton(cask: cask)
             }
             
-            if moreOptionsButton {
-                // More options popover
-                Button() {
-                    showingPopover = true
-                } label: {
-                    Image(systemName: "chevron.down")
-                        .padding(.vertical)
-                        .contentShape(Rectangle())
-                }
-                .popover(isPresented: $showingPopover) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        // Reinstall button
-                        Button {
-                            Task {
-                                await cask.reinstall(caskData: caskData)
-                            }
-                        } label: {
-                            Label("Reinstall", systemImage: "arrow.2.squarepath")
+            // More options popover
+            Button() {
+                showingPopover = true
+            } label: {
+                Image(systemName: "chevron.down")
+                    .padding(.vertical)
+                    .contentShape(Rectangle())
+            }
+            .popover(isPresented: $showingPopover) {
+                VStack(alignment: .leading, spacing: 6) {
+                    // Reinstall button
+                    Button {
+                        Task {
+                            await cask.reinstall(caskData: caskData)
                         }
-                        
-                        // Uninstall button
-                        Button(role: .destructive) {
-                            Task {
-                                await cask.uninstall(caskData: caskData)
-                            }
-                        } label: {
-                            Label("Uninstall", systemImage: "trash")
-                        }
+                    } label: {
+                        Label("Reinstall", systemImage: "arrow.2.squarepath")
                     }
-                    .padding(8)
-                    .buttonStyle(.plain)
+                    
+                    // Uninstall button
+                    Button(role: .destructive) {
+                        Task {
+                            await cask.uninstall(caskData: caskData)
+                        }
+                    } label: {
+                        Label("Uninstall", systemImage: "trash")
+                            .foregroundStyle(.red)
+                    }
+                    
+                    // Uninstall completely button
+                    Button(role: .destructive) {
+                        Task {
+                            await cask.uninstall(caskData: caskData, zap: true)
+                        }
+                    } label: {
+                        Label("Uninstall Completely", systemImage: "trash.fill")
+                            .foregroundStyle(.red)
+                    }
                 }
+                .padding(8)
+                .buttonStyle(.plain)
             }
         }
     }

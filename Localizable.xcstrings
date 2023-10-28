@@ -1833,6 +1833,22 @@
         }
       }
     },
+    "Notice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attention"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Figyelem!"
+          }
+        }
+      }
+    },
     "Notifications" : {
       "localizations" : {
         "fr" : {
@@ -2237,6 +2253,38 @@
         }
       }
     },
+    "Show All" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher tout"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mutasd mindet"
+          }
+        }
+      }
+    },
+    "Show All Updates" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher toutes les mises à jour"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Összes frissítés megjelenítése"
+          }
+        }
+      }
+    },
     "Sort by" : {
       "localizations" : {
         "fr" : {
@@ -2421,6 +2469,22 @@
         }
       }
     },
+    "This will show updates from applications that have auto-update turned off, i.e., applications that are taking care of their own updates." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette option affiche les mises à jour des applications dont la mise à jour automatique est désactivée, c'est-à-dire les applications qui s'occupent elles-mêmes de leurs mises à jour."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez olyan alkalmazások frissítéseit jeleníti meg, amelyeknél az automatikus frissítés ki van kapcsolva, azaz amelyek maguk gondoskodnak a saját frissítéseikről."
+          }
+        }
+      }
+    },
     "This will uninstall all files and cache associated with %@." : {
       "localizations" : {
         "fr" : {
@@ -2517,18 +2581,34 @@
         }
       }
     },
-    "Uninstall..." : {
+    "Uninstall Applite..." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Désinstaller..."
+            "value" : "Désinstaller Applite..."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Törlés..."
+            "value" : "Az Applite törlése..."
+          }
+        }
+      }
+    },
+    "Uninstall Completely" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désinstaller totalement"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teljes törlés"
           }
         }
       }
