@@ -8,4 +8,4 @@
 import Foundation
 
 /// MD5 hash of the pinentry.ksh file
-let pinentryScriptHash = "xEAHWuD1eAqgO7XO+/cfmg=="
+let pinentryScriptHash = "AnfcWA+MzXeqGOc3oQHu0Q=="
