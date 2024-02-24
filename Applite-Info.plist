@@ -4,10 +4,6 @@
 <dict>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2023 Milán Várady</string>
-	<key>SUEnableDownloaderService</key>
-	<true/>
-	<key>SUEnableInstallerLauncherService</key>
-	<true/>
 	<key>SUFeedURL</key>
 	<string>https://milanvarady.github.io/Applite/appcast.xml</string>
 	<key>SUPublicEDKey</key>
