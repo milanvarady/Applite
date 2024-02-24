@@ -89,7 +89,8 @@
             "stats",
             "ticktick",
             "tomatobar",
-            "vanilla"
+            "vanilla",
+            "meetingbar"
         ],
         "sfSymbol": "menubar.rectangle"
     },
