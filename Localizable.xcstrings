@@ -14,6 +14,12 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
         }
       }
     },
@@ -30,6 +36,12 @@
             "state" : "translated",
             "value" : ": "
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ":"
+          }
         }
       }
     },
@@ -42,6 +54,12 @@
           }
         },
         "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "?"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "?"
@@ -62,6 +80,12 @@
             "state" : "translated",
             "value" : "Nincs találat a(z) \"%@\" kifejezésre. Nem elérhető az alkalmazás a Homebrew-n, vagy rosszul írta."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到任何与\"%@\"匹配的应用程序。可能它在 Homebrew 目录中不可用，或者你拼写错误了。"
+          }
         }
       }
     },
@@ -74,6 +98,12 @@
           }
         },
         "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%@)"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "(%@)"
@@ -94,6 +124,12 @@
             "state" : "translated",
             "value" : "Ez az alkalmazás a [Homebrew](https://brew.sh) nevű csomagkezelőt használja az appok letöltéséhez. A Homebrew egy ingyenes és nyílt forráskódú szoftver, ami megkönnyíti az appok letöltését."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "[Homebrew](https://brew.sh) 是一个免费开源的包管理器工具，可以轻松安装第三方应用程序。%@ 在底层使用 Homebrew 来下载和管理应用程序。"
+          }
         }
       }
     },
@@ -109,6 +145,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "**Figyelem:** A Homebrew cache tárhelye közös a telepítések között. Ha törli a cachet, az minden Homebrew telepítésre hatással lesz."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**警告**：Homebrew 缓存是在多个 Homebrew 安装之间共享的。删除缓存将会删除所有安装的缓存！"
           }
         }
       }
@@ -126,6 +168,12 @@
             "state" : "translated",
             "value" : "/brew/elérési/útvonal"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/path/to/brew"
+          }
         }
       }
     },
@@ -142,6 +190,12 @@
             "state" : "translated",
             "value" : "/elérési/útvonal"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/path/to/dir"
+          }
         }
       }
     },
@@ -154,6 +208,12 @@
           }
         },
         "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@"
@@ -180,6 +240,12 @@
             "state" : "translated",
             "value" : "A(z) %1$@ már telepítve van. Ha hozzá akarja adni az %2$@-hoz, kattintson a további opciók gombra, és válassza a Kényszerített telepítés opciót."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 已经安装。如果你想要将它添加到 %2$@ 中，点击更多选项（一个小箭头图标），然后选择强制安装。"
+          }
         }
       }
     },
@@ -195,6 +261,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ sikeresen telepítve!"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 安装成功！"
           }
         }
       }
@@ -212,6 +284,12 @@
             "state" : "translated",
             "value" : "%@ sikeresen újratelepítve!"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 重新安装成功"
+          }
         }
       }
     },
@@ -227,6 +305,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ sikeresen törölve!"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 成功卸载"
           }
         }
       }
@@ -244,6 +328,12 @@
             "state" : "translated",
             "value" : "%@ sikeresen frissítve!"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 成功更新"
+          }
         }
       }
     },
@@ -259,6 +349,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Egy új Homebrew telepítés fog kerülni a ~/Library/Application Support/%@ elérési helyre"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新的 Homebrew 安装将被安装到 ~/Library/Application Support/%@"
           }
         }
       }
@@ -276,6 +372,12 @@
             "state" : "translated",
             "value" : "Az Applite névjegye"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于 %@"
+          }
         }
       }
     },
@@ -292,6 +394,12 @@
             "state" : "translated",
             "value" : "Módosítás"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作"
+          }
         }
       }
     },
@@ -307,6 +415,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktív feladatok"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活动任务"
           }
         }
       }
@@ -330,6 +444,12 @@
             "state" : "translated",
             "value" : "Az újratelepítés után az összes jelenleg letöltött alkalmazás nem lesz elérhető az %1$@ felületén. Nem törlődnek, de nem lehet majd őket frissíteni vagy letörölni az %2$@-on keresztül."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新安装后，所有当前安装的应用程序将从 %1$@ 解除链接。它们不会被删除，但您将无法通过 %2$@ 更新或卸载它们。"
+          }
         }
       }
     },
@@ -345,6 +465,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Minden jelenleg letöltött alkalmazás nem lesz elérhető az %@-on keresztül."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有当前安装的应用程序将从 %@ 解除链接。"
           }
         }
       }
@@ -362,6 +488,12 @@
             "state" : "translated",
             "value" : "A frissítés közben az alkalmazás minden más funkciója nem lesz elérhető!"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在更新期间，所有其他应用程序功能将被禁用！"
+          }
         }
       }
     },
@@ -377,6 +509,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Minden készen áll!"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已完成设置！"
           }
         }
       }
@@ -394,6 +532,12 @@
             "state" : "translated",
             "value" : "Az alkalmazással kapcsolatos fenntartások"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用程序注意事项"
+          }
         }
       }
     },
@@ -409,6 +553,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nem található elérési útvonal az alkalmazáshoz"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法找到应用程序"
           }
         }
       }
@@ -426,6 +576,12 @@
             "state" : "translated",
             "value" : "Alkalmazás betöltési hiba"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用程序加载错误"
+          }
         }
       }
     },
@@ -441,6 +597,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appdir"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用目录"
           }
         }
       }
@@ -458,6 +620,12 @@
             "state" : "translated",
             "value" : "Appdir (nem kötelező)"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用目录（可选）"
+          }
         }
       }
     },
@@ -473,6 +641,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Megjelenés"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外观"
           }
         }
       }
@@ -490,6 +664,12 @@
             "state" : "translated",
             "value" : "A telepítéshez admin jelszót igénylő alkalmazások telepítése sikertelen lesz."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要管理员密码才能安装的应用程序将无法安装。"
+          }
         }
       }
     },
@@ -502,6 +682,12 @@
           }
         },
         "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Applite"
@@ -522,6 +708,12 @@
             "state" : "translated",
             "value" : "A kevés letöltéssel rendelkező alkalmazások el vannak rejtve.  Fontolja meg ennek a szűrőnek a kikapcsolását."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载量较少的应用被隐藏了，请考虑关闭这个过滤器。"
+          }
         }
       }
     },
@@ -537,6 +729,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Biztos telepíteni szeretné a Homebrew-t?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您确定不要 %@ 安装 Homebrew？"
           }
         }
       }
@@ -554,6 +752,12 @@
             "state" : "translated",
             "value" : "Biztos telepíteni szeretné a(z) %@ alkalmazást? A jelenlegi telepítés felül lesz írva."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您确定要强制安装 %@ 吗？这将覆盖任何当前的安装！"
+          }
         }
       }
     },
@@ -569,6 +773,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Biztos véglegesen törli az %@-tot?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您确定要永久卸载 %@ 吗？"
           }
         }
       }
@@ -586,6 +796,12 @@
             "state" : "translated",
             "value" : "Frissítések automatikus ellenőrzése"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动检查更新"
+          }
         }
       }
     },
@@ -601,6 +817,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frissítések automatikus letöltése"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动下载更新"
           }
         }
       }
@@ -618,6 +840,12 @@
             "state" : "translated",
             "value" : "Vissza"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回"
+          }
         }
       }
     },
@@ -633,6 +861,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Brew futtatható állomány (executable) elérési útja"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew 可执行文件路径"
           }
         }
       }
@@ -650,6 +884,12 @@
             "state" : "translated",
             "value" : "Brew elérési útja"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew 路径"
+          }
         }
       }
     },
@@ -665,6 +905,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A Brew elérési útja megváltozott. Indítsa újra az alkalmazást, hogy a változtatás érvénybe lépjen."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew 路径已修改。重新启动应用程序以使更改生效。"
           }
         }
       }
@@ -682,6 +928,12 @@
             "state" : "translated",
             "value" : "Brew elérési útvonal hiba"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew 路径损坏"
+          }
         }
       }
     },
@@ -697,6 +949,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tallózás"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "浏览"
           }
         }
       }
@@ -715,6 +973,12 @@
             "state" : "translated",
             "value" : "Válogasson egy gondosan kiválogatott alkalmazás listából"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "浏览精选的出色应用程序列表。"
+          }
         }
       }
     },
@@ -732,6 +996,12 @@
             "state" : "translated",
             "value" : "Böngészők"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "浏览器"
+          }
         }
       }
     },
@@ -747,6 +1017,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mégse"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
           }
         }
       }
@@ -765,6 +1041,12 @@
             "state" : "translated",
             "value" : "Cask lista (.txt fájl)"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask 列表（.txt 文件）"
+          }
         }
       }
     },
@@ -780,6 +1062,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kategóriák"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分类"
           }
         }
       }
@@ -797,6 +1085,12 @@
             "state" : "translated",
             "value" : "Frissítések keresése..."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "检查更新..."
+          }
         }
       }
     },
@@ -812,6 +1106,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Színséma:"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "颜色方案："
           }
         }
       }
@@ -830,6 +1130,12 @@
             "state" : "translated",
             "value" : "Kommunikáció"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通讯"
+          }
         }
       }
     },
@@ -847,6 +1153,12 @@
             "state" : "translated",
             "value" : "Concurrency error"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "并发错误"
+          }
         }
       }
     },
@@ -862,6 +1174,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tovább"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "继续"
           }
         }
       }
@@ -879,6 +1197,12 @@
             "state" : "translated",
             "value" : "Alkalmazás letöltése sikertelen. Nincs internetkapcsolat, vagy a forrás nem elérhető."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法下载应用程序。可能是因为没有网络连接，或者目标主机无法访问。"
+          }
         }
       }
     },
@@ -895,6 +1219,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Digitális alkotás"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创意工具"
           }
         }
       }
@@ -918,6 +1248,12 @@
             "state" : "translated",
             "value" : "Jelenlegi verzió: %1$@ (%2$@)"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前应用程序版本：%1$@（%2$@）"
+          }
         }
       }
     },
@@ -933,6 +1269,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A kiválasztott elérési útvonal helytelen"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前选择的 Brew 路径无效"
           }
         }
       }
@@ -950,6 +1292,12 @@
             "state" : "translated",
             "value" : "Saját"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义"
+          }
         }
       }
     },
@@ -966,6 +1314,12 @@
             "state" : "translated",
             "value" : "Saját brew elérési útvonal"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义 Brew 路径"
+          }
         }
       }
     },
@@ -981,6 +1335,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saját telepítési mappa"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义安装目录"
           }
         }
       }
@@ -999,6 +1359,12 @@
             "state" : "translated",
             "value" : "Sötét"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "深色"
+          }
         }
       }
     },
@@ -1014,6 +1380,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew cache törlése"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除 Homebrew 缓存"
           }
         }
       }
@@ -1032,6 +1404,12 @@
             "state" : "translated",
             "value" : "Fejlesztői eszközök"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开发工具"
+          }
         }
       }
     },
@@ -1047,6 +1425,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discord"
           }
         }
       }
@@ -1064,6 +1448,12 @@
             "state" : "translated",
             "value" : "Letöltés"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "发现"
+          }
         }
       }
     },
@@ -1080,6 +1470,12 @@
             "state" : "translated",
             "value" : "Ön már rendelkezik a Homebrew csomagkezelővel?"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已经安装了 Homebrew 吗？"
+          }
         }
       }
     },
@@ -1095,6 +1491,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Telepítés mindenképp"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "强制下载"
           }
         }
       }
@@ -1113,6 +1515,12 @@
             "state" : "translated",
             "value" : "Alkalmazások letöltése könnyedén"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "轻松下载应用程序"
+          }
         }
       }
     },
@@ -1130,6 +1538,12 @@
             "state" : "translated",
             "value" : "Harmadik féltől származó alkalmazások letöltése egyetlen kattintással. Nincs többé \"Húzd az applikációk mappába\"."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "单击一下即可下载第三方应用程序。再也不用\"拖到应用程序文件夹\"了。\n"
+          }
         }
       }
     },
@@ -1145,6 +1559,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hiba"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "错误"
           }
         }
       }
@@ -1162,6 +1582,12 @@
             "state" : "translated",
             "value" : "Az összes jelenleg telepített alkalmazást tartalmazó fájl exportálása. Ez importálható egy másik eszközre."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出一个包含所有当前已安装应用程序的文件。可以导入到另一台设备。"
+          }
         }
       }
     },
@@ -1177,6 +1603,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alakalmazások exportálása fájlba"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出应用程序到文件"
           }
         }
       }
@@ -1194,6 +1626,12 @@
             "state" : "translated",
             "value" : "Exportálás sikertelen"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出失败"
+          }
         }
       }
     },
@@ -1209,6 +1647,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exportált fálj formátum"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出文件类型"
           }
         }
       }
@@ -1227,6 +1671,12 @@
             "state" : "translated",
             "value" : "Nem sikerült cask információt szerezni a kiválasztott brew executable révén"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法从所选的 brew 可执行文件中检索 cask 信息"
+          }
         }
       }
     },
@@ -1244,6 +1694,12 @@
             "state" : "translated",
             "value" : "Nem sikerült dekódolni a Homebrew API-ról érkezett információt"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法从 Homebrew API 解码 json 数据"
+          }
         }
       }
     },
@@ -1260,6 +1716,12 @@
             "state" : "translated",
             "value" : "%@ letöltése sikertelen"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法下载 %@"
+          }
         }
       }
     },
@@ -1275,6 +1737,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nem sikerült a Pinentry telepítése"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法安装 pinentry"
           }
         }
       }
@@ -1293,6 +1761,12 @@
             "state" : "translated",
             "value" : "Nem sikerült betölteni a cask adatait a cache-ből"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法从缓存加载 cask 数据"
+          }
         }
       }
     },
@@ -1308,6 +1782,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Újratelepítés sikertelen"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新安装 %@ 失败"
           }
         }
       }
@@ -1325,6 +1805,12 @@
             "state" : "translated",
             "value" : "%@ letöltése sikertelen"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新 %@ 失败"
+          }
         }
       }
     },
@@ -1340,6 +1826,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kényszerített telepítés"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "强制安装"
           }
         }
       }
@@ -1357,6 +1849,12 @@
             "state" : "translated",
             "value" : "Általános"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "常用"
+          }
         }
       }
     },
@@ -1372,6 +1870,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Github"
           }
         }
       }
@@ -1389,6 +1893,12 @@
             "state" : "translated",
             "value" : "Kevés letöltéssel rendelkező alkalmazások elrejtése"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏下载次数少的应用程序"
+          }
         }
       }
     },
@@ -1401,6 +1911,12 @@
           }
         },
         "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew"
@@ -1421,6 +1937,12 @@
             "state" : "translated",
             "value" : "Homebrew verzió: "
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 版本： "
+          }
         }
       }
     },
@@ -1437,6 +1959,12 @@
             "state" : "translated",
             "value" : "Honlap"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主页"
+          }
         }
       }
     },
@@ -1452,6 +1980,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Értem"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我明白"
           }
         }
       }
@@ -1470,6 +2004,12 @@
             "state" : "translated",
             "value" : "IDE-k"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "集成开发环境"
+          }
         }
       }
     },
@@ -1485,6 +2025,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alkalmazások importálása"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入应用程序"
           }
         }
       }
@@ -1502,6 +2048,12 @@
             "state" : "translated",
             "value" : "Importálás sikertelen"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入失败"
+          }
         }
       }
     },
@@ -1517,6 +2069,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alkalmazások importálása/exportálása"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入/导出应用程序"
           }
         }
       }
@@ -1534,6 +2092,12 @@
             "state" : "translated",
             "value" : "Folyamatban..."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "进行中..."
+          }
         }
       }
     },
@@ -1549,6 +2113,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Infó"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "信息"
           }
         }
       }
@@ -1566,6 +2136,12 @@
             "state" : "translated",
             "value" : "Külön brew telepítése"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装独立的 Brew"
+          }
         }
       }
     },
@@ -1582,6 +2158,12 @@
             "state" : "translated",
             "value" : "Telepítés sikertelen"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装失败"
+          }
         }
       }
     },
@@ -1597,6 +2179,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Telepítve"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装"
           }
         }
       }
@@ -1615,6 +2203,12 @@
             "state" : "translated",
             "value" : "Telepítés"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装中"
+          }
         }
       }
     },
@@ -1630,6 +2224,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tartozékok telepítése"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装依赖项"
           }
         }
       }
@@ -1648,6 +2248,12 @@
             "state" : "translated",
             "value" : "Világos"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "浅色"
+          }
         }
       }
     },
@@ -1664,6 +2270,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Betöltési hiba"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加载错误"
           }
         }
       }
@@ -1682,6 +2294,12 @@
             "state" : "translated",
             "value" : "Alkalmazások kezelése"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理应用程序"
+          }
         }
       }
     },
@@ -1697,6 +2315,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A Homebrew kezelése"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理 Homebrew"
           }
         }
       }
@@ -1715,6 +2339,12 @@
             "state" : "translated",
             "value" : "Média"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "媒体"
+          }
         }
       }
     },
@@ -1731,6 +2361,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Menüsáv"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "菜单栏"
           }
         }
       }
@@ -1749,6 +2385,12 @@
             "state" : "translated",
             "value" : "Legtöbb letöltés (alapértelmezett)"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载次数最多（默认）"
+          }
         }
       }
     },
@@ -1764,6 +2406,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nem (nem tudom mi az)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有（我不知道它是什么）"
           }
         }
       }
@@ -1781,6 +2429,12 @@
             "state" : "translated",
             "value" : "Nincs aktív feladat"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无活动任务"
+          }
         }
       }
     },
@@ -1797,6 +2451,12 @@
             "state" : "translated",
             "value" : "Nincs kiválasztás"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无选择"
+          }
         }
       }
     },
@@ -1812,6 +2472,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nincs elérhető frissítés"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无更新"
           }
         }
       }
@@ -1830,6 +2496,12 @@
             "state" : "translated",
             "value" : "Megjegyzés"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "备注"
+          }
         }
       }
     },
@@ -1845,6 +2517,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Figyelem!"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知"
           }
         }
       }
@@ -1862,6 +2540,12 @@
             "state" : "translated",
             "value" : "Értesítések"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知"
+          }
         }
       }
     },
@@ -1877,6 +2561,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Letöltött alkalmazások száma: "
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装应用程序数量： "
           }
         }
       }
@@ -1895,6 +2585,12 @@
             "state" : "translated",
             "value" : "Irodai eszközök"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "办公工具"
+          }
         }
       }
     },
@@ -1911,6 +2607,12 @@
             "state" : "translated",
             "value" : "Ok"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "好"
+          }
         }
       }
     },
@@ -1926,6 +2628,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Megnyitás"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开"
           }
         }
       }
@@ -1944,6 +2652,12 @@
             "state" : "translated",
             "value" : "Jelszókezelők"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "密码管理器"
+          }
         }
       }
     },
@@ -1956,6 +2670,12 @@
           }
         },
         "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinentry"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pinentry"
@@ -1976,6 +2696,12 @@
             "state" : "translated",
             "value" : "A Pinentry segít biztonságosan elkérni a admin jelszót olyan alkalmazásoknál, amelyeknek szükségük van rá a telepítéshez."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinentry 用于在安装应用程序时安全地提示输入管理员密码。"
+          }
         }
       }
     },
@@ -1991,6 +2717,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A PINEntry nincs letöltve"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PINEntry 未正确安装"
           }
         }
       }
@@ -2009,6 +2741,12 @@
             "state" : "translated",
             "value" : "Hatékonyság"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生产力"
+          }
         }
       }
     },
@@ -2024,6 +2762,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adja meg a brew elérési útvonalát"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "提供 Brew 可执行路径"
           }
         }
       }
@@ -2041,6 +2785,12 @@
             "state" : "translated",
             "value" : "Kilépés"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出"
+          }
         }
       }
     },
@@ -2056,6 +2806,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Újratelepítés"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新安装"
           }
         }
       }
@@ -2073,6 +2829,12 @@
             "state" : "translated",
             "value" : "Újratelepítés sikertelen"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新安装失败"
+          }
         }
       }
     },
@@ -2088,6 +2850,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew újratelepítése"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新安装 Homebrew"
           }
         }
       }
@@ -2106,6 +2874,12 @@
             "state" : "translated",
             "value" : "Újratelepítés"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新安装中"
+          }
         }
       }
     },
@@ -2121,6 +2895,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Újraindítás"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新启动"
           }
         }
       }
@@ -2138,6 +2918,12 @@
             "state" : "translated",
             "value" : "Próbáld újra"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
+          }
         }
       }
     },
@@ -2153,6 +2939,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Próbálja meg újra a telepítést"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试安装"
           }
         }
       }
@@ -2170,6 +2962,12 @@
             "state" : "translated",
             "value" : "Próbálja meg újra a betöltést"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试加载"
+          }
         }
       }
     },
@@ -2185,6 +2983,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Próbálja meg újra a telepítést, vagy látogasson el a hibaelhárítási oldalra."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试安装或访问故障排除页面。"
           }
         }
       }
@@ -2202,6 +3006,12 @@
             "state" : "translated",
             "value" : "Összes"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看全部"
+          }
         }
       }
     },
@@ -2217,6 +3027,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mappa tallózása"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择文件夹"
           }
         }
       }
@@ -2234,6 +3050,12 @@
             "state" : "translated",
             "value" : "A kiválasztott brew elérési útvonal helytelen!"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所选 Brew 路径无效！"
+          }
         }
       }
     },
@@ -2249,6 +3071,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Shell kimenete"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell 输出"
           }
         }
       }
@@ -2266,6 +3094,12 @@
             "state" : "translated",
             "value" : "Mutasd mindet"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示全部"
+          }
         }
       }
     },
@@ -2281,6 +3115,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Összes frissítés megjelenítése"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示所有更新"
           }
         }
       }
@@ -2298,6 +3138,12 @@
             "state" : "translated",
             "value" : "Rendezés"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "排序方式"
+          }
         }
       }
     },
@@ -2314,6 +3160,12 @@
             "state" : "translated",
             "value" : "Rendezési opciók"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "排序选项"
+          }
         }
       }
     },
@@ -2329,6 +3181,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kezdjünk bele!"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开始使用 %@"
           }
         }
       }
@@ -2347,6 +3205,12 @@
             "state" : "translated",
             "value" : "Rendszer"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统"
+          }
         }
       }
     },
@@ -2363,6 +3227,12 @@
             "state" : "translated",
             "value" : "Sikeres akció"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "任务完成情况"
+          }
         }
       }
     },
@@ -2378,6 +3248,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sikertelen akció"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "任务错误"
           }
         }
       }
@@ -2396,6 +3272,12 @@
             "state" : "translated",
             "value" : "Terminálok"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端"
+          }
         }
       }
     },
@@ -2411,6 +3293,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ez az alakalmazás"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此应用程序"
           }
         }
       }
@@ -2428,6 +3316,12 @@
             "state" : "translated",
             "value" : "Ez az alkalmazás a [Homebrew](https://brew.sh/) (röviden brew) csomagkezelőt használja az alkalmazások letöltéséhez. A Homebrew egy ingyenes és nyílt forráskódú parancssoros segédprogram, amellyel hasznos fejlesztői eszközöket, valamint asztali alkalmazásokat tölthetünk le."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此应用程序使用[Homebrew](https://brew.sh/)（简称brew）包管理器来下载应用。Homebrew 是一个免费且开源的命令行工具，能够下载有用的开发者工具以及桌面应用程序。"
+          }
         }
       }
     },
@@ -2443,6 +3337,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ez az alkalmazás az ingyenes és nyílt forráskódú [Homebrew](https://brew.sh/) csomagkezelőt használja az alkalmazások letöltésére és kezelésére. Ha már telepítve van a számítógépére, használhatja azt. Ha nincs telepítve a brew, vagy nem tudja, mi az, válassza a **Nem** lehetőséget. Ez egy új brew telepítést hoz létre csak az %@ számára."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此应用程序使用免费且开源的[Homebrew](https://brew.sh/)包管理器来下载和管理应用程序。如果你的系统已经安装了它，你可以立即使用。如果你没有安装 brew 或不知道它是什么，请选择**否**。这将为 %@ 创建一个新的 brew 安装。"
           }
         }
       }
@@ -2466,6 +3366,12 @@
             "state" : "translated",
             "value" : "Ez a ~/Library/Application Support/%2$@/homebrew elérési útvonalon található Homebrew telepítést fogja (újra)telepíteni."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这将在以下位置（重新）安装%1$@的Homebrew：~/Library/Application Support/%2$@/homebrew"
+          }
         }
       }
     },
@@ -2481,6 +3387,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ez olyan alkalmazások frissítéseit jeleníti meg, amelyeknél az automatikus frissítés ki van kapcsolva, azaz amelyek maguk gondoskodnak a saját frissítéseikről."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这将显示那些关闭了自动更新的应用程序的更新信息，即，那些自行管理更新的应用程序。"
           }
         }
       }
@@ -2498,6 +3410,12 @@
             "state" : "translated",
             "value" : "Ez az %@-al kapcsolatos összes fájlt és cachet törölni fogja."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这将卸载与 %@ 相关的所有文件和缓存。"
+          }
         }
       }
     },
@@ -2513,6 +3431,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hibaelhárítás"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "故障排除"
           }
         }
       }
@@ -2530,6 +3454,12 @@
             "state" : "translated",
             "value" : "Kevés letöltés szűrő kikapcsolása"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭少数下载过滤器"
+          }
         }
       }
     },
@@ -2545,6 +3475,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Törlés"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载"
           }
         }
       }
@@ -2562,6 +3498,12 @@
             "state" : "translated",
             "value" : "%@ törlése"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载 %@"
+          }
         }
       }
     },
@@ -2577,6 +3519,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Az %@ és minden kapcsolatos fájl törlése."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载 %@ 相关文件和缓存。"
           }
         }
       }
@@ -2594,6 +3542,12 @@
             "state" : "translated",
             "value" : "Az Applite törlése..."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载 Applite..."
+          }
         }
       }
     },
@@ -2609,6 +3563,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Teljes törlés"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完全卸载"
           }
         }
       }
@@ -2627,6 +3587,12 @@
             "state" : "translated",
             "value" : "Törlés"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载中"
+          }
         }
       }
     },
@@ -2643,6 +3609,12 @@
             "state" : "translated",
             "value" : "Frissítés"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
+          }
         }
       }
     },
@@ -2658,6 +3630,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Összes frissítése"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新全部"
           }
         }
       }
@@ -2676,6 +3654,12 @@
             "state" : "translated",
             "value" : "Frissítse és törölje az alkalmazásait. Nincsenek többé hátramaradt fájlok a törölt alkalmazások után."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新和卸载你的应用程序，不再有已删除应用程序的残留文件。"
+          }
         }
       }
     },
@@ -2691,6 +3675,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Firssítés sikertelen"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新失败"
           }
         }
       }
@@ -2708,6 +3698,12 @@
             "state" : "translated",
             "value" : "A Homebrew frissítése"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新 Homebrew"
+          }
         }
       }
     },
@@ -2723,6 +3719,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frissítések"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
           }
         }
       }
@@ -2741,6 +3743,12 @@
             "state" : "translated",
             "value" : "Firssítés"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新中"
+          }
         }
       }
     },
@@ -2756,6 +3764,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saját telepítési mappa használata"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用自定义安装目录"
           }
         }
       }
@@ -2774,6 +3788,12 @@
             "state" : "translated",
             "value" : "Eszközök"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公用设施"
+          }
         }
       }
     },
@@ -2789,6 +3809,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hiba Megtekintése"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示错误"
           }
         }
       }
@@ -2807,6 +3833,12 @@
             "state" : "translated",
             "value" : "Virtualizáció"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "虚拟技术"
+          }
         }
       }
     },
@@ -2824,6 +3856,12 @@
             "state" : "translated",
             "value" : "Figyelem"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告"
+          }
         }
       }
     },
@@ -2839,6 +3877,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weboldal"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "网站"
           }
         }
       }
@@ -2856,6 +3900,12 @@
             "state" : "translated",
             "value" : "Üdvözöljük a %@-on"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "欢迎使用 %@"
+          }
         }
       }
     },
@@ -2871,6 +3921,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A Brewfile importálásakor csak a cask-ok kerülnek telepítésre. A többi elem, mint például a formulák és a tapok mellőzve lesznek."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当导入 Brewfile 时，只会安装 casks。其他项，如 formulae 和 taps，将被跳过。"
           }
         }
       }
@@ -2888,6 +3944,12 @@
             "state" : "translated",
             "value" : "Xcode Command Line Tools"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xcode 命令行工具"
+          }
         }
       }
     },
@@ -2903,6 +3965,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Igen"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "是"
           }
         }
       }
@@ -2920,6 +3988,12 @@
             "state" : "translated",
             "value" : "Továbbléphet, de a .pkg telepítőkkel rendelkező alkalmazásokat nem fogja tudni telepíteni."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您可以安全地继续操作，但是无法安装使用 .pkg 安装程序的应用程序。"
+          }
         }
       }
     },
@@ -2936,6 +4010,12 @@
             "state" : "translated",
             "value" : "A program kérni fogja az Xcode Command Line Tools telepítését, kérjük, kattintson a \"Telepítés\" gombra, mivel ez szükséges az alkalmazás működéséhez. Ez néhány percet vesz igénybe, a telepítés előrehaladását a telepítési ablakban láthatja."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统将提示您安装 Xcode 命令行工具，请点击“安装”，因为该应用程序需要这些工具才能正常工作。安装需要几分钟时间，您可以在安装窗口中查看进度。"
+          }
         }
       }
     },
@@ -2951,6 +4031,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A program kérni fogja az Xcode Command Line Tools telepítését. Kérjük, válassza a \"Telepítés\" lehetőséget, mivel ez szükséges az alkalmazás működéséhez."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统将提示您安装 Xcode 命令行工具。请选择“安装”，因为该应用程序需要这些工具才能正常工作。"
           }
         }
       }
