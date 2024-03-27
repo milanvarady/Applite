@@ -84,7 +84,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "未找到任何与\"%@\"匹配的应用程序。可能它在 Homebrew 目录中不可用，或者你拼写错误了。"
+            "value" : "未找到任何与“%@”匹配的应用程序。可能它在 Homebrew 目录中不可用，或者你拼写错误了。"
           }
         }
       }
@@ -310,7 +310,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ 成功卸载"
+            "value" : "%@ 卸载成功"
           }
         }
       }
@@ -332,7 +332,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ 成功更新"
+            "value" : "%@ 更新成功"
           }
         }
       }
@@ -1542,7 +1542,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "单击一下即可下载第三方应用程序。再也不用\"拖到应用程序文件夹\"了。\n"
+            "value" : "单击一下即可下载第三方应用程序。再也不用“拖到应用程序文件夹”了。\n"
           }
         }
       }
@@ -1941,7 +1941,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew 版本： "
+            "value" : "Homebrew 版本："
           }
         }
       }
