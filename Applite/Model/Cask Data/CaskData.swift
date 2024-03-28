@@ -55,10 +55,10 @@ final class CaskData: ObservableObject {
             do {
                 (caskData, _) = try await URLSession.shared.data(from: casksURL)
             } catch {
-                Self.logger.error("Couldn't get cask data from brew API. Error: \(error.localizedDescription)")
-                
+                await Self.logger.error("Couldn't get cask data from brew API. Error: \(error.localizedDescription)")
+
                 // Try to load from cache
-                Self.logger.notice("Attempting to load cask data from cache")
+                await Self.logger.notice("Attempting to load cask data from cache")
                 caskData = try await loadDataFromCache(dataURL: Self.caskCacheURL)
             }
             
@@ -70,7 +70,7 @@ final class CaskData: ObservableObject {
                 return try JSONDecoder().decode([Cask].self, from: caskData)
             }
             catch {
-                Self.logger.error("Failed to parse cask data, error: \(error.localizedDescription)")
+                await Self.logger.error("Failed to parse cask data, error: \(error.localizedDescription)")
                 throw CaskDataLoadError.decodeError
             }
         }
@@ -87,10 +87,10 @@ final class CaskData: ObservableObject {
             do {
                 (analyticsData, _) = try await URLSession.shared.data(from: analyticsURL)
             } catch {
-                Self.logger.error("Couldn't get analytics data from brew API. Error: \(error.localizedDescription)")
+                await Self.logger.error("Couldn't get analytics data from brew API. Error: \(error.localizedDescription)")
                 
                 // Try to load from cache
-                Self.logger.notice("Attempting to load analytics data from cache")
+                await Self.logger.notice("Attempting to load analytics data from cache")
                 analyticsData = try await loadDataFromCache(dataURL: Self.analyicsCacheURL)
             }
             
@@ -104,7 +104,7 @@ final class CaskData: ObservableObject {
                 analyticsDecoded = try JSONDecoder().decode(BrewAnalytics.self, from: analyticsData)
             }
             catch {
-                Self.logger.error("Failed to parse cask data, error: \(error.localizedDescription)")
+                await Self.logger.error("Failed to parse cask data, error: \(error.localizedDescription)")
                 throw CaskDataLoadError.decodeError
             }
             
@@ -123,12 +123,12 @@ final class CaskData: ObservableObject {
             let result = await shell("\(BrewPaths.currentBrewExecutable) list --cask")
             
             if result.didFail {
-                Self.logger.error("Couldn't get installed apps. Shell output: \(result.output)")
+                await Self.logger.error("Couldn't get installed apps. Shell output: \(result.output)")
                 throw CaskDataLoadError.shellError
             }
             
             if result.output.isEmpty {
-                Self.logger.notice("No installed casks were found")
+                await Self.logger.notice("No installed casks were found")
             }
             
             return result.output.components(separatedBy: "\n")
@@ -141,7 +141,7 @@ final class CaskData: ObservableObject {
             let result = await shell("\(BrewPaths.currentBrewExecutable) outdated --cask -q")
             
             if result.didFail {
-                Self.logger.error("Couldn't get outdated apps. Shell output: \(result.output)")
+                await Self.logger.error("Couldn't get outdated apps. Shell output: \(result.output)")
                 throw CaskDataLoadError.shellError
             }
             
@@ -160,19 +160,19 @@ final class CaskData: ObservableObject {
             do {
                 var isDirectory: ObjCBool = true
                 
-                if !FileManager.default.fileExists(atPath: Self.cacheDirectory.path, isDirectory: &isDirectory) {
-                    Self.logger.warning("Cache directory doesn't exists, attempting to create it")
-                    try FileManager.default.createDirectory(at: Self.cacheDirectory, withIntermediateDirectories: false)
+                if await !FileManager.default.fileExists(atPath: Self.cacheDirectory.path, isDirectory: &isDirectory) {
+                    await Self.logger.warning("Cache directory doesn't exists, attempting to create it")
+                    try await FileManager.default.createDirectory(at: Self.cacheDirectory, withIntermediateDirectories: false)
                 }
             } catch {
-                Self.logger.error("Cound't create cache directory")
+                await Self.logger.error("Cound't create cache directory")
             }
             
             // Save data to cache
             do {
                 try data.write(to: filePath)
             } catch {
-                Self.logger.error("Couldn't write data to cache")
+                await Self.logger.error("Couldn't write data to cache")
             }
         }
         
