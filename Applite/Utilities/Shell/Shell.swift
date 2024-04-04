@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import os
+import OSLog
 
 fileprivate let shellPath = "/bin/zsh"
 
@@ -20,8 +20,8 @@ fileprivate let shellPath = "/bin/zsh"
 func shell(_ command: String) -> ShellResult {
     let task = Process()
     let pipe = Pipe()
-    let logger = Logger()
-    
+    let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "shell")
+
     // Get pinentry script for sudo askpass
     guard let pinentryScript = Bundle.main.path(forResource: "pinentry", ofType: "ksh") else {
         return ShellResult(output: "pinentry.ksh not found", didFail: true)
@@ -31,10 +31,20 @@ func shell(_ command: String) -> ShellResult {
     if URL(string: pinentryScript)?.checksumInBase64() != pinentryScriptHash {
         return ShellResult(output: "pinentry.ksh checksum mismatch. The file has been modified.", didFail: true)
     }
-    
+
+    // Set up environment
+    var environment: [String: String] = [
+        "SUDO_ASKPASS": pinentryScript
+    ]
+
+    if let proxySettings = try? NetworkProxyManager.getProxySettings() {
+        logger.info("Network proxy is enabled")
+        environment["ALL_PROXY"] = "\(proxySettings.host):\(proxySettings.port)"
+    }
+
     task.standardOutput = pipe
     task.standardError = pipe
-    task.environment = ["SUDO_ASKPASS": pinentryScript]
+    task.environment = environment
     task.arguments = ["-l", "-c", command]
     task.executableURL = URL(fileURLWithPath: shellPath)
     task.standardInput = nil

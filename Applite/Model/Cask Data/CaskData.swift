@@ -51,9 +51,12 @@ final class CaskData: ObservableObject {
             guard let casksURL = URL(string: "https://formulae.brew.sh/api/cask.json") else { return [] }
             
             let caskData: Data
-            
+
+            let sessionConfiguration = NetworkProxyManager.getURLSessionConfiguration()
+            let urlSession = URLSession(configuration: sessionConfiguration)
+
             do {
-                (caskData, _) = try await URLSession.shared.data(from: casksURL)
+                (caskData, _) = try await urlSession.data(from: casksURL)
             } catch {
                 await Self.logger.error("Couldn't get cask data from brew API. Error: \(error.localizedDescription)")
 
@@ -83,9 +86,12 @@ final class CaskData: ObservableObject {
             guard let analyticsURL = URL(string: "https://formulae.brew.sh/api/analytics/cask-install/365d.json") else { return [:] }
             
             let analyticsData: Data
-            
+
+            let sessionConfiguration = NetworkProxyManager.getURLSessionConfiguration()
+            let urlSession = URLSession(configuration: sessionConfiguration)
+
             do {
-                (analyticsData, _) = try await URLSession.shared.data(from: analyticsURL)
+                (analyticsData, _) = try await urlSession.data(from: analyticsURL)
             } catch {
                 await Self.logger.error("Couldn't get analytics data from brew API. Error: \(error.localizedDescription)")
                 

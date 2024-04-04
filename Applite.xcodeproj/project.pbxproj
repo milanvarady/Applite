@@ -24,6 +24,7 @@
 		412635492A7804E700155034 /* CaskDataLoadError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412635482A7804E700155034 /* CaskDataLoadError.swift */; };
 		4126354B2A79075900155034 /* ShellResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4126354A2A79075900155034 /* ShellResult.swift */; };
 		4129FFD92A7A613E00CFE392 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = 4129FFD82A7A613E00CFE392 /* Fuse */; };
+		413E60B72BBAE5E000978F6A /* NetworkProxyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E60B62BBAE5E000978F6A /* NetworkProxyManager.swift */; };
 		413F77A52972B2E70053349A /* DependencyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F77A42972B2E70053349A /* DependencyManager.swift */; };
 		413F77A72972C8000053349A /* ShellOutputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F77A62972C8000053349A /* ShellOutputStream.swift */; };
 		414074F528DF53E80073EB22 /* AppliteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F428DF53E80073EB22 /* AppliteApp.swift */; };
@@ -86,6 +87,7 @@
 		412635432A77FB1600155034 /* BrewInstallationProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewInstallationProgress.swift; sourceTree = "<group>"; };
 		412635482A7804E700155034 /* CaskDataLoadError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskDataLoadError.swift; sourceTree = "<group>"; };
 		4126354A2A79075900155034 /* ShellResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellResult.swift; sourceTree = "<group>"; };
+		413E60B62BBAE5E000978F6A /* NetworkProxyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkProxyManager.swift; sourceTree = "<group>"; };
 		413F77A42972B2E70053349A /* DependencyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyManager.swift; sourceTree = "<group>"; };
 		413F77A62972C8000053349A /* ShellOutputStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellOutputStream.swift; sourceTree = "<group>"; };
 		414074F128DF53E80073EB22 /* Applite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Applite.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -210,6 +212,14 @@
 				4189CE40293C980E009C836D /* BigButtonStyle.swift */,
 			);
 			path = Styles;
+			sourceTree = "<group>";
+		};
+		413E60B52BBAE58B00978F6A /* Network Proxy */ = {
+			isa = PBXGroup;
+			children = (
+				413E60B62BBAE5E000978F6A /* NetworkProxyManager.swift */,
+			);
+			path = "Network Proxy";
 			sourceTree = "<group>";
 		};
 		414074E828DF53E80073EB22 = {
@@ -340,6 +350,7 @@
 				41524B9D295FA36E00D0046A /* DebounceObject.swift */,
 				41DF006329EAA094004EB7AE /* SendNotification.swift */,
 				41062C962A3A20F900FD48EA /* UninstallSelf.swift */,
+				413E60B52BBAE58B00978F6A /* Network Proxy */,
 				418989B02A35D628004AC23B /* Verify Brew Installation */,
 			);
 			path = Utilities;
@@ -415,7 +426,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1400;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1530;
 				TargetAttributes = {
 					414074F028DF53E80073EB22 = {
 						CreatedOnToolsVersion = 14.0;
@@ -517,6 +528,7 @@
 				411EDDD92A9F7E220051E07B /* PinentryScriptHash.swift in Sources */,
 				418F332628EC921D0023D76F /* CaskData.swift in Sources */,
 				4178CF922A8689AF0037F270 /* ExportCasks.swift in Sources */,
+				413E60B72BBAE5E000978F6A /* NetworkProxyManager.swift in Sources */,
 				4196C8F928F9CDF700EADDDA /* DownloadView.swift in Sources */,
 				4120AB682A755B5A00F68EFE /* CheckForUpdatesView.swift in Sources */,
 				4120AB652A754B1700F68EFE /* AppliteAppView.swift in Sources */,
