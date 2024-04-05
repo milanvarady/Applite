@@ -31,7 +31,7 @@ struct AppIconView: View {
                         .fill(.gray)
                         .shimmering()
                 }
-                .setProcessor(RoundCornerImageProcessor(cornerRadius: 25)) // Round corners
+                .setProcessor(RoundCornerImageProcessor(cornerRadius: 8)) // Round corners
                 .fade(duration: 0.25)
                 .onFailure { error in
                     // Change state
