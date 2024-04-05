@@ -44,9 +44,9 @@ public class ShellOutputStream {
             "SUDO_ASKPASS": pinentryScript
         ]
 
-        if let proxySettings = try? NetworkProxyManager.getProxySettings() {
-            Self.logger.info("Network proxy is enabled")
-            environment["ALL_PROXY"] = "\(proxySettings.host):\(proxySettings.port)"
+        if let proxySettings = try? NetworkProxyManager.getSystemProxySettings() {
+            Self.logger.info("Network proxy is enabled. Type: \(proxySettings.type.rawValue)")
+            environment["ALL_PROXY"] = proxySettings.fullString
         }
 
         self.task?.launchPath = "/bin/zsh"

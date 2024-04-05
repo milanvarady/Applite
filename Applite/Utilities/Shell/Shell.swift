@@ -37,9 +37,9 @@ func shell(_ command: String) -> ShellResult {
         "SUDO_ASKPASS": pinentryScript
     ]
 
-    if let proxySettings = try? NetworkProxyManager.getProxySettings() {
-        logger.info("Network proxy is enabled")
-        environment["ALL_PROXY"] = "\(proxySettings.host):\(proxySettings.port)"
+    if let proxySettings = try? NetworkProxyManager.getSystemProxySettings() {
+        logger.info("Network proxy is enabled. Type: \(proxySettings.type.rawValue)")
+        environment["ALL_PROXY"] = proxySettings.fullString
     }
 
     task.standardOutput = pipe
