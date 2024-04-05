@@ -6,7 +6,8 @@
 //
 
 import Foundation
-import os
+import OSLog
+import Kingfisher
 
 enum UninstallError: Error {
     case fileError
@@ -17,7 +18,17 @@ func uninstallSelf(deleteBrewCache: Bool) {
     let logger = Logger()
     
     logger.notice("Applite uninstallation stated. deleteBrewCache: \(deleteBrewCache)")
-    
+
+    logger.notice("Clearing Kingfisher image cache")
+
+    let cache = ImageCache.default
+    cache.clearMemoryCache()
+    cache.clearDiskCache {
+        logger.notice("Kingfisher disk image cache cleared")
+    }
+
+    logger.notice("Deleting library files")
+
     // Delete related files and cache
     let command = """
     rm -r "$HOME/Library/Application Support/\(Bundle.main.appName)";
@@ -36,8 +47,7 @@ func uninstallSelf(deleteBrewCache: Bool) {
     logger.notice("Running command: \(command)")
     
     let result = shell(command)
-    
-    
+
     logger.notice("Uninstall result: \(result.output)")
     
     // Homebrew cache
@@ -45,7 +55,7 @@ func uninstallSelf(deleteBrewCache: Bool) {
         shell("rm -rf $HOME/Library/Caches/Homebrew")
     }
     
-    logger.notice("Self destructing. Goodbye world!")
+    logger.notice("Self destructing. Goodbye world! o7")
     
     // Quit the app and remove it
     let process = Process()
