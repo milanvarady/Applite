@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import CachedAsyncImage
-import Shimmer
 import CircularProgress
 
 /// App view role
@@ -51,48 +49,14 @@ struct AppView: View {
         .buttonStyle(.plain)
         .frame(width: Self.dimensions.width, height: Self.dimensions.height)
     }
-    
+
     private var iconAndDescriptionView: some View {
-        func appIconView(iconURL: URL, faviconURL: URL) -> some View {
-            CachedAsyncImage(url: iconURL) { phase in
-                Group {
-                    if let image = phase.image {
-                        image
-                            .resizable()
-                    } else if phase.error != nil {
-                        // If fails fallback to homepage favicon
-                        CachedAsyncImage(url: faviconURL) { faviconPhase in
-                            
-                            if let image = faviconPhase.image {
-                                image
-                                    .resizable()
-                            } else if phase.error != nil {
-                                // App icon not found
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                        .stroke(.gray, lineWidth: 3)
-                                    
-                                    Text("?")
-                                        .font(.system(size: 24, weight: .light))
-                                }
-                                .foregroundStyle(.gray)
-                                .frame(width: 40, height: 40)
-                            }
-                        }
-                    } else {
-                        // Loading app icon
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(.gray)
-                            .shimmering()
-                    }
-                }
-                .frame(width: 54, height: 54)
-            }
-        }
-        
         return HStack {
-            appIconView(iconURL: URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.id)/AppIcon.png")!,
-                        faviconURL: URL(string: "https://icon.horse/icon/\(cask.homepageURL.host ?? "")")!)
+            AppIconView(
+                iconURL: URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.id)/AppIcon.png")!,
+                faviconURL: URL(string: "https://icon.horse/icon/\(cask.homepageURL.host ?? "")")!,
+                cacheKey: cask.id
+            )
             .padding(.leading, 5)
             
             // Name and description
