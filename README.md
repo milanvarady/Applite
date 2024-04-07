@@ -35,7 +35,7 @@ Applite is a free and open-source macOS application that streamlines the install
 
 The main goal of the application is to bring the convenience of [Homebrew casks](https://github.com/Homebrew/homebrew-cask) to the non-technical user. So the UI was designed with simplicity and ease of use in mind.
 
-FAQ on the [official website](https://aerolite.dev/applite).
+FAQ on the [official website](https://aerolite.dev/applite/FAQ.html).
 
 ## Screenshots
 
@@ -66,7 +66,7 @@ The project is open to contributions. See the [Contribution Guidelines](docs/CON
 
  - [Homebrew](https://github.com/homebrew)
  - [Fuse](https://github.com/krisk/fuse-swift), Kiro Risk - search result filtering
- - [SwiftUI CachedAsyncImage](https://github.com/lorenzofiamingo/swiftui-cached-async-image), Lorenzo Fiamingo
+ - [Kingfisher](https://github.com/onevcat/Kingfisher) - web image downloading and caching
  - [SwiftUI-Shimmer](https://github.com/markiv/SwiftUI-Shimmer), Vikram Kriplaney
  - [CircularProgressSwiftUI](https://github.com/ArnavMotwani/CircularProgressSwiftUI), Arnav Motwani
  - [Sparkle](https://github.com/sparkle-project/Sparkle) - app updates
