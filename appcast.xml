@@ -3,6 +3,17 @@
     <channel>
         <title>Applite</title>
         <item>
+            <title>1.2.4</title>
+            <pubDate>Sun, 07 Apr 2024 16:31:33 +0200</pubDate>
+            <sparkle:version>10</sparkle:version>
+            <sparkle:shortVersionString>1.2.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <sparkle:releaseNotesLink>
+                https://aerolite.dev/applite/releases/1.2.4.html
+            </sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/milanvarady/Applite/releases/download/v1.2.4/Applite.dmg" length="3346635" type="application/octet-stream" sparkle:edSignature="DMDK6YfVclvbqMC1jDIoj8XQVYmZTGydCLd9yjs76KnB8OI5AgcoX3bKP07GCEo2Xfu7U6QcclcwVM53O7I4Bw=="/>
+        </item>
+        <item>
             <title>1.2.3</title>
             <pubDate>Mon, 26 Feb 2024 20:07:45 +0100</pubDate>
             <sparkle:version>9</sparkle:version>
