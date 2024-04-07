@@ -16,19 +16,57 @@ struct NetworkProxyManager {
             Self.logger.warning("Failed to get system network proxy settings")
             throw NetworkProxyError.failedToGetSystemSettings
         }
-        
+
+        // Get preferneces
+        let proxyEnabled: Bool = UserDefaults.standard.value(forKey: Preferences.networkProxyEnabled.rawValue) as? Bool ?? true
+        let preferredProxyTypeString: String = UserDefaults.standard.string(forKey: Preferences.preferredProxyType.rawValue) ?? ""
+        let preferredProxyType: NetworkProxyType? = NetworkProxyType(rawValue: preferredProxyTypeString)
+
+        if !proxyEnabled {
+            Self.logger.info("Proxy disabled by user")
+            throw NetworkProxyError.proxyNotEnabled
+        }
+
         // Determine proxy type
         let httpProxyEnabled = proxySettings[kCFNetworkProxiesHTTPEnable as String] as? Bool ?? false
         let httpsProxyEnabled = proxySettings[kCFNetworkProxiesHTTPSEnable as String] as? Bool ?? false
         let socks5ProxyEnabled = proxySettings[kCFNetworkProxiesSOCKSEnable as String] as? Bool ?? false
 
-        let proxyType: NetworkProxyType = if httpProxyEnabled {
-            .http
-        } else if httpsProxyEnabled {
-            .https
-        } else if socks5ProxyEnabled {
-            .socks5
-        } else {
+        var proxyType: NetworkProxyType? = nil
+
+        // First, try to set it to preferred proxy method
+        if let preferredProxyTypeUnwrapped = preferredProxyType {
+            switch preferredProxyTypeUnwrapped {
+            case .http:
+                if httpProxyEnabled {
+                    proxyType = .http
+                }
+            case .https:
+                if httpsProxyEnabled {
+                    proxyType = .https
+                }
+            case .socks5:
+                if socks5ProxyEnabled {
+                    proxyType = .socks5
+                }
+            }
+        }
+
+        // If no preferred method is selected, check other methods
+        if proxyType == nil {
+            proxyType = if httpProxyEnabled {
+                .http
+            } else if httpsProxyEnabled {
+                .https
+            } else if socks5ProxyEnabled {
+                .socks5
+            } else {
+                throw NetworkProxyError.proxyNotEnabled
+            }
+        }
+
+        // Check proxy type for nil
+        guard let proxyType = proxyType else {
             throw NetworkProxyError.proxyNotEnabled
         }
 
@@ -40,7 +78,7 @@ struct NetworkProxyManager {
                 proxySettings[kCFNetworkProxiesHTTPSProxy as String] as? String
             case .socks5:
                 proxySettings[kCFNetworkProxiesSOCKSProxy as String] as? String
-            }
+        }
         // guard else
         else {
             throw NetworkProxyError.noProxyHost
@@ -48,12 +86,12 @@ struct NetworkProxyManager {
 
         // Get proxy port
         guard let proxyPort = switch proxyType {
-        case .http:
-            proxySettings[kCFNetworkProxiesHTTPPort as String] as? Int
-        case .https:
-            proxySettings[kCFNetworkProxiesHTTPSPort as String] as? Int
-        case .socks5:
-            proxySettings[kCFNetworkProxiesSOCKSPort as String] as? Int
+            case .http:
+                proxySettings[kCFNetworkProxiesHTTPPort as String] as? Int
+            case .https:
+                proxySettings[kCFNetworkProxiesHTTPSPort as String] as? Int
+            case .socks5:
+                proxySettings[kCFNetworkProxiesSOCKSPort as String] as? Int
         }
         // guard else
         else {
@@ -107,7 +145,7 @@ struct NetworkProxyConfiguration {
     }
 }
 
-enum NetworkProxyType: String {
+enum NetworkProxyType: String, CaseIterable, Identifiable {
     case http
     case https
     case socks5
@@ -121,6 +159,21 @@ enum NetworkProxyType: String {
         case .socks5:
             return "socks5://"
         }
+    }
+
+    var displayName: String {
+        switch self {
+        case .http:
+            return "HTTP"
+        case .https:
+            return "HTTPS"
+        case .socks5:
+            return "SOCKS5"
+        }
+    }
+
+    var id: String {
+        self.rawValue
     }
 }
 
