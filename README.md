@@ -23,11 +23,12 @@ User-friendly GUI macOS application for Homebrew Casks
 
 ## Key Features
 
-- Install, update and uninstall apps with a single click
+- Install, update, and uninstall apps with a single click
 - Clean and simple UI designed for non-technical users
-- Free and open-source
+- Free and open source
+- Works with existing brew installation
+- Supports system proxy (HTTP, HTTPS, and SOCKS5)
 - Handpicked gallery of awesome apps
-- Can be used with existing brew installation
 
 ## About
 
