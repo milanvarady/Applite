@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import OSLog
 
 /// Streams the output of a shell command in real time
 public class ShellOutputStream {
@@ -15,7 +16,9 @@ public class ShellOutputStream {
     private var output: String = ""
     private var task: Process?
     private var fileHandle: FileHandle?
-    
+
+    static let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "ShellOutputStream")
+
     /// Runs shell command
     ///
     /// - Parameters:
@@ -36,8 +39,18 @@ public class ShellOutputStream {
             return ShellResult(output: "pinentry.ksh checksum mismatch. The file has been modified.", didFail: true)
         }
         
+        // Set up environment
+        var environment: [String: String] = [
+            "SUDO_ASKPASS": pinentryScript
+        ]
+
+        if let proxySettings = try? NetworkProxyManager.getSystemProxySettings() {
+            Self.logger.info("Network proxy is enabled. Type: \(proxySettings.type.rawValue)")
+            environment["ALL_PROXY"] = proxySettings.fullString
+        }
+
         self.task?.launchPath = "/bin/zsh"
-        self.task?.environment = ["SUDO_ASKPASS": pinentryScript]
+        self.task?.environment = environment
         self.task?.arguments = ["-l", "-c", "script -q /dev/null \(command)"]
         
         let pipe = Pipe()

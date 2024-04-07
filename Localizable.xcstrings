@@ -337,6 +337,22 @@
         }
       }
     },
+    "%@ uses the system network proxy, but it can only use one protocol (HTTP, HTTPS, or SOCKS5). Select your preferred method." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ utilise le proxy réseau du système, mais il ne peut utiliser qu'un seul protocole (HTTP, HTTPS, ou SOCKS5). Sélectionnez la méthode que vous préférez."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az alkalmazás a rendszer hálózati proxy beállításait használja, de csak egy protokollt tud használni (HTTP, HTTPS vagy SOCKS5). Válassza ki a kívánt módszert."
+          }
+        }
+      }
+    },
     "A new Homebrew installation will be installed into ~/Library/Application Support/%@" : {
       "localizations" : {
         "fr" : {
@@ -2727,6 +2743,22 @@
         }
       }
     },
+    "Preferred proxy protocol" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protocole proxy préféré"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preferált proxy protokoll"
+          }
+        }
+      }
+    },
     "Productivity" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2768,6 +2800,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "提供 Brew 可执行路径"
+          }
+        }
+      }
+    },
+    "Proxy" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proxy"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proxy"
           }
         }
       }
@@ -3770,6 +3818,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "使用自定义安装目录"
+          }
+        }
+      }
+    },
+    "Use system proxy" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utiliser le proxy système"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rendszer proxy használata"
           }
         }
       }

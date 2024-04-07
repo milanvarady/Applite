@@ -16,4 +16,6 @@ enum Preferences: String {
     case customUserBrewPath
     case appdirOn
     case appdirPath
+    case networkProxyEnabled
+    case preferredProxyType
 }
