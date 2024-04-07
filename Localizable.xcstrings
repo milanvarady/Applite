@@ -350,6 +350,12 @@
             "state" : "translated",
             "value" : "Ez az alkalmazás a rendszer hálózati proxy beállításait használja, de csak egy protokollt tud használni (HTTP, HTTPS vagy SOCKS5). Válassza ki a kívánt módszert."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 使用系统网络代理，但只能使用一种协议（HTTP、HTTPS 或 SOCKS5）。请选择您首选的方法。"
+          }
         }
       }
     },
@@ -2756,6 +2762,12 @@
             "state" : "translated",
             "value" : "Preferált proxy protokoll"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首选代理协议"
+          }
         }
       }
     },
@@ -2816,6 +2828,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proxy"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "代理"
           }
         }
       }
@@ -3834,6 +3852,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rendszer proxy használata"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用系统代理"
           }
         }
       }
