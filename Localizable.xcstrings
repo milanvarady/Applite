@@ -563,7 +563,7 @@
         }
       }
     },
-    "App coundn't be located" : {
+    "App couldn't be located" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -717,7 +717,7 @@
         }
       }
     },
-    "Apps with few downloads are hidden, consider turning of this filter" : {
+    "Apps with few downloads are hidden, consider turning off this filter" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -739,7 +739,7 @@
         }
       }
     },
-    "Are you sure you wan't to %@install Homebrew?" : {
+    "Are you sure you want to %@install Homebrew?" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1880,7 +1880,7 @@
         }
       }
     },
-    "Github" : {
+    "GitHub" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
