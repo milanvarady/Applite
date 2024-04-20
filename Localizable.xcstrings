@@ -42,6 +42,12 @@
             "state" : "translated",
             "value" : ":"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "："
+          }
         }
       }
     },
@@ -63,6 +69,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "?"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "？"
           }
         }
       }
@@ -86,6 +98,12 @@
             "state" : "translated",
             "value" : "未找到任何与“%@”匹配的应用程序。可能它在 Homebrew 目录中不可用，或者你拼写错误了。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到任何與「%@」匹配的應用程式。可能它在 Homebrew 目錄中不可用，或者你拼寫錯誤了。"
+          }
         }
       }
     },
@@ -107,6 +125,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "(%@)"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "（%@）"
           }
         }
       }
@@ -130,6 +154,12 @@
             "state" : "translated",
             "value" : "[Homebrew](https://brew.sh) 是一个免费开源的包管理器工具，可以轻松安装第三方应用程序。%@ 在底层使用 Homebrew 来下载和管理应用程序。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "[Homebrew](https://brew.sh) 是一個免費開源的包管理器工具，可以輕鬆安裝第三方應用程式。%@ 在底層使用 Homebrew 來下載和管理應用程式。"
+          }
         }
       }
     },
@@ -152,6 +182,12 @@
             "state" : "translated",
             "value" : "**警告**：Homebrew 缓存是在多个 Homebrew 安装之间共享的。删除缓存将会删除所有安装的缓存！"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**警告**：Homebrew 緩存是在多個 Homebrew 安裝之間共享的。刪除緩存將會刪除所有安裝的緩存！"
+          }
         }
       }
     },
@@ -170,6 +206,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/path/to/brew"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "/path/to/brew"
@@ -196,6 +238,12 @@
             "state" : "translated",
             "value" : "/path/to/dir"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/path/to/dir"
+          }
         }
       }
     },
@@ -214,6 +262,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@"
@@ -246,6 +300,12 @@
             "state" : "translated",
             "value" : "%1$@ 已经安装。如果你想要将它添加到 %2$@ 中，点击更多选项（一个小箭头图标），然后选择强制安装。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 已經安裝。如果您想將其添加到 %2$@，請點擊更多選項（向下箭頭圖標）並按下強制安裝。"
+          }
         }
       }
     },
@@ -267,6 +327,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ 安装成功！"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 安裝成功！"
           }
         }
       }
@@ -290,6 +356,12 @@
             "state" : "translated",
             "value" : "%@ 重新安装成功"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 已成功重新安裝"
+          }
         }
       }
     },
@@ -311,6 +383,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ 卸载成功"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 已成功卸載"
           }
         }
       }
@@ -334,6 +412,12 @@
             "state" : "translated",
             "value" : "%@ 更新成功"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 成功更新"
+          }
         }
       }
     },
@@ -355,6 +439,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ 使用系统网络代理，但只能使用一种协议（HTTP、HTTPS 或 SOCKS5）。请选择您首选的方法。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 使用系統網路代理，但只能使用一種協定（HTTP、HTTPS 或 SOCKS5）。 選擇您喜歡的方法。"
           }
         }
       }
@@ -378,6 +468,12 @@
             "state" : "translated",
             "value" : "新的 Homebrew 安装将被安装到 ~/Library/Application Support/%@"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新的 Homebrew 安裝將安裝到 ~/Library/Application Support/%@"
+          }
         }
       }
     },
@@ -399,6 +495,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "关于 %@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于%@"
           }
         }
       }
@@ -422,6 +524,12 @@
             "state" : "translated",
             "value" : "操作"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行動"
+          }
         }
       }
     },
@@ -443,6 +551,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "活动任务"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活動任務"
           }
         }
       }
@@ -472,6 +586,12 @@
             "state" : "translated",
             "value" : "重新安装后，所有当前安装的应用程序将从 %1$@ 解除链接。它们不会被删除，但您将无法通过 %2$@ 更新或卸载它们。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新安裝後，所有目前安裝的應用程式都將從 %1$@ 取消連結。 它們不會被刪除，但您將無法透過 %2$@ 更新或卸載它們。"
+          }
         }
       }
     },
@@ -493,6 +613,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "所有当前安装的应用程序将从 %@ 解除链接。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有目前安裝的應用程式將從 %@ 取消連結。"
           }
         }
       }
@@ -516,6 +642,12 @@
             "state" : "translated",
             "value" : "在更新期间，所有其他应用程序功能将被禁用！"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新期間所有其他應用程式功能將被停用！"
+          }
         }
       }
     },
@@ -537,6 +669,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已完成设置！"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有設立成功！"
           }
         }
       }
@@ -560,6 +698,12 @@
             "state" : "translated",
             "value" : "应用程序注意事项"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "應用注意事項"
+          }
         }
       }
     },
@@ -581,6 +725,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "无法找到应用程序"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法找到應用程式"
           }
         }
       }
@@ -604,6 +754,12 @@
             "state" : "translated",
             "value" : "应用程序加载错误"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "應用程式載入錯誤"
+          }
         }
       }
     },
@@ -625,6 +781,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "应用目录"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "應用程式目錄"
           }
         }
       }
@@ -648,6 +810,12 @@
             "state" : "translated",
             "value" : "应用目录（可选）"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "應用程式目錄（可選）"
+          }
         }
       }
     },
@@ -669,6 +837,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "外观"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外觀"
           }
         }
       }
@@ -692,6 +866,12 @@
             "state" : "translated",
             "value" : "需要管理员密码才能安装的应用程序将无法安装。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要管理員密碼才能安裝的應用程式將無法安裝。"
+          }
         }
       }
     },
@@ -710,6 +890,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Applite"
@@ -736,6 +922,12 @@
             "state" : "translated",
             "value" : "下载量较少的应用被隐藏了，请考虑关闭这个过滤器。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下載量少的應用程式被隱藏，考慮關閉此過濾器"
+          }
         }
       }
     },
@@ -757,6 +949,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "您确定不要 %@ 安装 Homebrew？"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您確定不想%@install Homebrew 嗎？"
           }
         }
       }
@@ -780,6 +978,12 @@
             "state" : "translated",
             "value" : "您确定要强制安装 %@ 吗？这将覆盖任何当前的安装！"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您確定要強制安裝%@嗎？ 這將覆蓋任何當前安裝！"
+          }
         }
       }
     },
@@ -801,6 +1005,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "您确定要永久卸载 %@ 吗？"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您確定要永久卸載%@嗎？"
           }
         }
       }
@@ -824,6 +1034,12 @@
             "state" : "translated",
             "value" : "自动检查更新"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動檢查更新"
+          }
         }
       }
     },
@@ -846,6 +1062,12 @@
             "state" : "translated",
             "value" : "自动下载更新"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動下載更新"
+          }
         }
       }
     },
@@ -864,6 +1086,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "返回"
@@ -890,6 +1118,12 @@
             "state" : "translated",
             "value" : "Brew 可执行文件路径"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew可執行路徑"
+          }
         }
       }
     },
@@ -911,6 +1145,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Brew 路径"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew路徑"
           }
         }
       }
@@ -934,6 +1174,12 @@
             "state" : "translated",
             "value" : "Brew 路径已修改。重新启动应用程序以使更改生效。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew路徑已被修改。 重新啟動應用程式以使變更生效。"
+          }
         }
       }
     },
@@ -956,6 +1202,12 @@
             "state" : "translated",
             "value" : "Brew 路径损坏"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew路徑損壞"
+          }
         }
       }
     },
@@ -977,6 +1229,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "浏览"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "瀏覽"
           }
         }
       }
@@ -1001,6 +1259,12 @@
             "state" : "translated",
             "value" : "浏览精选的出色应用程序列表。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "瀏覽精選的精彩應用程式清單。"
+          }
         }
       }
     },
@@ -1024,6 +1288,12 @@
             "state" : "translated",
             "value" : "浏览器"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "瀏覽器"
+          }
         }
       }
     },
@@ -1042,6 +1312,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "取消"
@@ -1069,6 +1345,12 @@
             "state" : "translated",
             "value" : "Cask 列表（.txt 文件）"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask清單（.txt 文件）"
+          }
         }
       }
     },
@@ -1090,6 +1372,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "分类"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目錄"
           }
         }
       }
@@ -1113,6 +1401,12 @@
             "state" : "translated",
             "value" : "检查更新..."
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "檢查更新"
+          }
         }
       }
     },
@@ -1134,6 +1428,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "颜色方案："
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配色方案："
           }
         }
       }
@@ -1158,6 +1458,12 @@
             "state" : "translated",
             "value" : "通讯"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "溝通"
+          }
         }
       }
     },
@@ -1181,6 +1487,12 @@
             "state" : "translated",
             "value" : "并发错误"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並發錯誤"
+          }
         }
       }
     },
@@ -1202,6 +1514,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "继续"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "繼續"
           }
         }
       }
@@ -1225,6 +1543,12 @@
             "state" : "translated",
             "value" : "无法下载应用程序。可能是因为没有网络连接，或者目标主机无法访问。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法下載應用程式。 沒有網路連接，或無法存取主機。"
+          }
         }
       }
     },
@@ -1247,6 +1571,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "创意工具"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "創意工具"
           }
         }
       }
@@ -1276,6 +1606,12 @@
             "state" : "translated",
             "value" : "当前应用程序版本：%1$@（%2$@）"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前應用程式版本：%1$@ (%2$@)"
+          }
         }
       }
     },
@@ -1297,6 +1633,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "当前选择的 Brew 路径无效"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前選擇的沖泡路徑無效"
           }
         }
       }
@@ -1320,6 +1662,12 @@
             "state" : "translated",
             "value" : "自定义"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自訂"
+          }
         }
       }
     },
@@ -1341,6 +1689,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "自定义 Brew 路径"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自訂brew目錄"
           }
         }
       }
@@ -1364,6 +1718,12 @@
             "state" : "translated",
             "value" : "自定义安装目录"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自訂安裝目錄"
+          }
         }
       }
     },
@@ -1383,6 +1743,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "深色"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "深色"
@@ -1409,6 +1775,12 @@
             "state" : "translated",
             "value" : "删除 Homebrew 缓存"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刪除自製快取"
+          }
         }
       }
     },
@@ -1432,6 +1804,12 @@
             "state" : "translated",
             "value" : "开发工具"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開發者工具"
+          }
         }
       }
     },
@@ -1453,6 +1831,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Discord"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不和諧"
           }
         }
       }
@@ -1476,6 +1860,12 @@
             "state" : "translated",
             "value" : "发现"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "發現"
+          }
         }
       }
     },
@@ -1498,6 +1888,12 @@
             "state" : "translated",
             "value" : "你已经安装了 Homebrew 吗？"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您已經安裝了 Homebrew 嗎？"
+          }
         }
       }
     },
@@ -1519,6 +1915,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "强制下载"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無論如何下載"
           }
         }
       }
@@ -1543,6 +1945,12 @@
             "state" : "translated",
             "value" : "轻松下载应用程序"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輕鬆下載應用程式"
+          }
         }
       }
     },
@@ -1566,6 +1974,12 @@
             "state" : "translated",
             "value" : "单击一下即可下载第三方应用程序。再也不用“拖到应用程序文件夹”了。\n"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "只需單擊即可下載第三方應用程式。 不再需要「拖至應用程式資料夾」。"
+          }
         }
       }
     },
@@ -1587,6 +2001,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "错误"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "錯誤"
           }
         }
       }
@@ -1610,6 +2030,12 @@
             "state" : "translated",
             "value" : "导出一个包含所有当前已安装应用程序的文件。可以导入到另一台设备。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "匯出包含所有目前安裝的應用程式的檔案。 這可以導入到另一台設備。"
+          }
         }
       }
     },
@@ -1631,6 +2057,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "导出应用程序到文件"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將應用程式匯出到文件"
           }
         }
       }
@@ -1654,6 +2086,12 @@
             "state" : "translated",
             "value" : "导出失败"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "匯出失敗"
+          }
         }
       }
     },
@@ -1675,6 +2113,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "导出文件类型"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "匯出文件類型"
           }
         }
       }
@@ -1699,6 +2143,12 @@
             "state" : "translated",
             "value" : "无法从所选的 brew 可执行文件中检索 cask 信息"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法從選定的brew可執行檔中檢索桶資訊"
+          }
         }
       }
     },
@@ -1722,6 +2172,12 @@
             "state" : "translated",
             "value" : "无法从 Homebrew API 解码 json 数据"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法從 Homebrew API 解碼 json 數據"
+          }
         }
       }
     },
@@ -1744,6 +2200,12 @@
             "state" : "translated",
             "value" : "无法下载 %@"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下載%@失敗"
+          }
         }
       }
     },
@@ -1765,6 +2227,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "无法安装 pinentry"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pinentry安裝失敗"
           }
         }
       }
@@ -1789,6 +2257,12 @@
             "state" : "translated",
             "value" : "无法从缓存加载 cask 数据"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法從快取加載桶數據"
+          }
         }
       }
     },
@@ -1810,6 +2284,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重新安装 %@ 失败"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安裝%@失敗"
           }
         }
       }
@@ -1833,6 +2313,12 @@
             "state" : "translated",
             "value" : "更新 %@ 失败"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新%@失敗"
+          }
         }
       }
     },
@@ -1854,6 +2340,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "强制安装"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "強制安裝"
           }
         }
       }
@@ -1877,6 +2369,12 @@
             "state" : "translated",
             "value" : "常用"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一般"
+          }
         }
       }
     },
@@ -1898,6 +2396,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Github"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub"
           }
         }
       }
@@ -1921,6 +2425,12 @@
             "state" : "translated",
             "value" : "隐藏下载次数少的应用程序"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隱藏下載量很少的應用程式"
+          }
         }
       }
     },
@@ -1939,6 +2449,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew"
@@ -1965,6 +2481,12 @@
             "state" : "translated",
             "value" : "Homebrew 版本："
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew版本："
+          }
         }
       }
     },
@@ -1987,6 +2509,12 @@
             "state" : "translated",
             "value" : "主页"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首頁"
+          }
         }
       }
     },
@@ -2005,6 +2533,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我明白"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "我明白"
@@ -2032,6 +2566,12 @@
             "state" : "translated",
             "value" : "集成开发环境"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IDEs"
+          }
         }
       }
     },
@@ -2053,6 +2593,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "导入应用程序"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "導入應用程式"
           }
         }
       }
@@ -2076,6 +2622,12 @@
             "state" : "translated",
             "value" : "导入失败"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "導入失敗"
+          }
         }
       }
     },
@@ -2097,6 +2649,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "导入/导出应用程序"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "導入/導出應用程式"
           }
         }
       }
@@ -2120,6 +2678,12 @@
             "state" : "translated",
             "value" : "进行中..."
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "進行中…"
+          }
         }
       }
     },
@@ -2141,6 +2705,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "信息"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "資訊"
           }
         }
       }
@@ -2164,6 +2734,12 @@
             "state" : "translated",
             "value" : "安装独立的 Brew"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安裝單獨的 Brew"
+          }
         }
       }
     },
@@ -2186,6 +2762,12 @@
             "state" : "translated",
             "value" : "安装失败"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安裝失敗"
+          }
         }
       }
     },
@@ -2207,6 +2789,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安装"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安裝"
           }
         }
       }
@@ -2231,6 +2819,12 @@
             "state" : "translated",
             "value" : "安装中"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安裝中"
+          }
         }
       }
     },
@@ -2252,6 +2846,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "安装依赖项"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安裝依賴項"
           }
         }
       }
@@ -2276,6 +2876,12 @@
             "state" : "translated",
             "value" : "浅色"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "淺色"
+          }
         }
       }
     },
@@ -2298,6 +2904,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "加载错误"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "載入錯誤"
           }
         }
       }
@@ -2322,6 +2934,12 @@
             "state" : "translated",
             "value" : "管理应用程序"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理應用程式"
+          }
         }
       }
     },
@@ -2343,6 +2961,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "管理 Homebrew"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理homebrew"
           }
         }
       }
@@ -2367,6 +2991,12 @@
             "state" : "translated",
             "value" : "媒体"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "媒體"
+          }
         }
       }
     },
@@ -2389,6 +3019,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "菜单栏"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選單列"
           }
         }
       }
@@ -2413,6 +3049,12 @@
             "state" : "translated",
             "value" : "下载次数最多（默认）"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下載次數最多（預設）"
+          }
         }
       }
     },
@@ -2434,6 +3076,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "没有（我不知道它是什么）"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不（我不知道那是什麼）"
           }
         }
       }
@@ -2457,6 +3105,12 @@
             "state" : "translated",
             "value" : "无活动任务"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有活動任務"
+          }
         }
       }
     },
@@ -2479,6 +3133,12 @@
             "state" : "translated",
             "value" : "无选择"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有選擇"
+          }
         }
       }
     },
@@ -2500,6 +3160,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "暂无更新"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無可用更新"
           }
         }
       }
@@ -2524,6 +3190,12 @@
             "state" : "translated",
             "value" : "备注"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "備註"
+          }
         }
       }
     },
@@ -2546,6 +3218,12 @@
             "state" : "translated",
             "value" : "通知"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "注意"
+          }
         }
       }
     },
@@ -2564,6 +3242,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "通知"
@@ -2590,6 +3274,12 @@
             "state" : "translated",
             "value" : "已安装应用程序数量： "
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安裝的應用程式數量："
+          }
         }
       }
     },
@@ -2613,6 +3303,12 @@
             "state" : "translated",
             "value" : "办公工具"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "辦公室工具"
+          }
         }
       }
     },
@@ -2635,6 +3331,12 @@
             "state" : "translated",
             "value" : "好"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "好的"
+          }
         }
       }
     },
@@ -2656,6 +3358,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "打开"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打開"
           }
         }
       }
@@ -2680,6 +3388,12 @@
             "state" : "translated",
             "value" : "密码管理器"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "密碼管理器"
+          }
         }
       }
     },
@@ -2698,6 +3412,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinentry"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pinentry"
@@ -2724,6 +3444,12 @@
             "state" : "translated",
             "value" : "Pinentry 用于在安装应用程序时安全地提示输入管理员密码。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinentry 用於在應用程式安裝過程中需要時安全地提示輸入管理員密碼。"
+          }
         }
       }
     },
@@ -2746,6 +3472,12 @@
             "state" : "translated",
             "value" : "PINEntry 未正确安装"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PINEntry 未正確安裝"
+          }
         }
       }
     },
@@ -2767,6 +3499,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "首选代理协议"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首選代理協議"
           }
         }
       }
@@ -2791,6 +3529,12 @@
             "state" : "translated",
             "value" : "生产力"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生產力"
+          }
         }
       }
     },
@@ -2813,6 +3557,12 @@
             "state" : "translated",
             "value" : "提供 Brew 可执行路径"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "提供brew可執行路徑"
+          }
         }
       }
     },
@@ -2831,6 +3581,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "代理"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "代理"
@@ -2857,6 +3613,12 @@
             "state" : "translated",
             "value" : "退出"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出"
+          }
         }
       }
     },
@@ -2878,6 +3640,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重新安装"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新安裝"
           }
         }
       }
@@ -2901,6 +3669,12 @@
             "state" : "translated",
             "value" : "重新安装失败"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新安裝失敗"
+          }
         }
       }
     },
@@ -2922,6 +3696,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重新安装 Homebrew"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新安裝Homebrew"
           }
         }
       }
@@ -2946,6 +3726,12 @@
             "state" : "translated",
             "value" : "重新安装中"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新安裝"
+          }
         }
       }
     },
@@ -2967,6 +3753,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重新启动"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新啟動"
           }
         }
       }
@@ -2990,6 +3782,12 @@
             "state" : "translated",
             "value" : "重试"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重試"
+          }
         }
       }
     },
@@ -3011,6 +3809,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重试安装"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重試安裝"
           }
         }
       }
@@ -3034,6 +3838,12 @@
             "state" : "translated",
             "value" : "重试加载"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重試加載"
+          }
         }
       }
     },
@@ -3055,6 +3865,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重试安装或访问故障排除页面。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重試安裝或存取故障排除頁面。"
           }
         }
       }
@@ -3078,6 +3894,12 @@
             "state" : "translated",
             "value" : "查看全部"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示所有"
+          }
         }
       }
     },
@@ -3099,6 +3921,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "选择文件夹"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇資料夾"
           }
         }
       }
@@ -3122,6 +3950,12 @@
             "state" : "translated",
             "value" : "所选 Brew 路径无效！"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇的brew路徑無效！"
+          }
         }
       }
     },
@@ -3143,6 +3977,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Shell 输出"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell輸出"
           }
         }
       }
@@ -3166,6 +4006,12 @@
             "state" : "translated",
             "value" : "显示全部"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示所有"
+          }
         }
       }
     },
@@ -3188,6 +4034,12 @@
             "state" : "translated",
             "value" : "显示所有更新"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示所有更新"
+          }
         }
       }
     },
@@ -3206,6 +4058,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "排序方式"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "排序方式"
@@ -3232,6 +4090,12 @@
             "state" : "translated",
             "value" : "排序选项"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "排序選項"
+          }
         }
       }
     },
@@ -3253,6 +4117,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "开始使用 %@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用%@開始"
           }
         }
       }
@@ -3277,6 +4147,12 @@
             "state" : "translated",
             "value" : "系统"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系統"
+          }
         }
       }
     },
@@ -3299,6 +4175,12 @@
             "state" : "translated",
             "value" : "任务完成情况"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "任務完成狀況"
+          }
         }
       }
     },
@@ -3320,6 +4202,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "任务错误"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "任務錯誤"
           }
         }
       }
@@ -3344,6 +4232,12 @@
             "state" : "translated",
             "value" : "终端"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終端"
+          }
         }
       }
     },
@@ -3365,6 +4259,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "此应用程序"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這個應用程式"
           }
         }
       }
@@ -3388,6 +4288,12 @@
             "state" : "translated",
             "value" : "此应用程序使用[Homebrew](https://brew.sh/)（简称brew）包管理器来下载应用。Homebrew 是一个免费且开源的命令行工具，能够下载有用的开发者工具以及桌面应用程序。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該應用程式使用[Homebrew](https://brew.sh/)（簡稱brew）套件管理器來下載應用程式。 Homebrew 是一個免費的開源命令列實用程序，可以下載有用的開發人員工具以及桌面應用程式。"
+          }
         }
       }
     },
@@ -3409,6 +4315,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "此应用程序使用免费且开源的[Homebrew](https://brew.sh/)包管理器来下载和管理应用程序。如果你的系统已经安装了它，你可以立即使用。如果你没有安装 brew 或不知道它是什么，请选择**否**。这将为 %@ 创建一个新的 brew 安装。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該應用程式使用免費開源的[Homebrew](https://brew.sh/)套件管理器來下載和管理應用程式。 如果您的系統上已經安裝了它，則可以立即使用它。 如果您沒有安裝brew或不知道它是什麼，請選擇**否**。 這將為%@ 創建一個新的brew 安裝。"
           }
         }
       }
@@ -3438,6 +4350,12 @@
             "state" : "translated",
             "value" : "这将在以下位置（重新）安装%1$@的Homebrew：~/Library/Application Support/%2$@/homebrew"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這將（重新）安裝 %1$@ 的 Homebrew 安裝：~/Library/Application Support/%2$@/homebrew"
+          }
         }
       }
     },
@@ -3459,6 +4377,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "这将显示那些关闭了自动更新的应用程序的更新信息，即，那些自行管理更新的应用程序。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這將顯示來自已關閉自動更新的應用程式的更新，即正在處理自己更新的應用程式。"
           }
         }
       }
@@ -3482,6 +4406,12 @@
             "state" : "translated",
             "value" : "这将卸载与 %@ 相关的所有文件和缓存。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這將卸載與 %@ 關聯的所有檔案和快取。"
+          }
         }
       }
     },
@@ -3500,6 +4430,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "故障排除"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "故障排除"
@@ -3526,6 +4462,12 @@
             "state" : "translated",
             "value" : "关闭少数下载过滤器"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關閉少量下載過濾器"
+          }
         }
       }
     },
@@ -3547,6 +4489,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "卸载"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸載"
           }
         }
       }
@@ -3570,6 +4518,12 @@
             "state" : "translated",
             "value" : "卸载 %@"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸載%@"
+          }
         }
       }
     },
@@ -3591,6 +4545,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "卸载 %@ 相关文件和缓存。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸載%@、相關文件和快取。"
           }
         }
       }
@@ -3614,6 +4574,12 @@
             "state" : "translated",
             "value" : "卸载 Applite..."
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸載Applite…"
+          }
         }
       }
     },
@@ -3635,6 +4601,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "完全卸载"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸載完成"
           }
         }
       }
@@ -3659,6 +4631,12 @@
             "state" : "translated",
             "value" : "卸载中"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在卸載"
+          }
         }
       }
     },
@@ -3681,6 +4659,12 @@
             "state" : "translated",
             "value" : "更新"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
+          }
         }
       }
     },
@@ -3699,6 +4683,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新全部"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "更新全部"
@@ -3726,6 +4716,12 @@
             "state" : "translated",
             "value" : "更新和卸载你的应用程序，不再有已删除应用程序的残留文件。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新和卸載您的應用程式。 已刪除的應用程式中不再有剩餘檔案。"
+          }
         }
       }
     },
@@ -3747,6 +4743,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "更新失败"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新失敗"
           }
         }
       }
@@ -3770,6 +4772,12 @@
             "state" : "translated",
             "value" : "更新 Homebrew"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新Homebrew"
+          }
         }
       }
     },
@@ -3788,6 +4796,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "更新"
@@ -3815,6 +4829,12 @@
             "state" : "translated",
             "value" : "更新中"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新中"
+          }
         }
       }
     },
@@ -3837,6 +4857,12 @@
             "state" : "translated",
             "value" : "使用自定义安装目录"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用自訂安裝目錄"
+          }
         }
       }
     },
@@ -3858,6 +4884,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "使用系统代理"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用系統代理"
           }
         }
       }
@@ -3882,6 +4914,12 @@
             "state" : "translated",
             "value" : "公用设施"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公用事業"
+          }
         }
       }
     },
@@ -3903,6 +4941,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "显示错误"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看錯誤"
           }
         }
       }
@@ -3927,6 +4971,12 @@
             "state" : "translated",
             "value" : "虚拟技术"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "虛擬化"
+          }
         }
       }
     },
@@ -3946,6 +4996,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "警告"
@@ -3972,6 +5028,12 @@
             "state" : "translated",
             "value" : "网站"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "網站"
+          }
         }
       }
     },
@@ -3993,6 +5055,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "欢迎使用 %@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歡迎來到 ％@"
           }
         }
       }
@@ -4016,6 +5084,12 @@
             "state" : "translated",
             "value" : "当导入 Brewfile 时，只会安装 casks。其他项，如 formulae 和 taps，将被跳过。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "導入 Brewfile 時，只會安裝木桶。 其他項目（例如公式和點擊）將被跳過。"
+          }
         }
       }
     },
@@ -4037,6 +5111,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Xcode 命令行工具"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xcode 命令列工具"
           }
         }
       }
@@ -4060,6 +5140,12 @@
             "state" : "translated",
             "value" : "是"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "是的"
+          }
         }
       }
     },
@@ -4081,6 +5167,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "您可以安全地继续操作，但是无法安装使用 .pkg 安装程序的应用程序。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您可以安全地繼續，但您將無法使用 .pkg 安裝程式安裝應用程式。"
           }
         }
       }
@@ -4104,6 +5196,12 @@
             "state" : "translated",
             "value" : "系统将提示您安装 Xcode 命令行工具，请点击“安装”，因为该应用程序需要这些工具才能正常工作。安装需要几分钟时间，您可以在安装窗口中查看进度。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系統將提示您安裝 Xcode 命令列工具，請按一下“安裝”，因為此應用程式需要它才能運作。 這將需要幾分鐘，您可以在安裝視窗中看到進度。"
+          }
         }
       }
     },
@@ -4125,6 +5223,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "系统将提示您安装 Xcode 命令行工具。请选择“安装”，因为该应用程序需要这些工具才能正常工作。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系統將提示您安裝 Xcode 命令列工具。 請選擇“安裝”，因為此應用程式需要它才能運行。"
           }
         }
       }
