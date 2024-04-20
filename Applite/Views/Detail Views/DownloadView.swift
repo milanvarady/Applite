@@ -61,7 +61,7 @@ struct DownloadView: View {
                                 Label("Turn off few downloads filter", systemImage: "slider.horizontal.2.square.on.square")
                             }
                             .bigButton()
-                            .help("Apps with few downloads are hidden, consider turning of this filter")
+                            .help("Apps with few downloads are hidden, consider turning off this filter")
                         }
                     }
                     .frame(maxWidth: 800)

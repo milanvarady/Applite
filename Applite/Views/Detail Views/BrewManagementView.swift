@@ -223,7 +223,7 @@ struct BrewManagementView: View {
                 Label(isAppBrewInstalled ? "Reinstall Homebrew" : "Install Separate Brew", systemImage: "wrench.and.screwdriver")
             }
             .disabled(modifyingBrew)
-            .confirmationDialog("Are you sure you wan't to \(isAppBrewInstalled ? "re" : "")install Homebrew?", isPresented: $isPresentingReinstallConfirm) {
+            .confirmationDialog("Are you sure you want to \(isAppBrewInstalled ? "re" : "")install Homebrew?", isPresented: $isPresentingReinstallConfirm) {
                 Button("Yes") {
                     withAnimation {
                         modifyingBrew = true

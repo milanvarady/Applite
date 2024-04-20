@@ -321,7 +321,7 @@ struct AppView: View {
             .font(.system(size: 14))
             .buttonStyle(.bordered)
             .clipShape(Capsule())
-            .alert("App coundn't be located", isPresented: $appNotFoundShowing) {
+            .alert("App couldn't be located", isPresented: $appNotFoundShowing) {
                 Button("OK", role: .cancel) { }
             }
             

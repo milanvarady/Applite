@@ -707,7 +707,7 @@
         }
       }
     },
-    "App coundn't be located" : {
+    "App couldn't be located" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -903,7 +903,7 @@
         }
       }
     },
-    "Apps with few downloads are hidden, consider turning of this filter" : {
+    "Apps with few downloads are hidden, consider turning off this filter" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -914,7 +914,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A kevés letöltéssel rendelkező alkalmazások el vannak rejtve.  Fontolja meg ennek a szűrőnek a kikapcsolását."
+            "value" : "A kevés letöltéssel rendelkező alkalmazások el vannak rejtve.  Fontolja meg ennek a szűrőnek a kikapcsolását"
           }
         },
         "zh-Hans" : {
@@ -931,12 +931,12 @@
         }
       }
     },
-    "Are you sure you wan't to %@install Homebrew?" : {
+    "Are you sure you want to %@install Homebrew?" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voulez-vous vraiment %@installer Homebrew ?"
+            "value" : "Voulez-vous vraiment %@installer Homebrew?"
           }
         },
         "hu" : {
@@ -954,7 +954,7 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "您確定不想%@install Homebrew 嗎？"
+            "value" : "您確定不想 %@install Homebrew 嗎？"
           }
         }
       }
@@ -2378,24 +2378,24 @@
         }
       }
     },
-    "Github" : {
+    "GitHub" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "GitHub"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "GitHub"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Github"
+            "value" : "GitHub"
           }
         },
         "zh-HK" : {

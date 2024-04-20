@@ -53,7 +53,7 @@ struct CommandsMenu: Commands {
         CommandGroup(replacing: .help) {
             Link("Website", destination: URL(string: "https://aerolite.dev/applite")!)
             Link("Troubleshooting", destination: URL(string: "https://aerolite.dev/applite/troubleshooting.html")!)
-            Link("Github", destination: URL(string: "https://github.com/milanvarady/Applite")!)
+            Link("GitHub", destination: URL(string: "https://github.com/milanvarady/Applite")!)
             Link("Discord", destination: URL(string: "https://discord.gg/ZgB6pRE8Qx")!)
         }
     }
