@@ -17,7 +17,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     let name: String
     /// Short description
     let description: String
-    let homepageURL: URL
+    let homepageURL: URL?
     @Published var isInstalled: Bool = false
     @Published var isOutdated: Bool = false
     /// Number of downloads in the last 365 days
@@ -51,7 +51,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         self.id = rawData.token
         self.name = rawData.nameArray[0]
         self.description = rawData.desc ?? "N/A"
-        self.homepageURL = URL(string: rawData.homepage)!
+        self.homepageURL = URL(string: rawData.homepage)
         self.caveats = rawData.caveats
         self.pkgInstaller = rawData.url.hasSuffix("pkg")
     }
@@ -60,7 +60,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         self.id = "test"
         self.name = "Test app"
         self.description = "An application to test this application"
-        self.homepageURL = URL(string: "https://aerolite.dev/")!
+        self.homepageURL = URL(string: "https://aerolite.dev/")
         self.caveats = nil
         self.pkgInstaller = false
     }
@@ -79,8 +79,10 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         Self.logger.info("Cask \"\(self.id)\" installation started")
         
         // Check if pinentry is installed
-        guard ((try? await checkPinentry()) != nil) else { return ShellResult(output: "Pinentry check error", didFail: true) }
-        
+        guard ((try? await checkPinentry()) != nil) else {
+            return ShellResult(output: "Pinentry check error", didFail: true)
+        }
+
         var cancellables = Set<AnyCancellable>()
         let shellOutputStream = ShellOutputStream()
         let appdirOn = UserDefaults.standard.bool(forKey: Preferences.appdirOn.rawValue)
@@ -242,8 +244,10 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
                                 notificationSuccess: String, notificationFailure: String, onSuccess: (() -> Void)? = nil) async -> Bool {
         
         // Check if pinentry is installed
-        guard ((try? await checkPinentry()) != nil) else { return true }
-        
+        guard ((try? await checkPinentry()) != nil) else {
+            return true
+        }
+
         await MainActor.run {
             let localizedTaskDescription = String.LocalizationValue(stringLiteral: taskDescription)
             self.progressState = .busy(withTask: String(localized: localizedTaskDescription))

@@ -16,10 +16,7 @@ public struct DependencyManager {
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: DependencyManager.self)
     )
-    
-    /// Extracts percentage from shell output when installing brew
-    static let percentageRegex = try! NSRegularExpression(pattern: #"(Receiving|Resolving).+:\s+(\d{1,3})%"#)
-    
+
     /// Message shown when brew path is broken
     static public var brokenPathOrIstallMessage = "Error. Broken brew path, or damaged installation. Check brew path in settings, or try reinstalling Homebrew (Manage Homebrew->Reinstall)"
     

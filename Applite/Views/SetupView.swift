@@ -76,9 +76,9 @@ struct SetupView: View {
             HStack {
                 Spacer()
                 
-                if pageBefore != nil {
+                if let pageBeforeUnwrapped = pageBefore {
                     Button("Back") {
-                        page = pageBefore!
+                        page = pageBeforeUnwrapped
                     }
                     .bigButton(backgroundColor: Color(red: 0.7, green: 0.7, blue: 0.7))
                 }

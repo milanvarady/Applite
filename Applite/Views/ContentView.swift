@@ -100,12 +100,10 @@ struct ContentView: View {
                 BrewManagementView(modifyingBrew: $modifyingBrew)
                 
             default:
-                let category = categories.first(where: { $0.id == selection })
-                
-                if category == nil {
-                    Text("No Selection")
+                if let category = categories.first(where: { $0.id == selection }) {
+                    CategoryView(category: category)
                 } else {
-                    CategoryView(category: category!)
+                    Text("No Selection")
                 }
             }
         }

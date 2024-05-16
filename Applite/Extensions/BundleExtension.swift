@@ -15,10 +15,10 @@ extension Bundle {
     }
     
     var version: String {
-        return infoDictionary?["CFBundleShortVersionString"] as! String
+        return infoDictionary?["CFBundleShortVersionString"] as? String ?? "N/A"
     }
     
     var buildNumber: String {
-        return infoDictionary?["CFBundleVersion"] as! String
+        return infoDictionary?["CFBundleVersion"] as? String ?? "N/A"
     }
 }

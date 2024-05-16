@@ -3114,6 +3114,34 @@
         }
       }
     },
+    "No homepage found" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune page d'accueil trouvée"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nem található honlap"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到主页"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有找到首頁"
+          }
+        }
+      }
+    },
     "No Selection" : {
       "localizations" : {
         "fr" : {

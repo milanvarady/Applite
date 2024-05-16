@@ -52,13 +52,16 @@ struct AppView: View {
 
     private var iconAndDescriptionView: some View {
         return HStack {
-            AppIconView(
-                iconURL: URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.id)/AppIcon.png")!,
-                faviconURL: URL(string: "https://icon.horse/icon/\(cask.homepageURL.host ?? "")")!,
-                cacheKey: cask.id
-            )
-            .padding(.leading, 5)
-            
+            if let iconURL = URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.id)/AppIcon.png"),
+               let faviconURL = URL(string: "https://icon.horse/icon/\(cask.homepageURL?.host ?? "")") {
+                AppIconView(
+                    iconURL: iconURL,
+                    faviconURL: faviconURL,
+                    cacheKey: cask.id
+                )
+                .padding(.leading, 5)
+            }
+
             // Name and description
             VStack(alignment: .leading) {
                 Text(cask.name)
@@ -260,11 +263,16 @@ struct AppView: View {
             .popover(isPresented: $showingPopover) {
                 VStack(alignment: .leading, spacing: 6) {
                     // Open homepage
-                    Link(destination: cask.homepageURL, label: {
-                        Label("Homepage", systemImage: "house")
-                    })
-                    .foregroundColor(.primary)
-                    
+                    if let homepageLink = cask.homepageURL {
+                        Link(destination: homepageLink, label: {
+                            Label("Homepage", systemImage: "house")
+                        })
+                        .foregroundColor(.primary)
+                    } else {
+                        Text("No homepage found")
+                            .fontWeight(.thin)
+                    }
+
                     // Force install button
                     Button {
                         showingForceInstallConfirmation = true
