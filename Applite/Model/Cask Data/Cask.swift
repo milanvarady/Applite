@@ -46,14 +46,16 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     )
     
     required init(from decoder: Decoder) throws {
-        let rawData = try CaskDTO(from: decoder)
-        
-        self.id = rawData.token
-        self.name = rawData.nameArray[0]
-        self.description = rawData.desc ?? "N/A"
-        self.homepageURL = URL(string: rawData.homepage)
-        self.caveats = rawData.caveats
-        self.pkgInstaller = rawData.url.hasSuffix("pkg")
+        let rawData = try? CaskDTO(from: decoder)
+
+        let homepage: String = rawData?.homepage ?? "https://brew.sh/"
+
+        self.id = rawData?.token ?? "N/A"
+        self.name = rawData?.nameArray[0] ?? "N/A"
+        self.description = rawData?.desc ?? "N/A"
+        self.homepageURL = URL(string: homepage)
+        self.caveats = rawData?.caveats
+        self.pkgInstaller = rawData?.url.hasSuffix("pkg") ?? false
     }
     
     required init() {
