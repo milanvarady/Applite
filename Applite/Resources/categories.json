@@ -221,8 +221,7 @@
             "parallels",
             "utm",
             "virtualbox",
-            "vmware-fusion",
-            "whisky"
+            "vmware-fusion"
         ],
         "sfSymbol": "shippingbox"
     },
@@ -240,7 +239,8 @@
             "prismlauncher",
             "steam",
             "the-battle-for-wesnoth",
-            "widelands"
+            "widelands",
+            "whisky"
         ],
         "sfSymbol": "gamecontroller"
     },
