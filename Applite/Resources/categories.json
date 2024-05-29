@@ -47,6 +47,7 @@
             "maccy",
             "notion",
             "numi",
+            "obsidian",
             "pastebot",
             "raycast",
             "rectangle",
@@ -109,6 +110,7 @@
             "fing",
             "handbrake",
             "imageoptim",
+            "latest",
             "obs",
             "onyx",
             "pdf-expert",
@@ -163,6 +165,7 @@
             "forklift",
             "github",
             "gitkraken",
+            "jetbrains-toolbox",
             "kaleidoscope",
             "postman",
             "rapidapi",
@@ -190,7 +193,8 @@
             "textmate",
             "visual-studio",
             "visual-studio-code",
-            "vscodium"
+            "vscodium",
+            "zed"
         ],
         "sfSymbol": "chevron.left.slash.chevron.right"
     },
@@ -217,7 +221,8 @@
             "parallels",
             "utm",
             "virtualbox",
-            "vmware-fusion"
+            "vmware-fusion",
+            "whisky"
         ],
         "sfSymbol": "shippingbox"
     },
@@ -231,6 +236,7 @@
             "openemu",
             "league-of-legends",
             "minecraft",
+            "modrinth",
             "prismlauncher",
             "steam",
             "the-battle-for-wesnoth",
@@ -241,6 +247,7 @@
     {
         "id": "VPN",
         "casks": [
+            "cloudflare-warp",
             "cyberghost-vpn",
             "nordvpn",
             "openvpn-connect",
