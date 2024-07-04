@@ -22,33 +22,59 @@ struct SetupView: View {
     
     @State var isBrewPathValid = false
     @State var isBrewInstallDone = false
-    
+
+    enum PushDirection {
+        case forward, backward
+    }
+
+    @State var pushDirection: PushDirection = .forward
+
     var body: some View {
         VStack {
             switch page {
             case .welcome:
                 Welcome()
-                PageControlButtons(page: $page,
-                                   canContinue: true,
-                                   pageAfter: .brewTypeSelection,
-                                   pageBefore: nil)
+                    .transition(.push(from: pushDirection == .forward ? .trailing : .leading))
                 
+                PageControlButtons(
+                    page: $page,
+                    pushDirection: $pushDirection,
+                    canContinue: true,
+                    pageAfter: .brewTypeSelection,
+                    pageBefore: nil
+                )
+
             case .brewTypeSelection:
                 BrewTypeSelection(page: $page)
-                
+                    .transition(.push(from: pushDirection == .forward ? .trailing : .leading))
+
             case .brewPathSelection:
                 BrewPathSelection(isBrewPathValid: $isBrewPathValid)
-                PageControlButtons(page: $page,
-                                   canContinue: isBrewPathValid,
-                                   pageAfter: .allSet,
-                                   pageBefore: .brewTypeSelection)
+                    .transition(.push(from: pushDirection == .forward ? .trailing : .leading))
                 
+                PageControlButtons(
+                    page: $page,
+                    pushDirection: $pushDirection,
+                    canContinue: isBrewPathValid,
+                    pageAfter: .allSet,
+                    pageBefore: .brewTypeSelection
+                )
+
             case .brewInstall:
                 BrewInstall(isDone: $isBrewInstallDone)
-                PageControlButtons(page: $page, canContinue: isBrewInstallDone, pageAfter: .allSet, pageBefore: nil)
+                    .transition(.push(from: pushDirection == .forward ? .trailing : .leading))
                 
+                PageControlButtons(
+                    page: $page,
+                    pushDirection: $pushDirection,
+                    canContinue: isBrewInstallDone,
+                    pageAfter: .allSet,
+                    pageBefore: nil
+                )
+
             case .allSet:
                 AllSet()
+                    .transition(.push(from: pushDirection == .forward ? .trailing : .leading))
             }
         }
     }
@@ -64,6 +90,7 @@ struct SetupView: View {
     /// - Returns: ``View``
     private struct PageControlButtons: View {
         @Binding var page: Pages
+        @Binding var pushDirection: PushDirection
         let canContinue: Bool
         let pageAfter: Pages
         let pageBefore: Pages?
@@ -76,15 +103,21 @@ struct SetupView: View {
             HStack {
                 Spacer()
                 
-                if let pageBeforeUnwrapped = pageBefore {
+                if let pageBefore {
                     Button("Back") {
-                        page = pageBeforeUnwrapped
+                        pushDirection = .backward
+                        withAnimation {
+                            page = pageBefore
+                        }
                     }
                     .bigButton(backgroundColor: Color(red: 0.7, green: 0.7, blue: 0.7))
                 }
                 
                 Button("Continue") {
-                    page = pageAfter
+                    pushDirection = .forward
+                    withAnimation {
+                        page = pageAfter
+                    }
                 }
                 .disabled(!canContinue)
                 .bigButton(backgroundColor: canContinue ? .accentColor : .gray)
