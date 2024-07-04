@@ -6,12 +6,15 @@
 //
 
 import Foundation
+import OSLog
 
 enum CaskExportError: Error {
     case ExportError
 }
 
 func exportCasks(url: URL, exportType: CaskExportType) throws {
+    let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "CaskExport")
+
     let today = Date.now
     
     let formatter = DateFormatter()
@@ -24,6 +27,7 @@ func exportCasks(url: URL, exportType: CaskExportType) throws {
         let result = shell("\(BrewPaths.currentBrewExecutable) bundle dump --file=\"\(brewfileURL.path)\"")
         
         if result.didFail {
+            logger.error("Failed to export brewfile. Shell output: \(result.output, privacy: .public)")
             throw CaskExportError.ExportError
         }
     } else {
@@ -41,6 +45,7 @@ func exportCasks(url: URL, exportType: CaskExportType) throws {
             do {
                 try data.write(to: fileURL)
             } catch {
+                logger.error("Failed to export cask list (txt). Reason: \(error.localizedDescription)")
                 throw CaskExportError.ExportError
             }
         }
