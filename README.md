@@ -40,8 +40,8 @@ FAQ on the [official website](https://aerolite.dev/applite/FAQ.html).
 
 ## Screenshots
 
-![Discover Page Screenshot](https://aerolite.dev/applite/assets/img/screenshots/discover-lg.png)
-![Productivity Category Screenshot](https://aerolite.dev/applite/assets/img/screenshots/productivity-lg.png)
+![Discover Page Screenshot](https://github.com/user-attachments/assets/d6861ab4-d9ce-40de-982b-8940fc1d1fbf)
+![Productivity Category Screenshot](https://github.com/user-attachments/assets/e17846e0-bdbf-4ac3-b922-572ffe69acc2)
 
 ## Download
 
