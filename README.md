@@ -80,8 +80,9 @@ Applite is licensed under the [MIT](https://choosealicense.com/licenses/mit/) Li
 
 ## Alternatives
 
-- [Cork](https://github.com/buresdv/Cork)
-- [Cakebrew](https://github.com/brunophilipe/Cakebrew)
-- [App Fair](https://github.com/App-Fair/App)
-- [Brewlet](https://github.com/zkokaja/Brewlet)
-- [BrewMate](https://github.com/romankurnovskii/BrewMate)
+- [Cork](https://github.com/buresdv/Cork) (paid)
+- [Brewer X](https://panini.house/brewer/) (paid)
+- [BrewMate](https://github.com/romankurnovskii/BrewMate) (electron based)
+- [Brewlet](https://github.com/zkokaja/Brewlet) (menu bar app)
+- [App Fair](https://github.com/App-Fair/App) (looks discontinued)
+- [Cakebrew](https://github.com/brunophilipe/Cakebrew) (discontinued)
