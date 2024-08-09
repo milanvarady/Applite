@@ -49,7 +49,7 @@ FAQ on the [official website](https://aerolite.dev/applite/FAQ.html).
 
 or
 
-`$ brew install --cask applite`
+`brew install applite`
 
 Minimum OS version: **macOS 13+**
 
