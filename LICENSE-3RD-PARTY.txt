@@ -2,7 +2,7 @@
                         The MIT License (MIT)
         applies to: 
         - Fuse, Kiro Risk (https://github.com/krisk/fuse-swift)
-        - SwiftUI CachedAsyncImage, Lorenzo Fiamingo (https://github.com/lorenzofiamingo/swiftui-cached-async-image)
+        - Kingfisher, Wei Wang (https://github.com/onevcat/Kingfisher)
         - SwiftUI-Shimmer, Vikram Kriplaney (https://github.com/markiv/SwiftUI-Shimmer)
         - CircularProgressSwiftUI, Arnav Motwani (https://github.com/ArnavMotwani/CircularProgressSwiftUI)
 --------------------------------------------------------------------------------------------------------------------
