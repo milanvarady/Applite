@@ -9,6 +9,12 @@
             "value" : ""
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26,6 +32,12 @@
     ": " : {
       "localizations" : {
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ": "
+          }
+        },
+        "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ": "
@@ -59,6 +71,12 @@
             "value" : "?"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "?"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -87,6 +105,12 @@
             "value" : "\"%@\" ne correspond à aucune application. Soit il n'est pas disponible dans le catalogue Homebrew, soit vous l'avez mal orthographié."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@はどのアプリケーションにも一致しません Homebrewで入手出来ないかスペルが間違っています"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -110,6 +134,12 @@
     "(%@)" : {
       "localizations" : {
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%@)"
+          }
+        },
+        "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "(%@)"
@@ -143,6 +173,12 @@
             "value" : "[Homebrew](https://brew.sh) est un outil de gestion de packages gratuit et open source qui facilite l'installation d'applications tierces. %@ utilise Homebrew sous le capot pour télécharger et gérer des applications."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "[Homebrew](https://brew.sh)は、サードパーティアプリケーションのインストールを簡単にする無料のオープンソースパッケージ管理ツールです %@は内部でHomebrewを使用してアプリケーションをダウンロードして管理します"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -169,6 +205,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "**Attention** : Le cache Homebrew est partagé entre les installations Homebrew. La suppression du cache supprimera le cache pour toutes les installations!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**警告**: HomebrewキャッシュはHomebrewインストール間で共有されます キャッシュを削除すると全てのインストールキャッシュが削除されます"
           }
         },
         "hu" : {
@@ -199,6 +241,12 @@
             "value" : ""
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/path/to/brew"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -227,6 +275,12 @@
             "value" : ""
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/path/to/dir"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -250,6 +304,12 @@
     "%@" : {
       "localizations" : {
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@"
@@ -281,6 +341,12 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ is already installed. If you want to add it to %2$@ click more options (chevron icon) and press Force Install."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@はすでにインストールされています %2$@に追加する場合は、その他のオプション(山形アイコン)をクリックし強制インストールを押します"
           }
         },
         "fr" : {
@@ -317,6 +383,12 @@
             "value" : "%@ installé avec succès!"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@は正常にインストールされました"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -343,6 +415,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ réinstaller avec succès!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の再インストールが成功しました"
           }
         },
         "hu" : {
@@ -373,6 +451,12 @@
             "value" : "%@ déinstaller avec succès!"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@は正常にアンインストールされました"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -399,6 +483,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ mis à jour avec succès!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@は正常に更新されました"
           }
         },
         "hu" : {
@@ -429,6 +519,12 @@
             "value" : "%@ utilise le proxy réseau du système, mais il ne peut utiliser qu'un seul protocole (HTTP, HTTPS, ou SOCKS5). Sélectionnez la méthode que vous préférez."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@はシステムネットワークプロキシを使用しますが、使用できるプロトコルは1つだけです(HTTP、HTTPS、SOCKS5)好みの方法を選択して下さい"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -455,6 +551,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Une nouvelle installation Homebrew sera installée dans ~/Library/Application Support/%@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新しいHomebrewインストールは~/Library/Application Support/%@にインストールされます"
           }
         },
         "hu" : {
@@ -485,6 +587,12 @@
             "value" : "À propos de %@"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@について"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -511,6 +619,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクション"
           }
         },
         "hu" : {
@@ -541,6 +655,12 @@
             "value" : "Tâches Actives"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクティブなタスク"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -567,6 +687,12 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "After reinstalling, all currently installed apps will be unlinked from %1$@. They won't be deleted, but you won't be able to update or uninstall them via %2$@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "再インストール後、現在インストールされているすべてのアプリは %1$@からリンク解除されます これらは削除されませんが、%2$@経由で更新又はアンインストールすることが出来ません"
           }
         },
         "fr" : {
@@ -603,6 +729,12 @@
             "value" : "Toutes les applications actuellement installées seront dissociées de %@."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在インストールされているすべてのアプリケーションは %@からリンク解除されます"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -629,6 +761,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toutes les autres fonctions de l'application seront désactivées pendant la mise à jour!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップデート中はアプリの他の機能は全て無効になります"
           }
         },
         "hu" : {
@@ -659,6 +797,12 @@
             "value" : "Tout est prêt!"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全ての準備完了"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -685,6 +829,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mises en garde concernant l'application"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用上の注意"
           }
         },
         "hu" : {
@@ -715,6 +865,12 @@
             "value" : "L'application est introuvable"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリケーションが見つかりません"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -741,6 +897,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Erreur de chargement de l'application"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリケーション読み込みエラー"
           }
         },
         "hu" : {
@@ -771,6 +933,12 @@
             "value" : ""
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリケーションディレクトリ"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -797,6 +965,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appdir (Optionnel)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appdir(オプション)"
           }
         },
         "hu" : {
@@ -827,6 +1001,12 @@
             "value" : "Apparence"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外観"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -853,6 +1033,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les applications qui nécessitent un mot de passe administrateur pour s'installer ne pourront pas s'installer."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストールに管理者パスワードが必要なアプリケーションはインストール出来ません"
           }
         },
         "hu" : {
@@ -883,6 +1069,12 @@
             "value" : ""
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -909,6 +1101,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les applications avec peu de téléchargements sont masquées, pensez à désactiver ce filtre"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダウンロードの少ないアプリケーションは非表示になります　このフィルターを無効にすることを検討して下さい"
           }
         },
         "hu" : {
@@ -939,6 +1137,12 @@
             "value" : "Voulez-vous vraiment %@installer Homebrew?"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrewを%@installしてもよろしいですか?"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -965,6 +1169,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voulez-vous vraiment forcer l'installation de %@ ? Cela remplacera toute installation actuelle!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@のインストールを強制してもよろしいですか?これにより現在のインストールが置き換えられます"
           }
         },
         "hu" : {
@@ -995,6 +1205,12 @@
             "value" : "Êtes-vous sûr de vouloir désinstaller définitivement %@?"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@を完全にアンインストールしてもよろしいですか?"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1021,6 +1237,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rechercher automatiquement des mises à jour"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップデートを自動的にチェックする"
           }
         },
         "hu" : {
@@ -1051,6 +1273,12 @@
             "value" : "Télécharger automatiquement les mises à jour"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップデートを自動的にダウンロードする"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1077,6 +1305,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retour"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "戻る"
           }
         },
         "hu" : {
@@ -1107,6 +1341,12 @@
             "value" : "Chemin d'accès de l'exécutable Homebrew"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brewの実行可能パス"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1133,6 +1373,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chemin d'accès"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brewのパス"
           }
         },
         "hu" : {
@@ -1163,6 +1409,12 @@
             "value" : "Le chemin d'accès à Homebrew a été modifié. Redémarrez l'application pour que les modifications prennent effet."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrewへのパスが変更されました 変更を有効にするにはアプリケーションを再起動します"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1191,6 +1443,12 @@
             "value" : "Le chemin d'accès à Homebrew est cassé"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brewのパスがありません"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1217,6 +1475,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Parcourir"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブラウズ"
           }
         },
         "hu" : {
@@ -1248,6 +1512,12 @@
             "value" : "Parcourez une liste triée sur le volet d'applications géniales."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "厳選された素晴らしいアプリのリストをご覧ください"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1277,6 +1547,12 @@
             "value" : "Navigateurs"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブラウザ"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1303,6 +1579,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
           }
         },
         "hu" : {
@@ -1334,6 +1616,12 @@
             "value" : "Liste Cask (fichier .txt)"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caskリスト(.txtファイル)"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1360,6 +1648,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Catégories"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カテゴリー"
           }
         },
         "hu" : {
@@ -1390,6 +1684,12 @@
             "value" : "Rechercher des mises à jour..."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップデートをチェック..."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1416,6 +1716,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Thème:"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テーマ："
           }
         },
         "hu" : {
@@ -1447,6 +1753,12 @@
             "value" : "Communications"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コミュニケーション"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1474,6 +1786,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Erreur de simultanéité"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同時実行エラー"
           }
         },
         "hu" : {
@@ -1504,6 +1822,12 @@
             "value" : "Continuer"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "続く"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1530,6 +1854,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible de télécharger l'application. Pas de connexion Internet ou l'hôte est inaccessible."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリケーションをダウンロード出来ません インターネット接続が無いかホストにアクセス出来ません"
           }
         },
         "hu" : {
@@ -1561,6 +1891,12 @@
             "value" : "Outils de Création"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作成ツール"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1587,6 +1923,12 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Current app version: %1$@ (%2$@)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "現在のアプリのバージョン:%1$@(%2$@)"
           }
         },
         "fr" : {
@@ -1623,6 +1965,12 @@
             "value" : "Chemin d'accès actuel à Homebrew n'est pas valide"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrewへの現在のパスが無効です"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1649,6 +1997,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Personnalisé"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カスタム"
           }
         },
         "hu" : {
@@ -1679,6 +2033,12 @@
             "value" : "Chemin d'accès à Homebrew personnalisé"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brewのカスタムパス"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1705,6 +2065,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Répertoire d'installation personnalisé"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カスタムインストールディレクトリ"
           }
         },
         "hu" : {
@@ -1736,6 +2102,12 @@
             "value" : "Sombre"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダーク"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1762,6 +2134,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer le cache de Homebrew"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrewキャッシュを削除する"
           }
         },
         "hu" : {
@@ -1793,6 +2171,12 @@
             "value" : "Outils de Développement"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開発ツール"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1819,6 +2203,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discord"
           }
         },
         "hu" : {
@@ -1849,6 +2239,12 @@
             "value" : "Découvrir"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリを探す"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1877,6 +2273,12 @@
             "value" : "Avez-vous déjà installé Homebrew ?"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もうHomebrewをインストールしましたか?"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1903,6 +2305,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Télécharger quand même"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "とにかくダウンロード"
           }
         },
         "hu" : {
@@ -1934,6 +2342,12 @@
             "value" : "Téléchargez des applications en toute simplicité"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリを簡単にダウンロード"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1961,6 +2375,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Téléchargez des applications tierces en un seul clic. Plus besoin de \"Glisser dans le dossier Applications\"."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ワンクリックでサードパーティのアプリをダウンロードできます アプリケーションフォルダーにドラッグする必要はもうありません"
           }
         },
         "hu" : {
@@ -1991,6 +2411,12 @@
             "value" : "Erreur"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラー"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2017,6 +2443,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exportez un fichier contenant toutes les applications actuellement installées. Le fichier peut être importé sur un autre appareil."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在インストールされているすべてのアプリケーションを含むファイルをエクスポートします ファイルは別のデバイスにインポート出来ます"
           }
         },
         "hu" : {
@@ -2047,6 +2479,12 @@
             "value" : "Exporter les applications vers un fichier"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリをファイルにエクスポートする"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2075,6 +2513,12 @@
             "value" : "Echec de l'export"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エクスポートに失敗しました"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2101,6 +2545,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Type de fichier d'exportation"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エクスポートファイルの種類"
           }
         },
         "hu" : {
@@ -2132,6 +2582,12 @@
             "value" : "Échec de la récupération des informations de cask à partir de l'exécutable de Homebrew sélectionné"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択したHomebrew実行可能ファイルからCask情報を取得できませんでした"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2159,6 +2615,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible de décoder les données json de l'API Homebrew"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew APIからのJSONデータをデコード出来ません"
           }
         },
         "hu" : {
@@ -2189,6 +2651,12 @@
             "value" : "Echec du téléchargement de %@"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@のダウンロードに失敗しました"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2215,6 +2683,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Échec de l'installation de pinentry"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pinentryのインストールに失敗しました"
           }
         },
         "hu" : {
@@ -2246,6 +2720,12 @@
             "value" : "Échec du chargement des données de cask à partir du cache"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャッシュからのキャスクデータのロードに失敗しました"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2272,6 +2752,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Echec de la réinstallation de %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の再インストールに失敗しました"
           }
         },
         "hu" : {
@@ -2302,6 +2788,12 @@
             "value" : "Echec de la mise à jour de %@"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@を更新出来ませんでした"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2328,6 +2820,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Forcer l'installation"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "強制インストール"
           }
         },
         "hu" : {
@@ -2358,6 +2856,12 @@
             "value" : "Général"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一般"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2381,6 +2885,12 @@
     "GitHub" : {
       "localizations" : {
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub"
+          }
+        },
+        "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "GitHub"
@@ -2414,6 +2924,12 @@
             "value" : "Masquer les applications avec peu de téléchargements"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダウンロード数が少ないアプリを非表示にする"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2437,6 +2953,12 @@
     "Homebrew" : {
       "localizations" : {
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew"
+          }
+        },
+        "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew"
@@ -2470,6 +2992,12 @@
             "value" : "Version Homebrew: "
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrewバージョン:"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2496,6 +3024,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Page d'accueil"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホームページ"
           }
         },
         "hu" : {
@@ -2526,6 +3060,12 @@
             "value" : "J'ai compris"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2550,6 +3090,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IDEs"
+          }
+        },
+        "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "IDEs"
@@ -2583,6 +3129,12 @@
             "value" : "Importer des applications"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリをインポートする"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2609,6 +3161,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Echec de l'importation"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インポートに失敗しました"
           }
         },
         "hu" : {
@@ -2639,6 +3197,12 @@
             "value" : "Importer/Exporter des applications"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリのインポート/エクスポート"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2665,6 +3229,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En cours..."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "進行中..."
           }
         },
         "hu" : {
@@ -2695,6 +3265,12 @@
             "value" : ""
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "情報"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2721,6 +3297,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installer un Homebrew séparé"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "別のHomebrewをインストールする"
           }
         },
         "hu" : {
@@ -2751,6 +3333,12 @@
             "value" : "Echec de l'installation"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストールに失敗しました"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2777,6 +3365,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installé"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール済み"
           }
         },
         "hu" : {
@@ -2808,6 +3402,12 @@
             "value" : "Installation"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2834,6 +3434,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installation des dépendances"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "依存関係のインストール"
           }
         },
         "hu" : {
@@ -2865,6 +3471,12 @@
             "value" : "Clair"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライト"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2892,6 +3504,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Erreur de chargement"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込みエラー"
           }
         },
         "hu" : {
@@ -2923,6 +3541,12 @@
             "value" : "Gérer vos applications"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリを管理"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2949,6 +3573,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gérer Homebrew"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrewの管理"
           }
         },
         "hu" : {
@@ -2980,6 +3610,12 @@
             "value" : "Média"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メディア"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3007,6 +3643,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Barre des Menus"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メニューバー"
           }
         },
         "hu" : {
@@ -3038,6 +3680,12 @@
             "value" : "Plus téléchergé (par défaut)"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最もダウンロードされたCask(デフォルト)"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3064,6 +3712,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Non (je ne sais pas ce que c'est)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No(それが何なのか分かりません）"
           }
         },
         "hu" : {
@@ -3094,6 +3748,12 @@
             "value" : "Aucune tâches actives"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクティブなタスクはありません"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3120,6 +3780,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune page d'accueil trouvée"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホームページが見つかりませんでした"
           }
         },
         "hu" : {
@@ -3150,6 +3816,12 @@
             "value" : "Aucune sélection"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択無し"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3176,6 +3848,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune mise à jour disponible"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "利用可能なアップデートはありません"
           }
         },
         "hu" : {
@@ -3207,6 +3885,12 @@
             "value" : "Remarque"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "備考"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3233,6 +3917,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Attention"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "注意"
           }
         },
         "hu" : {
@@ -3263,6 +3953,12 @@
             "value" : ""
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3289,6 +3985,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nombre d'applications installées:"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストールされているアプリケーションの数:"
           }
         },
         "hu" : {
@@ -3320,6 +4022,12 @@
             "value" : "Outils Bureautiques"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オフィスツール"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3348,6 +4056,12 @@
             "value" : ""
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3374,6 +4088,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ouvrir"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開く"
           }
         },
         "hu" : {
@@ -3405,6 +4125,12 @@
             "value" : "Gestionnaires de Mots de Passe"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パスワードマネージャー"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3431,6 +4157,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinentry"
           }
         },
         "hu" : {
@@ -3461,6 +4193,12 @@
             "value" : "PINEntry est utilisé pour demander en toute sécurité le mot de passe administrateur lorsqu'il est requis lors de l'installation d'une application."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PINEntryはアプリケーションのインストール中に管理者パスワードが必要になった場合に安全に管理者パスワードの入力を求める為に使用されます"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3489,6 +4227,12 @@
             "value" : "PINEntry n’est pas installé correctement"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PINEntryが正しくインストールされていません"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3515,6 +4259,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Protocole proxy préféré"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "優先プロキシプロトコル"
           }
         },
         "hu" : {
@@ -3546,6 +4296,12 @@
             "value" : "Productivité"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生産性"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3572,6 +4328,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Donner le chemin d'accès de Homebrew"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrewの実行パスを指定"
           }
         },
         "hu" : {
@@ -3602,6 +4364,12 @@
             "value" : "Proxy"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロキシ"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3628,6 +4396,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quitter"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了"
           }
         },
         "hu" : {
@@ -3658,6 +4432,12 @@
             "value" : "Réinstaller"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再インストール"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3686,6 +4466,12 @@
             "value" : "Echec de la réinstallation"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再インストールに失敗しました"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3712,6 +4498,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réinstaller Homebrew"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrewを再インストールする"
           }
         },
         "hu" : {
@@ -3743,6 +4535,12 @@
             "value" : "Réinstallation"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再インストール"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3769,6 +4567,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Relancer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再起動"
           }
         },
         "hu" : {
@@ -3799,6 +4603,12 @@
             "value" : "Réessayer"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一度やり直してください"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3825,6 +4635,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retry Install"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストールを再試行する"
           }
         },
         "hu" : {
@@ -3855,6 +4671,12 @@
             "value" : "Réessayez de charger"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一度読み込んで下さい"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3881,6 +4703,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réessayez l'installation ou visitez la page de dépannage."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストールを再試行するかトラブルシューティングページにアクセスして下さい"
           }
         },
         "hu" : {
@@ -3911,6 +4739,12 @@
             "value" : "Voir tout"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て見る"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3937,6 +4771,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sélectionner le dossier"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フォルダを選択"
           }
         },
         "hu" : {
@@ -3967,6 +4807,12 @@
             "value" : "Le chemin d'accès de Homebrew n'est pas valide!"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brewのパスが無効です"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3993,6 +4839,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シェルの出力"
           }
         },
         "hu" : {
@@ -4023,6 +4875,12 @@
             "value" : "Afficher tout"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て表示"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4049,6 +4907,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afficher toutes les mises à jour"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全てのアップデートを表示"
           }
         },
         "hu" : {
@@ -4079,6 +4943,12 @@
             "value" : "Trier par"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並べ替え"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4107,6 +4977,12 @@
             "value" : "Trier"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並べ替えオプション"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4133,6 +5009,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Commence à utiliser %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の使用を開始する"
           }
         },
         "hu" : {
@@ -4164,6 +5046,12 @@
             "value" : "Système"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4192,6 +5080,12 @@
             "value" : "Tâches terminées"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了したタスク"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4218,6 +5112,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Erreurs de tâche"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タスクエラー"
           }
         },
         "hu" : {
@@ -4249,6 +5149,12 @@
             "value" : "Terminals"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナル"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4275,6 +5181,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cette app"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このアプリ"
           }
         },
         "hu" : {
@@ -4305,6 +5217,12 @@
             "value" : "Cette application utilise le gestionnaire de packages [Homebrew](https://brew.sh/) (brew en abrégé) pour télécharger des applications. Homebrew est un utilitaire de ligne de commande gratuit et open source qui peut télécharger des outils de développement utiles ainsi que des applications de bureau."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このアプリケーションは[Homebrew](https://brew.sh/)パッケージ マネージャー(略してBrew)を使用してアプリケーションをダウンロードします Homebrewは便利な開発ツールやデスクトップアプリケーションをダウンロード出来る無料のオープンソースコマンドラインユーティリティです"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4333,6 +5251,12 @@
             "value" : "Cette application utilise le gestionnaire de packages gratuit et open source [Homebrew](https://brew.sh/) pour télécharger et gérer les applications. Si vous l'avez déjà installé sur votre système, vous pouvez l'utiliser immédiatement. Si vous n'avez pas installé Homebrew ou si vous ne savez pas ce que c'est, sélectionnez **Non**. Cela créera une nouvelle installation de Homebrew juste pour %@."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このアプリケーションは無料のオープンソースパッケージマネージャー[Homebrew](https://brew.sh/)を使用してアプリケーションのダウンロードと管理を行います すでにシステムにインストールされている場合はすぐに使用できます Homebrewがインストールされていない場合又はHomebrewが何であるかわからない場合は、**いいえ** を選択して下さい これにより %@専用のHomebrewの新しいインストールが作成されます"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4359,6 +5283,12 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "This will (re)install %1$@'s Homebrew installation at: ~/Library/Application Support/%2$@/homebrew"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "これにより、%1$@のHomebrewインストールが~/Library/Application Support/%2$@/homebrew に再インストールされます"
           }
         },
         "fr" : {
@@ -4395,6 +5325,12 @@
             "value" : "Cette option affiche les mises à jour des applications dont la mise à jour automatique est désactivée, c'est-à-dire les applications qui s'occupent elles-mêmes de leurs mises à jour."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このオプションは自動更新が無効になっているアプリケーション つまり独自の更新を処理するアプリケーションの更新を表示します"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4421,6 +5357,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cela désinstallera tous les fichiers ainsi que le cache associés à %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "これにより%@に関連付けられたすべてのファイルとキャッシュがアンインストールされます"
           }
         },
         "hu" : {
@@ -4451,6 +5393,12 @@
             "value" : "Dépannage"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トラブルシューティング"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4477,6 +5425,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Désactiver le filtre téléchargements minoritaire"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダウンロード数フィルターを無効にする"
           }
         },
         "hu" : {
@@ -4507,6 +5461,12 @@
             "value" : "Désinstaller"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アンインストール"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4533,6 +5493,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Désinstaller %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@をアンインストール"
           }
         },
         "hu" : {
@@ -4563,6 +5529,12 @@
             "value" : "Désinstallez %@, les fichiers associés ainsi que le cache."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@関連ファイル及びキャッシュをアンインストール"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4591,6 +5563,12 @@
             "value" : "Désinstaller Applite..."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appliteをアンインストール..."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4617,6 +5595,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Désinstaller totalement"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完全にアンインストールする"
           }
         },
         "hu" : {
@@ -4648,6 +5632,12 @@
             "value" : "Désinstallation"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アンインストール"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4676,6 +5666,12 @@
             "value" : "Mettre à jour"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4702,6 +5698,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tout mettre à jour"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて更新"
           }
         },
         "hu" : {
@@ -4733,6 +5735,12 @@
             "value" : "Mettez à jour et désinstallez vos applications. Fini les résidus des applications supprimées."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリを更新してアンインストールします 削除したアプリの残り物はもうありません"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4759,6 +5767,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Echec de la mise à jour"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップデートに失敗しました"
           }
         },
         "hu" : {
@@ -4789,6 +5803,12 @@
             "value" : "Mettre à jour Homebrew"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrewを更新する"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4815,6 +5835,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mises à jour"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップデート"
           }
         },
         "hu" : {
@@ -4846,6 +5872,12 @@
             "value" : "Mise à jour"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップデート"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4874,6 +5906,12 @@
             "value" : "Utiliser le répertoire d'installation personnalisé"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カスタムインストールディレクトリを使用する"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4900,6 +5938,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Utiliser le proxy système"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システムプロキシを使用する"
           }
         },
         "hu" : {
@@ -4931,6 +5975,12 @@
             "value" : "Utilitaires"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユーティリティ"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4957,6 +6007,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voir l'erreur"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラーを参照してください"
           }
         },
         "hu" : {
@@ -4988,6 +6044,12 @@
             "value" : "Virtualisation"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仮想化"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5015,6 +6077,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Attention"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "注意"
           }
         },
         "hu" : {
@@ -5045,6 +6113,12 @@
             "value" : "Site web"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Webサイト"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5071,6 +6145,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bienvenue sur %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@へようこそ"
           }
         },
         "hu" : {
@@ -5101,6 +6181,12 @@
             "value" : "Lors de l'importation d'un Brewfile, seuls les casks seront installés. D'autres éléments tels que les formules et les taps seront ignorés."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrewfileをインポートするとCaskのみがインストールされます 数式やタップなどの他の要素は無視されます"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5127,6 +6213,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Outils de ligne de commande Xcode"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xcodeコマンドラインツール"
           }
         },
         "hu" : {
@@ -5157,6 +6249,12 @@
             "value" : "Oui"
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "はい"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5183,6 +6281,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vous pouvez continuer en toute sécurité, mais vous ne pourrez pas installer d'applications avec des installateurs .pkg."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "続行しても安全ですが、.pkgインストーラーを使用してアプリをインストールすることは出来ません"
           }
         },
         "hu" : {
@@ -5213,6 +6317,12 @@
             "value" : "Vous serez invité à installer les outils de ligne de commande Xcode. Veuillez sélectionner \"Installer\" car ils sont nécessaires pour que cette application fonctionne."
           }
         },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xcodeコマンドラインツールをインストールするように求められます このアプリが動作するために必要なためインストールを選択してください"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5239,6 +6349,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vous serez invité à installer les outils de ligne de commande Xcode. Veuillez sélectionner \"Installer\" car ils sont nécessaires pour que cette application fonctionne."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xcodeコマンドラインツールをインストールするように求められます このアプリが動作するために必要なためインストールを選択してください"
           }
         },
         "hu" : {
