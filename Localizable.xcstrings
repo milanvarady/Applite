@@ -345,8 +345,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@はすでにインストールされています %2$@に追加する場合は、その他のオプション(山形アイコン)をクリックし強制インストールを押します"
+            "state" : "translated",
+            "value" : "%1$@はすでにインストールされています %2$@に追加する場合は、その他のオプション(矢印アイコン)をクリックし強制インストールを押します"
           }
         },
         "fr" : {
@@ -556,7 +556,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "新しいHomebrewインストールは~/Library/Application Support/%@にインストールされます"
+            "value" : "新しいHomebrewのインストールは~/Library/Application Support/%@にインストールされます"
           }
         },
         "hu" : {
@@ -691,8 +691,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "再インストール後、現在インストールされているすべてのアプリは %1$@からリンク解除されます これらは削除されませんが、%2$@経由で更新又はアンインストールすることが出来ません"
+            "state" : "translated",
+            "value" : "再インストール後、現在インストールされている全てのアプリは %1$@からリンク解除されます これらは削除されませんが、%2$@経由で更新又はアンインストールすることが出来ません"
           }
         },
         "fr" : {
@@ -732,7 +732,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "現在インストールされているすべてのアプリケーションは %@からリンク解除されます"
+            "value" : "現在インストールされている全てのアプリケーションは %@からリンク解除されます"
           }
         },
         "hu" : {
@@ -766,7 +766,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アップデート中はアプリの他の機能は全て無効になります"
+            "value" : "アップデート中はアプリの他の機能が全て無効になります"
           }
         },
         "hu" : {
@@ -1140,7 +1140,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrewを%@installしてもよろしいですか?"
+            "value" : "Homebrewを %@ installしてもよろしいですか?"
           }
         },
         "hu" : {
@@ -1174,7 +1174,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@のインストールを強制してもよろしいですか?これにより現在のインストールが置き換えられます"
+            "value" : "%@の強制インストールをしてよろしいですか？ これにより現在のインストールが置き換えられます"
           }
         },
         "hu" : {
@@ -1412,7 +1412,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrewへのパスが変更されました 変更を有効にするにはアプリケーションを再起動します"
+            "value" : "Homebrewのパスが変更されました 変更を有効にするにはアプリケーションを再起動します"
           }
         },
         "hu" : {
@@ -1446,7 +1446,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Brewのパスがありません"
+            "value" : "Brewのパスが見つかりません"
           }
         },
         "hu" : {
@@ -1927,7 +1927,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "現在のアプリのバージョン:%1$@(%2$@)"
           }
         },
@@ -1968,7 +1968,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrewへの現在のパスが無効です"
+            "value" : "Homebrewの現在のパスが無効です"
           }
         },
         "hu" : {
@@ -2139,7 +2139,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrewキャッシュを削除する"
+            "value" : "Homebrewのキャッシュを削除する"
           }
         },
         "hu" : {
@@ -2276,7 +2276,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "もうHomebrewをインストールしましたか?"
+            "value" : "Homebrewはインストール済みですか？"
           }
         },
         "hu" : {
@@ -2310,7 +2310,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "とにかくダウンロード"
+            "value" : "強制ダウンロード"
           }
         },
         "hu" : {
@@ -2380,7 +2380,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ワンクリックでサードパーティのアプリをダウンロードできます アプリケーションフォルダーにドラッグする必要はもうありません"
+            "value" : "ワンクリックでサードパーティのアプリをダウンロードできます アプリケーションフォルダーにドラッグする必要はありません"
           }
         },
         "hu" : {
@@ -2448,7 +2448,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "現在インストールされているすべてのアプリケーションを含むファイルをエクスポートします ファイルは別のデバイスにインポート出来ます"
+            "value" : "現在インストールされている全てのアプリケーションを含むファイルをエクスポートします ファイルは別のデバイスにインポート出来ます"
           }
         },
         "hu" : {
@@ -2585,7 +2585,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "選択したHomebrew実行可能ファイルからCask情報を取得できませんでした"
+            "value" : "選択したHomebrewの実行可能ファイルからCask情報を取得出来ませんでした"
           }
         },
         "hu" : {
@@ -2688,7 +2688,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "pinentryのインストールに失敗しました"
+            "value" : "Pinentryのインストールに失敗しました"
           }
         },
         "hu" : {
@@ -2723,7 +2723,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キャッシュからのキャスクデータのロードに失敗しました"
+            "value" : "キャッシュからのCaskデータのロードに失敗しました"
           }
         },
         "hu" : {
@@ -2995,7 +2995,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrewバージョン:"
+            "value" : "Homebrewのバージョン:"
           }
         },
         "hu" : {
@@ -4742,7 +4742,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "全て見る"
+            "value" : "全て表示"
           }
         },
         "hu" : {
@@ -4776,7 +4776,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "フォルダを選択"
+            "value" : "フォルダーを選択"
           }
         },
         "hu" : {
@@ -5254,7 +5254,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このアプリケーションは無料のオープンソースパッケージマネージャー[Homebrew](https://brew.sh/)を使用してアプリケーションのダウンロードと管理を行います すでにシステムにインストールされている場合はすぐに使用できます Homebrewがインストールされていない場合又はHomebrewが何であるかわからない場合は、**いいえ** を選択して下さい これにより %@専用のHomebrewの新しいインストールが作成されます"
+            "value" : "このアプリケーションは無料のオープンソースパッケージマネージャー[Homebrew](https://brew.sh/)を使用してアプリケーションのダウンロードと管理を行います すでにシステムにインストールされている場合はすぐに使用できます Homebrewがインストールされていない場合、又はHomebrewが何であるかわからない場合は、**いいえ** を選択して下さい これにより %@専用のHomebrewの新しいインストールが作成されます"
           }
         },
         "hu" : {
@@ -5287,7 +5287,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "これにより、%1$@のHomebrewインストールが~/Library/Application Support/%2$@/homebrew に再インストールされます"
           }
         },
@@ -5362,7 +5362,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "これにより%@に関連付けられたすべてのファイルとキャッシュがアンインストールされます"
+            "value" : "これにより%@に関連付けられた全てのファイルとキャッシュがアンインストールされます"
           }
         },
         "hu" : {
@@ -5430,7 +5430,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ダウンロード数フィルターを無効にする"
+            "value" : "少数ダウンロードフィルターを無効にする"
           }
         },
         "hu" : {
@@ -5703,7 +5703,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "すべて更新"
+            "value" : "全て更新"
           }
         },
         "hu" : {
@@ -5738,7 +5738,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アプリを更新してアンインストールします 削除したアプリの残り物はもうありません"
+            "value" : "アプリを更新してアンインストールします 削除したアプリのファイルは残りません"
           }
         },
         "hu" : {
