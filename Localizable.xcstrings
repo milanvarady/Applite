@@ -210,7 +210,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**警告**: HomebrewキャッシュはHomebrewインストール間で共有されます キャッシュを削除すると全てのインストールキャッシュが削除されます"
+            "value" : "**警告**: HomebrewキャッシュはHomebrewのインストール間で共有されます キャッシュを削除すると全てのインストールキャッシュが削除されます"
           }
         },
         "hu" : {
@@ -1140,7 +1140,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrewから%@をinstallしてもよろしいですか?"
+            "value" : "Homebrewを%@installしてもよろしいですか?"
           }
         },
         "hu" : {
@@ -2723,7 +2723,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キャッシュからのCaskデータのロードに失敗しました"
+            "value" : "キャッシュからのCaskデータの読み込みに失敗しました"
           }
         },
         "hu" : {
@@ -4606,7 +4606,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "もう一度やり直してください"
+            "value" : "もう一度やり直して下さい"
           }
         },
         "hu" : {
@@ -6012,7 +6012,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "エラーを参照してください"
+            "value" : "エラーを参照して下さい"
           }
         },
         "hu" : {
@@ -6320,7 +6320,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xcodeコマンドラインツールをインストールするように求められます このアプリが動作するために必要なためインストールを選択してください"
+            "value" : "Xcodeコマンドラインツールをインストールするように求められます このアプリの動作に必要な為、インストールを選択して下さい"
           }
         },
         "hu" : {
@@ -6354,7 +6354,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xcodeコマンドラインツールをインストールするように求められます このアプリが動作するために必要なためインストールを選択してください"
+            "value" : "Xcodeコマンドラインツールをインストールするように求められます このアプリの動作に必要な為、インストールを選択して下さい"
           }
         },
         "hu" : {
