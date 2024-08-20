@@ -556,7 +556,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "新しいHomebrewのインストールは~/Library/Application Support/%@にインストールされます"
+            "value" : "新しいHomebrewのインストール先は ~/Library/Application Support/%@にインストールされます"
           }
         },
         "hu" : {
@@ -1140,7 +1140,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrewを %@ installしてもよろしいですか?"
+            "value" : "Homebrewから%@をinstallしてもよろしいですか?"
           }
         },
         "hu" : {
@@ -1174,7 +1174,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@の強制インストールをしてよろしいですか？ これにより現在のインストールが置き換えられます"
+            "value" : "%@の強制インストールをしてよろしいですか？ これにより現在のアプリケーションが置き換えられます"
           }
         },
         "hu" : {
@@ -5254,7 +5254,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このアプリケーションは無料のオープンソースパッケージマネージャー[Homebrew](https://brew.sh/)を使用してアプリケーションのダウンロードと管理を行います すでにシステムにインストールされている場合はすぐに使用できます Homebrewがインストールされていない場合、又はHomebrewが何であるかわからない場合は、**いいえ** を選択して下さい これにより %@専用のHomebrewの新しいインストールが作成されます"
+            "value" : "このアプリケーションは無料のオープンソースパッケージマネージャー[Homebrew](https://brew.sh/)を使用してアプリケーションのダウンロードと管理を行います すでにシステムにインストールされている場合はすぐに使用できます Homebrewがインストールされていない場合、又はHomebrewが何であるかわからない場合は、**いいえ** を選択して下さい これにより %@専用のHomebrewの新しいインストール先が作成されます"
           }
         },
         "hu" : {
@@ -5288,7 +5288,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "これにより、%1$@のHomebrewインストールが~/Library/Application Support/%2$@/homebrew に再インストールされます"
+            "value" : "これにより、%1$@のHomebrewのインストール先が ~/Library/Application Support/%2$@/homebrew に再インストールされます"
           }
         },
         "fr" : {
