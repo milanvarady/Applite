@@ -936,7 +936,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Appdir"
+            "value" : "アプリケーションディレクトリ"
           }
         },
         "hu" : {
@@ -970,7 +970,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Appdir(オプション)"
+            "value" : "アプリケーションディレクトリ(オプション)"
           }
         },
         "hu" : {
@@ -1515,7 +1515,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "厳選された素晴らしいアプリのリストをご覧ください"
+            "value" : "厳選された素晴らしいアプリのリストをご覧下さい"
           }
         },
         "hu" : {
@@ -4333,7 +4333,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrewの実行パスを指定"
+            "value" : "Homebrewの実行パスを指定して下さい"
           }
         },
         "hu" : {
@@ -5328,7 +5328,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このオプションは自動更新が無効になっているアプリケーション つまり独自の更新を処理するアプリケーションの更新を表示します"
+            "value" : "このオプションは自動更新が無効になっているアプリケーション、つまり独自の更新を処理するアプリケーションの更新を表示します"
           }
         },
         "hu" : {
@@ -6184,7 +6184,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BrewfileをインポートするとCaskのみがインストールされます。数式やタップなどの他の要素は無視されます"
+            "value" : "BrewfileをインポートするとCaskのみがインストールされます。FormulaやTapなどの他の要素は無視されます"
           }
         },
         "hu" : {
