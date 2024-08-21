@@ -420,7 +420,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@の再インストールが成功しました"
+            "value" : "%@の再インストールに成功しました"
           }
         },
         "hu" : {
@@ -522,7 +522,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@はシステムネットワークプロキシを使用しますが、使用できるプロトコルは1つだけです(HTTP、HTTPS、SOCKS5)好みの方法を選択して下さい"
+            "value" : "%@はシステムネットワークプロキシを使用しますが、使用できるプロトコルは1つだけです(HTTP、HTTPS、SOCKS5)お好みの方法を選択して下さい"
           }
         },
         "hu" : {
@@ -692,7 +692,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "再インストール後、現在インストールされている全てのアプリは %1$@からリンク解除されます これらは削除されませんが、%2$@経由で更新又はアンインストールすることが出来ません"
+            "value" : "再インストール後、現在インストールされている全てのアプリは %1$@からリンク解除されます\nこれらは削除されませんが、%2$@経由で更新又はアンインストールすることが出来ません"
           }
         },
         "fr" : {
@@ -2995,7 +2995,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrewのバージョン:"
+            "value" : "Homebrewのバージョン : "
           }
         },
         "hu" : {
@@ -5220,7 +5220,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このアプリケーションは[Homebrew](https://brew.sh/)パッケージ マネージャー(略してBrew)を使用してアプリケーションをダウンロードします Homebrewは便利な開発ツールやデスクトップアプリケーションをダウンロード出来る無料のオープンソースコマンドラインユーティリティです"
+            "value" : "このアプリケーションは[Homebrew](https://brew.sh/)パッケージ マネージャー(略してBrew)を使用してアプリケーションをダウンロードします\nHomebrewは便利な開発ツールやデスクトップアプリケーションをダウンロード出来る無料のオープンソースコマンドラインユーティリティです"
           }
         },
         "hu" : {
@@ -5288,7 +5288,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "これにより、%1$@のHomebrewのインストール先が ~/Library/Application Support/%2$@/homebrew に(再)インストールされます"
+            "value" : "これにより、%1$@のHomebrewのインストール先が\n~/Library/Application Support/%2$@/homebrew に(再)インストールされます"
           }
         },
         "fr" : {
