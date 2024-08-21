@@ -2380,7 +2380,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ワンクリックでサードパーティのアプリをダウンロードできます アプリケーションフォルダーにドラッグする必要はありません"
+            "value" : "ワンクリックでサードパーティのアプリをダウンロード出来ます アプリケーションフォルダーにドラッグする必要はありません"
           }
         },
         "hu" : {
@@ -2723,7 +2723,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キャッシュからのCaskデータの読み込みに失敗しました"
+            "value" : "キャッシュからのCaskデータの取得に失敗しました"
           }
         },
         "hu" : {
@@ -3990,7 +3990,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "インストールされているアプリケーションの数:"
+            "value" : "インストールされているアプリケーションの数 : "
           }
         },
         "hu" : {
@@ -5288,7 +5288,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "これにより、%1$@のHomebrewのインストール先が ~/Library/Application Support/%2$@/homebrew に再インストールされます"
+            "value" : "これにより、%1$@のHomebrewのインストール先が ~/Library/Application Support/%2$@/homebrew に(再)インストールされます"
           }
         },
         "fr" : {
