@@ -11,5 +11,11 @@ import Foundation
 ///
 /// - Returns: Whether it is installed or not
 public func isCommandLineToolsInstalled() -> Bool {
-    return !shell("xcode-select -p").didFail
+    do {
+        try Shell.run("xcode-select -p")
+    } catch {
+        return false
+    }
+
+    return true
 }

@@ -11,7 +11,7 @@ enum ShellError: LocalizedError {
     case scriptNotFound
     case checksumMismatch
     case outputDecodingFailed
-    case nonZeroExit(status: Int32, output: String)
+    case nonZeroExit(command: String, exitCode: Int32, output: String)
 
     var errorDescription: String? {
         switch self {
@@ -21,8 +21,8 @@ enum ShellError: LocalizedError {
             return "Script checksum mismatch. The file has been modified."
         case .outputDecodingFailed:
             return "Failed to decode command output as UTF-8"
-        case .nonZeroExit(let status, let output):
-            return "Command failed with exit code \(status): \(output)"
+        case .nonZeroExit(let command, let exitCode, let output):
+            return "Failed to run shell command.\nCommand: \(command) (exit code: \(exitCode))\nOutput: \(output)"
         }
     }
 }

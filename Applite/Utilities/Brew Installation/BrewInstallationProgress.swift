@@ -17,6 +17,6 @@ public enum InstallPhase: Int {
 /// Keeps track of current brew installation progress
 ///
 /// Used by the ``DependencyManager`` struct
-public final class BrewInstallationProgress: ObservableObject {
+final class BrewInstallationProgress: ObservableObject {
     @Published var phase: InstallPhase = .waitingForXcodeCommandLineTools
 }

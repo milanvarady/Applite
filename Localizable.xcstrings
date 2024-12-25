@@ -1469,6 +1469,7 @@
     },
     "Concurrency error" : {
       "comment" : "CaskDataLoadError",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2125,6 +2126,7 @@
     },
     "Faild to retrieve cask information from selected brew executable" : {
       "comment" : "CaskDataLoadError",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2154,6 +2156,7 @@
     },
     "Failed to decode json data from the Homebrew API" : {
       "comment" : "CaskDataLoadError",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2239,6 +2242,7 @@
     },
     "Failed to load cask data from cache" : {
       "comment" : "CaskDataLoadError",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2265,6 +2269,9 @@
           }
         }
       }
+    },
+    "Failed to load outdated apps" : {
+
     },
     "Failed to reinstall %@" : {
       "localizations" : {
@@ -2293,6 +2300,9 @@
           }
         }
       }
+    },
+    "Failed to uninstall" : {
+
     },
     "Failed to update %@" : {
       "localizations" : {
@@ -2887,6 +2897,7 @@
     },
     "Load error" : {
       "comment" : "CaskDataLoadError",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

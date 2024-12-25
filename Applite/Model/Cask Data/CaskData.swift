@@ -69,13 +69,7 @@ final class CaskData: ObservableObject {
             await cacheData(data: caskData, to: Self.caskCacheURL)
             
             // Decode data
-            do {
-                return try JSONDecoder().decode([Cask].self, from: caskData)
-            }
-            catch {
-                await Self.logger.error("Failed to parse cask data, error: \(error.localizedDescription)")
-                throw CaskDataLoadError.decodeError
-            }
+            return try JSONDecoder().decode([Cask].self, from: caskData)
         }
         
         /// Gets cask analytics information from the Homebrew API and decodes it into a dictionary
@@ -106,13 +100,7 @@ final class CaskData: ObservableObject {
             let analyticsDecoded: BrewAnalytics
             
             // Decode data
-            do {
-                analyticsDecoded = try JSONDecoder().decode(BrewAnalytics.self, from: analyticsData)
-            }
-            catch {
-                await Self.logger.error("Failed to parse cask data, error: \(error.localizedDescription)")
-                throw CaskDataLoadError.decodeError
-            }
+            analyticsDecoded = try JSONDecoder().decode(BrewAnalytics.self, from: analyticsData)
             
             // Convert analytics to a cask ID to download count dictionary
             let analyticsDict: BrewAnalyticsDictionary = Dictionary(uniqueKeysWithValues: analyticsDecoded.items.map {
@@ -126,32 +114,26 @@ final class CaskData: ObservableObject {
         /// - Returns: A list of Cask ID's
         @Sendable
         func getInstalledCasks() async throws -> [String] {
-            let result = await shell("\(BrewPaths.currentBrewExecutable) list --cask")
-            
-            if result.didFail {
-                await Self.logger.error("Couldn't get installed apps. Shell output: \(result.output)")
-                throw CaskDataLoadError.shellError
-            }
-            
-            if result.output.isEmpty {
+            let output = try await Shell.runAsync("\(BrewPaths.currentBrewExecutable) list --cask")
+
+            if output.isEmpty {
                 await Self.logger.notice("No installed casks were found")
             }
             
-            return result.output.components(separatedBy: "\n")
+            return output
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .components(separatedBy: "\n")
         }
         
         /// Gets the list of outdated casks
         /// - Returns: A list of Cask ID's
         @Sendable
         func getOutdatedCasks() async throws -> [String] {
-            let result = await shell("\(BrewPaths.currentBrewExecutable) outdated --cask -q")
-            
-            if result.didFail {
-                await Self.logger.error("Couldn't get outdated apps. Shell output: \(result.output)")
-                throw CaskDataLoadError.shellError
-            }
-            
-            return result.output.components(separatedBy: "\n")
+            let output = try await Shell.runAsync("\(BrewPaths.currentBrewExecutable) outdated --cask -q")
+
+            return output
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .components(separatedBy: "\n")
         }
         
         /// Saves ``Data`` objects to cache
@@ -172,6 +154,7 @@ final class CaskData: ObservableObject {
                 }
             } catch {
                 await Self.logger.error("Cound't create cache directory")
+                return
             }
             
             // Save data to cache
@@ -186,13 +169,9 @@ final class CaskData: ObservableObject {
         /// - Returns: A ``Data`` object
         @Sendable
         func loadDataFromCache(dataURL: URL) async throws -> Data {
-            do {
-                let data = try Data(contentsOf: dataURL)
-                
-                return data
-            } catch {
-                throw CaskDataLoadError.cacheError
-            }
+            let data = try Data(contentsOf: dataURL)
+
+            return data
         }
         
         /// Filters casks into a category to casks dictionary
@@ -253,10 +232,13 @@ final class CaskData: ObservableObject {
         (casksByCategory, casksByCategoryCoupled) = fillCategoryDicts()
     }
 
-    func refreshOutdatedApps(greedy: Bool = false) async -> Void {
-        let outdatedCaskIDs = await shell("\(BrewPaths.currentBrewExecutable) outdated --cask \(greedy ? "-g" : "") -q").output
+    func refreshOutdatedApps(greedy: Bool = false) async throws -> Void {
+        let output = try await Shell.runAsync("\(BrewPaths.currentBrewExecutable) outdated --cask \(greedy ? "-g" : "") -q")
+
+        let outdatedCaskIDs = output
+            .trimmingCharacters(in: .whitespacesAndNewlines)
             .components(separatedBy: "\n")
-            .filter({ $0.count > 0 })                                       // Remove empty strings
+            .filter({ !$0.isEmpty })                                        // Remove empty strings
             .map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) })    // Trim whitespace
         
         for i in self.casks.indices {

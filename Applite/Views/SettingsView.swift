@@ -147,8 +147,8 @@ fileprivate struct BrewPathView: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 Button("Relaunch", role: .destructive) {
-                    Task {
-                        await shell("/usr/bin/osascript -e 'tell application \"\(Bundle.main.appName)\" to quit' && sleep 2 && open \"\(Bundle.main.bundlePath)\"")
+                    Task.detached {
+                        try? await Shell.runAsync("/usr/bin/osascript -e 'tell application \"\(Bundle.main.appName)\" to quit' && sleep 2 && open \"\(Bundle.main.bundlePath)\"")
                     }
                 }
             }

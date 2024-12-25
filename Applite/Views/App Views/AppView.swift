@@ -320,9 +320,9 @@ struct AppView: View {
         var body: some View {
             // Lauch app
             Button("Open") {
-                let result = cask.launchApp()
-                
-                if result.didFail {
+                do {
+                    try cask.launchApp()
+                } catch {
                     appNotFoundShowing = true
                 }
             }

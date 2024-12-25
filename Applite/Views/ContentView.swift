@@ -109,7 +109,6 @@ struct ContentView: View {
         }
         .task {
             await loadCasks()
-            await checkPinentry()
         }
         .searchable(text: $searchText, placement: .sidebar)
         .onSubmit(of: .search) {
@@ -153,15 +152,15 @@ struct ContentView: View {
             errorMessage = DependencyManager.brokenPathOrIstallMessage
             loadAlertShowing = true
             brokenInstall = true
-            
-            let output = await shell("\(BrewPaths.currentBrewExecutable) --version").output
-            
+
+            let output = (try? await Shell.runAsync("\(BrewPaths.currentBrewExecutable) --version")) ?? "n/a"
+
             logger.error("""
 Initial cask load failure. Reason: selected brew path seems invalid.
 Brew executable path path: \(BrewPaths.currentBrewExecutable)
 brew --version output: \(output)
 """)
-            
+
             return
         }
         
@@ -174,20 +173,6 @@ brew --version output: \(output)
             loadAlertShowing = true
             
             logger.error("Initial cask load failure. Reason: \(error.localizedDescription)")
-        }
-    }
-    
-    /// Checks if pinentry-mac is correctly installed, if not it installes it
-    private func checkPinentry() async {
-        // Return if installed
-        if await BrewPaths.isPinentryInstalled() { return }
-        
-        logger.notice("pinentry-mac is not installed. Installing now...")
-        
-        do {
-            try await DependencyManager.installPinentry(forceInstall: true)
-        } catch {
-            pinentryErrorShowing = true
         }
     }
 }

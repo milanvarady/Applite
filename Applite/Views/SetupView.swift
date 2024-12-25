@@ -382,9 +382,6 @@ struct SetupView: View {
             
             do {
                 try await DependencyManager.install(progressObject: installationProgress)
-            } catch DependencyInstallationError.PinentryError {
-                showingPinentryAlert = true
-                installationProgress.phase = .done
             } catch {
                 failed = true
             }
