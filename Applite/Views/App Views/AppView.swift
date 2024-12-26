@@ -142,7 +142,8 @@ struct AppView: View {
                         }
                         
                         if self.role == .installAndManage {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            Task { @MainActor in
+                                try await Task.sleep(for: .seconds(1.5))
                                 withAnimation(.spring(blendDuration: 1)) {
                                     successCheckmarkScale = 0.0001
                                 }

@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Fuse
-import Combine
 
 /// Download section. Either dispays the `DiscoverView` or search results
 struct DownloadView: View {

@@ -7,7 +7,6 @@
 
 import SwiftUI
 import os
-import Combine
 
 /// Holds all essential data of a Homebrew cask and provides methods to run brew commands on it (e.g. install, uninstall, update)
 final class Cask: Identifiable, Decodable, Hashable, ObservableObject {

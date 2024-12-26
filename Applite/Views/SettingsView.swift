@@ -54,7 +54,7 @@ struct SettingsView: View {
         .contentShape(Rectangle())
         .onTapGesture {
             // Deselect textfield when clicking away
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 NSApp.keyWindow?.makeFirstResponder(nil)
             }
         }
