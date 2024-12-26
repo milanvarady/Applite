@@ -19,7 +19,8 @@ struct UpdateView: View {
     @State var updateAllButtonRotation = 0.0
     
     @State var showingGreedyUpdateConfirm = false
-    
+    @State var showOutdatedFailAlert = false
+
     // Filter outdated casks
     var casks: [Cask] {
         var filteredCasks = caskData.casks.filter { $0.isOutdated }
@@ -103,7 +104,11 @@ struct UpdateView: View {
             .alert("Notice", isPresented: $showingGreedyUpdateConfirm) {
                 Button("Show All") {
                     Task {
-                        await caskData.refreshOutdatedApps(greedy: true)
+                        do {
+                            try await caskData.refreshOutdatedApps(greedy: true)
+                        } catch {
+                            showOutdatedFailAlert = true
+                        }
                     }
                 }
                 
@@ -120,9 +125,15 @@ struct UpdateView: View {
             }
             else {
                 Button {
-                    Task.init {
+                    Task {
                         refreshing = true
-                        await caskData.refreshOutdatedApps()
+
+                        do {
+                            try await caskData.refreshOutdatedApps(greedy: true)
+                        } catch {
+                            showOutdatedFailAlert = true
+                        }
+
                         refreshing = false
                     }
                 } label: {
@@ -130,6 +141,7 @@ struct UpdateView: View {
                 }
             }
         }
+        .alert("Failed to load outdated apps", isPresented: $showOutdatedFailAlert) {}
     }
 }
 

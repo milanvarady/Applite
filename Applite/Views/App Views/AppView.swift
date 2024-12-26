@@ -178,9 +178,6 @@ struct AppView: View {
                     } else if output.contains("Could not resolve host") {
                         failureAlertMessage = String(localized: "Couldn't download app. No internet connection, or host is unreachable.")
                         showingFailureAlert = true
-                    } else if output.lowercased().contains("pinentry") {
-                        failureAlertMessage = output
-                        showingFailureAlert = true
                     }
                 }
                 .alert("Error", isPresented: $showingFailureAlert) {
@@ -320,9 +317,9 @@ struct AppView: View {
         var body: some View {
             // Lauch app
             Button("Open") {
-                let result = cask.launchApp()
-                
-                if result.didFail {
+                do {
+                    try cask.launchApp()
+                } catch {
                     appNotFoundShowing = true
                 }
             }

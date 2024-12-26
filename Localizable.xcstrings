@@ -1027,40 +1027,6 @@
         }
       }
     },
-    "Applications that require an admin password to install will fail to install." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les applications qui nécessitent un mot de passe administrateur pour s'installer ne pourront pas s'installer."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インストールに管理者パスワードが必要なアプリケーションはインストール出来ません"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A telepítéshez admin jelszót igénylő alkalmazások telepítése sikertelen lesz."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "需要管理员密码才能安装的应用程序将无法安装。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "需要管理員密碼才能安裝的應用程式將無法安裝。"
-          }
-        }
-      }
-    },
     "Applite" : {
       "localizations" : {
         "fr" : {
@@ -1775,41 +1741,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "溝通"
-          }
-        }
-      }
-    },
-    "Concurrency error" : {
-      "comment" : "CaskDataLoadError",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erreur de simultanéité"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "同時実行エラー"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Concurrency error"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "并发错误"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "並發錯誤"
           }
         }
       }
@@ -2573,76 +2504,6 @@
         }
       }
     },
-    "Faild to retrieve cask information from selected brew executable" : {
-      "comment" : "CaskDataLoadError",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Échec de la récupération des informations de cask à partir de l'exécutable de Homebrew sélectionné"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択したHomebrewの実行可能ファイルからCask情報を取得出来ませんでした"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nem sikerült cask információt szerezni a kiválasztott brew executable révén"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法从所选的 brew 可执行文件中检索 cask 信息"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無法從選定的brew可執行檔中檢索桶資訊"
-          }
-        }
-      }
-    },
-    "Failed to decode json data from the Homebrew API" : {
-      "comment" : "CaskDataLoadError",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible de décoder les données json de l'API Homebrew"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew APIからJSONデータをデコード出来ません"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nem sikerült dekódolni a Homebrew API-ról érkezett információt"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法从 Homebrew API 解码 json 数据"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無法從 Homebrew API 解碼 json 數據"
-          }
-        }
-      }
-    },
     "Failed to download %@" : {
       "localizations" : {
         "fr" : {
@@ -2677,74 +2538,8 @@
         }
       }
     },
-    "Failed to install pinentry" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Échec de l'installation de pinentry"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pinentryのインストールに失敗しました"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nem sikerült a Pinentry telepítése"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法安装 pinentry"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pinentry安裝失敗"
-          }
-        }
-      }
-    },
-    "Failed to load cask data from cache" : {
-      "comment" : "CaskDataLoadError",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Échec du chargement des données de cask à partir du cache"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "キャッシュからのCaskデータの取得に失敗しました"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nem sikerült betölteni a cask adatait a cache-ből"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法从缓存加载 cask 数据"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無法從快取加載桶數據"
-          }
-        }
-      }
+    "Failed to load outdated apps" : {
+    
     },
     "Failed to reinstall %@" : {
       "localizations" : {
@@ -2779,6 +2574,9 @@
           }
         }
       }
+    },
+    "Failed to uninstall" : {
+
     },
     "Failed to update %@" : {
       "localizations" : {
@@ -3048,40 +2846,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "首頁"
-          }
-        }
-      }
-    },
-    "I Understand" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "J'ai compris"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Értem"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我明白"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我明白"
           }
         }
       }
@@ -3493,41 +3257,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "淺色"
-          }
-        }
-      }
-    },
-    "Load error" : {
-      "comment" : "CaskDataLoadError",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erreur de chargement"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "読み込みエラー"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Betöltési hiba"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "加载错误"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "載入錯誤"
           }
         }
       }
@@ -4147,108 +3876,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "密碼管理器"
-          }
-        }
-      }
-    },
-    "Pinentry" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pinentry"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pinentry"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pinentry"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pinentry"
-          }
-        }
-      }
-    },
-    "Pinentry is used to securely prompt for the admin password when it is required during the installation of an application." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PINEntry est utilisé pour demander en toute sécurité le mot de passe administrateur lorsqu'il est requis lors de l'installation d'une application."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PINEntryはアプリケーションのインストール中に管理者パスワードが必要になった場合に安全に管理者パスワードの入力を求める為に使用されます"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A Pinentry segít biztonságosan elkérni a admin jelszót olyan alkalmazásoknál, amelyeknek szükségük van rá a telepítéshez."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pinentry 用于在安装应用程序时安全地提示输入管理员密码。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pinentry 用於在應用程式安裝過程中需要時安全地提示輸入管理員密碼。"
-          }
-        }
-      }
-    },
-    "PINEntry not installed correctly" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PINEntry n’est pas installé correctement"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PINEntryが正しくインストールされていません"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A PINEntry nincs letöltve"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PINEntry 未正确安装"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PINEntry 未正確安裝"
           }
         }
       }
@@ -6271,40 +5898,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "是的"
-          }
-        }
-      }
-    },
-    "You can safely continue, but you won't be able to install apps with .pkg installers." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous pouvez continuer en toute sécurité, mais vous ne pourrez pas installer d'applications avec des installateurs .pkg."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "続行しても安全ですが、.pkgインストーラーを使用してアプリをインストールする事は出来ません"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Továbbléphet, de a .pkg telepítőkkel rendelkező alkalmazásokat nem fogja tudni telepíteni."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "您可以安全地继续操作，但是无法安装使用 .pkg 安装程序的应用程序。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "您可以安全地繼續，但您將無法使用 .pkg 安裝程式安裝應用程式。"
           }
         }
       }

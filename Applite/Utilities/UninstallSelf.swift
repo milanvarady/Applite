@@ -14,7 +14,7 @@ enum UninstallError: Error {
 }
 
 /// This function will uninstall Applite and all it's related files
-func uninstallSelf(deleteBrewCache: Bool) {
+func uninstallSelf(deleteBrewCache: Bool) throws {
     let logger = Logger()
     
     logger.notice("Applite uninstallation stated. deleteBrewCache: \(deleteBrewCache)")
@@ -46,13 +46,13 @@ func uninstallSelf(deleteBrewCache: Bool) {
     
     logger.notice("Running command: \(command)")
     
-    let result = shell(command)
+    let output = try Shell.run(command)
 
-    logger.notice("Uninstall result: \(result.output)")
+    logger.notice("Uninstall result: \(output)")
     
     // Homebrew cache
     if deleteBrewCache {
-        shell("rm -rf $HOME/Library/Caches/Homebrew")
+        try Shell.run("rm -rf $HOME/Library/Caches/Homebrew")
     }
     
     logger.notice("Self destructing. Goodbye world! o7")
