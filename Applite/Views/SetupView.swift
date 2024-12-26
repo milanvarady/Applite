@@ -259,8 +259,8 @@ struct SetupView: View {
         @State var failed = false
         
         // Alerts
-        @State var showingAlert = false
-        @State var showingCommandLineToolsAlert = false
+        @State var showCommandLineToolsInstallAlert = false
+        @State var showInstallFailAlert = false
         
         @StateObject var installationProgress = BrewInstallationProgress()
         
@@ -302,28 +302,23 @@ struct SetupView: View {
                 }
                 .onAppear() {
                     if !isCommandLineToolsInstalled() {
-                        showingCommandLineToolsAlert = true
+                        showCommandLineToolsInstallAlert = true
                     }
                 }
-                .alert(isPresented: $showingCommandLineToolsAlert) {
-                    Alert(title: Text("Xcode Command Line Tools"),
-                          message: Text("You will be prompted to install Xcode Command Line Tools. Please select \"Install\" as it is required for this application to work."))
+                .alert("Xcode Command Line Tools", isPresented: $showCommandLineToolsInstallAlert) {} message: {
+                    Text("You will be prompted to install Xcode Command Line Tools. Please select \"Install\" as it is required for this application to work.")
                 }
-                .alert("Installation failed", isPresented: $showingAlert, actions: {
+                .alert("Installation failed", isPresented: $showInstallFailAlert) {
                     Button("Troubleshooting") {
                         if let url = URL(string: "https://aerolite.dev/applite/troubleshooting.html") {
                             NSWorkspace.shared.open(url)
                         }
                     }
                     
-                    Button("Retry") {
-                        
-                    }
-                    
                     Button("Quit", role: .destructive) { NSApplication.shared.terminate(self) }
-                }, message: {
+                } message: {
                     Text("Retry the installation or visit the troubleshooting page.")
-                })
+                }
             }
         }
         

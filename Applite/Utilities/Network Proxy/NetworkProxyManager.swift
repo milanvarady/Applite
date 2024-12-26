@@ -177,9 +177,22 @@ enum NetworkProxyType: String, CaseIterable, Identifiable {
     }
 }
 
-enum NetworkProxyError: Error {
+enum NetworkProxyError: LocalizedError {
     case failedToGetSystemSettings
     case proxyNotEnabled
     case noProxyHost
     case noProxyPort
+
+    var errorDescription: String? {
+        switch self {
+        case .failedToGetSystemSettings:
+            return "Failed to get system proxy settings"
+        case .proxyNotEnabled:
+            return "Proxy is not enabled"
+        case .noProxyHost:
+            return "No proxy host specified"
+        case .noProxyPort:
+            return "No proxy port specified"
+        }
+    }
 }

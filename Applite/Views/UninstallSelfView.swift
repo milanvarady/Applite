@@ -12,7 +12,7 @@ struct UninstallSelfView: View {
     @State var deleteBrewCache = false
     @State var showConfirmation = false
 
-    @State var showUninstallFailedAlert = false
+    @StateObject var uninstallAlert = AlertManager()
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -44,13 +44,13 @@ struct UninstallSelfView: View {
                 do {
                     try uninstallSelf(deleteBrewCache: deleteBrewCache)
                 } catch {
-                    showUninstallFailedAlert = true
+                    uninstallAlert.show(title: "Failed to uninstall", message: error.localizedDescription)
                 }
             }
             
             Button("Cancel", role: .cancel) { }
         }
-        .alert("Failed to uninstall", isPresented: $showUninstallFailedAlert) {}
+        .alertManager(uninstallAlert)
     }
 }
 

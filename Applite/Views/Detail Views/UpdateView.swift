@@ -19,7 +19,7 @@ struct UpdateView: View {
     @State var updateAllButtonRotation = 0.0
     
     @State var showingGreedyUpdateConfirm = false
-    @State var showOutdatedFailAlert = false
+    @StateObject var loadAlert = AlertManager()
 
     // Filter outdated casks
     var casks: [Cask] {
@@ -107,23 +107,20 @@ struct UpdateView: View {
                         do {
                             try await caskData.refreshOutdatedApps(greedy: true)
                         } catch {
-                            showOutdatedFailAlert = true
+                            loadAlert.show(title: "Failed to load updates", message: error.localizedDescription)
                         }
                     }
                 }
                 
-                Button("Cancel", role: .cancel) { }
+                Button("Cancel", role: .cancel) {}
             } message: {
-                VStack {
-                    Text("This will show updates from applications that have auto-update turned off, i.e., applications that are taking care of their own updates.")
-                }
+                Text("This will show updates from applications that have auto-update turned off, i.e., applications that are taking care of their own updates.")
             }
             
             // Refresh outdated casks
             if refreshing {
                 SmallProgressView()
-            }
-            else {
+            } else {
                 Button {
                     Task {
                         refreshing = true
@@ -131,7 +128,7 @@ struct UpdateView: View {
                         do {
                             try await caskData.refreshOutdatedApps(greedy: true)
                         } catch {
-                            showOutdatedFailAlert = true
+                            loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
                         }
 
                         refreshing = false
@@ -141,7 +138,7 @@ struct UpdateView: View {
                 }
             }
         }
-        .alert("Failed to load outdated apps", isPresented: $showOutdatedFailAlert) {}
+        .alertManager(loadAlert)
     }
 }
 

@@ -9,10 +9,6 @@ import Foundation
 import OSLog
 import Kingfisher
 
-enum UninstallError: Error {
-    case fileError
-}
-
 /// This function will uninstall Applite and all it's related files
 func uninstallSelf(deleteBrewCache: Bool) throws {
     let logger = Logger()

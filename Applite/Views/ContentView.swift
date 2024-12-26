@@ -19,9 +19,8 @@ struct ContentView: View {
     /// This variable is set to the value of searchText whenever the user submits the search quiery
     @State var searchTextSubmitted = ""
     
-    @State var loadAlertShowing = false
-    @State var errorMessage = ""
-    
+    @StateObject var loadAlert = AlertManager()
+
     @State var brokenInstall = false
     
     /// If true the sidebar is disabled
@@ -33,28 +32,28 @@ struct ContentView: View {
         NavigationSplitView {
             List(selection: $selection) {
                 Divider()
-                
+
                 Label("Discover", systemImage: "house.fill")
                     .tag("home")
-                
+
                 Label("Updates", systemImage: "arrow.clockwise.circle.fill")
                     .badge(caskData.outdatedCasks.count)
                     .tag("updates")
-                
+
                 Label("Installed", systemImage: "externaldrive.fill.badge.checkmark")
                     .tag("installed")
-                
+
                 Label("Active Tasks", systemImage: "gearshape.arrow.triangle.2.circlepath")
                     .badge(caskData.busyCasks.count)
                     .tag("activeTasks")
-                
+
                 Section("Categories") {
                     ForEach(categories) { category in
                         Label(LocalizedStringKey(category.id), systemImage: category.sfSymbol)
                             .tag(category.id)
                     }
                 }
-                
+
                 Section("Homebrew") {
                     NavigationLink(value: "brew", label: {
                         Label("Manage Homebrew", systemImage: "mug")
@@ -71,7 +70,7 @@ struct ContentView: View {
                     // Broken install
                     VStack(alignment: .center) {
                         Text(DependencyManager.brokenPathOrIstallMessage)
-                        
+
                         Button {
                             Task {
                                 await loadCasks()
@@ -84,19 +83,19 @@ struct ContentView: View {
                     }
                     .frame(maxWidth: 600)
                 }
-                
+
             case "updates":
                 UpdateView()
-                
+
             case "installed":
                 InstalledView()
-                
+
             case "activeTasks":
                 ActiveTasksView()
-                
+
             case "brew":
                 BrewManagementView(modifyingBrew: $modifyingBrew)
-                
+
             default:
                 if let category = categories.first(where: { $0.id == selection }) {
                     CategoryView(category: category)
@@ -111,7 +110,7 @@ struct ContentView: View {
         .searchable(text: $searchText, placement: .sidebar)
         .onSubmit(of: .search) {
             searchTextSubmitted = searchText
-            
+
             if !searchText.isEmpty && selection != "home" {
                 selection = "home"
             }
@@ -121,7 +120,7 @@ struct ContentView: View {
                 searchTextSubmitted = ""
             }
         }
-        .alert("App load error", isPresented: $loadAlertShowing) {
+        .alert(loadAlert.title, isPresented: $loadAlert.isPresented) {
             Button {
                 Task { @MainActor in
                     await loadCasks()
@@ -129,30 +128,31 @@ struct ContentView: View {
             } label: {
                 Label("Retry", systemImage: "arrow.clockwise")
             }
-            
+
             Button("Quit", role: .destructive) {
                 NSApplication.shared.terminate(self)
             }
-            
+
             Button("OK", role: .cancel) { }
         } message: {
-            Text(errorMessage)
+            Text(loadAlert.message)
         }
     }
     
     private func loadCasks() async {
-        if !BrewPaths.isSelectedBrewPathValid() {
-            errorMessage = DependencyManager.brokenPathOrIstallMessage
-            loadAlertShowing = true
+        guard BrewPaths.isSelectedBrewPathValid() else {
+            loadAlert.show(title: "Couldn't load app catalog", message: DependencyManager.brokenPathOrIstallMessage)
             brokenInstall = true
 
             let output = (try? await Shell.runAsync("\(BrewPaths.currentBrewExecutable) --version")) ?? "n/a"
 
-            logger.error("""
-Initial cask load failure. Reason: selected brew path seems invalid.
-Brew executable path path: \(BrewPaths.currentBrewExecutable)
-brew --version output: \(output)
-""")
+            logger.error(
+                """
+                Initial cask load failure. Reason: selected brew path seems invalid.
+                Brew executable path path: \(BrewPaths.currentBrewExecutable)
+                brew --version output: \(output)
+                """
+            )
 
             return
         }
@@ -161,10 +161,7 @@ brew --version output: \(output)
             try await caskData.loadData()
             brokenInstall = false
         } catch {
-            errorMessage = "Couldn't load app catalog. Check internet your connection, or try restarting the app."
-            
-            loadAlertShowing = true
-            
+            loadAlert.show(title: "Couldn't load app catalog", message: error.localizedDescription)
             logger.error("Initial cask load failure. Reason: \(error.localizedDescription)")
         }
     }
