@@ -14,8 +14,6 @@ enum CaskImportError: Error {
 
 enum CaskToFileManager {
     static func export(url: URL, exportType: CaskExportType) throws {
-        let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "CaskExport")
-
         let today = Date.now
 
         let formatter = DateFormatter()
@@ -35,7 +33,7 @@ enum CaskToFileManager {
         case .brewfile:
             let brewfileURL = url.appendingPathComponent("Brewfile_\(currentDateString)")
 
-            let result = try Shell.run("\(BrewPaths.currentBrewExecutable) bundle dump --file=\"\(brewfileURL.path)\"")
+            try Shell.run("\(BrewPaths.currentBrewExecutable) bundle dump --file=\"\(brewfileURL.path)\"")
         }
     }
 

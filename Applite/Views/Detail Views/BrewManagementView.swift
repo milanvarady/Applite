@@ -187,7 +187,7 @@ struct BrewManagementView: View {
                     logger.info("Updating brew started")
 
                     do {
-                        let output = try await Shell.runAsync("\(BrewPaths.currentBrewExecutable) update")
+                        try await Shell.runAsync("\(BrewPaths.currentBrewExecutable) update")
                     } catch {
                         await MainActor.run {
                             logger.error("Brew update failed. Error: \(error.localizedDescription)")

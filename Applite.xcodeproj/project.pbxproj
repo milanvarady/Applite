@@ -12,7 +12,6 @@
 		41062C972A3A20F900FD48EA /* UninstallSelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C962A3A20F900FD48EA /* UninstallSelf.swift */; };
 		41062C992A3A263F00FD48EA /* UninstallSelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C982A3A263F00FD48EA /* UninstallSelfView.swift */; };
 		41062C9B2A3E4AFA00FD48EA /* BundleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C9A2A3E4AFA00FD48EA /* BundleExtension.swift */; };
-		411EDDD52A9F56020051E07B /* pinentry.ksh in Resources */ = {isa = PBXBuildFile; fileRef = 411EDDD22A9DD5F40051E07B /* pinentry.ksh */; };
 		411EDDD72A9F58180051E07B /* URLExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411EDDD62A9F58180051E07B /* URLExtension.swift */; };
 		4120AB652A754B1700F68EFE /* AppliteAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4120AB642A754B1700F68EFE /* AppliteAppView.swift */; };
 		4120AB682A755B5A00F68EFE /* CheckForUpdatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4120AB672A755B5A00F68EFE /* CheckForUpdatesView.swift */; };
@@ -74,7 +73,6 @@
 		41062C962A3A20F900FD48EA /* UninstallSelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallSelf.swift; sourceTree = "<group>"; };
 		41062C982A3A263F00FD48EA /* UninstallSelfView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallSelfView.swift; sourceTree = "<group>"; };
 		41062C9A2A3E4AFA00FD48EA /* BundleExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtension.swift; sourceTree = "<group>"; };
-		411EDDD22A9DD5F40051E07B /* pinentry.ksh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = pinentry.ksh; sourceTree = "<group>"; };
 		411EDDD62A9F58180051E07B /* URLExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtension.swift; sourceTree = "<group>"; };
 		4120AB642A754B1700F68EFE /* AppliteAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppliteAppView.swift; sourceTree = "<group>"; };
 		4120AB672A755B5A00F68EFE /* CheckForUpdatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckForUpdatesView.swift; sourceTree = "<group>"; };
@@ -284,7 +282,6 @@
 			children = (
 				419256052D1C546D00D9EF10 /* askpass.js */,
 				41857B722911A2F2004A1894 /* categories.json */,
-				411EDDD22A9DD5F40051E07B /* pinentry.ksh */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -461,7 +458,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				411EDDD52A9F56020051E07B /* pinentry.ksh in Resources */,
 				414074FC28DF53EB0073EB22 /* Preview Assets.xcassets in Resources */,
 				41857B732911A2F2004A1894 /* categories.json in Resources */,
 				BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */,

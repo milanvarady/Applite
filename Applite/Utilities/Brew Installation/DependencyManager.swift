@@ -34,7 +34,7 @@ struct DependencyManager {
         if !isCommandLineToolsInstalled() {
             Self.logger.info("Prompting user to install Xcode Command Line Tools")
 
-            let output = try await Shell.runAsync("xcode-select --install")
+            try await Shell.runAsync("xcode-select --install")
             
             // Wait for command line tools installation with a 30 minute timeout
             var didBreak = false
@@ -59,16 +59,16 @@ struct DependencyManager {
         // Skip Homebrew installation if keepCurrentInstall is set to true
         guard keepCurrentInstall && !isBrewPathValid(path: BrewPaths.appBrewExetutable.path) else {
             Self.logger.notice("Brew is already installed, skipping installation")
-            progressObject.phase = .done
+            await MainActor.run { progressObject.phase = .done }
             return
         }
-        
-        progressObject.phase = .fetchingHomebrew
-        
+
+        await MainActor.run { progressObject.phase = .fetchingHomebrew }
+
         // Install brew
         try await Self.installHomebrew()
         
-        progressObject.phase = .done
+        await MainActor.run { progressObject.phase = .done }
         Self.logger.notice("Brew installed successfully!")
     }
     

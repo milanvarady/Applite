@@ -22,8 +22,6 @@ struct ContentView: View {
     @State var loadAlertShowing = false
     @State var errorMessage = ""
     
-    @State var pinentryErrorShowing = false
-    
     @State var brokenInstall = false
     
     /// If true the sidebar is disabled
@@ -139,11 +137,6 @@ struct ContentView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(errorMessage)
-        }
-        .alert("PINEntry not installed correctly", isPresented: $pinentryErrorShowing) {
-            Button("I Understand", role: .cancel) { }
-        } message: {
-            Text("Applications that require an admin password to install will fail to install.")
         }
     }
     
