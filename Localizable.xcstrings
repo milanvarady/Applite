@@ -891,41 +891,6 @@
         }
       }
     },
-    "App load error" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erreur de chargement de l'application"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alkalmazás betöltési hiba"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アプリケーション読み込みエラー"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "应用程序加载错误"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "應用程式載入錯誤"
-          }
-        }
-      }
-    },
     "Appdir" : {
       "localizations" : {
         "fr" : {
@@ -1923,40 +1888,6 @@
         }
       }
     },
-    "Custom" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Personnalisé"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saját"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "カスタム"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自定义"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自訂"
-          }
-        }
-      }
-    },
     "Custom brew path" : {
       "localizations" : {
         "fr" : {
@@ -2538,9 +2469,6 @@
           }
         }
       }
-    },
-    "Failed to load outdated apps" : {
-
     },
     "Failed to reinstall %@" : {
       "localizations" : {
