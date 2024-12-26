@@ -11,7 +11,9 @@ import SwiftUI
 struct UninstallSelfView: View {
     @State var deleteBrewCache = false
     @State var showConfirmation = false
-    
+
+    @State var showUninstallFailedAlert = false
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("Uninstall \(Bundle.main.appName)")
@@ -39,12 +41,16 @@ struct UninstallSelfView: View {
         .frame(width: 400, height: 250)
         .confirmationDialog("Are you sure you want to permanently uninstall \(Bundle.main.appName)?", isPresented: $showConfirmation) {
             Button("Uninstall", role: .destructive) {
-                uninstallSelf(deleteBrewCache: deleteBrewCache)
-         
+                do {
+                    try uninstallSelf(deleteBrewCache: deleteBrewCache)
+                } catch {
+                    showUninstallFailedAlert = true
+                }
             }
             
             Button("Cancel", role: .cancel) { }
         }
+        .alert("Failed to uninstall", isPresented: $showUninstallFailedAlert) {}
     }
 }
 

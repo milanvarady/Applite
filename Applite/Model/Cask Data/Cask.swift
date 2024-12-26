@@ -18,8 +18,6 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     /// Short description
     let description: String
     let homepageURL: URL?
-    @Published var isInstalled: Bool = false
-    @Published var isOutdated: Bool = false
     /// Number of downloads in the last 365 days
     var downloadsIn365days: Int = 0
     /// Description of any caveats with the app
@@ -35,7 +33,13 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         case success
         case failed(output: String)
     }
-    
+
+    @MainActor
+    @Published var isInstalled: Bool = false
+
+    @MainActor
+    @Published var isOutdated: Bool = false
+
     /// Progress state of the cask when installing, updating or uninstalling
     @MainActor
     @Published public var progressState: ProgressState = .idle
@@ -45,7 +49,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         category: String(describing: Cask.self)
     )
     
-    required init(from decoder: Decoder) throws {
+    init(from decoder: Decoder) throws {
         let rawData = try? CaskDTO(from: decoder)
 
         let homepage: String = rawData?.homepage ?? "https://brew.sh/"
@@ -58,7 +62,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         self.pkgInstaller = rawData?.url.hasSuffix("pkg") ?? false
     }
     
-    required init() {
+    init() {
         self.id = "test"
         self.name = "Test app"
         self.description = "An application to test this application"
@@ -72,64 +76,63 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     /// - Parameters:
     ///   - force: If `true` install will be run with the `--force` flag
     /// - Returns: `Void`
-    @discardableResult
-    func install(caskData: CaskData, force: Bool = false) async -> ShellResult {
+    func install(caskData: CaskData, force: Bool = false) async {
         defer {
             resetProgressState(caskData: caskData)
         }
         
         Self.logger.info("Cask \"\(self.id)\" installation started")
-        
-        // Check if pinentry is installed
-        guard ((try? await checkPinentry()) != nil) else {
-            return ShellResult(output: "Pinentry check error", didFail: true)
-        }
 
-        var cancellables = Set<AnyCancellable>()
-        let shellOutputStream = ShellOutputStream()
+        // Appdir argument
         let appdirOn = UserDefaults.standard.bool(forKey: Preferences.appdirOn.rawValue)
         let appdirPath = UserDefaults.standard.string(forKey: Preferences.appdirPath.rawValue)
         let appdirArgument = "--appdir=\"\(appdirPath ?? "/Applications")\""
-        
+
+        // Install command
+        let command = "\(BrewPaths.currentBrewExecutable) install --cask \(force ? "--force" : "") \(self.id) \(appdirOn ? appdirArgument : "")"
+
+        // Setup progress
         await MainActor.run {
             self.progressState = .busy(withTask: "")
             caskData.busyCasks.insert(self)
         }
-            
-        shellOutputStream.outputPublisher
-            .sink { output in
-                Task {
-                    await MainActor.run { self.progressState = self.parseBrewInstall(output: output) }
+
+        var completeOutput = ""
+
+        // Run install command and stream output
+        do {
+            for try await line in Shell.stream(command) {
+                completeOutput += line
+
+                await MainActor.run {
+                    self.progressState = self.parseBrewInstall(output: line)
                 }
             }
-            .store(in: &cancellables)
-        
-        let result = await shellOutputStream.run("\(BrewPaths.currentBrewExecutable) install --cask \(force ? "--force" : "") \(self.id) \(appdirOn ? appdirArgument : "")")
-        
-        if result.didFail {
-            Self.logger.error("Failed to install cask \(self.id). Output: \(result.output)")
-            
+        } catch {
+            Self.logger.error("Failed to install cask \(self.id).")
+
+            // Capture output
+            let output = completeOutput
+
             await MainActor.run {
-                progressState = .failed(output: result.output)
+                progressState = .failed(output: output)
                 caskData.busyCasks.remove(self)
             }
-            
+
             sendNotification(title: String(localized: "Failed to download \(self.name)"), reason: .failure)
-        } else {
-            Self.logger.info("Successfully installed cask \(self.id)")
-            
-            sendNotification(title: String(localized: "\(self.name) successfully installed!"), reason: .success)
-            
-            await MainActor.run {
-                progressState = .success
-                self.isInstalled = true
-            }
-            
-            // Show success for 2 seconds
-            try? await Task.sleep(for: .seconds(2))
         }
-        
-        return result
+
+        Self.logger.info("Successfully installed cask \(self.id)")
+
+        sendNotification(title: String(localized: "\(self.name) successfully installed!"), reason: .success)
+
+        await MainActor.run {
+            progressState = .success
+            self.isInstalled = true
+        }
+
+        // Show success for 2 seconds
+        try? await Task.sleep(for: .seconds(2))
     }
     
     /// Parses the shell output when installing a cask
@@ -157,9 +160,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     /// - Parameters:
     ///     - caskData: ``CaskData`` object
     ///     - zap: If true the app will be uninstalled completely using the brew --zap flag
-    /// - Returns: Bool - Whether the task has failed or not
-    @discardableResult
-    func uninstall(caskData: CaskData, zap: Bool = false) async -> Bool {
+    func uninstall(caskData: CaskData, zap: Bool = false) async {
         defer {
             resetProgressState(caskData: caskData)
         }
@@ -170,18 +171,19 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         
         let arguments: [String] = if zap { ["--zap", self.id] } else { [self.id] }
         
-        return await runBrewCommand(command: "uninstall",
-                                    arguments: arguments,
-                                    taskDescription: "Uninstalling",
-                                    notificationSuccess: String(localized:"\(self.name) successfully uninstalled"),
-                                    notificationFailure: "Failed to uninstall \(self.name)",
-                                    onSuccess: { self.isInstalled = false })
+        await runBrewCommand(
+            command: "uninstall",
+            arguments: arguments,
+            taskDescription: "Uninstalling",
+            notificationSuccess: String(localized:"\(self.name) successfully uninstalled"),
+            notificationFailure: "Failed to uninstall \(self.name)",
+            onSuccess: { self.isInstalled = false }
+        )
     }
     
     /// Updates the cask
     /// - Returns: Bool - Whether the task has failed or not
-    @discardableResult
-    func update(caskData: CaskData) async -> Bool {
+    func update(caskData: CaskData) async {
         defer {
             resetProgressState(caskData: caskData)
         }
@@ -190,25 +192,21 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             caskData.busyCasks.insert(self)
         }
         
-        return await runBrewCommand(command: "upgrade",
-                                    arguments: [self.id],
-                                    taskDescription: "Updating",
-                                    notificationSuccess: String(localized: "\(self.name) successfully updated"),
-                                    notificationFailure: String(localized: "Failed to update \(self.name)"),
-                                    onSuccess: {
-            Task {
-                await MainActor.run {
-                    self.isOutdated = false
-                    caskData.outdatedCasks.remove(self)
-                }
-            }
+        await runBrewCommand(
+            command: "upgrade",
+            arguments: [self.id],
+            taskDescription: "Updating",
+            notificationSuccess: String(localized: "\(self.name) successfully updated"),
+            notificationFailure: String(localized: "Failed to update \(self.name)"),
+            onSuccess: {
+                self.isOutdated = false
+                caskData.outdatedCasks.remove(self)
         })
     }
     
     /// Updates the cask
     /// - Returns: Bool - Whether the task has failed or not
-    @discardableResult
-    func reinstall(caskData: CaskData) async -> Bool {
+    func reinstall(caskData: CaskData) async {
         defer {
             resetProgressState(caskData: caskData)
         }
@@ -217,19 +215,16 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             caskData.busyCasks.insert(self)
         }
         
-        return await runBrewCommand(command: "reinstall",
-                                    arguments: [self.id],
-                                    taskDescription: "Reinstalling",
-                                    notificationSuccess: String(localized: "\(self.name) successfully reinstalled"),
-                                    notificationFailure: String(localized:"Failed to reinstall \(self.name)"),
-                                    onSuccess: {
-            
-            Task {
-                await MainActor.run {
-                    caskData.busyCasks.remove(self)
-                }
+        await runBrewCommand(
+            command: "reinstall",
+            arguments: [self.id],
+            taskDescription: "Reinstalling",
+            notificationSuccess: String(localized: "\(self.name) successfully reinstalled"),
+            notificationFailure: String(localized:"Failed to reinstall \(self.name)"),
+            onSuccess: {
+                caskData.busyCasks.remove(self)
             }
-        })
+        )
     }
     
     /// Runs a shell command with the currently selected brew path
@@ -242,46 +237,50 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     ///   - notificationFailure: Notification message if fails
     ///   - onSuccess: Closure run if task succeeds
     /// - Returns: Bool - Whether the the task has failed or not
-    private func runBrewCommand(command: String, arguments: [String], taskDescription: String,
-                                notificationSuccess: String, notificationFailure: String, onSuccess: (() -> Void)? = nil) async -> Bool {
-        
-        // Check if pinentry is installed
-        guard ((try? await checkPinentry()) != nil) else {
-            return true
-        }
-
+    private func runBrewCommand(
+        command: String,
+        arguments: [String],
+        taskDescription: String,
+        notificationSuccess: String,
+        notificationFailure: String,
+        onSuccess: (@MainActor () -> Void)? = nil
+    ) async {
         await MainActor.run {
             let localizedTaskDescription = String.LocalizationValue(stringLiteral: taskDescription)
             self.progressState = .busy(withTask: String(localized: localizedTaskDescription))
         }
-        
-        let result = await shell("HOMEBREW_NO_AUTO_UPDATE=1 \(BrewPaths.currentBrewExecutable) \(command) --cask \(arguments.joined(separator: " "))")
-        
-        if !result.didFail && onSuccess != nil {
+
+        let command = "HOMEBREW_NO_AUTO_UPDATE=1 \(BrewPaths.currentBrewExecutable) \(command) --cask \(arguments.joined(separator: " "))"
+
+        var output: String = ""
+
+        do {
+            output = try await Shell.runAsync(command)
+        } catch {
+            Self.logger.error("Failed to run brew command: \(error.localizedDescription)")
+
+            sendNotification(title: notificationFailure, reason: .failure)
+
+            await MainActor.run { self.progressState = .failed(output: error.localizedDescription) }
+        }
+
+        if let onSuccess {
             await MainActor.run {
-                onSuccess?()
+                onSuccess()
             }
         }
         
         // Log and Notify
-        if result.didFail {
-            Self.logger.error("Failed to run brew command \"\(command)\" with arguments \"\(arguments)\", output: \(result.output)")
-            
-            sendNotification(title: notificationFailure, reason: .failure)
-            await MainActor.run { self.progressState = .failed(output: result.output) }
-        } else {
-            Self.logger.notice("Successfully run brew command \"\(command)\" with arguments \"\(arguments)\", output: \(result.output)")
-            
-            sendNotification(title: notificationSuccess, reason: .success)
-            await MainActor.run { self.progressState = .success }
-            try? await Task.sleep(for: .seconds(2))
-        }
-        
-        return result.didFail
+        Self.logger.notice("Successfully run brew command \"\(command)\" with arguments \"\(arguments)\", output: \(output)")
+
+        sendNotification(title: notificationSuccess, reason: .success)
+
+        // Show success for 2 seconds
+        await MainActor.run { self.progressState = .success }
+        try? await Task.sleep(for: .seconds(2))
     }
-    
-    @discardableResult
-    public func launchApp() -> ShellResult {
+
+    public func launchApp() throws {
         let appPath: String
         
         if self.pkgInstaller {
@@ -305,39 +304,8 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
             
             appPath = "\(brewDirectory.replacingOccurrences(of: " ", with: "\\ ") )/Caskroom/\(self.id)/*/*.app"
         }
-        
-        let result = shell("open \(appPath)")
-        
-        if result.didFail {
-            Self.logger.error("Couldn't launch app at path: \(appPath). Output: \(result.output)")
-        }
-        
-        return result
-    }
-    
-    /// Checks if pinentry-mac is installed, if not it tries it install it
-    private func checkPinentry() async throws {
-        if self.pkgInstaller {
-            do {
-                await MainActor.run {
-                    progressState = .busy(withTask: "Preparing")
-                }
-                
-                if await BrewPaths.isPinentryInstalled() { return }
-                
-                Self.logger.notice("pinentry-mac is not installed. Installing now...")
-                
-                try await DependencyManager.installPinentry(forceInstall: true)
-            } catch {
-                Self.logger.error("Cask: Application has PKG installer. Pinentry not installed. Installation attempt failed.")
-                
-                await MainActor.run {
-                    progressState = .failed(output: "Application has a PKG installer that requires an admin password. Pinentry was not installed and the installation attempt failed.")
-                }
-                
-                throw PinentryError.installError
-            }
-        }
+
+        try Shell.run("open \(appPath)")
     }
     
     /// Resets progress state and removes self from ``CaskData.busyCasks``

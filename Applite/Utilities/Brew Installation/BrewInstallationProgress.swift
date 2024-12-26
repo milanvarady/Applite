@@ -10,13 +10,13 @@ import Foundation
 public enum InstallPhase: Int {
     case waitingForXcodeCommandLineTools = 0
     case fetchingHomebrew = 1
-    case installingPinentry = 2
-    case done = 3
+    case done = 2
 }
 
 /// Keeps track of current brew installation progress
 ///
 /// Used by the ``DependencyManager`` struct
-public final class BrewInstallationProgress: ObservableObject {
+@MainActor
+final class BrewInstallationProgress: ObservableObject {
     @Published var phase: InstallPhase = .waitingForXcodeCommandLineTools
 }

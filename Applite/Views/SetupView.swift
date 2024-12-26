@@ -261,14 +261,8 @@ struct SetupView: View {
         // Alerts
         @State var showingAlert = false
         @State var showingCommandLineToolsAlert = false
-        @State var showingPinentryAlert = false
         
         @StateObject var installationProgress = BrewInstallationProgress()
-        
-        enum SetupInstallError: Error {
-            case homebrew
-            case pinentry
-        }
         
         var body: some View {
             VStack {
@@ -289,11 +283,6 @@ struct SetupView: View {
                                    description: "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. \(Bundle.main.appName) uses Homebrew under the hood to download and manage applications.",
                                    progressOrder: .fetchingHomebrew)
                     
-                    // Pinentry
-                    dependencyView(title: "Pinentry",
-                                   description: "Pinentry is used to securely prompt for the admin password when it is required during the installation of an application.",
-                                   progressOrder: .installingPinentry)
-                    
                     // Retry button
                     if failed {
                         Button {
@@ -303,7 +292,7 @@ struct SetupView: View {
                         } label: {
                             Label("Retry Install", systemImage: "arrow.clockwise.circle")
                         }
-                        .bigButton(backgroundColor: .accentColor)
+                        .bigButton(backgroundColor: .secondary)
                     }
                 }
                 .frame(width: 440)
@@ -334,17 +323,6 @@ struct SetupView: View {
                     Button("Quit", role: .destructive) { NSApplication.shared.terminate(self) }
                 }, message: {
                     Text("Retry the installation or visit the troubleshooting page.")
-                })
-                .alert("Failed to install pinentry", isPresented: $showingPinentryAlert, actions: {
-                    Button("OK") { }
-                    
-                    Button("Troubleshooting") {
-                        if let url = URL(string: "https://aerolite.dev/applite/troubleshooting.html") {
-                            NSWorkspace.shared.open(url)
-                        }
-                    }
-                }, message: {
-                    Text("You can safely continue, but you won't be able to install apps with .pkg installers.")
                 })
             }
         }
@@ -382,9 +360,6 @@ struct SetupView: View {
             
             do {
                 try await DependencyManager.install(progressObject: installationProgress)
-            } catch DependencyInstallationError.PinentryError {
-                showingPinentryAlert = true
-                installationProgress.phase = .done
             } catch {
                 failed = true
             }

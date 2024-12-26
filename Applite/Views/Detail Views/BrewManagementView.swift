@@ -102,20 +102,16 @@ struct BrewManagementView: View {
             }
             .task {
                 // Get version
-                let versionOutput = await shell("\(BrewPaths.currentBrewExecutable) --version").output
-                
-                if let version = versionOutput.firstMatch(of: /Homebrew ([\d\.]+)/) {
-                    homebrewVersion = String(version.1)
-                } else {
+                guard let versionOutput = try? await Shell.runAsync("\(BrewPaths.currentBrewExecutable) --version"),
+                      let version = versionOutput.firstMatch(of: /Homebrew ([\d\.]+)/),
+                      let casksInstalled = try? await Shell.runAsync("\(BrewPaths.currentBrewExecutable) list --cask | wc -w") else {
                     homebrewVersion = "N/a"
                     numberOfCasks = "N/a"
                     return
                 }
-                
-                // Get number of installed casks
-                let countOutput = await shell("\(BrewPaths.currentBrewExecutable) list --cask | wc -w").output
-                
-                numberOfCasks = countOutput.trimmingCharacters(in: .whitespacesAndNewlines)
+
+                homebrewVersion = String(version.1)
+                numberOfCasks = casksInstalled.trimmingCharacters(in: .whitespacesAndNewlines)
             }
         }
     }
@@ -189,20 +185,21 @@ struct BrewManagementView: View {
                 
                 Task {
                     logger.info("Updating brew started")
-                    
-                    let result = await shell("\(BrewPaths.currentBrewExecutable) update")
-                    
-                    logger.info("Brew update output: \(result.output)")
-                    
-                    await MainActor.run {
-                        if result.didFail {
+
+                    do {
+                        try await Shell.runAsync("\(BrewPaths.currentBrewExecutable) update")
+                    } catch {
+                        await MainActor.run {
+                            logger.error("Brew update failed. Error: \(error.localizedDescription)")
                             updateFailed = true
-                            logger.error("Brew update failed")
-                        } else {
-                            logger.info("Brew update successful")
-                            updateDone = true
                         }
-                        
+                    }
+
+                    logger.info("Brew update successful")
+
+                    await MainActor.run {
+                        updateDone = true
+
                         withAnimation {
                             modifyingBrew = false
                         }
@@ -291,9 +288,9 @@ struct BrewManagementView: View {
                     switch result {
                     case .success(let url):
                         do {
-                            try exportCasks(url: url[0], exportType: selectedExportFileType)
+                            try CaskToFileManager.export(url: url[0], exportType: selectedExportFileType)
                         } catch {
-                            logger.error("Failed to export casks")
+                            logger.error("Failed to export casks. Error: \(error.localizedDescription)")
                             showingExportError = true
                         }
                     case .failure(let error):
@@ -325,8 +322,8 @@ struct BrewManagementView: View {
                     switch result {
                     case .success(let url):
                         do {
-                            let casks = try readCaskFile(url: url[0])
-                            
+                            let casks = try  CaskToFileManager.readCaskFile(url: url[0])
+
                             installImported(casks: casks)
                         } catch {
                             logger.error("Failed to import cask. Reason: \(error.localizedDescription)")
@@ -345,7 +342,7 @@ struct BrewManagementView: View {
         
         func installImported(casks: [String]) {
             Task {
-                await installImportedCasks(casks: casks, caskData: caskData)
+                await CaskToFileManager.installImportedCasks(casks: casks, caskData: caskData)
             }
         }
     }
