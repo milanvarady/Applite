@@ -76,7 +76,7 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
     /// - Parameters:
     ///   - force: If `true` install will be run with the `--force` flag
     /// - Returns: `Void`
-    func install(caskData: CaskData, force: Bool = false) async{
+    func install(caskData: CaskData, force: Bool = false) async {
         defer {
             resetProgressState(caskData: caskData)
         }
@@ -171,12 +171,14 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         
         let arguments: [String] = if zap { ["--zap", self.id] } else { [self.id] }
         
-        await runBrewCommand(command: "uninstall",
-                                    arguments: arguments,
-                                    taskDescription: "Uninstalling",
-                                    notificationSuccess: String(localized:"\(self.name) successfully uninstalled"),
-                                    notificationFailure: "Failed to uninstall \(self.name)",
-                                    onSuccess: { self.isInstalled = false })
+        await runBrewCommand(
+            command: "uninstall",
+            arguments: arguments,
+            taskDescription: "Uninstalling",
+            notificationSuccess: String(localized:"\(self.name) successfully uninstalled"),
+            notificationFailure: "Failed to uninstall \(self.name)",
+            onSuccess: { self.isInstalled = false }
+        )
     }
     
     /// Updates the cask
