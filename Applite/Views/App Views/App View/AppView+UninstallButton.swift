@@ -17,9 +17,7 @@ extension AppView {
         var body: some View {
             Button {
                 Task {
-                    await MainActor.run { cask.progressState = .busy(withTask: "Uninstalling") }
-
-                    _ = await cask.uninstall(caskData: caskData)
+                    await cask.uninstall(caskData: caskData)
                 }
             } label: {
                 Image(systemName: "trash.fill")

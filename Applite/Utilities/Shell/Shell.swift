@@ -47,6 +47,13 @@ public enum Shell {
         try run(command)
     }
 
+    /// Executes a brew command asynchronously
+    @discardableResult
+    static func runBrewCommand(_ brewCommand: String, arguments: [String]) async throws -> String {
+        let command = "brew \(brewCommand) --cask \(arguments.joined(separator: " "))"
+        return try await runAsync(command)
+    }
+
     /// Executes a shell command and streams the output
     static func stream(_ command: String) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
@@ -110,8 +117,8 @@ public enum Shell {
         task.standardOutput = pipe
         task.standardError = pipe
         task.environment = environment
-        task.arguments = ["-l", "-c", command]
         task.executableURL = URL(fileURLWithPath: "/bin/zsh")
+        task.arguments = ["-l", "-c", command]
         task.standardInput = nil
 
         return (task, pipe)

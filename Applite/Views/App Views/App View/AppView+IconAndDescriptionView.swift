@@ -32,12 +32,5 @@ extension AppView {
             Spacer()
         }
         .contentShape(Rectangle())
-        .alert("Broken Brew Path", isPresented: $showingBrewPathError) {
-            Button("OK", role: .cancel) {
-                showingBrewPathError = false
-            }
-        } message: {
-            Text(LocalizedStringKey(DependencyManager.brokenPathOrIstallMessage))
-        }
     }
 }

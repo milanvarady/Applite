@@ -15,7 +15,6 @@ extension AppView {
         var body: some View {
             Button {
                 Task {
-                    await MainActor.run { cask.progressState = .busy(withTask: "Updating") }
                     await cask.update(caskData: caskData)
                 }
             } label: {

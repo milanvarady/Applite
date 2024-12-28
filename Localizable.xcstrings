@@ -376,6 +376,7 @@
       }
     },
     "%@ successfully installed!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -410,6 +411,7 @@
       }
     },
     "%@ successfully reinstalled" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -444,6 +446,7 @@
       }
     },
     "%@ successfully uninstalled" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -478,6 +481,7 @@
       }
     },
     "%@ successfully updated" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2437,6 +2441,7 @@
       }
     },
     "Failed to download %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2471,6 +2476,7 @@
       }
     },
     "Failed to reinstall %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2505,6 +2511,7 @@
       }
     },
     "Failed to update %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5555,6 +5562,7 @@
       }
     },
     "View Error" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

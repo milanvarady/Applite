@@ -91,6 +91,9 @@
 		419256622D1E15EA00D9EF10 /* UpdateView+UpdateUnavailable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256612D1E15EA00D9EF10 /* UpdateView+UpdateUnavailable.swift */; };
 		419256642D1E164600D9EF10 /* UpdateView+ToolbarItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256632D1E164600D9EF10 /* UpdateView+ToolbarItems.swift */; };
 		419256682D1E18D100D9EF10 /* AlertManagerViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256672D1E18D100D9EF10 /* AlertManagerViewModifier.swift */; };
+		4192566B2D1F286B00D9EF10 /* Cask+BrewFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192566A2D1F286B00D9EF10 /* Cask+BrewFunctions.swift */; };
+		4192566E2D1F293700D9EF10 /* Cask+LaunchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192566D2D1F293700D9EF10 /* Cask+LaunchApp.swift */; };
+		419256702D1F299E00D9EF10 /* Cask+ProtocolConformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192566F2D1F299E00D9EF10 /* Cask+ProtocolConformances.swift */; };
 		419506A42964A27F00FE5802 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A32964A27F00FE5802 /* SetupView.swift */; };
 		419506A62964A5EF00FE5802 /* BrewPathSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */; };
 		4196C8F528F9CB2600EADDDA /* DiscoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8F428F9CB2600EADDDA /* DiscoverView.swift */; };
@@ -186,6 +189,9 @@
 		419256612D1E15EA00D9EF10 /* UpdateView+UpdateUnavailable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UpdateView+UpdateUnavailable.swift"; sourceTree = "<group>"; };
 		419256632D1E164600D9EF10 /* UpdateView+ToolbarItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UpdateView+ToolbarItems.swift"; sourceTree = "<group>"; };
 		419256672D1E18D100D9EF10 /* AlertManagerViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManagerViewModifier.swift; sourceTree = "<group>"; };
+		4192566A2D1F286B00D9EF10 /* Cask+BrewFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+BrewFunctions.swift"; sourceTree = "<group>"; };
+		4192566D2D1F293700D9EF10 /* Cask+LaunchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+LaunchApp.swift"; sourceTree = "<group>"; };
+		4192566F2D1F299E00D9EF10 /* Cask+ProtocolConformances.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+ProtocolConformances.swift"; sourceTree = "<group>"; };
 		419506A32964A27F00FE5802 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewPathSelectorView.swift; sourceTree = "<group>"; };
 		419506A729696A5300FE5802 /* Applite-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Applite-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -358,15 +364,15 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		41483CCA29101C7200BB10C2 /* Cask Data */ = {
+		41483CCA29101C7200BB10C2 /* Cask Models */ = {
 			isa = PBXGroup;
 			children = (
+				419256692D1F284100D9EF10 /* Cask */,
 				418F332528EC921D0023D76F /* CaskData.swift */,
-				418F332328EC8BA10023D76F /* Cask.swift */,
 				4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */,
 				4191392B29159B5C00F1D75D /* CaskDTO.swift */,
 			);
-			path = "Cask Data";
+			path = "Cask Models";
 			sourceTree = "<group>";
 		};
 		41483CCB29101C7D00BB10C2 /* Categories */ = {
@@ -389,7 +395,7 @@
 		418F332228EC8B120023D76F /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				41483CCA29101C7200BB10C2 /* Cask Data */,
+				41483CCA29101C7200BB10C2 /* Cask Models */,
 				41483CCB29101C7D00BB10C2 /* Categories */,
 				4104D7442A8FC53200F84F9B /* Preferences */,
 			);
@@ -541,6 +547,17 @@
 				419256672D1E18D100D9EF10 /* AlertManagerViewModifier.swift */,
 			);
 			path = "Alert Manager";
+			sourceTree = "<group>";
+		};
+		419256692D1F284100D9EF10 /* Cask */ = {
+			isa = PBXGroup;
+			children = (
+				418F332328EC8BA10023D76F /* Cask.swift */,
+				4192566A2D1F286B00D9EF10 /* Cask+BrewFunctions.swift */,
+				4192566D2D1F293700D9EF10 /* Cask+LaunchApp.swift */,
+				4192566F2D1F299E00D9EF10 /* Cask+ProtocolConformances.swift */,
+			);
+			path = Cask;
 			sourceTree = "<group>";
 		};
 		4196C8F628F9CB4100EADDDA /* App Views */ = {
@@ -701,6 +718,7 @@
 				419256352D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift in Sources */,
 				4192563C2D1DF3C900D9EF10 /* ContentView+SidebarItems.swift in Sources */,
 				4192560F2D1CC09500D9EF10 /* DependencyError.swift in Sources */,
+				4192566E2D1F293700D9EF10 /* Cask+LaunchApp.swift in Sources */,
 				419256592D1E0EA000D9EF10 /* DiscoverSectionView+OffsetKey.swift in Sources */,
 				4192565E2D1E155400D9EF10 /* UpdateView+UpdateAllButton.swift in Sources */,
 				419256572D1E0E5F00D9EF10 /* DiscoverSectionView+AppRow.swift in Sources */,
@@ -727,10 +745,12 @@
 				419256272D1DF1AC00D9EF10 /* SetupView+BrewTypeSelection.swift in Sources */,
 				4192560A2D1C9FF800D9EF10 /* StringExtension.swift in Sources */,
 				4191392C29159B5C00F1D75D /* CaskDTO.swift in Sources */,
+				419256702D1F299E00D9EF10 /* Cask+ProtocolConformances.swift in Sources */,
 				413E60C22BBFF98A00978F6A /* AppIconView.swift in Sources */,
 				418989AD2A33A5C4004AC23B /* BrewManagementView.swift in Sources */,
 				418989B22A35D651004AC23B /* isBrewPathValid.swift in Sources */,
 				4192560D2D1CA02C00D9EF10 /* ShellError.swift in Sources */,
+				4192566B2D1F286B00D9EF10 /* Cask+BrewFunctions.swift in Sources */,
 				4192561A2D1DEB2100D9EF10 /* AppView+OpenAndManageView.swift in Sources */,
 				4192562C2D1DF20600D9EF10 /* SetupView+BrewInstall.swift in Sources */,
 				41062C952A3794EA00FD48EA /* BrewPaths.swift in Sources */,

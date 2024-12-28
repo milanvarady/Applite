@@ -109,27 +109,6 @@ extension AppView {
                 }
                 .buttonStyle(.bordered)
             }
-            .onAppear {
-                // Alert for install errors
-                if output.contains("It seems there is already an App") {
-                    failureAlertMessage = String(localized: "\(cask.name) is already installed. If you want to add it to \(Bundle.main.appName) click more options (chevron icon) and press Force Install.")
-                    showingFailureAlert = true
-                } else if output.contains("Could not resolve host") {
-                    failureAlertMessage = String(localized: "Couldn't download app. No internet connection, or host is unreachable.")
-                    showingFailureAlert = true
-                }
-            }
-            .alert("Error", isPresented: $showingFailureAlert) {
-                Button("OK") { }
-
-                Button("View Error") {
-                    // Open new window with shell output
-                    openWindow(value: output)
-                    cask.progressState = .idle
-                }
-            } message: {
-                Text(failureAlertMessage)
-            }
 
         case .idle:
             EmptyView()

@@ -27,7 +27,6 @@ struct AppView: View {
     @EnvironmentObject var caskData: CaskData
     
     // Alerts
-    @State var showingBrewPathError = false
     @State var failureAlertMessage = ""
     @State var showingFailureAlert = false
     
@@ -48,6 +47,7 @@ struct AppView: View {
         }
         .buttonStyle(.plain)
         .frame(width: Self.dimensions.width, height: Self.dimensions.height)
+        .alertManager(cask.alert)
     }
 }
 
