@@ -25,7 +25,7 @@ public func isBrewPathValid(path: String) -> Bool {
     if !path.hasSuffix("brew") && !path.hasSuffix("brew\"") {
         return false
     }
-    
+
     // Check if Homebrew is returned when checking version
     guard let output = try? Shell.run("\(path) --version") else {
         return false
