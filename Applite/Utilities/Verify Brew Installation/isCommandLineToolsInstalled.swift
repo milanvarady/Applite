@@ -10,9 +10,9 @@ import Foundation
 /// Checks if Xcode Command Line Tools is installed
 ///
 /// - Returns: Whether it is installed or not
-public func isCommandLineToolsInstalled() -> Bool {
+public func isCommandLineToolsInstalled() async -> Bool {
     do {
-        try Shell.run("xcode-select -p")
+        try await Shell.runAsync("xcode-select -p")
     } catch {
         return false
     }

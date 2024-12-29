@@ -9,7 +9,7 @@ import SwiftUI
 
 extension ContentView {
     func loadCasks() async {
-        guard BrewPaths.isSelectedBrewPathValid() else {
+        guard await BrewPaths.isSelectedBrewPathValid() else {
             loadAlert.show(title: "Couldn't load app catalog", message: DependencyManager.brokenPathOrIstallMessage)
             brokenInstall = true
 

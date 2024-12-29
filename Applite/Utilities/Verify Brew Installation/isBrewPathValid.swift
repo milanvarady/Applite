@@ -13,7 +13,7 @@ import Foundation
 ///   - path: Path to be checked
 ///
 /// - Returns: Whether the path is valid or not
-public func isBrewPathValid(path: String) -> Bool {
+public func isBrewPathValid(path: String) async -> Bool {
     var path = path
     
     // Add " marks so shell doesn't fail on spaces
@@ -27,7 +27,7 @@ public func isBrewPathValid(path: String) -> Bool {
     }
 
     // Check if Homebrew is returned when checking version
-    guard let output = try? Shell.run("\(path) --version") else {
+    guard let output = try? await Shell.runAsync("\(path) --version") else {
         return false
     }
 

@@ -54,13 +54,12 @@ extension SetupView {
                 }
                 .frame(width: 440)
                 .task {
-                    // Start installation when view loads
-                    await installDependencies()
-                }
-                .onAppear() {
-                    if !isCommandLineToolsInstalled() {
+                    if await !isCommandLineToolsInstalled() {
                         showCommandLineToolsInstallAlert = true
                     }
+
+                    // Start installation when view loads
+                    await installDependencies()
                 }
                 .alert("Xcode Command Line Tools", isPresented: $showCommandLineToolsInstallAlert) {} message: {
                     Text("You will be prompted to install Xcode Command Line Tools. Please select \"Install\" as it is required for this application to work.")

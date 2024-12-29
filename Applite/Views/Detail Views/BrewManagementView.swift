@@ -152,7 +152,7 @@ struct BrewManagementView: View {
                 reinstallButton
                     .task {
                         // Check if brew is installed in application support
-                        isAppBrewInstalled = isBrewPathValid(path: BrewPaths.getBrewExectuablePath(for: .appPath))
+                        isAppBrewInstalled = await isBrewPathValid(path: BrewPaths.getBrewExectuablePath(for: .appPath))
                     }
                 
                 if reinstallDone {
@@ -287,11 +287,13 @@ struct BrewManagementView: View {
                 ) { result in
                     switch result {
                     case .success(let url):
-                        do {
-                            try CaskToFileManager.export(url: url[0], exportType: selectedExportFileType)
-                        } catch {
-                            logger.error("Failed to export casks. Error: \(error.localizedDescription)")
-                            showingExportError = true
+                        Task { @MainActor in
+                            do {
+                                try await CaskToFileManager.export(url: url[0], exportType: selectedExportFileType)
+                            } catch {
+                                logger.error("Failed to export casks. Error: \(error.localizedDescription)")
+                                showingExportError = true
+                            }
                         }
                     case .failure(let error):
                         logger.error("\(error.localizedDescription)")

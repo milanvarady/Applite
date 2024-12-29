@@ -8,7 +8,7 @@
 import Foundation
 
 extension Cask {
-    func launchApp() throws {
+    func launchApp() async throws {
         let appPath: String
 
         if self.pkgInstaller {
@@ -33,6 +33,6 @@ extension Cask {
             appPath = "\(brewDirectory.replacingOccurrences(of: " ", with: "\\ ") )/Caskroom/\(self.id)/*/*.app"
         }
 
-        try Shell.run("open \(appPath)")
+        try await Shell.runAsync("open \(appPath)")
     }
 }

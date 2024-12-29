@@ -37,7 +37,7 @@ extension Cask {
 
         // Run install command and stream output
         do {
-            for try await line in Shell.stream(command) {
+            for try await line in Shell.stream(command, pty: true) {
                 completeOutput += line
                 self.progressState = self.parseBrewInstall(output: line)
             }

@@ -98,13 +98,13 @@ extension AppView {
         }
 
         private func download(force: Bool = false) {
-            // Check if brew path is valid
-            guard BrewPaths.isSelectedBrewPathValid() else {
-                showingBrewError = true
-                return
-            }
+            Task { @MainActor in
+                // Check if brew path is valid
+                guard await BrewPaths.isSelectedBrewPathValid() else {
+                    showingBrewError = true
+                    return
+                }
 
-            Task {
                 await cask.install(caskData: caskData, force: force)
             }
         }

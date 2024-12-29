@@ -10,7 +10,7 @@ import OSLog
 import Kingfisher
 
 /// This function will uninstall Applite and all it's related files
-func uninstallSelf(deleteBrewCache: Bool) throws {
+func uninstallSelf(deleteBrewCache: Bool) async throws {
     let logger = Logger()
     
     logger.notice("Applite uninstallation stated. deleteBrewCache: \(deleteBrewCache)")
@@ -42,13 +42,13 @@ func uninstallSelf(deleteBrewCache: Bool) throws {
     
     logger.notice("Running command: \(command)")
     
-    let output = try Shell.run(command)
+    let output = try await Shell.runAsync(command)
 
     logger.notice("Uninstall result: \(output)")
     
     // Homebrew cache
     if deleteBrewCache {
-        try Shell.run("rm -rf $HOME/Library/Caches/Homebrew")
+        try await Shell.runAsync("rm -rf $HOME/Library/Caches/Homebrew")
     }
     
     logger.notice("Self destructing. Goodbye world! o7")

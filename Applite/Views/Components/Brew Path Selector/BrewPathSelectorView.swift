@@ -33,18 +33,24 @@ struct BrewPathSelectorView: View {
             }
             .pickerStyle(.radioGroup)
         }
+        .task {
+            isSelectedPathValid = await BrewPaths.isSelectedBrewPathValid()
+        }
         .onAppear {
             customBrewPathDebounced.text = customUserBrewPath
-            isSelectedPathValid = BrewPaths.isSelectedBrewPathValid()
         }
         .onChange(of: brewPathOption) { _ in
-            isSelectedPathValid = BrewPaths.isSelectedBrewPathValid()
+            Task { @MainActor in
+                isSelectedPathValid = await BrewPaths.isSelectedBrewPathValid()
+            }
         }
         .onChange(of: customBrewPathDebounced.debouncedText) { newPath in
             customUserBrewPath = newPath
 
             if brewPathOption == BrewPaths.PathOption.custom.rawValue {
-                isSelectedPathValid = isBrewPathValid(path: newPath)
+                Task { @MainActor in
+                    isSelectedPathValid = await isBrewPathValid(path: newPath)
+                }
             }
         }
     }

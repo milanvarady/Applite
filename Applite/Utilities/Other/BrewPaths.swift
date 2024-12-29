@@ -103,7 +103,7 @@ struct BrewPaths {
     }
     
     /// Checks if currently selected brew executable path is valid
-    static public func isSelectedBrewPathValid() -> Bool {
-        return isBrewPathValid(path: Self.currentBrewExecutable)
+    static public func isSelectedBrewPathValid() async -> Bool {
+        return await isBrewPathValid(path: Self.currentBrewExecutable)
     }
 }

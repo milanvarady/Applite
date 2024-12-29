@@ -23,10 +23,12 @@ extension AppView {
         var body: some View {
             // Lauch app
             Button("Open") {
-                do {
-                    try cask.launchApp()
-                } catch {
-                    showAppNotFoundAlert = true
+                Task {
+                    do {
+                        try await cask.launchApp()
+                    } catch {
+                        showAppNotFoundAlert = true
+                    }
                 }
             }
             .font(.system(size: 14))

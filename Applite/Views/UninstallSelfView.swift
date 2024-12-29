@@ -41,10 +41,12 @@ struct UninstallSelfView: View {
         .frame(width: 400, height: 250)
         .confirmationDialog("Are you sure you want to permanently uninstall \(Bundle.main.appName)?", isPresented: $showConfirmation) {
             Button("Uninstall", role: .destructive) {
-                do {
-                    try uninstallSelf(deleteBrewCache: deleteBrewCache)
-                } catch {
-                    uninstallAlert.show(title: "Failed to uninstall", message: error.localizedDescription)
+                Task.detached {
+                    do {
+                        try await uninstallSelf(deleteBrewCache: deleteBrewCache)
+                    } catch {
+                        await uninstallAlert.show(title: "Failed to uninstall", message: error.localizedDescription)
+                    }
                 }
             }
             

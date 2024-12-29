@@ -13,7 +13,7 @@ enum CaskImportError: Error {
 }
 
 enum CaskToFileManager {
-    static func export(url: URL, exportType: CaskExportType) throws {
+    static func export(url: URL, exportType: CaskExportType) async throws {
         let today = Date.now
 
         let formatter = DateFormatter()
@@ -22,7 +22,7 @@ enum CaskToFileManager {
 
         switch exportType {
         case .txtFile:
-            let output = try Shell.run("\(BrewPaths.currentBrewExecutable) list --cask")
+            let output = try await Shell.runAsync("\(BrewPaths.currentBrewExecutable) list --cask")
 
             let exportedCasks = output.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -33,7 +33,7 @@ enum CaskToFileManager {
         case .brewfile:
             let brewfileURL = url.appendingPathComponent("Brewfile_\(currentDateString)")
 
-            try Shell.run("\(BrewPaths.currentBrewExecutable) bundle dump --file=\"\(brewfileURL.path)\"")
+            try await Shell.runAsync("\(BrewPaths.currentBrewExecutable) bundle dump --file=\"\(brewfileURL.path)\"")
         }
     }
 
