@@ -18,7 +18,7 @@ extension Cask {
             resetProgressState(caskData: caskData)
         }
 
-        Self.logger.info("Cask \"\(self.id)\" installation started")
+        Self.logger.info("Cask \"\(self.info.id)\" installation started")
 
         // Appdir argument
         let appdirOn = UserDefaults.standard.bool(forKey: Preferences.appdirOn.rawValue)
@@ -45,7 +45,7 @@ extension Cask {
             let alertMessage = switch completeOutput {
             // Already installed
             case _ where completeOutput.contains("It seems there is already an App"):
-                String(localized: "\(self.name) is already installed. If you want to add it to \(Bundle.main.appName) click more options (chevron icon) and press Force Install.")
+                String(localized: "\(self.info.name) is already installed. If you want to add it to \(Bundle.main.appName) click more options (chevron icon) and press Force Install.")
             // Network error
             case _ where completeOutput.contains("Could not resolve host"):
                 String(localized: "Couldn't download app. No internet connection, or host is unreachable.")
@@ -56,7 +56,7 @@ extension Cask {
             showFailure(
                 error: error,
                 output: completeOutput,
-                alertTitle: "Failed to install \(self.name)",
+                alertTitle: "Failed to install \(self.info.name)",
                 alertMessage: alertMessage
             )
             return
@@ -64,7 +64,7 @@ extension Cask {
 
         showSuccess(
             logMessage: "Successfully installed cask \(self.id)",
-            alertTitle: "\(self.name) successfully installed!"
+            alertTitle: "\(self.info.name) successfully installed!"
         )
 
         // Update state
@@ -83,7 +83,7 @@ extension Cask {
         progressState = .busy(withTask: "Uninstalling")
         caskData.busyCasks.insert(self)
 
-        var arguments: [String] = [self.id]
+        var arguments: [String] = [self.info.id]
 
         // Add -- zap argument
         if zap {
@@ -98,15 +98,15 @@ extension Cask {
             showFailure(
                 error: error,
                 output: output,
-                alertTitle: "Failed to uninstall \(self.name)",
+                alertTitle: "Failed to uninstall \(self.info.name)",
                 alertMessage: error.localizedDescription
             )
             return
         }
 
         showSuccess(
-            logMessage: "Successfully uninstalled \(self.id)",
-            alertTitle: "\(self.name) successfully uninstalled"
+            logMessage: "Successfully uninstalled \(self.info.id)",
+            alertTitle: "\(self.info.name) successfully uninstalled"
         )
 
         // Update state
@@ -125,12 +125,12 @@ extension Cask {
         var output: String = ""
 
         do {
-            output = try await Shell.runBrewCommand("uninstall", arguments: [self.id])
+            output = try await Shell.runBrewCommand("uninstall", arguments: [self.info.id])
         } catch {
             showFailure(
                 error: error,
                 output: output,
-                alertTitle: "Failed to update \(self.name)",
+                alertTitle: "Failed to update \(self.info.name)",
                 alertMessage: error.localizedDescription
             )
             return
@@ -138,7 +138,7 @@ extension Cask {
 
         showSuccess(
             logMessage: "Successfully updated \(self.id)",
-            alertTitle: "\(self.name) successfully updated"
+            alertTitle: "\(self.info.name) successfully updated"
         )
 
         // Update state
@@ -157,20 +157,20 @@ extension Cask {
         var output: String = ""
 
         do {
-            output = try await Shell.runBrewCommand("uninstall", arguments: [self.id])
+            output = try await Shell.runBrewCommand("uninstall", arguments: [self.info.id])
         } catch {
             showFailure(
                 error: error,
                 output: output,
-                alertTitle: "Failed to reinstall \(self.name)",
+                alertTitle: "Failed to reinstall \(self.info.name)",
                 alertMessage: error.localizedDescription
             )
             return
         }
 
         showSuccess(
-            logMessage: "Successfully reinstalled \(self.id)",
-            alertTitle: "\(self.name) successfully reinstalled"
+            logMessage: "Successfully reinstalled \(self.info.id)",
+            alertTitle: "\(self.info.name) successfully reinstalled"
         )
     }
 
@@ -208,7 +208,10 @@ extension Cask {
         alertMessage: String = ""
     ) {
         Self.logger.info("\(logMessage)")
-        sendNotification(title: alertTitle, body: alertMessage, reason: .success)
+
+        Task {
+            await sendNotification(title: alertTitle, body: alertMessage, reason: .success)
+        }
 
         // Show success for 2 seconds
         progressState = .success
@@ -239,7 +242,10 @@ extension Cask {
 
         // Send notification
         let notificationTitle = notificationTitle ?? alertTitle
-        sendNotification(title: notificationTitle, body: notificationMessage, reason: .failure)
+
+        Task {
+            await sendNotification(title: notificationTitle, body: notificationMessage, reason: .failure)
+        }
 
         // Set progress state to failed
         progressState = .failed(output: output)

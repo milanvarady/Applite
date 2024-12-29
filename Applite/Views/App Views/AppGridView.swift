@@ -28,7 +28,7 @@ struct AppGridView: View {
             
             ForEach(casks) { cask in
                 // Filter out self
-                if cask.id != "applite" {
+                if cask.info.id != "applite" {
                     AppView(cask: cask, role: appRole)
                 }
             }

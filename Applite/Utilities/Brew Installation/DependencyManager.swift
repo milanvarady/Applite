@@ -18,8 +18,8 @@ struct DependencyManager {
     )
 
     /// Message shown when brew path is broken
-    static var brokenPathOrIstallMessage = "Error. Broken brew path, or damaged installation. Check brew path in settings, or try reinstalling Homebrew (Manage Homebrew->Reinstall)"
-    
+    static let brokenPathOrIstallMessage = "Error. Broken brew path, or damaged installation. Check brew path in settings, or try reinstalling Homebrew (Manage Homebrew->Reinstall)"
+
     /// Installs dependencies to `~/Library/Application Support/Applite/homebrew/`
     ///
     /// - Parameters:

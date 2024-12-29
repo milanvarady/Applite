@@ -25,7 +25,7 @@ extension AppView {
         var body: some View {
             /// Download button
             Button {
-                if cask.caveats != nil {
+                if cask.info.caveats != nil {
                     // Show caveats dialog
                     showingCaveats = true
                     return
@@ -51,7 +51,7 @@ extension AppView {
 
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text(cask.caveats ?? "")
+                Text(cask.info.caveats ?? "")
             }
             .alert("Broken Brew Path", isPresented: $showingBrewError) {} message: {
                 Text(DependencyManager.brokenPathOrIstallMessage)
@@ -68,7 +68,7 @@ extension AppView {
             .popover(isPresented: $showingPopover) {
                 VStack(alignment: .leading, spacing: 6) {
                     // Open homepage
-                    if let homepageLink = cask.homepageURL {
+                    if let homepageLink = cask.info.homepageURL {
                         Link(destination: homepageLink, label: {
                             Label("Homepage", systemImage: "house")
                         })
@@ -88,7 +88,7 @@ extension AppView {
                 .padding(8)
                 .buttonStyle(.plain)
             }
-            .confirmationDialog("Are you sure you want to force install \(cask.name)? This will override any current installation!", isPresented: $showingForceInstallConfirmation) {
+            .confirmationDialog("Are you sure you want to force install \(cask.info.name)? This will override any current installation!", isPresented: $showingForceInstallConfirmation) {
                 Button("Yes") {
                     download(force: true)
                 }

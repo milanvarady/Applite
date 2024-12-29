@@ -94,6 +94,7 @@
 		4192566B2D1F286B00D9EF10 /* Cask+BrewFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192566A2D1F286B00D9EF10 /* Cask+BrewFunctions.swift */; };
 		4192566E2D1F293700D9EF10 /* Cask+LaunchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192566D2D1F293700D9EF10 /* Cask+LaunchApp.swift */; };
 		419256702D1F299E00D9EF10 /* Cask+ProtocolConformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192566F2D1F299E00D9EF10 /* Cask+ProtocolConformances.swift */; };
+		419256832D22055200D9EF10 /* CaskInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256822D22055200D9EF10 /* CaskInfo.swift */; };
 		419506A42964A27F00FE5802 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A32964A27F00FE5802 /* SetupView.swift */; };
 		419506A62964A5EF00FE5802 /* BrewPathSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */; };
 		4196C8F528F9CB2600EADDDA /* DiscoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8F428F9CB2600EADDDA /* DiscoverView.swift */; };
@@ -192,6 +193,7 @@
 		4192566A2D1F286B00D9EF10 /* Cask+BrewFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+BrewFunctions.swift"; sourceTree = "<group>"; };
 		4192566D2D1F293700D9EF10 /* Cask+LaunchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+LaunchApp.swift"; sourceTree = "<group>"; };
 		4192566F2D1F299E00D9EF10 /* Cask+ProtocolConformances.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+ProtocolConformances.swift"; sourceTree = "<group>"; };
+		419256822D22055200D9EF10 /* CaskInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskInfo.swift; sourceTree = "<group>"; };
 		419506A32964A27F00FE5802 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewPathSelectorView.swift; sourceTree = "<group>"; };
 		419506A729696A5300FE5802 /* Applite-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Applite-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -369,8 +371,9 @@
 			children = (
 				419256692D1F284100D9EF10 /* Cask */,
 				418F332528EC921D0023D76F /* CaskData.swift */,
-				4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */,
+				419256822D22055200D9EF10 /* CaskInfo.swift */,
 				4191392B29159B5C00F1D75D /* CaskDTO.swift */,
+				4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */,
 			);
 			path = "Cask Models";
 			sourceTree = "<group>";
@@ -749,6 +752,7 @@
 				413E60C22BBFF98A00978F6A /* AppIconView.swift in Sources */,
 				418989AD2A33A5C4004AC23B /* BrewManagementView.swift in Sources */,
 				418989B22A35D651004AC23B /* isBrewPathValid.swift in Sources */,
+				419256832D22055200D9EF10 /* CaskInfo.swift in Sources */,
 				4192560D2D1CA02C00D9EF10 /* ShellError.swift in Sources */,
 				4192566B2D1F286B00D9EF10 /* Cask+BrewFunctions.swift in Sources */,
 				4192561A2D1DEB2100D9EF10 /* AppView+OpenAndManageView.swift in Sources */,
@@ -931,7 +935,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = dev.aerolite.Applite;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -966,7 +970,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = dev.aerolite.Applite;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};

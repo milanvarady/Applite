@@ -8,25 +8,15 @@
 import SwiftUI
 import os
 
-/// Holds all essential data of a Homebrew cask and provides methods to run brew commands on it (e.g. install, uninstall, update)
+/// A view model that holds all essential data of a Homebrew cask and provides methods to run brew commands on it (e.g. install, uninstall, update)
 @MainActor
-final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
-    // MARK: - Static properties
+final class Cask: ObservableObject, Identifiable, Hashable {
+    /// Static cask information
+    let info: CaskInfo
 
-    /// Unique id of the class, this is the same name you would use to download the cask with brew
-    let id: String
-    /// Longer format cask name
-    let name: String
-    /// Short description
-    let description: String
-    let homepageURL: URL?
     /// Number of downloads in the last 365 days
-    var downloadsIn365days: Int = 0
-    /// Description of any caveats with the app
-    let caveats: String?
-    /// If true app has a .pkg installer
-    let pkgInstaller: Bool
-    
+    let downloadsIn365days: Int
+
     // MARK: - Published properties
 
     @Published var isInstalled: Bool = false
@@ -51,27 +41,19 @@ final class Cask: Identifiable, Decodable, Hashable, ObservableObject {
         case failed(output: String)
     }
 
-    // MARK: - Initializers
-
-    nonisolated init(from decoder: Decoder) throws {
-        let rawData = try? CaskDTO(from: decoder)
-
-        let homepage: String = rawData?.homepage ?? "https://brew.sh/"
-
-        self.id = rawData?.token ?? "N/A"
-        self.name = rawData?.nameArray[0] ?? "N/A"
-        self.description = rawData?.desc ?? "N/A"
-        self.homepageURL = URL(string: homepage)
-        self.caveats = rawData?.caveats
-        self.pkgInstaller = rawData?.url.hasSuffix("pkg") ?? false
+    required init(info: CaskInfo, downloadsIn365days: Int, isInstalled: Bool = false, isOutdated: Bool = false) {
+        self.info = info
+        self.downloadsIn365days = downloadsIn365days
+        self.isInstalled = isInstalled
+        self.isOutdated = isOutdated
     }
-    
-    init() {
-        self.id = "test"
-        self.name = "Test app"
-        self.description = "An application to test this application"
-        self.homepageURL = URL(string: "https://aerolite.dev/")
-        self.caveats = nil
-        self.pkgInstaller = false
-    }
+
+    static let dummy = Cask(info: CaskInfo(
+        id: "test",
+        name: "Test",
+        description: "Test application",
+        homepageURL: URL(string: "https://aerolite.dev/"),
+        caveats: nil,
+        pkgInstaller: false
+    ), downloadsIn365days: 100)
 }

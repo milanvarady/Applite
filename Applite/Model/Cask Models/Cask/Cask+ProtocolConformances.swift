@@ -8,6 +8,10 @@
 import Foundation
 
 extension Cask {
+    nonisolated var id: String {
+        self.info.id
+    }
+
     // Equatable
     nonisolated static func == (lhs: Cask, rhs: Cask) -> Bool {
         lhs.id == rhs.id

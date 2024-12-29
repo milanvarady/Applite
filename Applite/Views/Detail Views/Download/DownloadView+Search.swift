@@ -22,9 +22,9 @@ extension DownloadView {
         } else {
             // A score of 0 means a perfect match, a score of one matches everything
             casks = caskData.casks.filter {
-                ($0.name.lowercased().contains(searchText.lowercased()) || $0.description.lowercased().contains(searchText.lowercased())) ||
-                (fuseSearch.search(searchText.lowercased(), in: $0.name.lowercased())?.score ?? 1) < 0.25 ||
-                (fuseSearch.search(searchText.lowercased(), in: $0.description.lowercased())?.score ?? 1) < 0.25
+                ($0.info.name.lowercased().contains(searchText.lowercased()) || $0.info.description.lowercased().contains(searchText.lowercased())) ||
+                (fuseSearch.search(searchText.lowercased(), in: $0.info.name.lowercased())?.score ?? 1) < 0.25 ||
+                (fuseSearch.search(searchText.lowercased(), in: $0.info.description.lowercased())?.score ?? 1) < 0.25
             }
         }
 

@@ -31,7 +31,7 @@ struct InstalledView: View {
         
         if !$searchText.wrappedValue.isEmpty {
             filteredCasks = filteredCasks.filter {
-                (fuseSearch.search(searchText, in: $0.name)?.score ?? 1) < 0.4
+                (fuseSearch.search(searchText, in: $0.info.name)?.score ?? 1) < 0.4
             }
         }
         

@@ -46,7 +46,7 @@ final class CaskData: ObservableObject {
         /// Gets cask information from the Homebrew API and decodes it into a list of ``Cask`` objects
         /// - Returns: List of ``Cask`` objects
         @Sendable
-        func loadCaskObjects() async throws -> [Cask] {
+        func loadCaskInfo() async throws -> [CaskInfo] {
             // Get json data from api
             guard let casksURL = URL(string: "https://formulae.brew.sh/api/cask.json") else { return [] }
             
@@ -68,8 +68,8 @@ final class CaskData: ObservableObject {
             // Chache json file
             await cacheData(data: caskData, to: Self.caskCacheURL)
             
-            // Decode data
-            return try JSONDecoder().decode([Cask].self, from: caskData)
+            // Decode static cask data
+            return try JSONDecoder().decode([CaskInfo].self, from: caskData)
         }
         
         /// Gets cask analytics information from the Homebrew API and decodes it into a dictionary
@@ -182,7 +182,7 @@ final class CaskData: ObservableObject {
             for category in categories {
                 // Filter casks
                 let filteredCasks = casks.filter {
-                    category.casks.contains($0.id)
+                    category.casks.contains($0.info.id)
                 }
                 
                 // Sort by number of downloads
@@ -201,31 +201,26 @@ final class CaskData: ObservableObject {
         }
         
         // Get data components concurrently
-        async let caskData = loadCaskObjects()
+        async let caskInfo = loadCaskInfo()
         async let analyticsDict = loadAnalyticsData()
         async let installedCasks = getInstalledCasks()
         async let outdatedCaskIDs = getOutdatedCasks()
-        
-        // Combine data into a final list of `Cask` objects
-        do {
-            for i in try await caskData.indices {
-                try await caskData[i].downloadsIn365days = try await analyticsDict[try await caskData[i].id] ?? 0
-                
-                if try await installedCasks.contains(try await caskData[i].id) {
-                    try await caskData[i].isInstalled = true
-                    
-                    if try await outdatedCaskIDs.contains(try await caskData[i].id) {
-                        try await caskData[i].isOutdated = true
-                        self.outdatedCasks.insert(try await caskData[i])
-                    }
-                }
-            }
-        } catch {
-            Self.logger.error("Error while trying to combine cask data. Message: \(error.localizedDescription)")
+
+        var casks: [Cask] = []
+
+        for caskInfo in try await caskInfo {
+            let cask = Cask(
+                info: caskInfo,
+                downloadsIn365days: try await analyticsDict[caskInfo.id] ?? 0,
+                isInstalled: try await installedCasks.contains(caskInfo.id),
+                isOutdated: try await outdatedCaskIDs.contains(caskInfo.id)
+            )
+
+            casks.append(cask)
         }
-        
-        self.casks = try await caskData
-        
+
+        self.casks = casks
+
         Self.logger.info("Cask data loaded successfully!")
         
         // Create category dicts
@@ -242,7 +237,7 @@ final class CaskData: ObservableObject {
             .map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) })    // Trim whitespace
         
         for i in self.casks.indices {
-            if outdatedCaskIDs.contains(self.casks[i].id) && self.casks[i].isInstalled {
+            if outdatedCaskIDs.contains(self.casks[i].info.id) && self.casks[i].isInstalled {
                 self.casks[i].isOutdated = true
                 outdatedCasks.insert(casks[i])
             }

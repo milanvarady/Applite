@@ -10,22 +10,22 @@ import SwiftUI
 extension AppView {
     var iconAndDescriptionView: some View {
         return HStack {
-            if let iconURL = URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.id)/AppIcon.png"),
-               let faviconURL = URL(string: "https://icon.horse/icon/\(cask.homepageURL?.host ?? "")") {
+            if let iconURL = URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.info.id)/AppIcon.png"),
+               let faviconURL = URL(string: "https://icon.horse/icon/\(cask.info.homepageURL?.host ?? "")") {
                 AppIconView(
                     iconURL: iconURL,
                     faviconURL: faviconURL,
-                    cacheKey: cask.id
+                    cacheKey: cask.info.id
                 )
                 .padding(.leading, 5)
             }
 
             // Name and description
             VStack(alignment: .leading) {
-                Text(cask.name)
+                Text(cask.info.name)
                     .font(.system(size: 16, weight: .bold))
 
-                Text(cask.description)
+                Text(cask.info.description)
                     .foregroundColor(.secondary)
             }
 

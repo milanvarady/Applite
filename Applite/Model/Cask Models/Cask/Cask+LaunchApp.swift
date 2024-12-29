@@ -11,7 +11,7 @@ extension Cask {
     func launchApp() async throws {
         let appPath: String
 
-        if self.pkgInstaller {
+        if self.info.pkgInstaller {
             // Open PKG type app
             var applicationsDirectory = "/Applications"
 
@@ -25,7 +25,7 @@ extension Cask {
                 }
             }
 
-            appPath = "\"\(applicationsDirectory)/\(self.name).app\""
+            appPath = "\"\(applicationsDirectory)/\(self.info.name).app\""
         } else {
             // Open normal app
             let brewDirectory = BrewPaths.currentBrewDirectory
