@@ -17,7 +17,7 @@ extension DiscoverSectionView {
                 .font(.system(size: 24, weight: .bold))
 
             Button("See All") {
-                navigationSelection = category.id
+                navigationSelection = .appCategory(categoryId: category.id)
             }
             .buttonStyle(.plain)
             .foregroundColor(.blue)

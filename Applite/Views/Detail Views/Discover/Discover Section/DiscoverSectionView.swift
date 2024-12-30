@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DiscoverSectionView: View {
     let category: Category
-    @Binding var navigationSelection: String
+    @Binding var navigationSelection: SidebarItem
 
     @EnvironmentObject var caskData: CaskData
 

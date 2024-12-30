@@ -12,8 +12,8 @@ struct ContentView: View {
     @EnvironmentObject var caskData: CaskData
     
     /// Currently selected tab in the sidebar
-    @State var selection: String = "home"
-    
+    @State var selection: SidebarItem = .home
+
     /// App search query
     @State var searchText = ""
     /// This variable is set to the value of searchText whenever the user submits the search quiery
@@ -30,7 +30,7 @@ struct ContentView: View {
     
     var body: some View {
         NavigationSplitView {
-            sidebarItems
+            sidebarViews
                 .disabled(modifyingBrew)
         } detail: {
             detailView
@@ -44,8 +44,8 @@ struct ContentView: View {
         .onSubmit(of: .search) {
             searchTextSubmitted = searchText
 
-            if !searchText.isEmpty && selection != "home" {
-                selection = "home"
+            if !searchText.isEmpty && selection != .home {
+                selection = .home
             }
         }
         .onChange(of: searchText) { newSearchText in

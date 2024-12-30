@@ -10,7 +10,7 @@ import Fuse
 
 /// Download section. Either dispays the `DiscoverView` or search results
 struct DownloadView: View {
-    @Binding var navigationSelection: String
+    @Binding var navigationSelection: SidebarItem
     @Binding var searchText: String
     
     @EnvironmentObject var caskData: CaskData
@@ -67,7 +67,7 @@ struct DownloadView: View {
 
 struct DownloadView_Previews: PreviewProvider {
     static var previews: some View {
-        DownloadView(navigationSelection: .constant(""), searchText: .constant(""))
+        DownloadView(navigationSelection: .constant(.home), searchText: .constant(""))
             .environmentObject(CaskData())
     }
 }

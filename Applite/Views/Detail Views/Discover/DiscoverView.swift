@@ -10,7 +10,7 @@ import Shimmer
 
 /// Shows apps in categories
 struct DiscoverView: View {
-    @Binding var navigationSelection: String
+    @Binding var navigationSelection: SidebarItem
     @State var currentPage: Float = 0
 
     var body: some View {
@@ -32,7 +32,7 @@ struct DiscoverView: View {
 
 struct DiscoverView_Previews: PreviewProvider {
     static var previews: some View {
-        DiscoverView(navigationSelection: .constant(""))
+        DiscoverView(navigationSelection: .constant(.home))
             .environmentObject(CaskData())
     }
 }
