@@ -97,6 +97,8 @@
 		419256832D22055200D9EF10 /* CaskInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256822D22055200D9EF10 /* CaskInfo.swift */; };
 		4192568A2D22D67400D9EF10 /* SidebarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256892D22D67400D9EF10 /* SidebarItem.swift */; };
 		4192568C2D22D7FC00D9EF10 /* AppMigrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192568B2D22D7FC00D9EF10 /* AppMigrationView.swift */; };
+		4192568F2D22DC9E00D9EF10 /* FontExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192568E2D22DC9E00D9EF10 /* FontExtension.swift */; };
+		419256912D23F93E00D9EF10 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256902D23F93E00D9EF10 /* Card.swift */; };
 		419506A42964A27F00FE5802 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A32964A27F00FE5802 /* SetupView.swift */; };
 		419506A62964A5EF00FE5802 /* BrewPathSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */; };
 		4196C8F528F9CB2600EADDDA /* DiscoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8F428F9CB2600EADDDA /* DiscoverView.swift */; };
@@ -198,6 +200,8 @@
 		419256822D22055200D9EF10 /* CaskInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskInfo.swift; sourceTree = "<group>"; };
 		419256892D22D67400D9EF10 /* SidebarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarItem.swift; sourceTree = "<group>"; };
 		4192568B2D22D7FC00D9EF10 /* AppMigrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMigrationView.swift; sourceTree = "<group>"; };
+		4192568E2D22DC9E00D9EF10 /* FontExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontExtension.swift; sourceTree = "<group>"; };
+		419256902D23F93E00D9EF10 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		419506A32964A27F00FE5802 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewPathSelectorView.swift; sourceTree = "<group>"; };
 		419506A729696A5300FE5802 /* Applite-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Applite-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -259,6 +263,7 @@
 				4126353D2A77C6EF00155034 /* ArrayExtension.swift */,
 				411EDDD62A9F58180051E07B /* URLExtension.swift */,
 				419256092D1C9FF800D9EF10 /* StringExtension.swift */,
+				4192568E2D22DC9E00D9EF10 /* FontExtension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -269,6 +274,7 @@
 				419256412D1E072700D9EF10 /* Brew Path Selector */,
 				415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */,
 				418989AE2A33B65A004AC23B /* SmallProgressView.swift */,
+				419256902D23F93E00D9EF10 /* Card.swift */,
 				4120AB662A755B0700F68EFE /* Sparkle Updater */,
 			);
 			path = Components;
@@ -732,6 +738,7 @@
 				4192565E2D1E155400D9EF10 /* UpdateView+UpdateAllButton.swift in Sources */,
 				4192568A2D22D67400D9EF10 /* SidebarItem.swift in Sources */,
 				419256572D1E0E5F00D9EF10 /* DiscoverSectionView+AppRow.swift in Sources */,
+				4192568F2D22DC9E00D9EF10 /* FontExtension.swift in Sources */,
 				419506A42964A27F00FE5802 /* SetupView.swift in Sources */,
 				4192561E2D1DEBE700D9EF10 /* AppView+UninstallButton.swift in Sources */,
 				41524B99295E352200D0046A /* SettingsView.swift in Sources */,
@@ -781,6 +788,7 @@
 				4120AB652A754B1700F68EFE /* AppliteAppView.swift in Sources */,
 				412635442A77FB1600155034 /* BrewInstallationProgress.swift in Sources */,
 				419256202D1DEC0D00D9EF10 /* AppView+UpdateButton.swift in Sources */,
+				419256912D23F93E00D9EF10 /* Card.swift in Sources */,
 				419256252D1DF17F00D9EF10 /* SetupView+Welcome.swift in Sources */,
 				419256082D1C734600D9EF10 /* Shell.swift in Sources */,
 				4192563E2D1DF3E900D9EF10 /* ContentView+DetailView.swift in Sources */,

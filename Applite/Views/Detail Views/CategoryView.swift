@@ -17,7 +17,7 @@ struct CategoryView: View {
             // Category name
             Group {
                 Text(LocalizedStringKey(category.id))
-                    .font(.system(size: 42, weight: .bold))
+                    .font(.appliteMediumTitle)
                     .padding(.bottom, -20)
                 
                 Divider()

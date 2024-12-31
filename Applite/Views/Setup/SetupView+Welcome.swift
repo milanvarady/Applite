@@ -13,7 +13,7 @@ extension SetupView {
         var body: some View {
             VStack {
                 Text("Welcome to \(Bundle.main.appName)")
-                    .font(.system(size: 36, weight: .bold))
+                    .font(.appliteSmallTitle)
                     .padding(.top, 50)
                     .padding(.bottom, 25)
 

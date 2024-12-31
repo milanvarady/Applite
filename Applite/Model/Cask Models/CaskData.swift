@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import os
+import OSLog
 
 /// A dictionary that has cask id's as keys and number of downloads as the values
 typealias BrewAnalyticsDictionary = [String: Int]

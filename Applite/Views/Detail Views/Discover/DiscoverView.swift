@@ -16,7 +16,7 @@ struct DiscoverView: View {
     var body: some View {
         LazyVStack(alignment: .leading) {
             Text("Discover")
-                .font(.system(size: 52, weight: .bold))
+                .font(.appliteLargeTitle)
                 .padding(.bottom)
 
             ForEach(categories) { category in

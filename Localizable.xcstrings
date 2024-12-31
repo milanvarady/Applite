@@ -199,6 +199,9 @@
         }
       }
     },
+    "**Note:** When importing a Brewfile only casks will be installed. Other items like formulae and taps will be skipped." : {
+
+    },
     "**Warning**: Homebrew cache is shared between Homebrew installations. Deleting the cache will remove the cache for all installations!" : {
       "localizations" : {
         "fr" : {
@@ -896,9 +899,6 @@
       }
     },
     "App Migration" : {
-
-    },
-    "App migration view" : {
 
     },
     "Appdir" : {
@@ -2310,6 +2310,9 @@
         }
       }
     },
+    "Export" : {
+
+    },
     "Export a file containing all currently installed applications. This can be imported to another device." : {
       "localizations" : {
         "fr" : {
@@ -2344,6 +2347,9 @@
         }
       }
     },
+    "Export all of your currently installed apps to a file. Import the file to another device to install them all. Useful when setting up a new Mac." : {
+
+    },
     "Export apps to file" : {
       "localizations" : {
         "fr" : {
@@ -2377,6 +2383,9 @@
           }
         }
       }
+    },
+    "Export Apps to File" : {
+
     },
     "Export failed" : {
       "localizations" : {
@@ -2824,6 +2833,9 @@
         }
       }
     },
+    "Import" : {
+
+    },
     "Import apps" : {
       "localizations" : {
         "fr" : {
@@ -2857,6 +2869,9 @@
           }
         }
       }
+    },
+    "Import Apps" : {
+
     },
     "Import failed" : {
       "localizations" : {
