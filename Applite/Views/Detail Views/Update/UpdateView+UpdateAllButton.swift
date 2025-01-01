@@ -41,7 +41,8 @@ extension UpdateView {
                 Text("Update All")
             }
         }
-        .bigButton(backgroundColor: .accentColor)
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
         .padding(.vertical)
         .disabled(isUpdatingAll)
     }

@@ -28,7 +28,7 @@ extension DownloadView {
                 } label: {
                     Label("Turn off few downloads filter", systemImage: "slider.horizontal.2.square.on.square")
                 }
-                .bigButton()
+                .controlSize(.large)
                 .help("Apps with few downloads are hidden, consider turning off this filter")
             }
         }

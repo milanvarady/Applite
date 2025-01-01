@@ -44,7 +44,6 @@
 		418989B22A35D651004AC23B /* isBrewPathValid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418989B12A35D651004AC23B /* isBrewPathValid.swift */; };
 		418989B42A35D67C004AC23B /* isCommandLineToolsInstalled.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418989B32A35D67C004AC23B /* isCommandLineToolsInstalled.swift */; };
 		4189CE392937CD41009C836D /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 4189CE382937CD41009C836D /* Shimmer */; };
-		4189CE41293C980E009C836D /* BigButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4189CE40293C980E009C836D /* BigButtonStyle.swift */; };
 		418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */ = {isa = PBXBuildFile; productRef = 418E9EF32AACD9C000046A58 /* CircularProgress */; };
 		418F331C28EB3D540023D76F /* AppGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F331B28EB3D540023D76F /* AppGridView.swift */; };
 		418F332428EC8BA10023D76F /* Cask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F332328EC8BA10023D76F /* Cask.swift */; };
@@ -144,7 +143,6 @@
 		418989AE2A33B65A004AC23B /* SmallProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallProgressView.swift; sourceTree = "<group>"; };
 		418989B12A35D651004AC23B /* isBrewPathValid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = isBrewPathValid.swift; sourceTree = "<group>"; };
 		418989B32A35D67C004AC23B /* isCommandLineToolsInstalled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = isCommandLineToolsInstalled.swift; sourceTree = "<group>"; };
-		4189CE40293C980E009C836D /* BigButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BigButtonStyle.swift; sourceTree = "<group>"; };
 		418F331B28EB3D540023D76F /* AppGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGridView.swift; sourceTree = "<group>"; };
 		418F332328EC8BA10023D76F /* Cask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cask.swift; sourceTree = "<group>"; };
 		418F332528EC921D0023D76F /* CaskData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskData.swift; sourceTree = "<group>"; };
@@ -280,14 +278,6 @@
 			path = "Brew Installation";
 			sourceTree = "<group>";
 		};
-		4126354C2A79195200155034 /* Styles */ = {
-			isa = PBXGroup;
-			children = (
-				4189CE40293C980E009C836D /* BigButtonStyle.swift */,
-			);
-			path = Styles;
-			sourceTree = "<group>";
-		};
 		413E60B52BBAE58B00978F6A /* Network Proxy */ = {
 			isa = PBXGroup;
 			children = (
@@ -321,7 +311,6 @@
 				414074F428DF53E80073EB22 /* AppliteApp.swift */,
 				414074F828DF53EB0073EB22 /* Assets.xcassets */,
 				4140750328DF5ED00073EB22 /* Views */,
-				4126354C2A79195200155034 /* Styles */,
 				418F332228EC8B120023D76F /* Model */,
 				4191393129269FD600F1D75D /* Utilities */,
 				412635402A77F99F00155034 /* Extensions */,
@@ -707,7 +696,6 @@
 				414074F728DF53E80073EB22 /* ContentView.swift in Sources */,
 				419256392D1DF35C00D9EF10 /* SettingsView+Uninstaller.swift in Sources */,
 				419256472D1E0B0900D9EF10 /* BrewPathSelectorView+GetPathDescription.swift in Sources */,
-				4189CE41293C980E009C836D /* BigButtonStyle.swift in Sources */,
 				41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */,
 				419256622D1E15EA00D9EF10 /* UpdateView+UpdateUnavailable.swift in Sources */,
 				41857B752912D94A004A1894 /* CategoryView.swift in Sources */,

@@ -29,13 +29,15 @@ struct UninstallSelfView: View {
             Divider()
                 .padding(.vertical)
             
-            Button {
+            Button(role: .destructive) {
                 showConfirmation = true
             } label: {
                 Label("Uninstall \(Bundle.main.appName)", systemImage: "trash.fill")
             }
-            .bigButton(foregroundColor: .white, backgroundColor: .red)
-            
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
+            .controlSize(.large)
+
             Spacer()
         }
         .frame(width: 400, height: 250)

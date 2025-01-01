@@ -26,8 +26,7 @@ extension ContentView {
                     } label: {
                         Label("Retry load", systemImage: "arrow.clockwise.circle")
                     }
-                    .bigButton()
-                    .disabled(false)
+                    .controlSize(.large)
                 }
                 .frame(maxWidth: 600)
             }

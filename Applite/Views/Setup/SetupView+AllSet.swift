@@ -20,7 +20,8 @@ extension SetupView {
             Button("Start Using \(Bundle.main.appName)") {
                 setupComplete = true
             }
-            .bigButton(backgroundColor: .accentColor)
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
         }
     }
 }

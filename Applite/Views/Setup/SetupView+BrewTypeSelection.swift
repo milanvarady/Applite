@@ -26,13 +26,14 @@ extension SetupView {
                         page = .brewPathSelection
                         BrewPaths.selectedBrewOption = .defaultAppleSilicon
                     }
-                    .bigButton()
+                    .controlSize(.large)
 
                     Button("No (I don't know what it is)") {
                         page = .brewInstall
                         BrewPaths.selectedBrewOption = .appPath
                     }
-                    .bigButton(backgroundColor: .accentColor)
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
                 }
 
                 Spacer()

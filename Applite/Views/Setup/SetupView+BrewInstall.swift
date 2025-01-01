@@ -49,7 +49,7 @@ extension SetupView {
                         } label: {
                             Label("Retry Install", systemImage: "arrow.clockwise.circle")
                         }
-                        .bigButton(backgroundColor: .secondary)
+                        .controlSize(.large)
                     }
                 }
                 .frame(width: 440)

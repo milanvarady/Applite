@@ -18,7 +18,9 @@ extension SettingsView {
                 } label: {
                     Label("Uninstall", systemImage: "trash.fill")
                 }
-                .bigButton(foregroundColor: .white, backgroundColor: .red)
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+                .controlSize(.large)
 
                 Text("Uninstall \(Bundle.main.appName), related files and cache.")
             }

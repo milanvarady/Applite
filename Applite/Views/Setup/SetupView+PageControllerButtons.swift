@@ -39,7 +39,7 @@ extension SetupView {
                             page = pageBefore
                         }
                     }
-                    .bigButton(backgroundColor: Color(red: 0.7, green: 0.7, blue: 0.7))
+                    .controlSize(.large)
                 }
 
                 Button("Continue") {
@@ -49,7 +49,8 @@ extension SetupView {
                     }
                 }
                 .disabled(!canContinue)
-                .bigButton(backgroundColor: canContinue ? .accentColor : .gray)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
             }
             .padding(.trailing)
             .padding(.bottom, 8)
