@@ -61,13 +61,15 @@ extension AppView {
             .scaleEffect(0.8)
 
         case .downloading(let percent):
-            CircularProgressView(count: Int(percent * 100),
-                                 total: 100,
-                                 progress: CGFloat(percent),
-                                 fontOne: Font.system(size: 16).bold(),
-                                 lineWidth: 6,
-                                 showBottomText: false)
-            .frame(width: 40, height: 40)
+            CircularProgressView(
+                count: Int(percent * 100),
+                total: 100,
+                progress: CGFloat(percent),
+                fontOne: .system(size: 14, weight: .black),
+                lineWidth: 4,
+                showBottomText: false
+            )
+            .frame(width: 36, height: 36)
 
         case .success:
             Image(systemName: "checkmark")

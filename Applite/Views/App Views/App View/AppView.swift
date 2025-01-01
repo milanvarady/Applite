@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import CircularProgress
 
 /// App view role
 enum AppRole {
