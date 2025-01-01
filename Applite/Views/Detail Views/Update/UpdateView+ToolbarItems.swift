@@ -32,7 +32,7 @@ extension UpdateView {
             Button("Show All") {
                 Task {
                     do {
-                        try await caskData.refreshOutdatedApps(greedy: true)
+                        try await caskManager.refreshOutdated(greedy: true)
                     } catch {
                         loadAlert.show(title: "Failed to load updates", message: error.localizedDescription)
                     }
@@ -51,7 +51,7 @@ extension UpdateView {
                 refreshing = true
 
                 do {
-                    try await caskData.refreshOutdatedApps(greedy: true)
+                    try await caskManager.refreshOutdated(greedy: true)
                 } catch {
                     loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
                 }

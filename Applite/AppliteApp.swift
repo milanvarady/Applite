@@ -12,7 +12,7 @@ import Kingfisher
 
 @main
 struct AppliteApp: App {
-    @StateObject var caskData = CaskData()
+    @StateObject var caskManager = CaskManager()
     
     @AppStorage(Preferences.colorSchemePreference.rawValue) var colorSchemePreference: ColorSchemePreference = .system
     @AppStorage(Preferences.setupComplete.rawValue) var setupComplete: Bool = false
@@ -42,7 +42,7 @@ struct AppliteApp: App {
         WindowGroup {
             if setupComplete {
                 ContentView()
-                    .environmentObject(caskData)
+                    .environmentObject(caskManager)
                     .frame(minWidth: 970, minHeight: 520)
                     .preferredColorScheme(selectedColorScheme)
             } else {

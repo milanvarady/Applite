@@ -13,7 +13,7 @@ extension ContentView {
             loadAlert.show(title: "Couldn't load app catalog", message: DependencyManager.brokenPathOrIstallMessage)
             brokenInstall = true
 
-            let output = (try? await Shell.runAsync("\(BrewPaths.currentBrewExecutable) --version")) ?? "n/a"
+            let output = (try? await Shell.runBrewCommand(["--version"])) ?? "n/a"
 
             logger.error(
                 """
@@ -27,7 +27,7 @@ extension ContentView {
         }
 
         do {
-            try await caskData.loadData()
+            try await caskManager.loadData()
             brokenInstall = false
         } catch {
             loadAlert.show(title: "Couldn't load app catalog", message: error.localizedDescription)

@@ -7,29 +7,14 @@
 
 import Foundation
 
-/// Holds the app categories
-let categories: [Category] = loadLocalJson(fileName: "categories")
+typealias CategoryId = String
 
 /// App category object
 struct Category: Decodable, Identifiable {
     /// Category id
     let id: String
     /// List of cask ids
-    let casks: [String]
+    let casks: [CaskId]
     /// SF Symbol of the category
     let sfSymbol: String
-}
-
-/// Loads a json from resources
-fileprivate func loadLocalJson(fileName: String) -> [Category] {
-   let decoder = JSONDecoder()
-   guard
-        let url = Bundle.main.url(forResource: fileName, withExtension: "json"),
-        let data = try? Data(contentsOf: url),
-        let categories = try? decoder.decode([Category].self, from: data)
-   else {
-        return []
-   }
-
-   return categories
 }

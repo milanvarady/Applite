@@ -11,14 +11,14 @@ extension ContentView {
     @ViewBuilder
     var detailView: some View {
         switch selection {
-        case "home":
+        case .home:
             if !brokenInstall {
                 DownloadView(navigationSelection: $selection, searchText: $searchTextSubmitted)
             } else {
                 // Broken install
                 VStack(alignment: .center) {
                     Text(DependencyManager.brokenPathOrIstallMessage)
-
+                    
                     Button {
                         Task {
                             await loadCasks()
@@ -31,25 +31,24 @@ extension ContentView {
                 }
                 .frame(maxWidth: 600)
             }
-
-        case "updates":
+            
+        case .updates:
             UpdateView()
-
-        case "installed":
+            
+        case .installed:
             InstalledView()
-
-        case "activeTasks":
+            
+        case .activeTasks:
             ActiveTasksView()
-
-        case "brew":
+            
+        case .appMigration:
+            AppMigrationView()
+            
+        case .appCategory(let category):
+            CategoryView(category: category)
+            
+        case .brew:
             BrewManagementView(modifyingBrew: $modifyingBrew)
-
-        default:
-            if let category = categories.first(where: { $0.id == selection }) {
-                CategoryView(category: category)
-            } else {
-                Text("No Selection")
-            }
         }
     }
 }

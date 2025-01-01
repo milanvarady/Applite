@@ -13,7 +13,7 @@ extension AppView {
         @StateObject var cask: Cask
         let deleteButton: Bool
 
-        @EnvironmentObject var caskData: CaskData
+        @EnvironmentObject var caskManager: CaskManager
 
         @State var showAppNotFoundAlert = false
         @State var showPopover = false
@@ -52,9 +52,7 @@ extension AppView {
                 VStack(alignment: .leading, spacing: 6) {
                     // Reinstall button
                     Button {
-                        Task {
-                            await cask.reinstall(caskData: caskData)
-                        }
+                        caskManager.reinstall(cask)
                     } label: {
                         Label("Reinstall", systemImage: "arrow.2.squarepath")
                     }
@@ -62,7 +60,7 @@ extension AppView {
                     // Uninstall button
                     Button(role: .destructive) {
                         Task {
-                            await cask.uninstall(caskData: caskData)
+                            caskManager.uninstall(cask)
                         }
                     } label: {
                         Label("Uninstall", systemImage: "trash")
@@ -72,7 +70,7 @@ extension AppView {
                     // Uninstall completely button
                     Button(role: .destructive) {
                         Task {
-                            await cask.uninstall(caskData: caskData, zap: true)
+                            caskManager.uninstall(cask, zap: true)
                         }
                     } label: {
                         Label("Uninstall Completely", systemImage: "trash.fill")

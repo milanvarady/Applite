@@ -10,12 +10,11 @@ import Fuse
 
 /// Update section
 struct UpdateView: View {
-    @EnvironmentObject var caskData: CaskData
+    @EnvironmentObject var caskManager: CaskManager
     
     @State var searchText = ""
     @State var refreshing = false
     @State var isUpdatingAll = false
-    @State var updateAllFinished = false
     @State var updateAllButtonRotation = 0.0
     
     @State var showingGreedyUpdateConfirm = false
@@ -23,15 +22,16 @@ struct UpdateView: View {
 
     // Filter outdated casks
     var casks: [Cask] {
-        var filteredCasks = caskData.casks.filter { $0.isOutdated }
-        
+        var outdatedCasks = caskManager.outdatedCasks
         if !$searchText.wrappedValue.isEmpty {
-            filteredCasks = filteredCasks.filter {
+            outdatedCasks = outdatedCasks.filter {
                 (fuseSearch.search(searchText, in: $0.info.name)?.score ?? 1) < 0.4
             }
         }
-        
-        return filteredCasks
+
+        let outdatedCasksAphabetical = Array(outdatedCasks).sorted { $0.info.name < $1.info.name }
+
+        return outdatedCasksAphabetical
     }
     
     let fuseSearch = Fuse()
@@ -39,7 +39,7 @@ struct UpdateView: View {
     var body: some View {
         ScrollView {
             // App grid
-            AppGridView(casks: Array(caskData.outdatedCasks), appRole: .update)
+            AppGridView(casks: Array(caskManager.outdatedCasks), appRole: .update)
                 .padding()
             
             if casks.count > 1 {
@@ -59,7 +59,7 @@ struct UpdateView: View {
 struct UpdateView_Previews: PreviewProvider {
     static var previews: some View {
         UpdateView()
-            .environmentObject(CaskData())
+            .environmentObject(CaskManager())
             .frame(width: 500, height: 400)
     }
 }

@@ -10,10 +10,10 @@ import Fuse
 
 /// Download section. Either dispays the `DiscoverView` or search results
 struct DownloadView: View {
-    @Binding var navigationSelection: String
+    @Binding var navigationSelection: SidebarItem
     @Binding var searchText: String
     
-    @EnvironmentObject var caskData: CaskData
+    @EnvironmentObject var caskManager: CaskManager
     
     @State var searchResults: [Cask] = []
     
@@ -48,7 +48,7 @@ struct DownloadView: View {
         }
         .onChange(of: searchText) { newSearchText in
             // Filter apps
-            searchResults = fuzzyFilter(casks: caskData.casks, searchText: newSearchText)
+            searchResults = fuzzyFilter(casks: Array(caskManager.casks.values), searchText: newSearchText)
         }
         .onChange(of: sortBy) { _newValue in
             // Refilter if sorting options change
@@ -67,7 +67,7 @@ struct DownloadView: View {
 
 struct DownloadView_Previews: PreviewProvider {
     static var previews: some View {
-        DownloadView(navigationSelection: .constant(""), searchText: .constant(""))
-            .environmentObject(CaskData())
+        DownloadView(navigationSelection: .constant(.home), searchText: .constant(""))
+            .environmentObject(CaskManager())
     }
 }

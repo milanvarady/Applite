@@ -10,14 +10,16 @@ import SwiftUI
 extension DiscoverSectionView {
     var categoryHeader: some View {
         HStack(alignment: .bottom) {
-            Image(systemName: category.sfSymbol)
-                .font(.system(size: 24))
+            let fontSize: CGFloat = 24
 
-            Text(LocalizedStringKey(category.id))
-                .font(.system(size: 24, weight: .bold))
+            Image(systemName: category.sfSymbol)
+                .font(.system(size: fontSize))
+
+            Text(LocalizedStringKey(category.name))
+                .font(.system(size: fontSize, weight: .bold))
 
             Button("See All") {
-                navigationSelection = category.id
+                navigationSelection = .appCategory(category: category)
             }
             .buttonStyle(.plain)
             .foregroundColor(.blue)

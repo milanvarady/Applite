@@ -12,7 +12,7 @@ extension AppView {
     struct DownloadButton: View {
         @ObservedObject var cask: Cask
 
-        @EnvironmentObject var caskData: CaskData
+        @EnvironmentObject var caskManager: CaskManager
 
         // Alerts
         @State var showingPopover = false
@@ -31,7 +31,7 @@ extension AppView {
                     return
                 }
 
-                download()
+                caskManager.install(cask)
             } label: {
                 Image(systemName: "arrow.down.to.line.circle\(buttonFill ? ".fill" : "")")
                     .font(.system(size: 22))
@@ -46,7 +46,7 @@ extension AppView {
             }
             .alert("App caveats", isPresented: $showingCaveats) {
                 Button("Download Anyway") {
-                    download()
+                    caskManager.install(cask)
                 }
 
                 Button("Cancel", role: .cancel) { }
@@ -90,22 +90,10 @@ extension AppView {
             }
             .confirmationDialog("Are you sure you want to force install \(cask.info.name)? This will override any current installation!", isPresented: $showingForceInstallConfirmation) {
                 Button("Yes") {
-                    download(force: true)
+                    caskManager.install(cask)
                 }
 
                 Button("Cancel", role: .cancel) { }
-            }
-        }
-
-        private func download(force: Bool = false) {
-            Task { @MainActor in
-                // Check if brew path is valid
-                guard await BrewPaths.isSelectedBrewPathValid() else {
-                    showingBrewError = true
-                    return
-                }
-
-                await cask.install(caskData: caskData, force: force)
             }
         }
     }

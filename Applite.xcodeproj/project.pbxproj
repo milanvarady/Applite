@@ -31,7 +31,6 @@
 		41483CCD29101C9900BB10C2 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41483CCC29101C9900BB10C2 /* Category.swift */; };
 		41524B99295E352200D0046A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41524B98295E352200D0046A /* SettingsView.swift */; };
 		41524B9E295FA36E00D0046A /* DebounceObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41524B9D295FA36E00D0046A /* DebounceObject.swift */; };
-		415563A02A9265CE00AE2F2E /* CaskExportType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4155639F2A9265CE00AE2F2E /* CaskExportType.swift */; };
 		415563A22A98BB2500AE2F2E /* ErrorWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */; };
 		415563A42A98C54300AE2F2E /* AppdirSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */; };
 		4166EE7028F5D4C900CE305A /* Commands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4166EE6F28F5D4C900CE305A /* Commands.swift */; };
@@ -48,7 +47,7 @@
 		418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */ = {isa = PBXBuildFile; productRef = 418E9EF32AACD9C000046A58 /* CircularProgress */; };
 		418F331C28EB3D540023D76F /* AppGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F331B28EB3D540023D76F /* AppGridView.swift */; };
 		418F332428EC8BA10023D76F /* Cask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F332328EC8BA10023D76F /* Cask.swift */; };
-		418F332628EC921D0023D76F /* CaskData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F332528EC921D0023D76F /* CaskData.swift */; };
+		418F332628EC921D0023D76F /* CaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F332528EC921D0023D76F /* CaskManager.swift */; };
 		4191392C29159B5C00F1D75D /* CaskDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4191392B29159B5C00F1D75D /* CaskDTO.swift */; };
 		419256062D1C546D00D9EF10 /* askpass.js in Resources */ = {isa = PBXBuildFile; fileRef = 419256052D1C546D00D9EF10 /* askpass.js */; };
 		419256082D1C734600D9EF10 /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256072D1C734600D9EF10 /* Shell.swift */; };
@@ -73,7 +72,7 @@
 		419256352D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256342D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift */; };
 		419256372D1DF34200D9EF10 /* SettingsView+ProxySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256362D1DF34200D9EF10 /* SettingsView+ProxySettings.swift */; };
 		419256392D1DF35C00D9EF10 /* SettingsView+Uninstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256382D1DF35C00D9EF10 /* SettingsView+Uninstaller.swift */; };
-		4192563C2D1DF3C900D9EF10 /* ContentView+SidebarItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192563B2D1DF3C900D9EF10 /* ContentView+SidebarItems.swift */; };
+		4192563C2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192563B2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift */; };
 		4192563E2D1DF3E900D9EF10 /* ContentView+DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192563D2D1DF3E900D9EF10 /* ContentView+DetailView.swift */; };
 		419256402D1DF41300D9EF10 /* ContentView+LoadCasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192563F2D1DF41300D9EF10 /* ContentView+LoadCasks.swift */; };
 		419256432D1E0A0200D9EF10 /* BrewPathSelectorView+PathOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256422D1E0A0200D9EF10 /* BrewPathSelectorView+PathOption.swift */; };
@@ -91,10 +90,24 @@
 		419256622D1E15EA00D9EF10 /* UpdateView+UpdateUnavailable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256612D1E15EA00D9EF10 /* UpdateView+UpdateUnavailable.swift */; };
 		419256642D1E164600D9EF10 /* UpdateView+ToolbarItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256632D1E164600D9EF10 /* UpdateView+ToolbarItems.swift */; };
 		419256682D1E18D100D9EF10 /* AlertManagerViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256672D1E18D100D9EF10 /* AlertManagerViewModifier.swift */; };
-		4192566B2D1F286B00D9EF10 /* Cask+BrewFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192566A2D1F286B00D9EF10 /* Cask+BrewFunctions.swift */; };
+		4192566B2D1F286B00D9EF10 /* CaskManager+BrewFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192566A2D1F286B00D9EF10 /* CaskManager+BrewFunctions.swift */; };
 		4192566E2D1F293700D9EF10 /* Cask+LaunchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192566D2D1F293700D9EF10 /* Cask+LaunchApp.swift */; };
-		419256702D1F299E00D9EF10 /* Cask+ProtocolConformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192566F2D1F299E00D9EF10 /* Cask+ProtocolConformances.swift */; };
 		419256832D22055200D9EF10 /* CaskInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256822D22055200D9EF10 /* CaskInfo.swift */; };
+		4192568A2D22D67400D9EF10 /* SidebarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256892D22D67400D9EF10 /* SidebarItem.swift */; };
+		4192568C2D22D7FC00D9EF10 /* AppMigrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192568B2D22D7FC00D9EF10 /* AppMigrationView.swift */; };
+		4192568F2D22DC9E00D9EF10 /* FontExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192568E2D22DC9E00D9EF10 /* FontExtension.swift */; };
+		419256912D23F93E00D9EF10 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256902D23F93E00D9EF10 /* Card.swift */; };
+		419256942D24255000D9EF10 /* CaskLoadError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256932D24255000D9EF10 /* CaskLoadError.swift */; };
+		419256962D2430C500D9EF10 /* CaskManager+LoadData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256952D2430C500D9EF10 /* CaskManager+LoadData.swift */; };
+		419256982D24311B00D9EF10 /* CaskManager+RefreshOutdated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256972D24311B00D9EF10 /* CaskManager+RefreshOutdated.swift */; };
+		4192569B2D24335900D9EF10 /* CaskTaskError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192569A2D24335900D9EF10 /* CaskTaskError.swift */; };
+		4192569D2D2433E200D9EF10 /* CaskProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192569C2D2433E200D9EF10 /* CaskProgressState.swift */; };
+		419256A12D25ACC300D9EF10 /* CategoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256A02D25ACC300D9EF10 /* CategoryViewModel.swift */; };
+		419256A42D25CFE600D9EF10 /* AppMigrationView+ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256A32D25CFE600D9EF10 /* AppMigrationView+ExportView.swift */; };
+		419256A62D25D00200D9EF10 /* AppMigrationView+ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256A52D25D00200D9EF10 /* AppMigrationView+ImportView.swift */; };
+		419256A82D25D10F00D9EF10 /* ExportFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256A72D25D10F00D9EF10 /* ExportFile.swift */; };
+		419256AB2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256AA2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift */; };
+		419256AD2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256AC2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift */; };
 		419506A42964A27F00FE5802 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A32964A27F00FE5802 /* SetupView.swift */; };
 		419506A62964A5EF00FE5802 /* BrewPathSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */; };
 		4196C8F528F9CB2600EADDDA /* DiscoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8F428F9CB2600EADDDA /* DiscoverView.swift */; };
@@ -132,7 +145,6 @@
 		41483CCC29101C9900BB10C2 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		41524B98295E352200D0046A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		41524B9D295FA36E00D0046A /* DebounceObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebounceObject.swift; sourceTree = "<group>"; };
-		4155639F2A9265CE00AE2F2E /* CaskExportType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskExportType.swift; sourceTree = "<group>"; };
 		415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorWindowView.swift; sourceTree = "<group>"; };
 		415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppdirSelectorView.swift; sourceTree = "<group>"; };
 		4166EE6F28F5D4C900CE305A /* Commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commands.swift; sourceTree = "<group>"; };
@@ -147,7 +159,7 @@
 		4189CE40293C980E009C836D /* BigButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BigButtonStyle.swift; sourceTree = "<group>"; };
 		418F331B28EB3D540023D76F /* AppGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGridView.swift; sourceTree = "<group>"; };
 		418F332328EC8BA10023D76F /* Cask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cask.swift; sourceTree = "<group>"; };
-		418F332528EC921D0023D76F /* CaskData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskData.swift; sourceTree = "<group>"; };
+		418F332528EC921D0023D76F /* CaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskManager.swift; sourceTree = "<group>"; };
 		4191392B29159B5C00F1D75D /* CaskDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskDTO.swift; sourceTree = "<group>"; };
 		419256052D1C546D00D9EF10 /* askpass.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = askpass.js; sourceTree = "<group>"; };
 		419256072D1C734600D9EF10 /* Shell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
@@ -172,7 +184,7 @@
 		419256342D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+UpdateSettings.swift"; sourceTree = "<group>"; };
 		419256362D1DF34200D9EF10 /* SettingsView+ProxySettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+ProxySettings.swift"; sourceTree = "<group>"; };
 		419256382D1DF35C00D9EF10 /* SettingsView+Uninstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+Uninstaller.swift"; sourceTree = "<group>"; };
-		4192563B2D1DF3C900D9EF10 /* ContentView+SidebarItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView+SidebarItems.swift"; sourceTree = "<group>"; };
+		4192563B2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView+SidebarViews.swift"; sourceTree = "<group>"; };
 		4192563D2D1DF3E900D9EF10 /* ContentView+DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView+DetailView.swift"; sourceTree = "<group>"; };
 		4192563F2D1DF41300D9EF10 /* ContentView+LoadCasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView+LoadCasks.swift"; sourceTree = "<group>"; };
 		419256422D1E0A0200D9EF10 /* BrewPathSelectorView+PathOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrewPathSelectorView+PathOption.swift"; sourceTree = "<group>"; };
@@ -190,10 +202,24 @@
 		419256612D1E15EA00D9EF10 /* UpdateView+UpdateUnavailable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UpdateView+UpdateUnavailable.swift"; sourceTree = "<group>"; };
 		419256632D1E164600D9EF10 /* UpdateView+ToolbarItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UpdateView+ToolbarItems.swift"; sourceTree = "<group>"; };
 		419256672D1E18D100D9EF10 /* AlertManagerViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManagerViewModifier.swift; sourceTree = "<group>"; };
-		4192566A2D1F286B00D9EF10 /* Cask+BrewFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+BrewFunctions.swift"; sourceTree = "<group>"; };
+		4192566A2D1F286B00D9EF10 /* CaskManager+BrewFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaskManager+BrewFunctions.swift"; sourceTree = "<group>"; };
 		4192566D2D1F293700D9EF10 /* Cask+LaunchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+LaunchApp.swift"; sourceTree = "<group>"; };
-		4192566F2D1F299E00D9EF10 /* Cask+ProtocolConformances.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+ProtocolConformances.swift"; sourceTree = "<group>"; };
 		419256822D22055200D9EF10 /* CaskInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskInfo.swift; sourceTree = "<group>"; };
+		419256892D22D67400D9EF10 /* SidebarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarItem.swift; sourceTree = "<group>"; };
+		4192568B2D22D7FC00D9EF10 /* AppMigrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMigrationView.swift; sourceTree = "<group>"; };
+		4192568E2D22DC9E00D9EF10 /* FontExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontExtension.swift; sourceTree = "<group>"; };
+		419256902D23F93E00D9EF10 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
+		419256932D24255000D9EF10 /* CaskLoadError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskLoadError.swift; sourceTree = "<group>"; };
+		419256952D2430C500D9EF10 /* CaskManager+LoadData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaskManager+LoadData.swift"; sourceTree = "<group>"; };
+		419256972D24311B00D9EF10 /* CaskManager+RefreshOutdated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaskManager+RefreshOutdated.swift"; sourceTree = "<group>"; };
+		4192569A2D24335900D9EF10 /* CaskTaskError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskTaskError.swift; sourceTree = "<group>"; };
+		4192569C2D2433E200D9EF10 /* CaskProgressState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskProgressState.swift; sourceTree = "<group>"; };
+		419256A02D25ACC300D9EF10 /* CategoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewModel.swift; sourceTree = "<group>"; };
+		419256A32D25CFE600D9EF10 /* AppMigrationView+ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppMigrationView+ExportView.swift"; sourceTree = "<group>"; };
+		419256A52D25D00200D9EF10 /* AppMigrationView+ImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppMigrationView+ImportView.swift"; sourceTree = "<group>"; };
+		419256A72D25D10F00D9EF10 /* ExportFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportFile.swift; sourceTree = "<group>"; };
+		419256AA2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrewManagementView+ActionsView.swift"; sourceTree = "<group>"; };
+		419256AC2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrewManagementView+InfoView.swift"; sourceTree = "<group>"; };
 		419506A32964A27F00FE5802 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewPathSelectorView.swift; sourceTree = "<group>"; };
 		419506A729696A5300FE5802 /* Applite-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Applite-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -255,6 +281,7 @@
 				4126353D2A77C6EF00155034 /* ArrayExtension.swift */,
 				411EDDD62A9F58180051E07B /* URLExtension.swift */,
 				419256092D1C9FF800D9EF10 /* StringExtension.swift */,
+				4192568E2D22DC9E00D9EF10 /* FontExtension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -265,6 +292,7 @@
 				419256412D1E072700D9EF10 /* Brew Path Selector */,
 				415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */,
 				418989AE2A33B65A004AC23B /* SmallProgressView.swift */,
+				419256902D23F93E00D9EF10 /* Card.swift */,
 				4120AB662A755B0700F68EFE /* Sparkle Updater */,
 			);
 			path = Components;
@@ -369,8 +397,8 @@
 		41483CCA29101C7200BB10C2 /* Cask Models */ = {
 			isa = PBXGroup;
 			children = (
+				419256922D24253800D9EF10 /* Cask Manager */,
 				419256692D1F284100D9EF10 /* Cask */,
-				418F332528EC921D0023D76F /* CaskData.swift */,
 				419256822D22055200D9EF10 /* CaskInfo.swift */,
 				4191392B29159B5C00F1D75D /* CaskDTO.swift */,
 				4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */,
@@ -382,6 +410,7 @@
 			isa = PBXGroup;
 			children = (
 				41483CCC29101C9900BB10C2 /* Category.swift */,
+				419256A02D25ACC300D9EF10 /* CategoryViewModel.swift */,
 			);
 			path = Categories;
 			sourceTree = "<group>";
@@ -401,6 +430,7 @@
 				41483CCA29101C7200BB10C2 /* Cask Models */,
 				41483CCB29101C7D00BB10C2 /* Categories */,
 				4104D7442A8FC53200F84F9B /* Preferences */,
+				419256892D22D67400D9EF10 /* SidebarItem.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -417,7 +447,7 @@
 			children = (
 				412635422A77FB0000155034 /* Brew Installation */,
 				4126353F2A77C71F00155034 /* Shell */,
-				41B731352A878993008BF6B9 /* Import Export */,
+				41B731352A878993008BF6B9 /* App Migration */,
 				413E60B52BBAE58B00978F6A /* Network Proxy */,
 				418989B02A35D628004AC23B /* Verify Brew Installation */,
 				419256652D1E18A500D9EF10 /* Alert Manager */,
@@ -482,7 +512,7 @@
 			isa = PBXGroup;
 			children = (
 				414074F628DF53E80073EB22 /* ContentView.swift */,
-				4192563B2D1DF3C900D9EF10 /* ContentView+SidebarItems.swift */,
+				4192563B2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift */,
 				4192563D2D1DF3E900D9EF10 /* ContentView+DetailView.swift */,
 				4192563F2D1DF41300D9EF10 /* ContentView+LoadCasks.swift */,
 			);
@@ -556,11 +586,44 @@
 			isa = PBXGroup;
 			children = (
 				418F332328EC8BA10023D76F /* Cask.swift */,
-				4192566A2D1F286B00D9EF10 /* Cask+BrewFunctions.swift */,
 				4192566D2D1F293700D9EF10 /* Cask+LaunchApp.swift */,
-				4192566F2D1F299E00D9EF10 /* Cask+ProtocolConformances.swift */,
 			);
 			path = Cask;
+			sourceTree = "<group>";
+		};
+		419256922D24253800D9EF10 /* Cask Manager */ = {
+			isa = PBXGroup;
+			children = (
+				418F332528EC921D0023D76F /* CaskManager.swift */,
+				419256952D2430C500D9EF10 /* CaskManager+LoadData.swift */,
+				4192566A2D1F286B00D9EF10 /* CaskManager+BrewFunctions.swift */,
+				419256972D24311B00D9EF10 /* CaskManager+RefreshOutdated.swift */,
+				4192569C2D2433E200D9EF10 /* CaskProgressState.swift */,
+				419256932D24255000D9EF10 /* CaskLoadError.swift */,
+				4192569A2D24335900D9EF10 /* CaskTaskError.swift */,
+			);
+			path = "Cask Manager";
+			sourceTree = "<group>";
+		};
+		419256A22D25CFBF00D9EF10 /* App Migration */ = {
+			isa = PBXGroup;
+			children = (
+				4192568B2D22D7FC00D9EF10 /* AppMigrationView.swift */,
+				419256A32D25CFE600D9EF10 /* AppMigrationView+ExportView.swift */,
+				419256A52D25D00200D9EF10 /* AppMigrationView+ImportView.swift */,
+				419256A72D25D10F00D9EF10 /* ExportFile.swift */,
+			);
+			path = "App Migration";
+			sourceTree = "<group>";
+		};
+		419256A92D25E17900D9EF10 /* Brew Management */ = {
+			isa = PBXGroup;
+			children = (
+				418989AC2A33A5C4004AC23B /* BrewManagementView.swift */,
+				419256AC2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift */,
+				419256AA2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift */,
+			);
+			path = "Brew Management";
 			sourceTree = "<group>";
 		};
 		4196C8F628F9CB4100EADDDA /* App Views */ = {
@@ -582,20 +645,20 @@
 				419256502D1E0CE000D9EF10 /* Discover */,
 				4192565C2D1E153D00D9EF10 /* Update */,
 				4196C8FF28F9E1F400EADDDA /* InstalledView.swift */,
-				41857B742912D94A004A1894 /* CategoryView.swift */,
-				418989AC2A33A5C4004AC23B /* BrewManagementView.swift */,
 				41B731382A879353008BF6B9 /* ActiveTasksView.swift */,
+				419256A22D25CFBF00D9EF10 /* App Migration */,
+				41857B742912D94A004A1894 /* CategoryView.swift */,
+				419256A92D25E17900D9EF10 /* Brew Management */,
 			);
 			path = "Detail Views";
 			sourceTree = "<group>";
 		};
-		41B731352A878993008BF6B9 /* Import Export */ = {
+		41B731352A878993008BF6B9 /* App Migration */ = {
 			isa = PBXGroup;
 			children = (
 				4178CF912A8689AF0037F270 /* ExportCasks.swift */,
-				4155639F2A9265CE00AE2F2E /* CaskExportType.swift */,
 			);
-			path = "Import Export";
+			path = "App Migration";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -702,6 +765,7 @@
 				4166EE7028F5D4C900CE305A /* Commands.swift in Sources */,
 				419256312D1DF2B600D9EF10 /* SettingsView+GeneralSettings.swift in Sources */,
 				4166EE7D28F73B2300CE305A /* BrewAnalytics.swift in Sources */,
+				419256A82D25D10F00D9EF10 /* ExportFile.swift in Sources */,
 				4104D7432A8FC52C00F84F9B /* Preferences.swift in Sources */,
 				419256682D1E18D100D9EF10 /* AlertManagerViewModifier.swift in Sources */,
 				414074F728DF53E80073EB22 /* ContentView.swift in Sources */,
@@ -718,21 +782,25 @@
 				419256182D1DEA4400D9EF10 /* AppView+ActionsView.swift in Sources */,
 				413F77A52972B2E70053349A /* DependencyManager.swift in Sources */,
 				418989B42A35D67C004AC23B /* isCommandLineToolsInstalled.swift in Sources */,
+				419256AB2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift in Sources */,
 				419256352D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift in Sources */,
-				4192563C2D1DF3C900D9EF10 /* ContentView+SidebarItems.swift in Sources */,
+				4192563C2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift in Sources */,
 				4192560F2D1CC09500D9EF10 /* DependencyError.swift in Sources */,
 				4192566E2D1F293700D9EF10 /* Cask+LaunchApp.swift in Sources */,
 				419256592D1E0EA000D9EF10 /* DiscoverSectionView+OffsetKey.swift in Sources */,
 				4192565E2D1E155400D9EF10 /* UpdateView+UpdateAllButton.swift in Sources */,
+				4192568A2D22D67400D9EF10 /* SidebarItem.swift in Sources */,
 				419256572D1E0E5F00D9EF10 /* DiscoverSectionView+AppRow.swift in Sources */,
+				4192568F2D22DC9E00D9EF10 /* FontExtension.swift in Sources */,
 				419506A42964A27F00FE5802 /* SetupView.swift in Sources */,
 				4192561E2D1DEBE700D9EF10 /* AppView+UninstallButton.swift in Sources */,
+				4192569B2D24335900D9EF10 /* CaskTaskError.swift in Sources */,
 				41524B99295E352200D0046A /* SettingsView.swift in Sources */,
-				415563A02A9265CE00AE2F2E /* CaskExportType.swift in Sources */,
 				41524B9E295FA36E00D0046A /* DebounceObject.swift in Sources */,
 				419256292D1DF1CF00D9EF10 /* SetupView+BrewPathSelection.swift in Sources */,
 				415563A22A98BB2500AE2F2E /* ErrorWindowView.swift in Sources */,
 				4196C8FE28F9E13600EADDDA /* UpdateView.swift in Sources */,
+				419256982D24311B00D9EF10 /* CaskManager+RefreshOutdated.swift in Sources */,
 				41062C992A3A263F00FD48EA /* UninstallSelfView.swift in Sources */,
 				419256372D1DF34200D9EF10 /* SettingsView+ProxySettings.swift in Sources */,
 				414074F528DF53E80073EB22 /* AppliteApp.swift in Sources */,
@@ -748,35 +816,43 @@
 				419256272D1DF1AC00D9EF10 /* SetupView+BrewTypeSelection.swift in Sources */,
 				4192560A2D1C9FF800D9EF10 /* StringExtension.swift in Sources */,
 				4191392C29159B5C00F1D75D /* CaskDTO.swift in Sources */,
-				419256702D1F299E00D9EF10 /* Cask+ProtocolConformances.swift in Sources */,
 				413E60C22BBFF98A00978F6A /* AppIconView.swift in Sources */,
 				418989AD2A33A5C4004AC23B /* BrewManagementView.swift in Sources */,
 				418989B22A35D651004AC23B /* isBrewPathValid.swift in Sources */,
+				419256A12D25ACC300D9EF10 /* CategoryViewModel.swift in Sources */,
 				419256832D22055200D9EF10 /* CaskInfo.swift in Sources */,
 				4192560D2D1CA02C00D9EF10 /* ShellError.swift in Sources */,
-				4192566B2D1F286B00D9EF10 /* Cask+BrewFunctions.swift in Sources */,
+				4192566B2D1F286B00D9EF10 /* CaskManager+BrewFunctions.swift in Sources */,
+				419256A42D25CFE600D9EF10 /* AppMigrationView+ExportView.swift in Sources */,
 				4192561A2D1DEB2100D9EF10 /* AppView+OpenAndManageView.swift in Sources */,
 				4192562C2D1DF20600D9EF10 /* SetupView+BrewInstall.swift in Sources */,
 				41062C952A3794EA00FD48EA /* BrewPaths.swift in Sources */,
 				4192565B2D1E0ECF00D9EF10 /* DiscoverSectionView+Placeholder.swift in Sources */,
 				41483CCD29101C9900BB10C2 /* Category.swift in Sources */,
+				4192569D2D2433E200D9EF10 /* CaskProgressState.swift in Sources */,
 				418F331C28EB3D540023D76F /* AppGridView.swift in Sources */,
 				419256332D1DF2E000D9EF10 /* SettingsView+BrewPath.swift in Sources */,
+				419256962D2430C500D9EF10 /* CaskManager+LoadData.swift in Sources */,
 				419256552D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift in Sources */,
 				41062C972A3A20F900FD48EA /* UninstallSelf.swift in Sources */,
-				418F332628EC921D0023D76F /* CaskData.swift in Sources */,
+				418F332628EC921D0023D76F /* CaskManager.swift in Sources */,
 				4178CF922A8689AF0037F270 /* ExportCasks.swift in Sources */,
 				4192562E2D1DF22500D9EF10 /* SetupView+AllSet.swift in Sources */,
+				4192568C2D22D7FC00D9EF10 /* AppMigrationView.swift in Sources */,
 				413E60B72BBAE5E000978F6A /* NetworkProxyManager.swift in Sources */,
 				4196C8F928F9CDF700EADDDA /* DownloadView.swift in Sources */,
 				4120AB682A755B5A00F68EFE /* CheckForUpdatesView.swift in Sources */,
 				4120AB652A754B1700F68EFE /* AppliteAppView.swift in Sources */,
 				412635442A77FB1600155034 /* BrewInstallationProgress.swift in Sources */,
 				419256202D1DEC0D00D9EF10 /* AppView+UpdateButton.swift in Sources */,
+				419256912D23F93E00D9EF10 /* Card.swift in Sources */,
 				419256252D1DF17F00D9EF10 /* SetupView+Welcome.swift in Sources */,
 				419256082D1C734600D9EF10 /* Shell.swift in Sources */,
+				419256AD2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift in Sources */,
 				4192563E2D1DF3E900D9EF10 /* ContentView+DetailView.swift in Sources */,
 				419256162D1DEA0A00D9EF10 /* AppView+IconAndDescriptionView.swift in Sources */,
+				419256942D24255000D9EF10 /* CaskLoadError.swift in Sources */,
+				419256A62D25D00200D9EF10 /* AppMigrationView+ImportView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1011,7 +1087,7 @@
 			repositoryURL = "https://github.com/onevcat/Kingfisher";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 7.11.0;
+				minimumVersion = 8.1.0;
 			};
 		};
 		4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
