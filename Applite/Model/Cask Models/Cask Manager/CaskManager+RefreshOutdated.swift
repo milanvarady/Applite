@@ -9,13 +9,13 @@ import Foundation
 
 extension CaskManager {
     func refreshOutdated(greedy: Bool = false) async throws -> Void {
-        var arguments: [String] = ["-q"]
+        var arguments: [String] = ["outdated", "--cask", "-q"]
 
         if greedy {
             arguments.append("-g")
         }
 
-        let output = try await Shell.runBrewCommand("outdated", arguments: arguments)
+        let output = try await Shell.runBrewCommand(arguments)
 
         let outdatedCaskIDs = output
             .trimmingCharacters(in: .whitespacesAndNewlines)

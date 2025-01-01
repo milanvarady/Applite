@@ -1037,6 +1037,9 @@
         }
       }
     },
+    "Apps Installed" : {
+
+    },
     "Apps with few downloads are hidden, consider turning off this filter" : {
       "localizations" : {
         "fr" : {
@@ -2737,7 +2740,11 @@
         }
       }
     },
+    "Homebrew Version" : {
+
+    },
     "Homebrew version: " : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3674,6 +3681,7 @@
       }
     },
     "Number of apps installed: " : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

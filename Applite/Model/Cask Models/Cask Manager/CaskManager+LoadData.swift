@@ -94,7 +94,7 @@ extension CaskManager {
         /// - Returns: A list of Cask ID's
         @Sendable
         func getInstalledCasks() async throws -> [String] {
-            let output = try await Shell.runAsync("\(BrewPaths.currentBrewExecutable) list --cask")
+            let output = try await Shell.runBrewCommand(["list", "--cask"])
 
             if output.isEmpty {
                 await Self.logger.notice("No installed casks were found")

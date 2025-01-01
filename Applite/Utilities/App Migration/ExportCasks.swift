@@ -14,7 +14,7 @@ enum CaskImportError: Error {
 
 enum AppMigration {
     static func export() async throws -> ExportFile {
-        let output = try await Shell.runBrewCommand("list")
+        let output = try await Shell.runBrewCommand(["list", "--cask"])
 
         let exportedCasks = output.trimmingCharacters(in: .whitespacesAndNewlines)
 

@@ -85,7 +85,7 @@ extension CaskManager {
         runTask(for: cask) {
             cask.progressState = .busy(withTask: "Uninstalling")
 
-            var arguments: [String] = [cask.info.id]
+            var arguments: [String] = ["uninstall", "--cask", cask.info.id]
 
             // Add -- zap argument
             if zap {
@@ -95,7 +95,7 @@ extension CaskManager {
             var output: String = ""
 
             do {
-                output = try await Shell.runBrewCommand("uninstall", arguments: arguments)
+                output = try await Shell.runBrewCommand(arguments)
             } catch {
                 await self.showFailure(
                     for: cask,
@@ -127,7 +127,7 @@ extension CaskManager {
             var output: String = ""
 
             do {
-                output = try await Shell.runBrewCommand("upgrade", arguments: [cask.info.id])
+                output = try await Shell.runBrewCommand(["upgrade", "--cask", cask.info.id])
             } catch {
                 await self.showFailure(
                     for: cask,
@@ -158,7 +158,7 @@ extension CaskManager {
             var output: String = ""
 
             do {
-                output = try await Shell.runBrewCommand("reinstall", arguments: [cask.info.id])
+                output = try await Shell.runBrewCommand(["reinstall", "--cask", cask.info.id])
             } catch {
                 await self.showFailure(
                     for: cask,
