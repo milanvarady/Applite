@@ -44,12 +44,8 @@ extension ContentView {
         case .appMigration:
             AppMigrationView()
             
-        case .appCategory(let categoryId):
-            if let category = categories.first(where: { $0.id == categoryId }) {
-                CategoryView(category: category)
-            } else {
-                Text("No Selection")
-            }
+        case .appCategory(let category):
+            CategoryView(category: category)
             
         case .brew:
             BrewManagementView(modifyingBrew: $modifyingBrew)

@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct DiscoverSectionView: View {
-    let category: Category
+    let category: CategoryViewModel
     @Binding var navigationSelection: SidebarItem
 
-    @EnvironmentObject var caskData: CaskData
+    @EnvironmentObject var caskManager: CaskManager
 
     @State var scrollOffset: CGFloat = 0
 

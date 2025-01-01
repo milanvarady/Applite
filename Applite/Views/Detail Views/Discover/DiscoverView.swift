@@ -10,6 +10,7 @@ import Shimmer
 
 /// Shows apps in categories
 struct DiscoverView: View {
+    @EnvironmentObject var caskManager: CaskManager
     @Binding var navigationSelection: SidebarItem
     @State var currentPage: Float = 0
 
@@ -19,7 +20,7 @@ struct DiscoverView: View {
                 .font(.appliteLargeTitle)
                 .padding(.bottom)
 
-            ForEach(categories) { category in
+            ForEach(caskManager.categories) { category in
                 DiscoverSectionView(category: category, navigationSelection: $navigationSelection)
 
                 Divider()
@@ -33,6 +34,6 @@ struct DiscoverView: View {
 struct DiscoverView_Previews: PreviewProvider {
     static var previews: some View {
         DiscoverView(navigationSelection: .constant(.home))
-            .environmentObject(CaskData())
+            .environmentObject(CaskManager())
     }
 }

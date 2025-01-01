@@ -16,23 +16,23 @@ extension ContentView {
                 .tag(SidebarItem.home)
 
             Label("Updates", systemImage: "arrow.clockwise.circle.fill")
-                .badge(caskData.outdatedCasks.count)
+                .badge(caskManager.outdatedCasks.count)
                 .tag(SidebarItem.updates)
 
             Label("Installed", systemImage: "externaldrive.fill.badge.checkmark")
                 .tag(SidebarItem.installed)
 
             Label("Active Tasks", systemImage: "gearshape.arrow.triangle.2.circlepath")
-                .badge(caskData.busyCasks.count)
+                .badge(caskManager.activeTasks.count)
                 .tag(SidebarItem.activeTasks)
 
             Label("App Migration", systemImage: "square.and.arrow.up.on.square")
                 .tag(SidebarItem.appMigration)
 
             Section("Categories") {
-                ForEach(categories) { category in
-                    Label(LocalizedStringKey(category.id), systemImage: category.sfSymbol)
-                        .tag(SidebarItem.appCategory(categoryId: category.id))
+                ForEach(caskManager.categories) { category in
+                    Label(LocalizedStringKey(category.name), systemImage: category.sfSymbol)
+                        .tag(SidebarItem.appCategory(category: category))
                 }
             }
 

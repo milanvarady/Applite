@@ -15,11 +15,11 @@ extension DiscoverSectionView {
             Image(systemName: category.sfSymbol)
                 .font(.system(size: fontSize))
 
-            Text(LocalizedStringKey(category.id))
+            Text(LocalizedStringKey(category.name))
                 .font(.system(size: fontSize, weight: .bold))
 
             Button("See All") {
-                navigationSelection = .appCategory(categoryId: category.id)
+                navigationSelection = .appCategory(category: category)
             }
             .buttonStyle(.plain)
             .foregroundColor(.blue)

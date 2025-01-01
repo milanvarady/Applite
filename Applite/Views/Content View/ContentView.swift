@@ -9,7 +9,7 @@ import SwiftUI
 import os
 
 struct ContentView: View {
-    @EnvironmentObject var caskData: CaskData
+    @EnvironmentObject var caskManager: CaskManager
     
     /// Currently selected tab in the sidebar
     @State var selection: SidebarItem = .home
@@ -27,7 +27,7 @@ struct ContentView: View {
     @State var modifyingBrew = false
     
     let logger = Logger()
-    
+
     var body: some View {
         NavigationSplitView {
             sidebarViews

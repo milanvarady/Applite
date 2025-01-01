@@ -10,15 +10,13 @@ import SwiftUI
 extension AppView {
     struct UninstallButton: View {
         @StateObject var cask: Cask
-        @EnvironmentObject var caskData: CaskData
+        @EnvironmentObject var caskManager: CaskManager
 
         @State var showingError = false
 
         var body: some View {
             Button {
-                Task {
-                    await cask.uninstall(caskData: caskData)
-                }
+                caskManager.uninstall(cask)
             } label: {
                 Image(systemName: "trash.fill")
                     .font(.system(size: 20))

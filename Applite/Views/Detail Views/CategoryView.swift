@@ -9,14 +9,13 @@ import SwiftUI
 
 /// Detail view used in the category section
 struct CategoryView: View {
-    let category: Category
-    @EnvironmentObject var caskData: CaskData
+    let category: CategoryViewModel
 
     var body: some View {
         VStack(alignment: .leading) {
             // Category name
             Group {
-                Text(LocalizedStringKey(category.id))
+                Text(category.name)
                     .font(.appliteMediumTitle)
                     .padding(.bottom, -20)
                 
@@ -26,15 +25,20 @@ struct CategoryView: View {
             
             // Apps
             ScrollView {
-                AppGridView(casks: caskData.casksByCategory[category.id] ?? [], appRole: .installAndManage)
+                AppGridView(casks: category.casks, appRole: .installAndManage)
             }
         }
         
     }
 }
 
-struct CategoryView_Previews: PreviewProvider {
-    static var previews: some View {
-        CategoryView(category: categories[0])
-    }
+#Preview {
+    CategoryView(category:
+        .init(
+            name: "Test",
+            sfSymbol: "star",
+            casks: Array(repeating: .dummy, count: 8),
+            casksCoupled: [Array(repeating: .dummy, count: 8)]
+        )
+    )
 }

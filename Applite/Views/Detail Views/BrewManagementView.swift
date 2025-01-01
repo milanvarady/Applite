@@ -258,7 +258,7 @@ struct BrewManagementView: View {
     }
     
     struct ExportView: View {
-        @EnvironmentObject var caskData: CaskData
+        @EnvironmentObject var caskManager: CaskManager
         
         @State private var fileExporterPresented = false
         @State private var fileImporterPresented = false
@@ -344,7 +344,7 @@ struct BrewManagementView: View {
         
         func installImported(casks: [String]) {
             Task {
-                await CaskToFileManager.installImportedCasks(casks: casks, caskData: caskData)
+                await CaskToFileManager.installImportedCasks(caskIds: casks, caskManager: caskManager)
             }
         }
     }

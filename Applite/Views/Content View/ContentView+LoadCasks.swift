@@ -27,7 +27,7 @@ extension ContentView {
         }
 
         do {
-            try await caskData.loadData()
+            try await caskManager.loadData()
             brokenInstall = false
         } catch {
             loadAlert.show(title: "Couldn't load app catalog", message: error.localizedDescription)

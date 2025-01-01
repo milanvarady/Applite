@@ -64,14 +64,16 @@ enum CaskToFileManager {
         return casks
     }
 
-    static func installImportedCasks(casks: [String], caskData: CaskData) async {
-        let casksToInstall: [Cask] = await caskData.casks.filter({ casks.contains($0.info.id) })
-
+    static func installImportedCasks(caskIds: [CaskId], caskManager: CaskManager) async {
         await withTaskGroup(of: Void.self) { group in
-            for cask in casksToInstall {
+            for caskId in caskIds {
+                guard let cask = await caskManager.casks[caskId] else {
+                    continue
+                }
+
                 group.addTask {
                     if await !cask.isInstalled {
-                        await cask.install(caskData: caskData)
+                        await caskManager.install(cask)
                     }
                 }
             }

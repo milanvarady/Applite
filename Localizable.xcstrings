@@ -3492,6 +3492,7 @@
       }
     },
     "No Selection" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

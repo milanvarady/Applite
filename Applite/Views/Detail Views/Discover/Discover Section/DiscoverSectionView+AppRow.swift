@@ -21,8 +21,7 @@ extension DiscoverSectionView {
 
                 // App row
                 appRow
-
-                .coordinateSpace(name: "\(category.id)Scroll")
+                    .coordinateSpace(name: "\(category.id)Scroll")
 
                 // Forward button
                 scrollButton(
@@ -38,8 +37,8 @@ extension DiscoverSectionView {
     private var appRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack {
-                if caskData.casksByCategoryCoupled[category.id]?.count ?? 0 > 0 {
-                    ForEach(Array((caskData.casksByCategoryCoupled[category.id]?.enumerated())!), id: \.offset) { index, casks in
+                if category.casksCoupled.count > 0 {
+                    ForEach(Array(category.casksCoupled.enumerated()), id: \.offset) { index, casks in
                         VStack {
                             ForEach(casks) { cask in
                                 AppView(cask: cask, role: .installAndManage)
