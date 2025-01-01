@@ -12,6 +12,8 @@ import Kingfisher
 
 @main
 struct AppliteApp: App {
+    @NSApplicationDelegateAdaptor(ApplicationDelegate.self) var appDelegate
+
     @StateObject var caskManager = CaskManager()
     
     @AppStorage(Preferences.colorSchemePreference.rawValue) var colorSchemePreference: ColorSchemePreference = .system
