@@ -30,7 +30,6 @@
 		4140750528DF5FA60073EB22 /* AppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4140750428DF5FA60073EB22 /* AppView.swift */; };
 		41483CCD29101C9900BB10C2 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41483CCC29101C9900BB10C2 /* Category.swift */; };
 		41524B99295E352200D0046A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41524B98295E352200D0046A /* SettingsView.swift */; };
-		41524B9E295FA36E00D0046A /* DebounceObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41524B9D295FA36E00D0046A /* DebounceObject.swift */; };
 		415563A22A98BB2500AE2F2E /* ErrorWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */; };
 		415563A42A98C54300AE2F2E /* AppdirSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */; };
 		4166EE7028F5D4C900CE305A /* Commands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4166EE6F28F5D4C900CE305A /* Commands.swift */; };
@@ -108,6 +107,7 @@
 		419256AB2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256AA2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift */; };
 		419256AD2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256AC2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift */; };
 		419256AF2D25F68700D9EF10 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256AE2D25F68700D9EF10 /* AppDelegate.swift */; };
+		419256B22D26033400D9EF10 /* DebouncedOnChange in Frameworks */ = {isa = PBXBuildFile; productRef = 419256B12D26033400D9EF10 /* DebouncedOnChange */; };
 		419506A42964A27F00FE5802 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A32964A27F00FE5802 /* SetupView.swift */; };
 		419506A62964A5EF00FE5802 /* BrewPathSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */; };
 		4196C8F528F9CB2600EADDDA /* DiscoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8F428F9CB2600EADDDA /* DiscoverView.swift */; };
@@ -144,7 +144,6 @@
 		4140750428DF5FA60073EB22 /* AppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppView.swift; sourceTree = "<group>"; };
 		41483CCC29101C9900BB10C2 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		41524B98295E352200D0046A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		41524B9D295FA36E00D0046A /* DebounceObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebounceObject.swift; sourceTree = "<group>"; };
 		415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorWindowView.swift; sourceTree = "<group>"; };
 		415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppdirSelectorView.swift; sourceTree = "<group>"; };
 		4166EE6F28F5D4C900CE305A /* Commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commands.swift; sourceTree = "<group>"; };
@@ -239,6 +238,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */,
+				419256B22D26033400D9EF10 /* DebouncedOnChange in Frameworks */,
 				4189CE392937CD41009C836D /* Shimmer in Frameworks */,
 				418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */,
 				4129FFD92A7A613E00CFE392 /* Fuse in Frameworks */,
@@ -452,7 +452,6 @@
 			isa = PBXGroup;
 			children = (
 				41062C942A3794EA00FD48EA /* BrewPaths.swift */,
-				41524B9D295FA36E00D0046A /* DebounceObject.swift */,
 				41DF006329EAA094004EB7AE /* SendNotification.swift */,
 				41062C962A3A20F900FD48EA /* UninstallSelf.swift */,
 			);
@@ -675,6 +674,7 @@
 				4129FFD82A7A613E00CFE392 /* Fuse */,
 				418E9EF32AACD9C000046A58 /* CircularProgress */,
 				413E60BF2BBF0E5C00978F6A /* Kingfisher */,
+				419256B12D26033400D9EF10 /* DebouncedOnChange */,
 			);
 			productName = Applite;
 			productReference = 414074F128DF53E80073EB22 /* Applite.app */;
@@ -714,6 +714,7 @@
 				4129FFD72A7A613E00CFE392 /* XCRemoteSwiftPackageReference "fuse-swift" */,
 				418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */,
 				413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */,
 			);
 			productRefGroup = 414074F228DF53E80073EB22 /* Products */;
 			projectDirPath = "";
@@ -788,7 +789,6 @@
 				4192561E2D1DEBE700D9EF10 /* AppView+UninstallButton.swift in Sources */,
 				4192569B2D24335900D9EF10 /* CaskTaskError.swift in Sources */,
 				41524B99295E352200D0046A /* SettingsView.swift in Sources */,
-				41524B9E295FA36E00D0046A /* DebounceObject.swift in Sources */,
 				419256292D1DF1CF00D9EF10 /* SetupView+BrewPathSelection.swift in Sources */,
 				415563A22A98BB2500AE2F2E /* ErrorWindowView.swift in Sources */,
 				4196C8FE28F9E13600EADDDA /* UpdateView.swift in Sources */,
@@ -1098,6 +1098,14 @@
 				minimumVersion = 1.2.1;
 			};
 		};
+		419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Tunous/DebouncedOnChange";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -1128,6 +1136,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */;
 			productName = CircularProgress;
+		};
+		419256B12D26033400D9EF10 /* DebouncedOnChange */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */;
+			productName = DebouncedOnChange;
 		};
 		41C8FA282A7A598B000BB9A2 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -23,7 +23,6 @@ struct NetworkProxyManager {
         let preferredProxyType: NetworkProxyType? = NetworkProxyType(rawValue: preferredProxyTypeString)
 
         if !proxyEnabled {
-            Self.logger.info("Proxy disabled by user")
             throw NetworkProxyError.proxyNotEnabled
         }
 

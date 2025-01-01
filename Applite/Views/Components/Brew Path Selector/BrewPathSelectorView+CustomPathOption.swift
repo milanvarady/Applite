@@ -13,7 +13,7 @@ extension BrewPathSelectorView {
             pathOption(option, showPath: false)
 
             HStack {
-                TextField("Custom brew path", text: $customBrewPathDebounced.text, prompt: Text("/path/to/brew"))
+                TextField("Custom brew path", text: $customUserBrewPath, prompt: Text("/path/to/brew"))
                     .textFieldStyle(.roundedBorder)
                     .frame(maxWidth: 300)
                     .autocorrectionDisabled()
@@ -27,7 +27,7 @@ extension BrewPathSelectorView {
                 ) { result in
                     switch result {
                     case .success(let file):
-                        customBrewPathDebounced.text = file.path
+                        customUserBrewPath = file.path(percentEncoded: false)
                     case .failure(let error):
                         print(error.localizedDescription)
                     }

@@ -6,12 +6,11 @@
 //
 
 import SwiftUI
+import DebouncedOnChange
 
 /// Provides a picker so the user can select the brew executable path they want to use
 struct BrewPathSelectorView: View {
     @Binding var isSelectedPathValid: Bool
-
-    @StateObject var customBrewPathDebounced = DebounceObject()
 
     @AppStorage(Preferences.customUserBrewPath.rawValue) var customUserBrewPath: String = BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon, shellFriendly: false)
     @AppStorage(Preferences.brewPathOption.rawValue) var brewPathOption = BrewPaths.PathOption.defaultAppleSilicon.rawValue
@@ -36,15 +35,12 @@ struct BrewPathSelectorView: View {
         .task {
             isSelectedPathValid = await BrewPaths.isSelectedBrewPathValid()
         }
-        .onAppear {
-            customBrewPathDebounced.text = customUserBrewPath
-        }
         .onChange(of: brewPathOption) { _ in
             Task { @MainActor in
                 isSelectedPathValid = await BrewPaths.isSelectedBrewPathValid()
             }
         }
-        .onChange(of: customBrewPathDebounced.debouncedText) { newPath in
+        .onChange(of: customUserBrewPath, debounceTime: .seconds(0.5)) { newPath in
             customUserBrewPath = newPath
 
             if brewPathOption == BrewPaths.PathOption.custom.rawValue {
