@@ -10,7 +10,7 @@ import Fuse
 
 /// Shows installed apps, where the user can open and uninstall them
 struct InstalledView: View {
-    @EnvironmentObject var caskData: CaskData
+    @EnvironmentObject var caskManager: CaskManager
     @State var searchText = ""
     
     let fuseSearch = Fuse()
@@ -23,25 +23,28 @@ struct InstalledView: View {
             }
         }
         .searchable(text: $searchText)
+        .id("InstalledView")
     }
-    
+
     // Filter installed casks
     var casks: [Cask] {
-        var filteredCasks = caskData.casks.filter { $0.isInstalled }
-        
+        var installedCasks = caskManager.installedCasks
+
         if !$searchText.wrappedValue.isEmpty {
-            filteredCasks = filteredCasks.filter {
+            installedCasks = installedCasks.filter {
                 (fuseSearch.search(searchText, in: $0.info.name)?.score ?? 1) < 0.4
             }
         }
-        
-        return filteredCasks
+
+        let installedCasksAlphabetical = installedCasks.sorted { $0.info.name < $1.info.name }
+
+        return installedCasksAlphabetical
     }
 }
 
 struct InstalledView_Previews: PreviewProvider {
     static var previews: some View {
         InstalledView()
-            .environmentObject(CaskData())
+            .environmentObject(CaskManager())
     }
 }

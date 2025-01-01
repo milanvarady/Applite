@@ -24,7 +24,7 @@ extension SetupView {
         var body: some View {
             VStack {
                 Text("Installing dependencies")
-                    .font(.system(size: 32, weight: .bold))
+                    .font(.appliteSmallTitle)
                     .padding(.vertical)
 
                 // Xcode Command Line Tools

@@ -6,14 +6,14 @@
 //
 
 import SwiftUI
-import os
+import OSLog
 
 struct ContentView: View {
-    @EnvironmentObject var caskData: CaskData
+    @EnvironmentObject var caskManager: CaskManager
     
     /// Currently selected tab in the sidebar
-    @State var selection: String = "home"
-    
+    @State var selection: SidebarItem = .home
+
     /// App search query
     @State var searchText = ""
     /// This variable is set to the value of searchText whenever the user submits the search quiery
@@ -27,10 +27,10 @@ struct ContentView: View {
     @State var modifyingBrew = false
     
     let logger = Logger()
-    
+
     var body: some View {
         NavigationSplitView {
-            sidebarItems
+            sidebarViews
                 .disabled(modifyingBrew)
         } detail: {
             detailView
@@ -44,8 +44,8 @@ struct ContentView: View {
         .onSubmit(of: .search) {
             searchTextSubmitted = searchText
 
-            if !searchText.isEmpty && selection != "home" {
-                selection = "home"
+            if !searchText.isEmpty && selection != .home {
+                selection = .home
             }
         }
         .onChange(of: searchText) { newSearchText in

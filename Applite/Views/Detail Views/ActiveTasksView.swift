@@ -8,24 +8,21 @@
 import SwiftUI
 
 struct ActiveTasksView: View {
-    @EnvironmentObject var caskData: CaskData
+    @EnvironmentObject var caskManager: CaskManager
     
     var body: some View {
         ScrollView {
             VStack {
-                if caskData.busyCasks.isEmpty {
+                if caskManager.activeTasks.isEmpty {
                     Text("No Active Tasks")
                         .font(.title)
                 } else {
-                    AppGridView(casks: Array(caskData.busyCasks), appRole: .update)
+                    AppGridView(casks: caskManager.activeTasks.map { $0.cask }, appRole: .update)
                 }
                 
                 Spacer()
             }
             .padding()
-        }
-        .onAppear {
-            caskData.filterBusyCasks()
         }
     }
 }

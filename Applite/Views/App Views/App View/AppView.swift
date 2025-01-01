@@ -24,7 +24,7 @@ struct AppView: View {
     
     @Environment(\.openWindow) var openWindow
     
-    @EnvironmentObject var caskData: CaskData
+    @EnvironmentObject var caskManager: CaskManager
     
     // Alerts
     @State var failureAlertMessage = ""
@@ -47,7 +47,7 @@ struct AppView: View {
         }
         .buttonStyle(.plain)
         .frame(width: Self.dimensions.width, height: Self.dimensions.height)
-        .alertManager(cask.alert)
+        .alertManager(caskManager.alert)
     }
 }
 

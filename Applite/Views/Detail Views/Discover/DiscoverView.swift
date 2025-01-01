@@ -10,16 +10,17 @@ import Shimmer
 
 /// Shows apps in categories
 struct DiscoverView: View {
-    @Binding var navigationSelection: String
+    @EnvironmentObject var caskManager: CaskManager
+    @Binding var navigationSelection: SidebarItem
     @State var currentPage: Float = 0
 
     var body: some View {
         LazyVStack(alignment: .leading) {
             Text("Discover")
-                .font(.system(size: 52, weight: .bold))
+                .font(.appliteLargeTitle)
                 .padding(.bottom)
 
-            ForEach(categories) { category in
+            ForEach(caskManager.categories) { category in
                 DiscoverSectionView(category: category, navigationSelection: $navigationSelection)
 
                 Divider()
@@ -32,7 +33,7 @@ struct DiscoverView: View {
 
 struct DiscoverView_Previews: PreviewProvider {
     static var previews: some View {
-        DiscoverView(navigationSelection: .constant(""))
-            .environmentObject(CaskData())
+        DiscoverView(navigationSelection: .constant(.home))
+            .environmentObject(CaskManager())
     }
 }

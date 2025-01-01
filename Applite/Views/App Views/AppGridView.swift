@@ -36,9 +36,6 @@ struct AppGridView: View {
     }
 }
 
-struct AppGridView_Previews: PreviewProvider {
-    static var previews: some View {
-        AppGridView(casks: Array(CaskData().casks[0...10]), appRole: .installAndManage)
-            .frame(width: 660, height: 500)
-    }
+#Preview {
+    AppGridView(casks: Array(repeating: .dummy, count: 8), appRole: .installAndManage)
 }

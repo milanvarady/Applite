@@ -33,16 +33,14 @@ final class AlertManager: ObservableObject {
 
     /// Shows an alert based on an error
     func show(
-        error: LocalizedError,
-        overrideTitle: String? = nil,
+        error: Error,
+        title: String,
         primaryButtonTitle: String = "OK",
         primaryAction: (() -> Void)? = nil
     ) {
-        let title = overrideTitle ?? error.errorDescription ?? error.localizedDescription
-
         show(
             title: title,
-            message: error.failureReason ?? "",
+            message: error.localizedDescription,
             primaryButtonTitle: primaryButtonTitle,
             primaryAction: primaryAction
         )

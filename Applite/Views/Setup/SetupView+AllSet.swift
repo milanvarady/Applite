@@ -14,7 +14,7 @@ extension SetupView {
 
         var body: some View {
             Text("All set!")
-                .font(.system(size: 52, weight: .bold))
+                .font(.appliteLargeTitle)
                 .padding(.top, 40)
 
             Button("Start Using \(Bundle.main.appName)") {

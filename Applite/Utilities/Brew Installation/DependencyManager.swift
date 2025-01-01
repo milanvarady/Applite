@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import os
+import OSLog
 
 /// Installs app dependecies: Homebrew and Xcode Command Line Tools
 ///

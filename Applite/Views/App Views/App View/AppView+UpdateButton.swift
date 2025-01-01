@@ -9,14 +9,12 @@ import SwiftUI
 
 extension AppView {
     struct UpdateButton: View {
-        @EnvironmentObject var caskData: CaskData
+        @EnvironmentObject var caskManager: CaskManager
         @StateObject var cask: Cask
 
         var body: some View {
             Button {
-                Task {
-                    await cask.update(caskData: caskData)
-                }
+                caskManager.update(cask)
             } label: {
                 Image(systemName: "arrow.uturn.down.circle.fill")
                     .font(.system(size: 20))
