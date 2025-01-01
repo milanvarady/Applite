@@ -76,7 +76,7 @@ enum Shell {
     ///
     /// Using the `pty` option can leave unwanted characters in the output, use only when necessary
     @discardableResult
-    static func runBrewCommand(_ brewCommand: String, arguments: [String], pty: Bool = false) async throws -> String {
+    static func runBrewCommand(_ brewCommand: String, arguments: [String] = [], pty: Bool = false) async throws -> String {
         let command = "\(BrewPaths.currentBrewExecutable) \(brewCommand) --cask \(arguments.joined(separator: " "))"
         return try await runAsync(command)
     }

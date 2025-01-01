@@ -199,7 +199,7 @@
         }
       }
     },
-    "**Note:** When importing a Brewfile only casks will be installed. Other items like formulae and taps will be skipped." : {
+    "**Tip:** You can also import apps from a Brewfile. However, only casks will be installed, other items like formulae and taps will be skipped." : {
 
     },
     "**Warning**: Homebrew cache is shared between Homebrew installations. Deleting the cache will remove the cache for all installations!" : {
@@ -2314,6 +2314,7 @@
 
     },
     "Export a file containing all currently installed applications. This can be imported to another device." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2347,10 +2348,14 @@
         }
       }
     },
+    "Export all apps currently installed by %@ to a file." : {
+
+    },
     "Export all of your currently installed apps to a file. Import the file to another device to install them all. Useful when setting up a new Mac." : {
 
     },
     "Export apps to file" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2388,6 +2393,7 @@
 
     },
     "Export failed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2422,6 +2428,7 @@
       }
     },
     "Export file type" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2837,6 +2844,7 @@
 
     },
     "Import apps" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2874,6 +2882,7 @@
 
     },
     "Import failed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2908,6 +2917,7 @@
       }
     },
     "Import/Export apps" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5757,6 +5767,7 @@
       }
     },
     "When importing a Brewfile only casks will be installed. Other items like formulae and taps will be skipped." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

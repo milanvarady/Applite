@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import os
+import OSLog
 
 struct ContentView: View {
     @EnvironmentObject var caskManager: CaskManager

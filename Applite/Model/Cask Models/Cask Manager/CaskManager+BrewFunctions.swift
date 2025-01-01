@@ -178,7 +178,14 @@ extension CaskManager {
         }
     }
 
-    /// Update all outdated casks
+    /// Installs multiple
+    func installAll(_ casks: [Cask]) {
+        for cask in casks {
+            self.install(cask)
+        }
+    }
+
+    /// Updates multiple casks
     func updateAll(_ casks: [Cask]) {
         for cask in casks {
             self.update(cask)

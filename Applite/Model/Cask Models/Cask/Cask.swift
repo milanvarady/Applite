@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import os
+import OSLog
 
 /// A view model that holds all essential data of a Homebrew cask and provides methods to run brew commands on it (e.g. install, uninstall, update)
 @MainActor

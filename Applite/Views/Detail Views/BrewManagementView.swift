@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import os
+import OSLog
 
 /// Displays info and provides tools to manage brew installation
 struct BrewManagementView: View {
@@ -34,10 +34,6 @@ struct BrewManagementView: View {
                         ActionsView(modifyingBrew: $modifyingBrew)
                     }
                     .padding(.bottom)
-                    
-                    section(title: "Import/Export apps") {
-                        ExportView()
-                    }
                     
                     Spacer()
                 }
@@ -254,98 +250,6 @@ struct BrewManagementView: View {
             .alert("Reinstall failed", isPresented: $reinstallFailed, actions: {
                 Button("OK", role: .cancel) { }
             })
-        }
-    }
-    
-    struct ExportView: View {
-        @EnvironmentObject var caskManager: CaskManager
-        
-        @State private var fileExporterPresented = false
-        @State private var fileImporterPresented = false
-        
-        @State var showingExportError = false
-        @State var showingImportError = false
-        
-        @State var selectedExportFileType: CaskExportType = .txtFile
-        
-        var body: some View {
-            VStack(alignment: .leading) {
-                Text("Export a file containing all currently installed applications. This can be imported to another device.")
-                
-                Divider()
-                    .padding(.vertical, 8)
-            
-                Button {
-                    fileExporterPresented = true
-                } label: {
-                    Label("Export apps to file", systemImage: "square.and.arrow.up")
-                }
-                .fileImporter(
-                    isPresented: $fileExporterPresented,
-                    allowedContentTypes: [.folder],
-                    allowsMultipleSelection: false
-                ) { result in
-                    switch result {
-                    case .success(let url):
-                        Task { @MainActor in
-                            do {
-                                try await CaskToFileManager.export(url: url[0], exportType: selectedExportFileType)
-                            } catch {
-                                logger.error("Failed to export casks. Error: \(error.localizedDescription)")
-                                showingExportError = true
-                            }
-                        }
-                    case .failure(let error):
-                        logger.error("\(error.localizedDescription)")
-                    }
-                }
-                .alert("Export failed", isPresented: $showingExportError, actions: {})
-                
-                Picker("Export file type", selection: $selectedExportFileType) {
-                    ForEach(CaskExportType.allCases) { type in
-                        Text(LocalizedStringKey(type.rawValue))
-                    }
-                }
-                .frame(maxWidth: 300)
-                
-                Divider()
-                    .padding(.vertical, 6)
-                
-                Button {
-                    fileImporterPresented = true
-                } label: {
-                    Label("Import apps", systemImage: "square.and.arrow.down")
-                }
-                .fileImporter(
-                    isPresented: $fileImporterPresented,
-                    allowedContentTypes: [.plainText, .data],
-                    allowsMultipleSelection: false
-                ) { result in
-                    switch result {
-                    case .success(let url):
-                        do {
-                            let casks = try  CaskToFileManager.readCaskFile(url: url[0])
-
-                            installImported(casks: casks)
-                        } catch {
-                            logger.error("Failed to import cask. Reason: \(error.localizedDescription)")
-                            showingImportError = true
-                        }
-                    case .failure(let error):
-                        logger.error("\(error.localizedDescription)")
-                        showingImportError = true
-                    }
-                }
-                .alert("Import failed", isPresented: $showingImportError, actions: {})
-                
-                notice(type: .note, "When importing a Brewfile only casks will be installed. Other items like formulae and taps will be skipped.")
-            }
-        }
-        
-        func installImported(casks: [String]) {
-            Task {
-                await CaskToFileManager.installImportedCasks(caskIds: casks, caskManager: caskManager)
-            }
         }
     }
 }
