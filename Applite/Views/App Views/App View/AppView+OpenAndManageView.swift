@@ -10,7 +10,7 @@ import SwiftUI
 extension AppView {
     /// Button used in the Download section, launches, uninstalls or reinstalls the app
     struct OpenAndManageView: View {
-        @StateObject var cask: Cask
+        @ObservedObject var cask: Cask
         let deleteButton: Bool
 
         @EnvironmentObject var caskManager: CaskManager
@@ -50,6 +50,8 @@ extension AppView {
             }
             .popover(isPresented: $showPopover) {
                 VStack(alignment: .leading, spacing: 6) {
+                    GetInfoButton(cask: cask)
+                    
                     // Reinstall button
                     Button {
                         caskManager.reinstall(cask)

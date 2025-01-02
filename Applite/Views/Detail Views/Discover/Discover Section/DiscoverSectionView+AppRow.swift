@@ -55,14 +55,17 @@ extension DiscoverSectionView {
                         PlaceholderAppGroup()
                     }
                 }
-            }.background(GeometryReader { geometry in
-                Color.clear.preference(key: ViewOffsetKey.self,
-                                       value: -geometry.frame(in: .named("\(category.id)Scroll")).origin.x)
+            }
+            .background(GeometryReader { geometry in
+                Color.clear.preference(
+                    key: ViewOffsetKey.self,
+                    value: -geometry.frame(in: .named("\(category.id)Scroll")).origin.x
+                )
             })
-            .onPreferenceChange(ViewOffsetKey.self) { value in
-                Task { @MainActor in
-                    scrollOffset = value
-                }
+        }
+        .onPreferenceChange(ViewOffsetKey.self) { value in
+            Task { @MainActor in
+                scrollOffset = value
             }
         }
     }

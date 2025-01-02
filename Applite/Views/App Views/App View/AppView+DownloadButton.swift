@@ -78,6 +78,8 @@ extension AppView {
                             .fontWeight(.thin)
                     }
 
+                    GetInfoButton(cask: cask)
+
                     // Force install button
                     Button {
                         showingForceInstallConfirmation = true

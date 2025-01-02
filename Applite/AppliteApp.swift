@@ -70,9 +70,13 @@ struct AppliteApp: App {
                 .preferredColorScheme(selectedColorScheme)
         }
         .windowResizability(.contentSize)
-        
+
         WindowGroup("Shell Output", for: String.self) { $errorString in
             ErrorWindowView(errorString: errorString ?? "N/a")
+        }
+
+        WindowGroup("Cask Info", for: CaskAdditionalInfo.self) { $info in
+            CaskInfoWindowView(info: info ?? .dummy)
         }
     }
 }

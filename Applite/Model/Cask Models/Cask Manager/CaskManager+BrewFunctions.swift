@@ -192,6 +192,23 @@ extension CaskManager {
         }
     }
 
+    func getAdditionalInfoForCask(_ cask: Cask) async throws -> CaskAdditionalInfo {
+        let json = try await Shell.runBrewCommand(["info", "--json=v2", "--cask", cask.info.id])
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .secondsSince1970
+
+        let responseObject = try decoder.decode(CaskAdditionalInfoResponse.self, from: json.data(using: .utf8)!)
+
+        guard let additionalInfo = responseObject.casks.first else {
+            Self.logger.error("Couldn't find cask \(cask.info.id)")
+            throw CaskLoadError.failedToLoadAdditionalInfo
+        }
+
+        return additionalInfo
+    }
+
     // MARK: - Helper functions
 
     /// Starts a brew task and appends it to active tasks

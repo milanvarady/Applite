@@ -10,6 +10,7 @@ import Foundation
 enum CaskLoadError: LocalizedError {
     case failedToLoadCategoryJSON
     case failedToLoadFromCache
+    case failedToLoadAdditionalInfo
 
     var errorDescription: String? {
         switch self {
@@ -17,6 +18,8 @@ enum CaskLoadError: LocalizedError {
             return "Failed to load categories"
         case .failedToLoadFromCache:
             return "Failed to load app catalog from cache"
+        case .failedToLoadAdditionalInfo:
+            return "Failed to load additional info"
         }
     }
 
@@ -26,6 +29,8 @@ enum CaskLoadError: LocalizedError {
             return "Couldn't load category JSON file"
         case .failedToLoadFromCache:
             return "The file doesn't exist or couldn't be read"
+        case .failedToLoadAdditionalInfo:
+            return "The response object was empty"
         }
     }
 }

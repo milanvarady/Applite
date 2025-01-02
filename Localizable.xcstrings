@@ -1552,6 +1552,9 @@
         }
       }
     },
+    "Cask Info" : {
+
+    },
     "Cask list (.txt file)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2637,6 +2640,9 @@
           }
         }
       }
+    },
+    "Get Info" : {
+
     },
     "GitHub" : {
       "localizations" : {
@@ -3921,6 +3927,9 @@
           }
         }
       }
+    },
+    "Property" : {
+
     },
     "Provide Brew Executable Path" : {
       "localizations" : {
@@ -5600,6 +5609,9 @@
           }
         }
       }
+    },
+    "Value" : {
+
     },
     "View Error" : {
       "extractionState" : "stale",

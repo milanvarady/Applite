@@ -97,7 +97,7 @@ extension CaskManager {
             let output = try await Shell.runBrewCommand(["list", "--cask"])
 
             if output.isEmpty {
-                await Self.logger.notice("No installed casks were found")
+                await Self.logger.notice("No installed casks were found. Output: \(output)")
             }
 
             return output

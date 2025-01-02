@@ -9,8 +9,8 @@ import SwiftUI
 
 extension AppView {
     struct UpdateButton: View {
+        @ObservedObject var cask: Cask
         @EnvironmentObject var caskManager: CaskManager
-        @StateObject var cask: Cask
 
         var body: some View {
             Button {
