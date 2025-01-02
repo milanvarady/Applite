@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import OSLog
 
 extension AppView {
     struct GetInfoButton: View {
@@ -15,6 +16,8 @@ extension AppView {
 
         @StateObject var alert = AlertManager()
 
+        private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "GetInfoButton")
+
         var body: some View {
             Button {
                 Task {
@@ -23,6 +26,7 @@ extension AppView {
                         openWindow(value: caskInfo)
                     } catch {
                         alert.show(error: error, title: "Failed to gather cask info")
+                        logger.error("Failed to gather additional cask info: \(error.localizedDescription)")
                     }
                 }
             } label: {

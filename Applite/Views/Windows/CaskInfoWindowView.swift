@@ -56,20 +56,25 @@ struct CaskInfoWindowView: View {
             Row(property: "Homepage", value: info.homepage.absoluteString, url: info.homepage),
             Row(property: "URL", value: info.url.absoluteString, url: info.url),
             Row(property: "Installed Version", value: info.installed ?? "Not installed"),
-            Row(property: "Auto Updates", value: (info.auto_updates ?? false) ? "Yes" : "No"),
-            Row(property: "Deprecated", value: info.deprecated ? "Yes" : "No"),
-            Row(property: "Disabled", value: info.disabled ? "Yes" : "No")
+            Row(property: "Bundle Version", value: info.bundle_version ?? "Not installed"),
+            Row(property: "Auto Updates", value: (info.auto_updates ?? false) ? "Yes" : "No")
         ]
+
+        if let outdated = info.outdated {
+            result.append(Row(property: "Outdated", value: outdated ? "Yes" : "No"))
+        }
 
         if let installedTime = info.installed_time {
             result.append(Row(property: "Installation Date",
                               value: dateFormatter.string(from: installedTime)))
         }
 
+        result.append(Row(property: "Deprecated", value: info.deprecated ? "Yes" : "No"))
+
         if info.deprecated {
-            if let date = info.deprection_date {
+            if let date = info.deprecation_date {
                 result.append(Row(property: "Deprecation Date",
-                                  value: dateFormatter.string(from: date)))
+                                  value: date))
             }
             if let reason = info.deprecation_reason {
                 result.append(Row(property: "Deprecation Reason", value: reason))
@@ -79,15 +84,17 @@ struct CaskInfoWindowView: View {
             }
         }
 
+        result.append(Row(property: "Disabled", value: info.disabled ? "Yes" : "No"))
+
         if info.disabled {
-            if let date = info.disabled_date {
+            if let date = info.disable_date {
                 result.append(Row(property: "Disabled Date",
-                                  value: dateFormatter.string(from: date)))
+                                  value: date))
             }
-            if let reason = info.disabled_reason {
+            if let reason = info.disable_reason {
                 result.append(Row(property: "Disabled Reason", value: reason))
             }
-            if let replacement = info.disabled_replacement {
+            if let replacement = info.disable_replacement {
                 result.append(Row(property: "Disabled Replacement", value: replacement))
             }
         }

@@ -18,31 +18,35 @@ struct CaskAdditionalInfo: Codable, Hashable {
     let url: URL
     /// Installed version
     let installed: String?
+    let bundle_version: String?
     let installed_time: Date?
+    let outdated: Bool?
     let auto_updates: Bool?
     let deprecated: Bool
-    let deprection_date: Date?
+    let deprecation_date: String?
     let deprecation_reason: String?
     let deprecation_replacement: String?
     let disabled: Bool
-    let disabled_date: Date?
-    let disabled_reason: String?
-    let disabled_replacement: String?
+    let disable_date: String?
+    let disable_reason: String?
+    let disable_replacement: String?
 
     static let dummy = CaskAdditionalInfo(
         token: "Applite",        tap: "homebrew/cask",
         homepage: URL(string: "https://aerolite.dev/applite")!,
         url: URL(string: "https://github.com/milanvarady/Applite/releases/download/v1.2.5/Applite.dmg")!,
         installed: "1.2.5",
+        bundle_version: "1.2.5",
         installed_time: Date(timeIntervalSince1970: 1735754762),
+        outdated: false,
         auto_updates: true,
         deprecated: false,
-        deprection_date: nil,
+        deprecation_date: nil,
         deprecation_reason: nil,
         deprecation_replacement: nil,
         disabled: false,
-        disabled_date: nil,
-        disabled_reason: nil,
-        disabled_replacement: nil
+        disable_date: nil,
+        disable_reason: nil,
+        disable_replacement: nil
     )
 }
