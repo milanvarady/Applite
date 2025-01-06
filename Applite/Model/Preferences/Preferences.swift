@@ -10,6 +10,7 @@ import Foundation
 enum Preferences: String {
     case colorSchemePreference
     case setupComplete
+    case noQuarantine
     case notificationSuccess
     case notificationFailure
     case brewPathOption

@@ -28,9 +28,9 @@ struct SettingsView: View {
                     Label("General", systemImage: "gearshape")
                 }
 
-            BrewPathView()
+            BrewSettingsView()
                 .tabItem {
-                    Label("Brew Path", systemImage: "mug")
+                    Label("Brew", systemImage: "mug")
                 }
 
             UpdateSettingsView(updater: updater)
@@ -48,6 +48,7 @@ struct SettingsView: View {
                     Label("Uninstall", systemImage: "trash")
                 }
         }
+        .scenePadding()
         .labelStyle(.titleAndIcon)
         .presentedWindowToolbarStyle(.expanded)
         .contentShape(Rectangle())

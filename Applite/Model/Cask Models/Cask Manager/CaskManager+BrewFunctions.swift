@@ -27,6 +27,9 @@ extension CaskManager {
             if force { arguments.append("--force") }
             if appdirOn { arguments.append(appdirArgument) }
 
+            let noQuarantine = UserDefaults.standard.bool(forKey: Preferences.noQuarantine.rawValue)
+            if noQuarantine { arguments.append("--no-quarantine") }
+
             let command = "\(BrewPaths.currentBrewExecutable) install --cask \(arguments.joined(separator: " "))"
 
             // Setup progress

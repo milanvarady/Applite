@@ -92,7 +92,7 @@ extension AppView {
             }
             .confirmationDialog("Are you sure you want to force install \(cask.info.name)? This will override any current installation!", isPresented: $showingForceInstallConfirmation) {
                 Button("Yes") {
-                    caskManager.install(cask)
+                    caskManager.install(cask, force: true)
                 }
 
                 Button("Cancel", role: .cancel) { }

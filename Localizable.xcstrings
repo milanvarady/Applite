@@ -349,6 +349,7 @@
       }
     },
     "%@ is already installed. If you want to add it to %@ click more options (chevron icon) and press Force Install." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1289,6 +1290,9 @@
         }
       }
     },
+    "Brew" : {
+
+    },
     "Brew Executable Path" : {
       "localizations" : {
         "fr" : {
@@ -1324,6 +1328,7 @@
       }
     },
     "Brew Path" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1773,6 +1778,7 @@
       }
     },
     "Couldn't download app. No internet connection, or host is unreachable." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3525,6 +3531,9 @@
         }
       }
     },
+    "No Quartine" : {
+
+    },
     "No Selection" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3834,6 +3843,9 @@
           }
         }
       }
+    },
+    "Other Flags" : {
+
     },
     "Password Managers" : {
       "extractionState" : "manual",

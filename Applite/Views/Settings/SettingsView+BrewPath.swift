@@ -8,9 +8,10 @@
 import SwiftUI
 
 extension SettingsView {
-    struct BrewPathView: View {
+    struct BrewSettingsView: View {
         @AppStorage(Preferences.customUserBrewPath.rawValue) var customUserBrewPath: String = "/opt/homebrew/bin/brew"
         @AppStorage(Preferences.brewPathOption.rawValue) var brewPathOption = BrewPaths.PathOption.appPath.rawValue
+        @AppStorage(Preferences.noQuarantine.rawValue) var noQuarantine: Bool = false
 
         @State var isSelectedBrewPathValid = false
 
@@ -48,6 +49,16 @@ extension SettingsView {
                     .bold()
 
                 AppdirSelectorView()
+
+                Divider()
+                    .padding(.vertical, 8)
+
+                Text("Other Flags")
+                    .bold()
+
+                Toggle(isOn: $noQuarantine) {
+                    Text("No Quartine")
+                }
             }
             .onAppear {
                 previousBrewOption = BrewPaths.selectedBrewOption.rawValue
