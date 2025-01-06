@@ -30,26 +30,25 @@ extension CaskManager {
             // Get json data from api
             guard let casksURL = URL(string: "https://formulae.brew.sh/api/cask.json") else { return [] }
 
-            let caskManager: Data
+            let caskData: Data
 
             let sessionConfiguration = NetworkProxyManager.getURLSessionConfiguration()
             let urlSession = URLSession(configuration: sessionConfiguration)
 
             do {
-                (caskManager, _) = try await urlSession.data(from: casksURL)
+                (caskData, _) = try await urlSession.data(from: casksURL)
             } catch {
                 await Self.logger.error("Couldn't get cask data from brew API. Error: \(error.localizedDescription)")
 
                 // Try to load from cache
                 await Self.logger.notice("Attempting to load cask data from cache")
-                caskManager = try await loadDataFromCache(dataURL: Self.caskCacheURL)
+                caskData = try await loadDataFromCache(dataURL: Self.caskCacheURL)
             }
 
-            // Chache json file
-            await cacheData(data: caskManager, to: Self.caskCacheURL)
-
             // Decode static cask data
-            return try JSONDecoder().decode([CaskInfo].self, from: caskManager)
+            async let casks = try JSONDecoder().decode([CaskInfo].self, from: caskData)
+
+            return try await casks
         }
 
         /// Gets cask analytics information from the Homebrew API and decodes it into a dictionary
@@ -77,13 +76,11 @@ extension CaskManager {
             // Chache json file
             await cacheData(data: analyticsData, to: Self.analyicsCacheURL)
 
-            let analyticsDecoded: BrewAnalytics
-
             // Decode data
-            analyticsDecoded = try JSONDecoder().decode(BrewAnalytics.self, from: analyticsData)
+            async let analyticsDecoded = try JSONDecoder().decode(BrewAnalytics.self, from: analyticsData)
 
             // Convert analytics to a cask ID to download count dictionary
-            let analyticsDict: BrewAnalyticsDictionary = Dictionary(uniqueKeysWithValues: analyticsDecoded.items.map {
+            let analyticsDict: BrewAnalyticsDictionary = Dictionary(uniqueKeysWithValues: try await analyticsDecoded.items.map {
                 ($0.cask, Int($0.count.replacingOccurrences(of: ",", with: "")) ?? 0)
             })
 
@@ -93,16 +90,18 @@ extension CaskManager {
         /// Gets the list of installed casks
         /// - Returns: A list of Cask ID's
         @Sendable
-        func getInstalledCasks() async throws -> [String] {
+        func getInstalledCasks() async throws -> Set<String> {
             let output = try await Shell.runBrewCommand(["list", "--cask"])
 
             if output.isEmpty {
                 await Self.logger.notice("No installed casks were found. Output: \(output)")
             }
 
-            return output
+            let arr = output
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .components(separatedBy: "\n")
+
+            return Set(arr)
         }
 
         /// Saves ``Data`` objects to cache
@@ -149,6 +148,83 @@ extension CaskManager {
             try loadCategoryJSON()
         }
 
+        /// Creates ``Cask`` objects concurrently in batches
+        func createCasks(
+            from caskInfos: [CaskInfo],
+            installedCasks: Set<String>,
+            analyticsDict: BrewAnalyticsDictionary,
+            categories: [Category],
+            batchSize: Int = 1024
+        ) async throws -> ([String: Cask], [CategoryId: [Cask]]) {
+            var casks: [String: Cask] = [:]
+            var categoryDict: [CategoryId: [Cask]] = [:]
+
+            /// Precomputed cask IDs that are in any of the cateogires for faster lookup
+            let casksInCategories: Set<CaskId> = Set(
+                categories
+                    .map { $0.casks }
+                    .reduce([], +)
+            )
+
+            // Break caskInfos into chunks of ~100 items
+            let chunks = caskInfos.chunked(into: batchSize)
+
+            try await withThrowingTaskGroup(of: ([(String, Cask)], [(CategoryId, Cask)])?.self) { group in
+                // Process each chunk concurrently instead of individual casks
+                // Creating too many tasks at once will slow down the loading process
+                for chunk in chunks {
+                    group.addTask {
+                        var chunkCasks: [(String, Cask)] = []
+                        var categoryAssignments: [(CategoryId, Cask)] = []
+
+                        for caskInfo in chunk {
+                            let isInstalled = installedCasks.contains(caskInfo.id)
+                            let cask = await Cask(
+                                info: caskInfo,
+                                downloadsIn365days: analyticsDict[caskInfo.id] ?? 0,
+                                isInstalled: isInstalled
+                            )
+
+                            chunkCasks.append((cask.id, cask))
+
+                            // Pre-compute category assignments
+                            if casksInCategories.contains(cask.id) {
+                                for category in categories {
+                                    if category.casks.contains(cask.id) {
+                                        categoryAssignments.append((category.id, cask))
+                                    }
+                                }
+                            }
+                        }
+
+                        return (chunkCasks, categoryAssignments)
+                    }
+                }
+
+                // Process chunk results
+                for try await result in group {
+                    guard let (chunkCasks, categoryAssignments) = result else { continue }
+
+                    // Store casks from chunk
+                    for (id, cask) in chunkCasks {
+                        casks[id] = cask
+                        self.allCasks.addCask(cask)
+                        if cask.isInstalled {
+                            self.installedCasks.addCask(cask)
+                        }
+                    }
+
+                    // Process category assignments
+                    for (categoryId, cask) in categoryAssignments {
+                        categoryDict[categoryId, default: []].append(cask)
+                    }
+                }
+            }
+
+            return (casks, categoryDict)
+        }
+
+
         // Get data components concurrently
         async let categories = loadCategoryJSONAsync()
         async let caskInfo = loadCaskInfo()
@@ -159,39 +235,14 @@ extension CaskManager {
         await self.casks.reserveCapacity(try caskInfo.count)
         await self.allCasks.setReserveCapacity(try caskInfo.count)
 
-        // Casks by category
-        var categoryDict: [CategoryId: [Cask]] = [:]
+        let (processedCasks, categoryDict) = try await createCasks(
+            from: caskInfo,
+            installedCasks: installedCasks,
+            analyticsDict: analyticsDict,
+            categories: categories
+        )
 
-        for caskInfo in try await caskInfo {
-            let isInstalled = try await installedCasks.contains(caskInfo.id)
-
-            let cask = Cask(
-                info: caskInfo,
-                downloadsIn365days: try await analyticsDict[caskInfo.id] ?? 0,
-                isInstalled: isInstalled
-            )
-
-            casks[cask.id] = cask
-
-            // Add to searchable collections
-            self.allCasks.addCask(cask)
-
-            if isInstalled {
-                self.installedCasks.addCask(cask)
-            }
-
-            // Add to category if needed
-            for category in try await categories {
-                // Add to category
-                if category.casks.contains(cask.id) {
-                    if let casksInCategory = categoryDict[category.id] {
-                        categoryDict[category.id] = casksInCategory + [cask]
-                    } else {
-                        categoryDict[category.id] = [cask]
-                    }
-                }
-            }
-        }
+        self.casks = processedCasks
 
         Self.logger.info("Compiling categories")
 
@@ -208,7 +259,8 @@ extension CaskManager {
                         name: category.id,
                         sfSymbol: category.sfSymbol,
                         casks: casks,
-                        casksCoupled: chunkedCasks)
+                        casksCoupled: chunkedCasks
+                    )
                 )
             }
         }

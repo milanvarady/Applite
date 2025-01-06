@@ -338,6 +338,16 @@
         }
       }
     },
+    "%@ couldn't open %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ couldn't open %2$@"
+          }
+        }
+      }
+    },
     "%@ is already installed. If you want to add it to %@ click more options (chevron icon) and press Force Install." : {
       "localizations" : {
         "en" : {
@@ -865,6 +875,7 @@
       }
     },
     "App couldn't be located" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

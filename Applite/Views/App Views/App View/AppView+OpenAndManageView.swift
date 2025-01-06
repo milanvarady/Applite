@@ -34,7 +34,7 @@ extension AppView {
             .font(.system(size: 14))
             .buttonStyle(.bordered)
             .clipShape(Capsule())
-            .alert("App couldn't be located", isPresented: $showAppNotFoundAlert) {}
+            .alert("\(Bundle.main.appName) couldn't open \(cask.info.name)", isPresented: $showAppNotFoundAlert) {}
 
             if deleteButton {
                 UninstallButton(cask: cask)
