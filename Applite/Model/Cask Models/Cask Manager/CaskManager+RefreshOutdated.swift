@@ -25,11 +25,15 @@ extension CaskManager {
 
         self.outdatedCasks.removeAll()
 
+        var outdatedCasks: [Cask] = []
+
         for caskID in outdatedCaskIDs {
             if let cask = self.casks[caskID] {
-                self.outdatedCasks.insert(cask)
+                outdatedCasks.append(cask)
             }
         }
+
+        self.outdatedCasks.defineCasks(outdatedCasks)
 
         Self.logger.info("Outdated apps refreshed")
     }

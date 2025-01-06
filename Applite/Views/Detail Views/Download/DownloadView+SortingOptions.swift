@@ -13,7 +13,8 @@ extension DownloadView {
             Menu {
                 Picker("Sort by", selection: $sortBy) {
                     ForEach(SortingOptions.allCases) { option in
-                        Text(LocalizedStringKey(option.rawValue)).tag(option)
+                        Text(LocalizedStringKey(option.description))
+                            .tag(option)
                     }
                 }
                 .pickerStyle(.inline)
@@ -22,7 +23,7 @@ extension DownloadView {
                     Text("Hide apps with few downloads")
                 }
             } label: {
-                Label("Sorting Options", systemImage: "slider.horizontal.3")
+                Label("Search Sorting Options", systemImage: "slider.horizontal.3")
                     .labelStyle(.titleAndIcon)
             }
         }

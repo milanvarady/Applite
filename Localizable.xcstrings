@@ -4340,6 +4340,12 @@
         }
       }
     },
+    "Search Sorting Options" : {
+
+    },
+    "Searching..." : {
+
+    },
     "See All" : {
       "localizations" : {
         "fr" : {
@@ -4579,6 +4585,7 @@
       }
     },
     "Sorting Options" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

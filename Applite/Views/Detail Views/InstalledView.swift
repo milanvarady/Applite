@@ -6,45 +6,32 @@
 //
 
 import SwiftUI
-import Fuse
+import DebouncedOnChange
 
 /// Shows installed apps, where the user can open and uninstall them
 struct InstalledView: View {
-    @EnvironmentObject var caskManager: CaskManager
+    @ObservedObject var caskCollection: SearchableCaskCollection
+
     @State var searchText = ""
-    
-    let fuseSearch = Fuse()
-    
+
     var body: some View {
         VStack {
             ScrollView {
-                AppGridView(casks: casks, appRole: .installed)
+                AppGridView(casks: caskCollection.casksMatchingSearch, appRole: .installed)
                     .padding()
             }
         }
-        .searchable(text: $searchText)
-        .id("InstalledView")
-    }
-
-    // Filter installed casks
-    var casks: [Cask] {
-        var installedCasks = caskManager.installedCasks
-
-        if !$searchText.wrappedValue.isEmpty {
-            installedCasks = installedCasks.filter {
-                (fuseSearch.search(searchText, in: $0.info.name)?.score ?? 1) < 0.4
-            }
+        .searchable(text: $searchText, placement: .toolbar)
+        .task(id: searchText, debounceTime: .seconds(0.2)) {
+            await caskCollection.search(query: searchText)
         }
-
-        let installedCasksAlphabetical = installedCasks.sorted { $0.info.name < $1.info.name }
-
-        return installedCasksAlphabetical
     }
 }
 
 struct InstalledView_Previews: PreviewProvider {
     static var previews: some View {
-        InstalledView()
-            .environmentObject(CaskManager())
+        InstalledView(
+            caskCollection: .init(casks: Array(repeating: .dummy, count: 8))
+        )
     }
 }

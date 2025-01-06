@@ -19,10 +19,12 @@ final class CaskManager: ObservableObject {
     @Published var casks: [CaskId: Cask] = [:]
     /// All currently running brew tasks
     @Published var activeTasks: [BrewTask] = []
-    @Published var installedCasks: Set<Cask> = []
-    @Published var outdatedCasks: Set<Cask> = []
-
     @Published var alert = AlertManager()
+
+    // Searchble cask collections
+    let allCasks = SearchableCaskCollection()
+    let installedCasks = SearchableCaskCollection()
+    let outdatedCasks = SearchableCaskCollection()
 
     // Precompiled cask category dicts
     var categories: [CategoryViewModel] = []

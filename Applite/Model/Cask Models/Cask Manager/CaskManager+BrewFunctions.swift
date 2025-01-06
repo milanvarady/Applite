@@ -73,7 +73,7 @@ extension CaskManager {
 
             // Update state
             cask.isInstalled = true
-            self.installedCasks.insert(cask)
+            self.installedCasks.addCask(cask)
         }
     }
 
