@@ -16,7 +16,7 @@ extension UpdateView {
                 updateAllButtonRotation = 360.0
             }
 
-            caskManager.updateAll(casks)
+            caskManager.updateAll(caskManager.outdatedCasks.casks)
         } label: {
             HStack {
                 Image(systemName: "arrow.2.circlepath")

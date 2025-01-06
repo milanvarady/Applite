@@ -13,29 +13,20 @@ extension ContentView {
         switch selection {
         case .home:
             if !brokenInstall {
-                DownloadView(navigationSelection: $selection, searchText: $searchTextSubmitted)
+                DownloadView(
+                    navigationSelection: $selection,
+                    searchText: $searchText,
+                    caskCollection: caskManager.allCasks
+                )
             } else {
-                // Broken install
-                VStack(alignment: .center) {
-                    Text(DependencyManager.brokenPathOrIstallMessage)
-                    
-                    Button {
-                        Task {
-                            await loadCasks()
-                        }
-                    } label: {
-                        Label("Retry load", systemImage: "arrow.clockwise.circle")
-                    }
-                    .controlSize(.large)
-                }
-                .frame(maxWidth: 600)
+                brokenInstallView
             }
             
         case .updates:
-            UpdateView()
-            
+            UpdateView(caskCollection: caskManager.outdatedCasks)
+
         case .installed:
-            InstalledView()
+            InstalledView(caskCollection: caskManager.installedCasks)
             
         case .activeTasks:
             ActiveTasksView()
@@ -49,5 +40,21 @@ extension ContentView {
         case .brew:
             BrewManagementView(modifyingBrew: $modifyingBrew)
         }
+    }
+
+    var brokenInstallView: some View {
+        VStack(alignment: .center) {
+            Text(DependencyManager.brokenPathOrIstallMessage)
+
+            Button {
+                Task {
+                    await loadCasks()
+                }
+            } label: {
+                Label("Retry load", systemImage: "arrow.clockwise.circle")
+            }
+            .controlSize(.large)
+        }
+        .frame(maxWidth: 600)
     }
 }

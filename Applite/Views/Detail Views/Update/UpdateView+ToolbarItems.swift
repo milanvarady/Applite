@@ -51,7 +51,7 @@ extension UpdateView {
                 refreshing = true
 
                 do {
-                    try await caskManager.refreshOutdated(greedy: true)
+                    try await caskManager.refreshOutdated()
                 } catch {
                     loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
                 }

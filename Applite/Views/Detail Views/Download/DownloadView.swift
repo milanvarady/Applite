@@ -6,68 +6,123 @@
 //
 
 import SwiftUI
-import Fuse
+import DebouncedOnChange
 
 /// Download section. Either dispays the `DiscoverView` or search results
 struct DownloadView: View {
     @Binding var navigationSelection: SidebarItem
     @Binding var searchText: String
-    
-    @EnvironmentObject var caskManager: CaskManager
-    
-    @State var searchResults: [Cask] = []
-    
+    @ObservedObject var caskCollection: SearchableCaskCollection
+
+    @State var searchInProgress = false
+
     // Sorting options
-    @State var hideUnpopularApps = false
-    @State var sortBy = SortingOptions.mostDownloaded
-    
+    @AppStorage("searchSortOption") var sortBy = SortingOptions.mostDownloaded
+    @AppStorage("hideUnpopularApps") var hideUnpopularApps = false
+
     enum SortingOptions: String, CaseIterable, Identifiable {
-        case mostDownloaded = "Most downloaded (default)"
-        case aToZ = "A-Z"
-        
+        case mostDownloaded
+        case bestMatch
+        case aToZ
+
         var id: SortingOptions { self }
+
+        var description: String {
+            switch self {
+            case .mostDownloaded: return "Most downloaded (default)"
+            case .bestMatch: return "Best match"
+            case .aToZ: return "A to Z"
+            }
+        }
     }
-    
-    let fuseSearch = Fuse()
     
     var body: some View {
         ScrollView {
             if searchText.isEmpty {
                 DiscoverView(navigationSelection: $navigationSelection)
             } else {
-                AppGridView(casks: searchResults, appRole: .installAndManage)
-                    .padding()
-                
-                // If search result is empty
-                if searchResults.isEmpty {
-                    noSearchResults
-                        .frame(maxWidth: 800)
+                if searchInProgress {
+                    ProgressView("Searching...")
+                        .padding(.top, 60)
+                } else {
+                    AppGridView(casks: caskCollection.casksMatchingSearch, appRole: .installAndManage)
                         .padding()
+
+                    // If search result is empty
+                    if caskCollection.casksMatchingSearch.isEmpty {
+                        noSearchResults
+                            .frame(maxWidth: 800)
+                            .padding()
+                    }
                 }
             }
         }
-        .onChange(of: searchText) { newSearchText in
-            // Filter apps
-            searchResults = fuzzyFilter(casks: Array(caskManager.casks.values), searchText: newSearchText)
+        .task {
+            if !searchText.isEmpty {
+                await searchAndSort()
+            }
         }
-        .onChange(of: sortBy) { _newValue in
+        .task(id: searchText) {
+            await searchAndSort()
+        }
+        // Apply sorting options
+        .task(id: sortBy) {
             // Refilter if sorting options change
-            search()
+            await sortCasks(ignoreBestMatch: false)
         }
-        .onChange(of: hideUnpopularApps) { _newValue in
-            // Refilter if sorting options change
-            search()
+        // Apply filter option
+        .task(id: hideUnpopularApps) {
+            if hideUnpopularApps {
+                await filterUnpopular()
+            } else {
+                await caskCollection.search(query: searchText)
+            }
         }
-        .onAppear { search() }
         .toolbar {
             sortingOptions
+        }
+    }
+
+    private func searchAndSort() async {
+        searchInProgress = true
+
+        await caskCollection.search(query: searchText, diffScroreThreshold: 0.3, limitResults: 25)
+        if hideUnpopularApps { await filterUnpopular() }
+        await sortCasks(ignoreBestMatch: true)
+
+        searchInProgress = false
+    }
+
+    private func filterUnpopular(threshold: Int = 500) async {
+        caskCollection.filterSearch { casks in
+            casks.filter { $0.downloadsIn365days > threshold }
+        }
+    }
+
+    private func sortCasks(ignoreBestMatch: Bool) async {
+        switch sortBy {
+        case .bestMatch:
+            if !ignoreBestMatch {
+                await caskCollection.search(query: searchText)
+            }
+        case .aToZ:
+            caskCollection.filterSearch { casks in
+                casks.sorted { $0.info.name < $1.info.name }
+            }
+        case .mostDownloaded:
+            caskCollection.filterSearch { casks in
+                casks.sorted { $0.downloadsIn365days > $1.downloadsIn365days }
+            }
         }
     }
 }
 
 struct DownloadView_Previews: PreviewProvider {
     static var previews: some View {
-        DownloadView(navigationSelection: .constant(.home), searchText: .constant(""))
-            .environmentObject(CaskManager())
+        DownloadView(
+            navigationSelection: .constant(.home),
+            searchText: .constant(""),
+            caskCollection: .init(casks: Array(repeating: .dummy, count: 8))
+        )
     }
 }

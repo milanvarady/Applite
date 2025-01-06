@@ -16,9 +16,8 @@ struct ContentView: View {
 
     /// App search query
     @State var searchText = ""
-    /// This variable is set to the value of searchText whenever the user submits the search quiery
-    @State var searchTextSubmitted = ""
-    
+    @State var searchInput = ""
+
     @StateObject var loadAlert = AlertManager()
 
     @State var brokenInstall = false
@@ -35,22 +34,24 @@ struct ContentView: View {
         } detail: {
             detailView
         }
-        // Load casks
+        // Load all cask releated data
         .task {
             await loadCasks()
         }
         // App search
-        .searchable(text: $searchText, placement: .sidebar)
+        .searchable(text: $searchInput, placement: .sidebar)
+        // Submit search
         .onSubmit(of: .search) {
-            searchTextSubmitted = searchText
-
-            if !searchText.isEmpty && selection != .home {
+            if !searchInput.isEmpty && selection != .home {
                 selection = .home
             }
+
+            searchText = searchInput
         }
-        .onChange(of: searchText) { newSearchText in
-            if newSearchText.isEmpty {
-                searchTextSubmitted = ""
+        // Clear search
+        .onChange(of: searchInput) { newValue in
+            if newValue.isEmpty {
+                searchText.removeAll()
             }
         }
         // Load failure alert

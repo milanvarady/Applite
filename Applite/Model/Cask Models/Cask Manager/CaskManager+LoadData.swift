@@ -157,6 +157,7 @@ extension CaskManager {
 
         // Set casks reseve capacity for better performance
         await self.casks.reserveCapacity(try caskInfo.count)
+        await self.allCasks.setReserveCapacity(try caskInfo.count)
 
         // Casks by category
         var categoryDict: [CategoryId: [Cask]] = [:]
@@ -172,8 +173,11 @@ extension CaskManager {
 
             casks[cask.id] = cask
 
+            // Add to searchable collections
+            self.allCasks.addCask(cask)
+
             if isInstalled {
-                self.installedCasks.insert(cask)
+                self.installedCasks.addCask(cask)
             }
 
             // Add to category if needed

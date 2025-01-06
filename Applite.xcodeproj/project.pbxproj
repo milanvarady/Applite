@@ -18,7 +18,6 @@
 		4125BB8A29539907000FBD25 /* PlaceholderAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4125BB8929539907000FBD25 /* PlaceholderAppView.swift */; };
 		4126353E2A77C6EF00155034 /* ArrayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4126353D2A77C6EF00155034 /* ArrayExtension.swift */; };
 		412635442A77FB1600155034 /* BrewInstallationProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412635432A77FB1600155034 /* BrewInstallationProgress.swift */; };
-		4129FFD92A7A613E00CFE392 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = 4129FFD82A7A613E00CFE392 /* Fuse */; };
 		413E60B72BBAE5E000978F6A /* NetworkProxyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E60B62BBAE5E000978F6A /* NetworkProxyManager.swift */; };
 		413E60C02BBF0E5C00978F6A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 413E60BF2BBF0E5C00978F6A /* Kingfisher */; };
 		413E60C22BBFF98A00978F6A /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E60C12BBFF98A00978F6A /* AppIconView.swift */; };
@@ -77,7 +76,6 @@
 		419256452D1E0A7000D9EF10 /* BrewPathSelectorView+CustomPathOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256442D1E0A7000D9EF10 /* BrewPathSelectorView+CustomPathOption.swift */; };
 		419256472D1E0B0900D9EF10 /* BrewPathSelectorView+GetPathDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256462D1E0B0900D9EF10 /* BrewPathSelectorView+GetPathDescription.swift */; };
 		4192564B2D1E0B9B00D9EF10 /* DownloadView+NoSearchResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192564A2D1E0B9B00D9EF10 /* DownloadView+NoSearchResults.swift */; };
-		4192564D2D1E0BDD00D9EF10 /* DownloadView+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192564C2D1E0BDD00D9EF10 /* DownloadView+Search.swift */; };
 		4192564F2D1E0C1E00D9EF10 /* DownloadView+SortingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192564E2D1E0C1E00D9EF10 /* DownloadView+SortingOptions.swift */; };
 		419256522D1E0D0500D9EF10 /* DiscoverSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256512D1E0D0500D9EF10 /* DiscoverSectionView.swift */; };
 		419256552D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256542D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift */; };
@@ -111,6 +109,9 @@
 		419256B42D26B8A200D9EF10 /* CaskAdditionalInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B32D26B8A200D9EF10 /* CaskAdditionalInfo.swift */; };
 		419256B62D26BBBD00D9EF10 /* AppView+GetInfoButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B52D26BBBD00D9EF10 /* AppView+GetInfoButton.swift */; };
 		419256B92D26C02E00D9EF10 /* CaskInfoWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B82D26C02E00D9EF10 /* CaskInfoWindowView.swift */; };
+		419256BC2D2724C200D9EF10 /* Ifrit in Frameworks */ = {isa = PBXBuildFile; productRef = 419256BB2D2724C200D9EF10 /* Ifrit */; };
+		419256BE2D27253D00D9EF10 /* Cask+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256BD2D27253D00D9EF10 /* Cask+Searchable.swift */; };
+		419256C02D273B2800D9EF10 /* SearchableCaskCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256BF2D273B2800D9EF10 /* SearchableCaskCollection.swift */; };
 		419506A42964A27F00FE5802 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A32964A27F00FE5802 /* SetupView.swift */; };
 		419506A62964A5EF00FE5802 /* BrewPathSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */; };
 		4196C8F528F9CB2600EADDDA /* DiscoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8F428F9CB2600EADDDA /* DiscoverView.swift */; };
@@ -192,7 +193,6 @@
 		419256442D1E0A7000D9EF10 /* BrewPathSelectorView+CustomPathOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrewPathSelectorView+CustomPathOption.swift"; sourceTree = "<group>"; };
 		419256462D1E0B0900D9EF10 /* BrewPathSelectorView+GetPathDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrewPathSelectorView+GetPathDescription.swift"; sourceTree = "<group>"; };
 		4192564A2D1E0B9B00D9EF10 /* DownloadView+NoSearchResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DownloadView+NoSearchResults.swift"; sourceTree = "<group>"; };
-		4192564C2D1E0BDD00D9EF10 /* DownloadView+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DownloadView+Search.swift"; sourceTree = "<group>"; };
 		4192564E2D1E0C1E00D9EF10 /* DownloadView+SortingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DownloadView+SortingOptions.swift"; sourceTree = "<group>"; };
 		419256512D1E0D0500D9EF10 /* DiscoverSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverSectionView.swift; sourceTree = "<group>"; };
 		419256542D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiscoverSectionView+CategoryHeader.swift"; sourceTree = "<group>"; };
@@ -225,6 +225,8 @@
 		419256B32D26B8A200D9EF10 /* CaskAdditionalInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskAdditionalInfo.swift; sourceTree = "<group>"; };
 		419256B52D26BBBD00D9EF10 /* AppView+GetInfoButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppView+GetInfoButton.swift"; sourceTree = "<group>"; };
 		419256B82D26C02E00D9EF10 /* CaskInfoWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskInfoWindowView.swift; sourceTree = "<group>"; };
+		419256BD2D27253D00D9EF10 /* Cask+Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+Searchable.swift"; sourceTree = "<group>"; };
+		419256BF2D273B2800D9EF10 /* SearchableCaskCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchableCaskCollection.swift; sourceTree = "<group>"; };
 		419506A32964A27F00FE5802 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		419506A52964A5EF00FE5802 /* BrewPathSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewPathSelectorView.swift; sourceTree = "<group>"; };
 		419506A729696A5300FE5802 /* Applite-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Applite-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -246,8 +248,8 @@
 				41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */,
 				419256B22D26033400D9EF10 /* DebouncedOnChange in Frameworks */,
 				4189CE392937CD41009C836D /* Shimmer in Frameworks */,
+				419256BC2D2724C200D9EF10 /* Ifrit in Frameworks */,
 				418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */,
-				4129FFD92A7A613E00CFE392 /* Fuse in Frameworks */,
 				413E60C02BBF0E5C00978F6A /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -401,6 +403,7 @@
 				4191392B29159B5C00F1D75D /* CaskDTO.swift */,
 				4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */,
 				419256B32D26B8A200D9EF10 /* CaskAdditionalInfo.swift */,
+				419256BF2D273B2800D9EF10 /* SearchableCaskCollection.swift */,
 			);
 			path = "Cask Models";
 			sourceTree = "<group>";
@@ -534,7 +537,6 @@
 			children = (
 				4196C8F828F9CDF700EADDDA /* DownloadView.swift */,
 				4192564A2D1E0B9B00D9EF10 /* DownloadView+NoSearchResults.swift */,
-				4192564C2D1E0BDD00D9EF10 /* DownloadView+Search.swift */,
 				4192564E2D1E0C1E00D9EF10 /* DownloadView+SortingOptions.swift */,
 			);
 			path = Download;
@@ -586,6 +588,7 @@
 			children = (
 				418F332328EC8BA10023D76F /* Cask.swift */,
 				4192566D2D1F293700D9EF10 /* Cask+LaunchApp.swift */,
+				419256BD2D27253D00D9EF10 /* Cask+Searchable.swift */,
 			);
 			path = Cask;
 			sourceTree = "<group>";
@@ -688,10 +691,10 @@
 			packageProductDependencies = (
 				4189CE382937CD41009C836D /* Shimmer */,
 				41C8FA282A7A598B000BB9A2 /* Sparkle */,
-				4129FFD82A7A613E00CFE392 /* Fuse */,
 				418E9EF32AACD9C000046A58 /* CircularProgress */,
 				413E60BF2BBF0E5C00978F6A /* Kingfisher */,
 				419256B12D26033400D9EF10 /* DebouncedOnChange */,
+				419256BB2D2724C200D9EF10 /* Ifrit */,
 			);
 			productName = Applite;
 			productReference = 414074F128DF53E80073EB22 /* Applite.app */;
@@ -728,10 +731,10 @@
 			packageReferences = (
 				4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
 				41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */,
-				4129FFD72A7A613E00CFE392 /* XCRemoteSwiftPackageReference "fuse-swift" */,
 				418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */,
 				413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */,
+				419256BA2D2724C200D9EF10 /* XCRemoteSwiftPackageReference "Ifrit" */,
 			);
 			productRefGroup = 414074F228DF53E80073EB22 /* Products */;
 			projectDirPath = "";
@@ -764,11 +767,11 @@
 			files = (
 				4196C90028F9E1F400EADDDA /* InstalledView.swift in Sources */,
 				415563A42A98C54300AE2F2E /* AppdirSelectorView.swift in Sources */,
-				4192564D2D1E0BDD00D9EF10 /* DownloadView+Search.swift in Sources */,
 				4140750528DF5FA60073EB22 /* AppView.swift in Sources */,
 				418F332428EC8BA10023D76F /* Cask.swift in Sources */,
 				4126353E2A77C6EF00155034 /* ArrayExtension.swift in Sources */,
 				4192564B2D1E0B9B00D9EF10 /* DownloadView+NoSearchResults.swift in Sources */,
+				419256BE2D27253D00D9EF10 /* Cask+Searchable.swift in Sources */,
 				419256432D1E0A0200D9EF10 /* BrewPathSelectorView+PathOption.swift in Sources */,
 				4192564F2D1E0C1E00D9EF10 /* DownloadView+SortingOptions.swift in Sources */,
 				419256122D1DDBD400D9EF10 /* AlertManager.swift in Sources */,
@@ -865,6 +868,7 @@
 				419256162D1DEA0A00D9EF10 /* AppView+IconAndDescriptionView.swift in Sources */,
 				419256942D24255000D9EF10 /* CaskLoadError.swift in Sources */,
 				419256A62D25D00200D9EF10 /* AppMigrationView+ImportView.swift in Sources */,
+				419256C02D273B2800D9EF10 /* SearchableCaskCollection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1086,14 +1090,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		4129FFD72A7A613E00CFE392 /* XCRemoteSwiftPackageReference "fuse-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/krisk/fuse-swift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
 		413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher";
@@ -1126,6 +1122,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		419256BA2D2724C200D9EF10 /* XCRemoteSwiftPackageReference "Ifrit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ukushu/Ifrit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -1137,11 +1141,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		4129FFD82A7A613E00CFE392 /* Fuse */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4129FFD72A7A613E00CFE392 /* XCRemoteSwiftPackageReference "fuse-swift" */;
-			productName = Fuse;
-		};
 		413E60BF2BBF0E5C00978F6A /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */;
@@ -1161,6 +1160,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */;
 			productName = DebouncedOnChange;
+		};
+		419256BB2D2724C200D9EF10 /* Ifrit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 419256BA2D2724C200D9EF10 /* XCRemoteSwiftPackageReference "Ifrit" */;
+			productName = Ifrit;
 		};
 		41C8FA282A7A598B000BB9A2 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;

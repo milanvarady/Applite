@@ -12,7 +12,6 @@ extension DownloadView {
         VStack {
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.red)
                     .font(.appliteMediumTitle)
 
                 Text("\"\(searchText)\" didn't match any app. Either it's not available in the Homebrew catalog or you misspelled it.")

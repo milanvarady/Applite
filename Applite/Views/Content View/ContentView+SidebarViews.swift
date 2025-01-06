@@ -15,8 +15,7 @@ extension ContentView {
             Label("Discover", systemImage: "house.fill")
                 .tag(SidebarItem.home)
 
-            Label("Updates", systemImage: "arrow.clockwise.circle.fill")
-                .badge(caskManager.outdatedCasks.count)
+            UpdateSidebarItem(caskCollection: caskManager.outdatedCasks)
                 .tag(SidebarItem.updates)
 
             Label("Installed", systemImage: "externaldrive.fill.badge.checkmark")
@@ -43,4 +42,13 @@ extension ContentView {
         }
     }
 
+    // Extract the update item because we need the badge to react to changes of outdatedCasks
+    private struct UpdateSidebarItem: View {
+        @ObservedObject var caskCollection: SearchableCaskCollection
+
+        var body: some View {
+            Label("Updates", systemImage: "arrow.clockwise.circle.fill")
+                .badge(caskCollection.casks.count)
+        }
+    }
 }
