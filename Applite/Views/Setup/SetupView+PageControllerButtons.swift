@@ -8,6 +8,17 @@
 import SwiftUI
 
 extension SetupView {
+    struct PageLink: Identifiable, Hashable {
+        let title: LocalizedStringKey
+        let page: SetupPage
+
+        var id: SetupPage { page }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(page)
+        }
+    }
+
     /// Adds a Back and Continue button to the bottom of the page
     ///
     /// - Parameters:
@@ -17,35 +28,36 @@ extension SetupView {
     ///   - pageBefore: Page when clicking on Back
     ///
     /// - Returns: ``View``
-    struct PageControlButtons: View {
-        @Binding var page: Pages
-        @Binding var pushDirection: PushDirection
-        let canContinue: Bool
-        let pageAfter: Pages
-        let pageBefore: Pages?
-
-        var body: some View {
-            Spacer()
-
+    func pageControlButtons(
+        nextPage: SetupPage,
+        canContinue: Bool = true,
+        additionalLinks: [PageLink]? = nil
+    ) -> some View {
+        VStack {
             Divider()
 
             HStack {
-                Spacer()
+                if let additionalLinks {
+                    ForEach(Array(additionalLinks.enumerated()), id: \.element) { index, link in
+                        Button(link.title) {
+                            page = link.page
+                        }
+                        .buttonStyle(.link)
+                        .padding(.horizontal)
 
-                if let pageBefore {
-                    Button("Back") {
-                        pushDirection = .backward
-                        withAnimation {
-                            page = pageBefore
+                        if additionalLinks.count > 1 && index != additionalLinks.count - 1 {
+
+                            Divider()
+                                .frame(height: 20)
                         }
                     }
-                    .controlSize(.large)
                 }
 
+                Spacer()
+
                 Button("Continue") {
-                    pushDirection = .forward
                     withAnimation {
-                        page = pageAfter
+                        page = nextPage
                     }
                 }
                 .disabled(!canContinue)

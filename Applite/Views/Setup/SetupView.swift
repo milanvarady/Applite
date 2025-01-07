@@ -10,71 +10,83 @@ import AppKit
 
 /// This view is shown when first launching the app. It welcomes the user and installs dependencies (Homebrew, Xcode Command Line Tools).
 struct SetupView: View {
-    enum Pages {
-        case welcome,
-             brewTypeSelection,
-             brewPathSelection,
-             brewInstall,
-             allSet
+    enum SetupPage {
+        case welcome
+        case appliteBrewInfo
+        case appliteBrewInstall
+        case brewPathDetected
+        case brewPathSelection
+        case allSet
     }
     
-    @State var page: Pages = .welcome
-    
+    @State var page: SetupPage = .welcome
+
+    @State var detectedBrewInstallation: BrewPaths.PathOption? = nil
+
     @State var isBrewPathValid = false
     @State var isBrewInstallDone = false
-
-    enum PushDirection {
-        case forward, backward
-    }
-
-    @State var pushDirection: PushDirection = .forward
 
     var body: some View {
         VStack {
             switch page {
             case .welcome:
                 Welcome()
-                    .transition(.push(from: pushDirection == .forward ? .trailing : .leading))
-                
-                PageControlButtons(
-                    page: $page,
-                    pushDirection: $pushDirection,
-                    canContinue: true,
-                    pageAfter: .brewTypeSelection,
-                    pageBefore: nil
+                    .transition(.push(from: .trailing))
+
+                Spacer()
+
+                pageControlButtons(
+                    nextPage: detectedBrewInstallation == nil ? .appliteBrewInfo : .brewPathDetected
                 )
 
-            case .brewTypeSelection:
-                BrewTypeSelection(page: $page)
-                    .transition(.push(from: pushDirection == .forward ? .trailing : .leading))
+            case .appliteBrewInfo:
+                AppliteBrewInfoView(page: $page)
+                    .transition(.push(from: .trailing))
+
+                pageControlButtons(
+                    nextPage: .appliteBrewInstall,
+                    additionalLinks: [PageLink(title: "I already have brew installed", page: .brewPathSelection)]
+                )
+
+            case .appliteBrewInstall:
+                AppliteBrewInstall(isDone: $isBrewInstallDone)
+                    .transition(.push(from: .trailing))
+
+                Spacer()
+
+                pageControlButtons(
+                    nextPage: .allSet,
+                    canContinue: isBrewInstallDone
+                )
+
+            case .brewPathDetected:
+                BrewPathDetectedView(page: $page)
+                    .transition(.push(from: .trailing))
+
+                pageControlButtons(
+                    nextPage: .allSet,
+                    additionalLinks: [
+                        PageLink(title: "Use different brew path", page: .brewPathSelection),
+                        PageLink(title: "Install separate brew for Applite", page: .appliteBrewInstall)
+                    ]
+                )
 
             case .brewPathSelection:
                 BrewPathSelection(isBrewPathValid: $isBrewPathValid)
-                    .transition(.push(from: pushDirection == .forward ? .trailing : .leading))
-                
-                PageControlButtons(
-                    page: $page,
-                    pushDirection: $pushDirection,
-                    canContinue: isBrewPathValid,
-                    pageAfter: .allSet,
-                    pageBefore: .brewTypeSelection
-                )
+                    .transition(.push(from: .trailing))
 
-            case .brewInstall:
-                BrewInstall(isDone: $isBrewInstallDone)
-                    .transition(.push(from: pushDirection == .forward ? .trailing : .leading))
-                
-                PageControlButtons(
-                    page: $page,
-                    pushDirection: $pushDirection,
-                    canContinue: isBrewInstallDone,
-                    pageAfter: .allSet,
-                    pageBefore: nil
-                )
+                pageControlButtons(nextPage: .allSet, canContinue: isBrewPathValid)
 
             case .allSet:
                 AllSet()
-                    .transition(.push(from: pushDirection == .forward ? .trailing : .leading))
+                    .transition(.push(from: .trailing))
+            }
+        }
+        .task {
+            detectedBrewInstallation = await DependencyManager.detectHomebrew()
+
+            if let brewInstallation = detectedBrewInstallation {
+                BrewPaths.selectedBrewOption = brewInstallation
             }
         }
     }

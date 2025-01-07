@@ -1,5 +1,5 @@
 //
-//  SetupView+BrewInstall.swift
+//  SetupView+AppliteBrewInstall.swift
 //  Applite
 //
 //  Created by Milán Várady on 2024.12.26.
@@ -9,7 +9,7 @@ import SwiftUI
 
 extension SetupView {
     /// Brew installation page
-    struct BrewInstall: View {
+    struct AppliteBrewInstall: View {
         /// This is needed so the parent view knows it can continue to the next page
         @Binding var isDone: Bool
 
@@ -26,6 +26,7 @@ extension SetupView {
                 Text("Installing dependencies")
                     .font(.appliteSmallTitle)
                     .padding(.vertical)
+                    .padding(.top, 10)
 
                 // Xcode Command Line Tools
                 VStack(alignment: .leading, spacing: 20) {
@@ -54,7 +55,7 @@ extension SetupView {
                 }
                 .frame(width: 440)
                 .task {
-                    if await !isCommandLineToolsInstalled() {
+                    if await !BrewPaths.isCommandLineToolsInstalled() {
                         showCommandLineToolsInstallAlert = true
                     }
 

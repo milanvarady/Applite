@@ -26,7 +26,7 @@ struct BrewPaths {
     }
     
     /// Retrieves and sets the currently selected ``PathOption`` from user defaults
-    static public var selectedBrewOption: PathOption {
+    static var selectedBrewOption: PathOption {
         set {
             UserDefaults.standard.setValue(newValue.rawValue, forKey: "brewPathOption")
         }
@@ -42,7 +42,7 @@ struct BrewPaths {
     ///   - shellFriendly: If true the path will be enclosed in " marks so shell doesn't fail on spaces
     ///
     /// - Returns: `String`
-    public static func getBrewExectuablePath(for option: PathOption, shellFriendly: Bool = true) -> String {
+    static func getBrewExectuablePath(for option: PathOption, shellFriendly: Bool = true) -> String {
         var result = ""
         
         switch option {
@@ -67,43 +67,82 @@ struct BrewPaths {
     }
     
     /// Brew directory when installing brew separately into Application Support
-    public static let appBrewDirectory = URL.applicationSupportDirectory
+    static let appBrewDirectory = URL.applicationSupportDirectory
         .appendingPathComponent(Bundle.main.appName, isDirectory: true)
         .appendingPathComponent("homebrew", isDirectory: true)
     
     /// Brew exectuable path when installing brew separately into Application Support
-    public static let appBrewExetutable = URL.applicationSupportDirectory
+    static let appBrewExetutable = URL.applicationSupportDirectory
         .appendingPathComponent(Bundle.main.appName, isDirectory: true)
         .appendingPathComponent("homebrew", isDirectory: true)
         .appendingPathComponent("bin", isDirectory: true)
         .appendingPathComponent("brew")
     
     /// Dynamically returns the current brew directory in use
-    static public var currentBrewDirectory: String {
-        get {
-            switch selectedBrewOption {
-            case .appPath:
-                return appBrewDirectory.path
-                
-            case .defaultAppleSilicon:
-                return "/opt/homebrew"
-                
-            case .defaultIntel:
-                return "/usr/local"
-                
-            case .custom:
-                return UserDefaults.standard.string(forKey: "customUserBrewPath")?.replacing("/bin/brew", with: "") ?? ""
-            }
+    static var currentBrewDirectory: String {
+        switch Self.selectedBrewOption {
+        case .appPath:
+            return appBrewDirectory.path
+
+        case .defaultAppleSilicon:
+            return "/opt/homebrew"
+
+        case .defaultIntel:
+            return "/usr/local"
+
+        case .custom:
+            return UserDefaults.standard.string(forKey: "customUserBrewPath")?.replacing("/bin/brew", with: "") ?? ""
         }
     }
     
     /// Returns the brew path currently in use (selected in settings), as a `String` enclosed in " marks so shell scripts don't fail beacuse of spaces
-    static public var currentBrewExecutable: String {
+    static var currentBrewExecutable: String {
         return getBrewExectuablePath(for: selectedBrewOption, shellFriendly: true)
     }
-    
+
+    /// Checks if a brew executable path is valid or not
+    ///
+    /// - Parameters:
+    ///   - path: Path to be checked
+    ///
+    /// - Returns: Whether the path is valid or not
+    static func isBrewPathValid(path: String) async -> Bool {
+        var path = path
+
+        // Add " marks so shell doesn't fail on spaces
+        if !path.hasPrefix("\"") && !path.hasSuffix("\"") {
+            path = "\"\(path)\""
+        }
+
+        // Check if path ends with brew
+        if !path.hasSuffix("brew") && !path.hasSuffix("brew\"") {
+            return false
+        }
+
+        // Check if Homebrew is returned when checking version
+        guard let output = try? await Shell.runAsync("\(path) --version") else {
+            return false
+        }
+
+        return output.contains("Homebrew")
+    }
+
     /// Checks if currently selected brew executable path is valid
-    static public func isSelectedBrewPathValid() async -> Bool {
+    static func isSelectedBrewPathValid() async -> Bool {
         return await isBrewPathValid(path: Self.currentBrewExecutable)
     }
+
+    /// Checks if Xcode Command Line Tools is installed
+    ///
+    /// - Returns: Whether it is installed or not
+    static func isCommandLineToolsInstalled() async -> Bool {
+        do {
+            try await Shell.runAsync("xcode-select -p")
+        } catch {
+            return false
+        }
+
+        return true
+    }
+
 }

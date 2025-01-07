@@ -31,7 +31,7 @@ struct DependencyManager {
         Self.logger.info("Brew installation started")
         
         // Install command line tools
-        if await !isCommandLineToolsInstalled() {
+        if await !BrewPaths.isCommandLineToolsInstalled() {
             Self.logger.info("Prompting user to install Xcode Command Line Tools")
 
             try await Shell.runAsync("xcode-select --install")
@@ -40,12 +40,12 @@ struct DependencyManager {
             var didBreak = false
             
             for _ in 0...360 {
-                if await isCommandLineToolsInstalled() {
+                if await BrewPaths.isCommandLineToolsInstalled() {
                     didBreak = true
                     break
                 }
                 
-                try await Task.sleep(for: Duration(secondsComponent: 5, attosecondsComponent: 0))
+                try await Task.sleep(for: .seconds(5))
             }
             
             if !didBreak {
@@ -57,7 +57,7 @@ struct DependencyManager {
         }
         
         // Skip Homebrew installation if keepCurrentInstall is set to true
-        let brewPathValid = await isBrewPathValid(path: BrewPaths.appBrewExetutable.path)
+        let brewPathValid = await BrewPaths.isBrewPathValid(path: BrewPaths.appBrewExetutable.path)
 
         guard keepCurrentInstall && !brewPathValid else {
             Self.logger.notice("Brew is already installed, skipping installation")
@@ -98,5 +98,20 @@ struct DependencyManager {
         try await Shell.runAsync("curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C \"\(BrewPaths.appBrewDirectory.path)\"")
 
         Self.logger.info("Brew install done")
+    }
+
+    static func detectHomebrew() async -> BrewPaths.PathOption? {
+        async let appleSilicon = BrewPaths.isBrewPathValid(path: BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon))
+        async let intel = BrewPaths.isBrewPathValid(path: BrewPaths.getBrewExectuablePath(for: .defaultIntel))
+
+        if await appleSilicon {
+            return .defaultAppleSilicon
+        }
+
+        if await intel {
+            return .defaultIntel
+        }
+
+        return nil
     }
 }

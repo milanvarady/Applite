@@ -45,7 +45,7 @@ struct BrewPathSelectorView: View {
 
             if brewPathOption == BrewPaths.PathOption.custom.rawValue {
                 Task { @MainActor in
-                    isSelectedPathValid = await isBrewPathValid(path: newPath)
+                    isSelectedPathValid = await BrewPaths.isBrewPathValid(path: newPath)
                 }
             }
         }

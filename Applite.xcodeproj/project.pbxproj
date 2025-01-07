@@ -38,8 +38,6 @@
 		41857B752912D94A004A1894 /* CategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41857B742912D94A004A1894 /* CategoryView.swift */; };
 		418989AD2A33A5C4004AC23B /* BrewManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418989AC2A33A5C4004AC23B /* BrewManagementView.swift */; };
 		418989AF2A33B65A004AC23B /* SmallProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418989AE2A33B65A004AC23B /* SmallProgressView.swift */; };
-		418989B22A35D651004AC23B /* isBrewPathValid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418989B12A35D651004AC23B /* isBrewPathValid.swift */; };
-		418989B42A35D67C004AC23B /* isCommandLineToolsInstalled.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418989B32A35D67C004AC23B /* isCommandLineToolsInstalled.swift */; };
 		4189CE392937CD41009C836D /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 4189CE382937CD41009C836D /* Shimmer */; };
 		418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */ = {isa = PBXBuildFile; productRef = 418E9EF32AACD9C000046A58 /* CircularProgress */; };
 		418F331C28EB3D540023D76F /* AppGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F331B28EB3D540023D76F /* AppGridView.swift */; };
@@ -60,9 +58,8 @@
 		419256202D1DEC0D00D9EF10 /* AppView+UpdateButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192561F2D1DEC0D00D9EF10 /* AppView+UpdateButton.swift */; };
 		419256232D1DF14C00D9EF10 /* SetupView+PageControllerButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256222D1DF14C00D9EF10 /* SetupView+PageControllerButtons.swift */; };
 		419256252D1DF17F00D9EF10 /* SetupView+Welcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256242D1DF17F00D9EF10 /* SetupView+Welcome.swift */; };
-		419256272D1DF1AC00D9EF10 /* SetupView+BrewTypeSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256262D1DF1AC00D9EF10 /* SetupView+BrewTypeSelection.swift */; };
 		419256292D1DF1CF00D9EF10 /* SetupView+BrewPathSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256282D1DF1CF00D9EF10 /* SetupView+BrewPathSelection.swift */; };
-		4192562C2D1DF20600D9EF10 /* SetupView+BrewInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192562B2D1DF20600D9EF10 /* SetupView+BrewInstall.swift */; };
+		4192562C2D1DF20600D9EF10 /* SetupView+AppliteBrewInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192562B2D1DF20600D9EF10 /* SetupView+AppliteBrewInstall.swift */; };
 		4192562E2D1DF22500D9EF10 /* SetupView+AllSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192562D2D1DF22500D9EF10 /* SetupView+AllSet.swift */; };
 		419256312D1DF2B600D9EF10 /* SettingsView+GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256302D1DF2B600D9EF10 /* SettingsView+GeneralSettings.swift */; };
 		419256332D1DF2E000D9EF10 /* SettingsView+BrewPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256322D1DF2E000D9EF10 /* SettingsView+BrewPath.swift */; };
@@ -120,6 +117,8 @@
 		4196C90028F9E1F400EADDDA /* InstalledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8FF28F9E1F400EADDDA /* InstalledView.swift */; };
 		41B731392A879353008BF6B9 /* ActiveTasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41B731382A879353008BF6B9 /* ActiveTasksView.swift */; };
 		41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 41C8FA282A7A598B000BB9A2 /* Sparkle */; };
+		41CE28C02D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CE28BF2D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift */; };
+		41CE28C22D2DA0690018483F /* SetupView+BrewPathDetectedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CE28C12D2DA0690018483F /* SetupView+BrewPathDetectedView.swift */; };
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
 		BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BD7546562A868DA30083996B /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
@@ -157,8 +156,6 @@
 		41857B742912D94A004A1894 /* CategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryView.swift; sourceTree = "<group>"; };
 		418989AC2A33A5C4004AC23B /* BrewManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewManagementView.swift; sourceTree = "<group>"; };
 		418989AE2A33B65A004AC23B /* SmallProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallProgressView.swift; sourceTree = "<group>"; };
-		418989B12A35D651004AC23B /* isBrewPathValid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = isBrewPathValid.swift; sourceTree = "<group>"; };
-		418989B32A35D67C004AC23B /* isCommandLineToolsInstalled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = isCommandLineToolsInstalled.swift; sourceTree = "<group>"; };
 		418F331B28EB3D540023D76F /* AppGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGridView.swift; sourceTree = "<group>"; };
 		418F332328EC8BA10023D76F /* Cask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cask.swift; sourceTree = "<group>"; };
 		418F332528EC921D0023D76F /* CaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskManager.swift; sourceTree = "<group>"; };
@@ -177,9 +174,8 @@
 		4192561F2D1DEC0D00D9EF10 /* AppView+UpdateButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppView+UpdateButton.swift"; sourceTree = "<group>"; };
 		419256222D1DF14C00D9EF10 /* SetupView+PageControllerButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+PageControllerButtons.swift"; sourceTree = "<group>"; };
 		419256242D1DF17F00D9EF10 /* SetupView+Welcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+Welcome.swift"; sourceTree = "<group>"; };
-		419256262D1DF1AC00D9EF10 /* SetupView+BrewTypeSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+BrewTypeSelection.swift"; sourceTree = "<group>"; };
 		419256282D1DF1CF00D9EF10 /* SetupView+BrewPathSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+BrewPathSelection.swift"; sourceTree = "<group>"; };
-		4192562B2D1DF20600D9EF10 /* SetupView+BrewInstall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+BrewInstall.swift"; sourceTree = "<group>"; };
+		4192562B2D1DF20600D9EF10 /* SetupView+AppliteBrewInstall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+AppliteBrewInstall.swift"; sourceTree = "<group>"; };
 		4192562D2D1DF22500D9EF10 /* SetupView+AllSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+AllSet.swift"; sourceTree = "<group>"; };
 		419256302D1DF2B600D9EF10 /* SettingsView+GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+GeneralSettings.swift"; sourceTree = "<group>"; };
 		419256322D1DF2E000D9EF10 /* SettingsView+BrewPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+BrewPath.swift"; sourceTree = "<group>"; };
@@ -236,6 +232,8 @@
 		4196C8FF28F9E1F400EADDDA /* InstalledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledView.swift; sourceTree = "<group>"; };
 		4196C90128FAF57A00EADDDA /* AppliteDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppliteDebug.entitlements; sourceTree = "<group>"; };
 		41B731382A879353008BF6B9 /* ActiveTasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveTasksView.swift; sourceTree = "<group>"; };
+		41CE28BF2D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+AppliteBrewInfoView.swift"; sourceTree = "<group>"; };
+		41CE28C12D2DA0690018483F /* SetupView+BrewPathDetectedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+BrewPathDetectedView.swift"; sourceTree = "<group>"; };
 		41DF006329EAA094004EB7AE /* SendNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendNotification.swift; sourceTree = "<group>"; };
 		BD7546562A868DA30083996B /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -417,15 +415,6 @@
 			path = Categories;
 			sourceTree = "<group>";
 		};
-		418989B02A35D628004AC23B /* Verify Brew Installation */ = {
-			isa = PBXGroup;
-			children = (
-				418989B12A35D651004AC23B /* isBrewPathValid.swift */,
-				418989B32A35D67C004AC23B /* isCommandLineToolsInstalled.swift */,
-			);
-			path = "Verify Brew Installation";
-			sourceTree = "<group>";
-		};
 		418F332228EC8B120023D76F /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -451,7 +440,6 @@
 				4126353F2A77C71F00155034 /* Shell */,
 				41B731352A878993008BF6B9 /* App Migration */,
 				413E60B52BBAE58B00978F6A /* Network Proxy */,
-				418989B02A35D628004AC23B /* Verify Brew Installation */,
 				419256652D1E18A500D9EF10 /* Alert Manager */,
 				419256102D1DDB9700D9EF10 /* Other */,
 			);
@@ -488,9 +476,10 @@
 			children = (
 				419506A32964A27F00FE5802 /* SetupView.swift */,
 				419256242D1DF17F00D9EF10 /* SetupView+Welcome.swift */,
-				419256262D1DF1AC00D9EF10 /* SetupView+BrewTypeSelection.swift */,
+				41CE28BF2D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift */,
+				4192562B2D1DF20600D9EF10 /* SetupView+AppliteBrewInstall.swift */,
+				41CE28C12D2DA0690018483F /* SetupView+BrewPathDetectedView.swift */,
 				419256282D1DF1CF00D9EF10 /* SetupView+BrewPathSelection.swift */,
-				4192562B2D1DF20600D9EF10 /* SetupView+BrewInstall.swift */,
 				4192562D2D1DF22500D9EF10 /* SetupView+AllSet.swift */,
 				419256222D1DF14C00D9EF10 /* SetupView+PageControllerButtons.swift */,
 			);
@@ -795,7 +784,6 @@
 				4125BB8A29539907000FBD25 /* PlaceholderAppView.swift in Sources */,
 				419256182D1DEA4400D9EF10 /* AppView+ActionsView.swift in Sources */,
 				413F77A52972B2E70053349A /* DependencyManager.swift in Sources */,
-				418989B42A35D67C004AC23B /* isCommandLineToolsInstalled.swift in Sources */,
 				419256AB2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift in Sources */,
 				419256352D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift in Sources */,
 				4192563C2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift in Sources */,
@@ -820,6 +808,7 @@
 				414074F528DF53E80073EB22 /* AppliteApp.swift in Sources */,
 				41062C9B2A3E4AFA00FD48EA /* BundleExtension.swift in Sources */,
 				419256522D1E0D0500D9EF10 /* DiscoverSectionView.swift in Sources */,
+				41CE28C22D2DA0690018483F /* SetupView+BrewPathDetectedView.swift in Sources */,
 				418989AF2A33B65A004AC23B /* SmallProgressView.swift in Sources */,
 				41B731392A879353008BF6B9 /* ActiveTasksView.swift in Sources */,
 				411EDDD72A9F58180051E07B /* URLExtension.swift in Sources */,
@@ -827,19 +816,18 @@
 				419256402D1DF41300D9EF10 /* ContentView+LoadCasks.swift in Sources */,
 				419256452D1E0A7000D9EF10 /* BrewPathSelectorView+CustomPathOption.swift in Sources */,
 				419256642D1E164600D9EF10 /* UpdateView+ToolbarItems.swift in Sources */,
-				419256272D1DF1AC00D9EF10 /* SetupView+BrewTypeSelection.swift in Sources */,
 				4192560A2D1C9FF800D9EF10 /* StringExtension.swift in Sources */,
 				4191392C29159B5C00F1D75D /* CaskDTO.swift in Sources */,
+				41CE28C02D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift in Sources */,
 				413E60C22BBFF98A00978F6A /* AppIconView.swift in Sources */,
 				418989AD2A33A5C4004AC23B /* BrewManagementView.swift in Sources */,
-				418989B22A35D651004AC23B /* isBrewPathValid.swift in Sources */,
 				419256A12D25ACC300D9EF10 /* CategoryViewModel.swift in Sources */,
 				419256832D22055200D9EF10 /* CaskInfo.swift in Sources */,
 				4192560D2D1CA02C00D9EF10 /* ShellError.swift in Sources */,
 				4192566B2D1F286B00D9EF10 /* CaskManager+BrewFunctions.swift in Sources */,
 				419256A42D25CFE600D9EF10 /* AppMigrationView+ExportView.swift in Sources */,
 				4192561A2D1DEB2100D9EF10 /* AppView+OpenAndManageView.swift in Sources */,
-				4192562C2D1DF20600D9EF10 /* SetupView+BrewInstall.swift in Sources */,
+				4192562C2D1DF20600D9EF10 /* SetupView+AppliteBrewInstall.swift in Sources */,
 				41062C952A3794EA00FD48EA /* BrewPaths.swift in Sources */,
 				4192565B2D1E0ECF00D9EF10 /* DiscoverSectionView+Placeholder.swift in Sources */,
 				41483CCD29101C9900BB10C2 /* Category.swift in Sources */,

@@ -349,7 +349,6 @@
       }
     },
     "%@ is already installed. If you want to add it to %@ click more options (chevron icon) and press Force Install." : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -562,6 +561,9 @@
           }
         }
       }
+    },
+    "A brew installation was detected at:" : {
+
     },
     "A new Homebrew installation will be installed into ~/Library/Application Support/%@" : {
       "localizations" : {
@@ -1257,6 +1259,7 @@
       }
     },
     "Back" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1326,6 +1329,9 @@
           }
         }
       }
+    },
+    "Brew Installation Detected" : {
+
     },
     "Brew Path" : {
       "extractionState" : "stale",
@@ -1777,8 +1783,10 @@
         }
       }
     },
+    "Continue to use detected installation or select another option below." : {
+
+    },
     "Couldn't download app. No internet connection, or host is unreachable." : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2162,6 +2170,7 @@
       }
     },
     "Do you already have Homebrew installed?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2763,6 +2772,9 @@
         }
       }
     },
+    "Homebrew Installation" : {
+
+    },
     "Homebrew Version" : {
 
     },
@@ -2834,6 +2846,9 @@
           }
         }
       }
+    },
+    "I already have brew installed" : {
+
     },
     "IDEs" : {
       "extractionState" : "manual",
@@ -3082,6 +3097,9 @@
           }
         }
       }
+    },
+    "Install separate brew for Applite" : {
+
     },
     "Installation failed" : {
       "localizations" : {
@@ -3430,6 +3448,7 @@
       }
     },
     "No (I don't know what it is)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4882,7 +4901,11 @@
         }
       }
     },
+    "This application uses the free and open source [Homebrew](https://brew.sh/) package manager to download and manage applications. Applite has detected that you don't have brew installed, so it will create a new brew installation just for Applite under ~/Library/Application Support/Applite." : {
+
+    },
     "This application uses the free and open source [Homebrew](https://brew.sh/) package manager to download and manage applications. If you already have it installed on your system, you can use it right away. If you don't have brew installed or don't know what it is, select **No**. This will create a new brew installation just for %@." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5570,6 +5593,9 @@
           }
         }
       }
+    },
+    "Use different brew path" : {
+
     },
     "Use system proxy" : {
       "localizations" : {
