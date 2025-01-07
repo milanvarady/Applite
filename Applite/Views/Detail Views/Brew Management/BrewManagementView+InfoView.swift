@@ -24,8 +24,10 @@ extension BrewManagementView {
 
                 HStack {
                     infoCard(title: "Homebrew Version", info: homebrewVersion)
+                        .frame(width: cardWidth)
 
                     infoCard(title: "Apps Installed", info: numberOfCasks)
+                        .frame(width: cardWidth)
                 }
             }
             .task {
@@ -45,7 +47,7 @@ extension BrewManagementView {
         }
 
         private func infoCard(title: LocalizedStringKey, info: String) -> some View {
-            Card(cardWidth: cardWidth, cardHeight: cardHeight, paddig: cardPadding) {
+            Card {
                 VStack {
                     Text(title)
                         .font(.system(size: 16, weight: .bold))

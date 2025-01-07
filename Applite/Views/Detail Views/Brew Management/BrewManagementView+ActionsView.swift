@@ -12,7 +12,6 @@ extension BrewManagementView {
         @Binding var modifyingBrew: Bool
         let cardWidth: CGFloat
         let cardPadding: CGFloat
-        let cardHeight: CGFloat = 210
 
         @State var updateDone = false
         @State var reinstallDone = false
@@ -39,8 +38,6 @@ extension BrewManagementView {
 
                 HStack {
                     ActionCard(
-                        cardWidth: cardWidth,
-                        cardHeight: cardHeight,
                         paddig: cardPadding,
                         actionSuccessful: $updateDone,
                         remarks: [
@@ -49,10 +46,9 @@ extension BrewManagementView {
                     ) {
                         updateButton
                     }
+                    .frame(width: cardWidth)
 
                     ActionCard(
-                        cardWidth: cardWidth,
-                        cardHeight: cardHeight,
                         paddig: cardPadding,
                         actionSuccessful: $reinstallDone,
                         remarks: [
@@ -62,6 +58,7 @@ extension BrewManagementView {
                     ) {
                         reinstallButton
                     }
+                    .frame(width: cardWidth)
                 }
                 .padding(.bottom, 10)
 
@@ -82,15 +79,13 @@ extension BrewManagementView {
         }
 
         private struct ActionCard<ActionButton: View>: View {
-            let cardWidth: CGFloat
-            let cardHeight: CGFloat
             let paddig: CGFloat
             @Binding var actionSuccessful: Bool
             let remarks: [Remark]
             @ViewBuilder let actionButton: ActionButton
 
             var body: some View {
-                Card(cardWidth: cardWidth, cardHeight: cardHeight, paddig: paddig) {
+                Card(paddig: paddig) {
                     VStack(alignment: .leading) {
                         HStack {
                             actionButton

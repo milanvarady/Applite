@@ -9,32 +9,28 @@ import SwiftUI
 
 struct AppMigrationView: View {
     let width: CGFloat = 620
-    let columnSpacing: CGFloat = 40
-
-    var cardWidth: CGFloat {
-        (width - columnSpacing) / 2
-    }
-    let cardHeight: CGFloat = 220
     let cardPadding: CGFloat = 24
 
     var body: some View {
-        VStack {
-            titleAndDescription
-                .padding(.vertical, 40)
-
-            HStack(spacing: columnSpacing) {
-                Card(cardWidth: cardWidth, cardHeight: cardHeight, paddig: cardPadding) {
-                    ExportView()
+        ScrollView {
+            VStack {
+                titleAndDescription
+                    .padding(.vertical, 40)
+                
+                HStack(spacing: 40) {
+                    Card(paddig: cardPadding) {
+                        ExportView()
+                    }
+                    
+                    Card(paddig: cardPadding) {
+                        ImportView()
+                    }
                 }
-
-                Card(cardWidth: cardWidth, cardHeight: cardHeight, paddig: cardPadding) {
-                    ImportView()
-                }
+                
+                Spacer()
             }
-
-            Spacer()
+            .frame(maxWidth: width)
         }
-        .frame(maxWidth: width)
     }
 
     var titleAndDescription: some View {
@@ -50,4 +46,5 @@ struct AppMigrationView: View {
 
 #Preview {
     AppMigrationView()
+        .padding()
 }

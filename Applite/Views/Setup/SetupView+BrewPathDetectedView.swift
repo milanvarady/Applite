@@ -21,13 +21,14 @@ extension SetupView {
 
                 Text("A brew installation was detected at:")
 
-                Card(cardWidth: 200, cardHeight: 30, paddig: 5) {
+                Card {
                     HStack {
                         Image(systemName: "mug")
                         Text(BrewPaths.currentBrewDirectory)
                             .font(.system(size: 12, design: .monospaced))
                     }
                 }
+                .frame(maxWidth: 200, maxHeight: 20)
                 .padding(.bottom)
 
                 Text("Continue to use detected installation or select another option below.")

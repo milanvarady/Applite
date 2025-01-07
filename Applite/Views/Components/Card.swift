@@ -9,15 +9,18 @@ import SwiftUI
 
 /// A reusabe view that adds a rounded rectange background shadow
 struct Card<Content: View>: View {
-    let cardWidth: CGFloat
-    let cardHeight: CGFloat
     let paddig: CGFloat
     @ViewBuilder let content: Content
 
+    init(paddig: CGFloat = 5, content: () -> Content) {
+        self.paddig = paddig
+        self.content = content()
+    }
+
     var body: some View {
         content
+            .frame(maxWidth: .infinity, maxHeight: .infinity) // Take available space
             .padding(paddig)
-            .frame(width: cardWidth, height: cardHeight)
             .background(.regularMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .shadow(radius: 3)
