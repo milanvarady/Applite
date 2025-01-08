@@ -61,7 +61,8 @@
             "value" : "："
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "?" : {
       "localizations" : {
@@ -95,7 +96,8 @@
             "value" : "？"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "\"%@\" didn't match any app. Either it's not available in the Homebrew catalog or you misspelled it." : {
       "comment" : "Empty search results message",
@@ -164,7 +166,8 @@
             "value" : "（%@）"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. %@ uses Homebrew under the hood to download and manage applications." : {
       "extractionState" : "stale",
@@ -202,11 +205,18 @@
       }
     },
     "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
+      "comment" : "Manage Homebrew view description",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ez az alkalmazás a [Homebrew](https://brew.sh) nevű csomagkezelőt használja az appok letöltéséhez. A Homebrew egy ingyenes és nyílt forráskódú szoftver, ami megkönnyíti az appok letöltését."
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "[Homebrew](https://brew.sh) 是一個免費開源的包管理器工具，可以輕鬆安裝第三方應用程式。Applite 在底層使用 Homebrew 來下載和管理應用程式。"
           }
         }
       }
@@ -258,6 +268,7 @@
       }
     },
     "/path/to/brew" : {
+      "comment" : "Example brew path",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -292,6 +303,7 @@
       }
     },
     "/path/to/dir" : {
+      "comment" : "Example directory path",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -402,6 +414,7 @@
       }
     },
     "%@ is already installed. If you want to add it to Applite click more options (chevron icon) and press Force Install." : {
+      "comment" : "App already installed alert message (parameter: app name)",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -412,7 +425,7 @@
       }
     },
     "%@ successfully installed!" : {
-      "extractionState" : "stale",
+      "comment" : "Successful app install notification",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -447,7 +460,7 @@
       }
     },
     "%@ successfully reinstalled" : {
-      "extractionState" : "stale",
+      "comment" : "Successful reinstall notification",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -482,7 +495,7 @@
       }
     },
     "%@ successfully uninstalled" : {
-      "extractionState" : "stale",
+      "comment" : "Successful app uninstall notification",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -517,7 +530,7 @@
       }
     },
     "%@ successfully updated" : {
-      "extractionState" : "stale",
+      "comment" : "Successful app update notification",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -656,6 +669,7 @@
       }
     },
     "A to Z" : {
+      "comment" : "Alphabetical sorting option",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -701,6 +715,7 @@
       }
     },
     "About Applite" : {
+      "comment" : "About Applite menubar item",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -746,6 +761,7 @@
       }
     },
     "Active Tasks" : {
+      "comment" : "Active Tasks sidebar item",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -821,6 +837,7 @@
       }
     },
     "After reinstalling, all currently installed apps will be unlinked from Applite. They won't be deleted, but you won't be able to update or uninstall them via Applite." : {
+      "comment" : "Brew reinstall warning",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -877,6 +894,7 @@
       }
     },
     "All other app functions will be disabled during the update!" : {
+      "comment" : "Brew update notice",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -946,6 +964,7 @@
       }
     },
     "App caveats" : {
+      "comment" : "App caveats alert title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1096,6 +1115,7 @@
       }
     },
     "Apple Silicon Mac" : {
+      "comment" : "Brew installation option",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -1141,6 +1161,7 @@
       }
     },
     "Applite couldn't open %@" : {
+      "comment" : "App couldn't be opened alert",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -1162,6 +1183,7 @@
       }
     },
     "Applite's installation" : {
+      "comment" : "Brew installation option",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -1172,6 +1194,7 @@
       }
     },
     "Apps Installed" : {
+      "comment" : "Number of apps installed",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -1182,6 +1205,7 @@
       }
     },
     "Apps with few downloads are hidden, consider turning off this filter" : {
+      "comment" : "Filter removal suggestion",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1216,6 +1240,7 @@
       }
     },
     "Are you sure you want to %@install Homebrew?" : {
+      "comment" : "Homebrew (re)install confirmation",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1250,6 +1275,7 @@
       }
     },
     "Are you sure you want to force install %@? This will override any current installation!" : {
+      "comment" : "App force install confirmation",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1319,6 +1345,7 @@
       }
     },
     "Are you sure you want to permanently uninstall Applite?" : {
+      "comment" : "Applite uninstall confirmation",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -1329,6 +1356,7 @@
       }
     },
     "Automatically check for updates" : {
+      "comment" : "Applite update option checkmark",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1363,6 +1391,7 @@
       }
     },
     "Automatically download updates" : {
+      "comment" : "Applite update option checkmark",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1396,42 +1425,8 @@
         }
       }
     },
-    "Back" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retour"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vissza"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "戻る"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "返回"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "返回"
-          }
-        }
-      }
-    },
     "Best match" : {
+      "comment" : "Sorting option",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -1497,41 +1492,6 @@
         }
       }
     },
-    "Brew Path" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chemin d'accès"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brew elérési útja"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brewのパス"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brew 路径"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brew路徑"
-          }
-        }
-      }
-    },
     "Brew path has been modified. Restart app for changes to take effect." : {
       "comment" : "Settings brew path changed message",
       "localizations" : {
@@ -1568,6 +1528,7 @@
       }
     },
     "Broken Brew Path" : {
+      "comment" : "Broken brew path alert title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1602,6 +1563,7 @@
       }
     },
     "Browse" : {
+      "comment" : "Browse sidebar item",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1636,6 +1598,7 @@
       }
     },
     "Browse through a handpicked list of awesome apps." : {
+      "comment" : "Onboarding",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -1671,6 +1634,7 @@
       }
     },
     "Browsers" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -1706,6 +1670,7 @@
       }
     },
     "Cancel" : {
+      "comment" : "Alert cancel button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1740,6 +1705,7 @@
       }
     },
     "Cask Info" : {
+      "comment" : "Brew Management section",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -1749,42 +1715,8 @@
         }
       }
     },
-    "Cask list (.txt file)" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liste Cask (fichier .txt)"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cask lista (.txt fájl)"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Caskリスト(.txtファイル)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cask 列表（.txt 文件）"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cask清單（.txt 文件）"
-          }
-        }
-      }
-    },
     "Categories" : {
+      "comment" : "Sidebar section name",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1854,6 +1786,7 @@
       }
     },
     "Color Scheme:" : {
+      "comment" : "Color scheme setting title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1888,6 +1821,7 @@
       }
     },
     "Communication" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -1923,6 +1857,7 @@
       }
     },
     "Continue" : {
+      "comment" : "Onboarding next button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1968,6 +1903,7 @@
       }
     },
     "Couldn't download app. No internet connection, or host is unreachable." : {
+      "comment" : "No internet alert message",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2002,6 +1938,7 @@
       }
     },
     "Creative Tools" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -2113,6 +2050,7 @@
       }
     },
     "Custom" : {
+      "comment" : "Brew installation option",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -2123,6 +2061,7 @@
       }
     },
     "Custom brew path" : {
+      "comment" : "Brew path textfield",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2157,6 +2096,7 @@
       }
     },
     "Custom Installation Directory" : {
+      "comment" : "Appdir textfield",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2191,6 +2131,7 @@
       }
     },
     "Dark" : {
+      "comment" : "Color mode",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -2226,6 +2167,7 @@
       }
     },
     "Delete Homebrew cache" : {
+      "comment" : "Applite uninstall option checkmark",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2260,6 +2202,7 @@
       }
     },
     "Developer Tools" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -2295,6 +2238,7 @@
       }
     },
     "Discord" : {
+      "comment" : "Applite discord",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2326,7 +2270,8 @@
             "value" : "不和諧"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "Discover" : {
       "comment" : "Discover view title",
@@ -2364,6 +2309,7 @@
       }
     },
     "Download Anyway" : {
+      "comment" : "App download confirmation button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2398,6 +2344,7 @@
       }
     },
     "Download apps with ease" : {
+      "comment" : "Onboarding",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -2433,6 +2380,7 @@
       }
     },
     "Download third party applications with a single click. No more \"Drag to Applications folder\"." : {
+      "comment" : "Onboarding",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -2606,6 +2554,7 @@
       }
     },
     "Export Apps to File" : {
+      "comment" : "App export button",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -2720,8 +2669,19 @@
         }
       }
     },
+    "Failed to install %@" : {
+      "comment" : "Install failure alert title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ letöltése sikertelen"
+          }
+        }
+      }
+    },
     "Failed to reinstall %@" : {
-      "extractionState" : "stale",
+      "comment" : "Failed reinstall alert title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2755,8 +2715,19 @@
         }
       }
     },
+    "Failed to uninstall %@" : {
+      "comment" : "Failed app install alert title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ törlése sikertelen"
+          }
+        }
+      }
+    },
     "Failed to update %@" : {
-      "extractionState" : "stale",
+      "comment" : "Failed app update alert title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2791,6 +2762,7 @@
       }
     },
     "Force Install" : {
+      "comment" : "Force install app button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2825,6 +2797,7 @@
       }
     },
     "General" : {
+      "comment" : "Settings tab",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2859,6 +2832,7 @@
       }
     },
     "Get Info" : {
+      "comment" : "Additional cask info button",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -2900,7 +2874,8 @@
             "value" : "GitHub"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "Hide apps with few downloads" : {
       "comment" : "Few downloads search filter",
@@ -2938,6 +2913,7 @@
       }
     },
     "Homebrew" : {
+      "comment" : "Sidebar item",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2983,6 +2959,7 @@
       }
     },
     "Homebrew Version" : {
+      "comment" : "Brew management Homebrew version card",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -3062,6 +3039,7 @@
       }
     },
     "I already have brew installed" : {
+      "comment" : "Setup link (keep it short)",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -3072,6 +3050,7 @@
       }
     },
     "IDEs" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -3153,6 +3132,7 @@
       }
     },
     "Import Apps" : {
+      "comment" : "Import apps button",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -3303,6 +3283,7 @@
       }
     },
     "Install Separate Brew" : {
+      "comment" : "Brew Management button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3337,6 +3318,7 @@
       }
     },
     "Install separate brew for Applite" : {
+      "comment" : "Setup link (keep it short)",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -3347,6 +3329,7 @@
       }
     },
     "Installation failed" : {
+      "comment" : "App install alert",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3416,7 +3399,7 @@
       }
     },
     "Installing" : {
-      "comment" : "Installing",
+      "comment" : "Install progress text",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3486,6 +3469,7 @@
       }
     },
     "Intel Mac" : {
+      "comment" : "Brew path option",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -3496,6 +3480,7 @@
       }
     },
     "Light" : {
+      "comment" : "Color mode",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -3531,6 +3516,7 @@
       }
     },
     "Manage applications" : {
+      "comment" : "Onboarding",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -3601,6 +3587,7 @@
       }
     },
     "Media" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -3636,6 +3623,7 @@
       }
     },
     "Menu Bar" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -3671,6 +3659,7 @@
       }
     },
     "Most downloaded (default)" : {
+      "comment" : "Sorting option",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -3701,41 +3690,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "下載次數最多（預設）"
-          }
-        }
-      }
-    },
-    "No (I don't know what it is)" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Non (je ne sais pas ce que c'est)"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nem (nem tudom mi az)"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "いいえ(それが何なのか分かりません）"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "没有（我不知道它是什么）"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "不（我不知道那是什麼）"
           }
         }
       }
@@ -3776,6 +3730,7 @@
       }
     },
     "No homepage found" : {
+      "comment" : "No homepage found alert",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3820,41 +3775,6 @@
         }
       }
     },
-    "No Selection" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune sélection"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nincs kiválasztás"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択無し"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无选择"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "沒有選擇"
-          }
-        }
-      }
-    },
     "No Updates Available" : {
       "comment" : "Update view no updates available",
       "localizations" : {
@@ -3891,6 +3811,7 @@
       }
     },
     "Note" : {
+      "comment" : "Remark",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -3926,6 +3847,7 @@
       }
     },
     "Notice" : {
+      "comment" : "Alert title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4030,6 +3952,7 @@
       }
     },
     "Office Tools" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -4065,6 +3988,7 @@
       }
     },
     "OK" : {
+      "comment" : "Alert OK button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4099,6 +4023,7 @@
       }
     },
     "Open" : {
+      "comment" : "Launch app button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4144,6 +4069,7 @@
       }
     },
     "Password Managers" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -4179,6 +4105,7 @@
       }
     },
     "Preferred proxy protocol" : {
+      "comment" : "Proxy protocol picker",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4213,6 +4140,7 @@
       }
     },
     "Productivity" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -4248,6 +4176,7 @@
       }
     },
     "Property" : {
+      "comment" : "Additional cask info property table column",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -4293,6 +4222,7 @@
       }
     },
     "Proxy" : {
+      "comment" : "Network proxy",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4327,6 +4257,7 @@
       }
     },
     "Quit" : {
+      "comment" : "Quit Applite button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4361,6 +4292,7 @@
       }
     },
     "Reinstall" : {
+      "comment" : "Reinstall app button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4395,6 +4327,7 @@
       }
     },
     "Reinstall failed" : {
+      "comment" : "Reinstall failed alert",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4429,6 +4362,7 @@
       }
     },
     "Reinstall Homebrew" : {
+      "comment" : "Reinstall Homebrew button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4463,6 +4397,7 @@
       }
     },
     "Reinstalling" : {
+      "comment" : "Progress text",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -4498,6 +4433,7 @@
       }
     },
     "Relaunch" : {
+      "comment" : "Relaunch Applite button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4566,6 +4502,7 @@
       }
     },
     "Retry Install" : {
+      "comment" : "Retry Homebrew install",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4600,6 +4537,7 @@
       }
     },
     "Retry load" : {
+      "comment" : "Load failed alert button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4679,6 +4617,7 @@
       }
     },
     "Searching..." : {
+      "comment" : "App search in progress",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -4689,6 +4628,7 @@
       }
     },
     "See All" : {
+      "comment" : "See all apps in category button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4723,6 +4663,7 @@
       }
     },
     "Select Folder" : {
+      "comment" : "Appdir folder selector",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4792,6 +4733,7 @@
       }
     },
     "Shell Output" : {
+      "comment" : "Shell output window title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4826,6 +4768,7 @@
       }
     },
     "Show All" : {
+      "comment" : "Show all updates confirmation",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4860,6 +4803,7 @@
       }
     },
     "Show All Updates" : {
+      "comment" : "Show all updates button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4894,6 +4838,7 @@
       }
     },
     "Sort by" : {
+      "comment" : "Sorting option picker",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4998,6 +4943,7 @@
       }
     },
     "Start Using Applite" : {
+      "comment" : "Onboarding finish button",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -5008,6 +4954,7 @@
       }
     },
     "System" : {
+      "comment" : "Color mode",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -5043,6 +4990,7 @@
       }
     },
     "Task completions" : {
+      "comment" : "Notification settings toggle",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5077,6 +5025,7 @@
       }
     },
     "Task errors" : {
+      "comment" : "Notification settings toggle",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5111,6 +5060,7 @@
       }
     },
     "Terminals" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -5315,6 +5265,7 @@
       }
     },
     "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/homebrew`" : {
+      "comment" : "Homebrew reinstallation note",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -5417,6 +5368,7 @@
       }
     },
     "Troubleshooting" : {
+      "comment" : "Applite troubleshooting website link",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5451,6 +5403,7 @@
       }
     },
     "Turn off few downloads filter" : {
+      "comment" : "Filter disable button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5485,6 +5438,7 @@
       }
     },
     "Uninstall" : {
+      "comment" : "Uninstall button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5611,6 +5565,7 @@
       }
     },
     "Uninstall Applite..." : {
+      "comment" : "Uninstall Applite button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5645,6 +5600,7 @@
       }
     },
     "Uninstall Completely" : {
+      "comment" : "Uninstall app completely button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5679,6 +5635,7 @@
       }
     },
     "Uninstalling" : {
+      "comment" : "Progress text",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -5714,6 +5671,7 @@
       }
     },
     "Update" : {
+      "comment" : "Update Applite button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5783,6 +5741,7 @@
       }
     },
     "Update and uninstall your applications. No more leftover files from deleted applications." : {
+      "comment" : "Onboarding",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -5818,6 +5777,7 @@
       }
     },
     "Update failed" : {
+      "comment" : "Update failed alert",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5852,6 +5812,7 @@
       }
     },
     "Update Homebrew" : {
+      "comment" : "Update Homebrew button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5886,6 +5847,7 @@
       }
     },
     "Updates" : {
+      "comment" : "Sidebar item",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5920,6 +5882,7 @@
       }
     },
     "Updating" : {
+      "comment" : "Progress text",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -5955,6 +5918,7 @@
       }
     },
     "Use Custom Installation Directory" : {
+      "comment" : "Setup link (keep it short)",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5989,6 +5953,7 @@
       }
     },
     "Use different brew path" : {
+      "comment" : "Setup link (keep it short)",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -5999,6 +5964,7 @@
       }
     },
     "Use system proxy" : {
+      "comment" : "Settings toggle",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -6033,6 +5999,7 @@
       }
     },
     "Utilities" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -6068,6 +6035,7 @@
       }
     },
     "Value" : {
+      "comment" : "Cask info window property value",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -6113,6 +6081,7 @@
       }
     },
     "Virtualization" : {
+      "comment" : "App category",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -6147,42 +6116,8 @@
         }
       }
     },
-    "Warning" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Attention"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Figyelem"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "注意"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "警告"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "警告"
-          }
-        }
-      }
-    },
     "Website" : {
+      "comment" : "Applite website link",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -6332,6 +6267,7 @@
       }
     },
     "Yes" : {
+      "comment" : "Confirmation",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -6366,6 +6302,7 @@
       }
     },
     "You will be prompted to install the Xcode Command Line Tools, please click \"Install\" as it is required for this application to work. It will take a few minutes, you can see the progress on the installation window." : {
+      "comment" : "Setup Xcode Command Line install alert",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

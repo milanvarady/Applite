@@ -17,7 +17,7 @@ enum CaskLoadError: LocalizedError {
         case .failedToLoadCategoryJSON:
             return "Failed to load categories"
         case .failedToLoadFromCache:
-            return "Failed to load app catalog from cache"
+            return "Failed to load app catalog from cache, check your internet connection"
         case .failedToLoadAdditionalInfo:
             return "Failed to load additional info"
         }

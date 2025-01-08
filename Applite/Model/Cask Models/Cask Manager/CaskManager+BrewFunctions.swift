@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 extension CaskManager {
     /// Installs the cask
@@ -50,10 +51,13 @@ extension CaskManager {
                 let alertMessage = switch completeOutput {
                     // Already installed
                 case _ where completeOutput.contains("It seems there is already an App"):
-                    String(localized: "\(cask.info.name) is already installed. If you want to add it to Applite click more options (chevron icon) and press Force Install.")
+                    String(
+                        localized: "\(cask.info.name) is already installed. If you want to add it to Applite click more options (chevron icon) and press Force Install.",
+                        comment: "App already installed alert message (parameter: app name)"
+                    )
                     // Network error
                 case _ where completeOutput.contains("Could not resolve host"):
-                    String(localized: "Couldn't download app. No internet connection, or host is unreachable.")
+                    String(localized: "Couldn't download app. No internet connection, or host is unreachable.", comment: "No internet alert message")
                 default:
                     error.localizedDescription
                 }
@@ -62,7 +66,7 @@ extension CaskManager {
                     for: cask,
                     error: error,
                     output: completeOutput,
-                    alertTitle: "Failed to install \(cask.info.name)",
+                    alertTitle: String(localized: "Failed to install \(cask.info.name)", comment: "Install failure alert title"),
                     alertMessage: alertMessage
                 )
                 return
@@ -71,7 +75,7 @@ extension CaskManager {
             await self.showSuccess(
                 for: cask,
                 logMessage: "Successfully installed cask \(cask.id)",
-                alertTitle: "\(cask.info.name) successfully installed!"
+                notificationTitle: String(localized: "\(cask.info.name) successfully installed!", comment: "Successful app install notification")
             )
 
             // Update state
@@ -86,7 +90,7 @@ extension CaskManager {
     ///     - zap: If true the app will be uninstalled completely using the brew --zap flag
     func uninstall(_ cask: Cask, zap: Bool = false) {
         runTask(for: cask) {
-            cask.progressState = .busy(withTask: "Uninstalling")
+            cask.progressState = .busy(withTask: String(localized: "Uninstalling", comment: "Uninstall progress text"))
 
             var arguments: [String] = ["uninstall", "--cask", cask.info.id]
 
@@ -104,7 +108,7 @@ extension CaskManager {
                     for: cask,
                     error: error,
                     output: output,
-                    alertTitle: "Failed to uninstall \(cask.info.name)",
+                    alertTitle: String(localized: "Failed to uninstall \(cask.info.name)", comment: "Failed app install alert title"),
                     alertMessage: error.localizedDescription
                 )
                 return
@@ -113,7 +117,7 @@ extension CaskManager {
             await self.showSuccess(
                 for: cask,
                 logMessage: "Successfully uninstalled \(cask.info.id)",
-                alertTitle: "\(cask.info.name) successfully uninstalled"
+                notificationTitle: String(localized: "\(cask.info.name) successfully uninstalled", comment: "Successful app uninstall notification")
             )
 
             // Update state
@@ -125,7 +129,7 @@ extension CaskManager {
     /// Updates the cask
     func update(_ cask: Cask) {
         runTask(for: cask) {
-            cask.progressState = .busy(withTask: "Updating")
+            cask.progressState = .busy(withTask: String(localized: "Updating", comment: "Update progress text"))
 
             var output: String = ""
 
@@ -136,7 +140,7 @@ extension CaskManager {
                     for: cask,
                     error: error,
                     output: output,
-                    alertTitle: "Failed to update \(cask.info.name)",
+                    alertTitle: String(localized: "Failed to update \(cask.info.name)", comment: "Failed app update alert title"),
                     alertMessage: error.localizedDescription
                 )
                 return
@@ -145,7 +149,7 @@ extension CaskManager {
             await self.showSuccess(
                 for: cask,
                 logMessage: "Successfully updated \(cask.id)",
-                alertTitle: "\(cask.info.name) successfully updated"
+                notificationTitle: String(localized: "\(cask.info.name) successfully updated", comment: "Successful app update notification")
             )
 
             // Update state
@@ -156,7 +160,7 @@ extension CaskManager {
     /// Reinstalls the cask
     func reinstall(_ cask: Cask) {
         runTask(for: cask) {
-            cask.progressState = .busy(withTask: "Reinstalling")
+            cask.progressState = .busy(withTask: String(localized: "Reinstalling", comment: "Reinstall progress text"))
 
             var output: String = ""
 
@@ -167,7 +171,7 @@ extension CaskManager {
                     for: cask,
                     error: error,
                     output: output,
-                    alertTitle: "Failed to reinstall \(cask.info.name)",
+                    alertTitle: String(localized: "Failed to reinstall \(cask.info.name)", comment: "Failed reinstall alert title"),
                     alertMessage: error.localizedDescription
                 )
                 return
@@ -176,7 +180,7 @@ extension CaskManager {
             await self.showSuccess(
                 for: cask,
                 logMessage: "Successfully reinstalled \(cask.info.id)",
-                alertTitle: "\(cask.info.name) successfully reinstalled"
+                notificationTitle: String(localized: "\(cask.info.name) successfully reinstalled", comment: "Successful reinstall notification")
             )
         }
     }
@@ -248,7 +252,7 @@ extension CaskManager {
             }
         }
         else if output.contains("Installing") || output.contains("Moving") || output.contains("Linking") {
-            return .busy(withTask: String(localized: "Installing"))
+            return .busy(withTask: String(localized: "Installing", comment: "Install progress text"))
         }
         else if output.contains("successfully installed") {
             return .success
@@ -265,8 +269,8 @@ extension CaskManager {
     private func showSuccess(
         for cask: Cask,
         logMessage: String,
-        alertTitle: String,
-        alertMessage: String = ""
+        notificationTitle: String,
+        notificationMessage: String = ""
     ) async {
         Self.logger.info("\(logMessage)")
 
@@ -275,7 +279,7 @@ extension CaskManager {
         try? await Task.sleep(for: .seconds(2))
         cask.progressState = .idle
 
-        await sendNotification(title: alertTitle, body: alertMessage, reason: .success)
+        await sendNotification(title: notificationTitle, body: notificationMessage, reason: .success)
     }
 
     /// Register failed task
