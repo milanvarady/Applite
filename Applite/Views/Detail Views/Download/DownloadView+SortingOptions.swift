@@ -11,7 +11,7 @@ extension DownloadView {
     var sortingOptions: some ToolbarContent {
         ToolbarItem {
             Menu {
-                Picker("Sort by", selection: $sortBy) {
+                Picker("Sort By", selection: $sortBy) {
                     ForEach(SortingOptions.allCases) { option in
                         Text(option.description)
                             .tag(option)

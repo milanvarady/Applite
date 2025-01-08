@@ -27,7 +27,8 @@
             "value" : ""
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     ": " : {
       "localizations" : {
@@ -169,13 +170,13 @@
       },
       "shouldTranslate" : false
     },
-    "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. %@ uses Homebrew under the hood to download and manage applications." : {
-      "extractionState" : "stale",
+    "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
+      "comment" : "Manage Homebrew view description",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "[Homebrew](https://brew.sh) est un outil de gestion de packages gratuit et open source qui facilite l'installation d'applications tierces. %@ utilise Homebrew sous le capot pour télécharger et gérer des applications."
+            "value" : "[Homebrew](https://brew.sh) est un outil de gestion de packages gratuit et open source qui facilite l'installation d'applications tierces. Applite utilise Homebrew sous le capot pour télécharger et gérer des applications."
           }
         },
         "hu" : {
@@ -187,30 +188,13 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "[Homebrew](https://brew.sh)は、サードパーティアプリケーションのインストールを簡単にする無料のオープンソースパッケージ管理ツールです。%@は内部でHomebrewを使用してアプリケーションをダウンロードして管理します"
+            "value" : "[Homebrew](https://brew.sh)は、サードパーティアプリケーションのインストールを簡単にする無料のオープンソースパッケージ管理ツールです。Appliteは内部でHomebrewを使用してアプリケーションをダウンロードして管理します"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "[Homebrew](https://brew.sh) 是一个免费开源的包管理器工具，可以轻松安装第三方应用程序。%@ 在底层使用 Homebrew 来下载和管理应用程序。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "[Homebrew](https://brew.sh) 是一個免費開源的包管理器工具，可以輕鬆安裝第三方應用程式。%@ 在底層使用 Homebrew 來下載和管理應用程式。"
-          }
-        }
-      }
-    },
-    "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
-      "comment" : "Manage Homebrew view description",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ez az alkalmazás a [Homebrew](https://brew.sh) nevű csomagkezelőt használja az appok letöltéséhez. A Homebrew egy ingyenes és nyílt forráskódú szoftver, ami megkönnyíti az appok letöltését."
+            "value" : "[Homebrew](https://brew.sh) 是一个免费开源的包管理器工具，可以轻松安装第三方应用程序。Applite 在底层使用 Homebrew 来下载和管理应用程序。"
           }
         },
         "zh-HK" : {
@@ -337,89 +321,37 @@
         }
       }
     },
-    "%@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@"
-          }
-        }
-      }
-    },
-    "%@ is already installed. If you want to add it to %@ click more options (chevron icon) and press Force Install." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ is already installed. If you want to add it to %2$@ click more options (chevron icon) and press Force Install."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ est déjà installé. Si vous souhaitez l'ajouter à %2$@, cliquez sur plus d'options (icône en forme de chevron) et appuyez sur Forcer l'installation."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A(z) %1$@ már telepítve van. Ha hozzá akarja adni az %2$@-hoz, kattintson a további opciók gombra, és válassza a Kényszerített telepítés opciót."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@はすでにインストールされています\n%2$@に追加する場合は\nVアイコンをクリックし強制インストールを押します"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ 已经安装。如果你想要将它添加到 %2$@ 中，点击更多选项（一个小箭头图标），然后选择强制安装。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ 已經安裝。如果您想將其添加到 %2$@，請點擊更多選項（向下箭頭圖標）並按下強制安裝。"
-          }
-        }
-      }
-    },
     "%@ is already installed. If you want to add it to Applite click more options (chevron icon) and press Force Install." : {
       "comment" : "App already installed alert message (parameter: app name)",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ est déjà installé. Si vous souhaitez l'ajouter à Applite, cliquez sur plus d'options (icône en forme de chevron) et appuyez sur Forcer l'installation."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A(z) %1$@ már telepítve van. Ha hozzá akarja adni az Applite-hoz, kattintson a további opciók gombra, és válassza a Kényszerített telepítés opciót."
+            "value" : "A(z) %@ már telepítve van. Ha hozzá akarja adni az Applite-hoz, kattintson a további opciók gombra, és válassza a Kényszerített telepítés opciót."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@はすでにインストールされています\nApplite に追加する場合は\nVアイコンをクリックし強制インストールを押します"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 已经安装。如果你想要将它添加到 Applite 中，点击更多选项（一个小箭头图标），然后选择强制安装。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 已經安裝。如果您想將其添加到 Applite，請點擊更多選項（向下箭頭圖標）並按下強制安裝。"
           }
         }
       }
@@ -564,41 +496,6 @@
         }
       }
     },
-    "%@ uses the system network proxy, but it can only use one protocol (HTTP, HTTPS, or SOCKS5). Select your preferred method." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ utilise le proxy réseau du système, mais il ne peut utiliser qu'un seul protocole (HTTP, HTTPS, ou SOCKS5). Sélectionnez la méthode que vous préférez."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ez az alkalmazás a rendszer hálózati proxy beállításait használja, de csak egy protokollt tud használni (HTTP, HTTPS vagy SOCKS5). Válassza ki a kívánt módszert."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@はシステムネットワークプロキシを使用しますが、使用できるプロトコルは1つだけです\n(HTTP、HTTPS、SOCKS5)お好みの方法を選択して下さい"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 使用系统网络代理，但只能使用一种协议（HTTP、HTTPS 或 SOCKS5）。请选择您首选的方法。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 使用系統網路代理，但只能使用一種協定（HTTP、HTTPS 或 SOCKS5）。 選擇您喜歡的方法。"
-          }
-        }
-      }
-    },
     "A brew installation was detected at:" : {
       "comment" : "Setup brew path detected view text",
       "localizations" : {
@@ -613,57 +510,34 @@
     "A new Homebrew installation will be installed into `~/Library/Application Support/Applite`" : {
       "comment" : "Brew installation alert notice",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une nouvelle installation Homebrew sera installée dans `~/Library/Application Support/Applite`"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Egy új Homebrew telepítés fog kerülni a `~/Library/Application Support/Applite` elérési helyre"
           }
-        }
-      }
-    },
-    "A new Homebrew installation will be installed into ~/Library/Application Support/%@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une nouvelle installation Homebrew sera installée dans ~/Library/Application Support/%@"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egy új Homebrew telepítés fog kerülni a ~/Library/Application Support/%@ elérési helyre"
-          }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "新しいHomebrewのインストール先は ~/Library/Application Support/%@にインストールされます"
+            "value" : "新しいHomebrewのインストール先は `~/Library/Application Support/Applite`にインストールされます"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "新的 Homebrew 安装将被安装到 ~/Library/Application Support/%@"
+            "value" : "新的 Homebrew 安装将被安装到 `~/Library/Application Support/Applite`"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "新的 Homebrew 安裝將安裝到 ~/Library/Application Support/%@"
-          }
-        }
-      }
-    },
-    "A new Homebrew installation will be installed into ~/Library/Application Support/Applite" : {
-      "comment" : "Brew installation alert notice",
-      "extractionState" : "stale",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egy új Homebrew telepítés fog kerülni a ~/Library/Application Support/Applite elérési helyre"
+            "value" : "新的 Homebrew 安裝將安裝到 `~/Library/Application Support/Applite`"
           }
         }
       }
@@ -679,13 +553,13 @@
         }
       }
     },
-    "About %@" : {
-      "extractionState" : "stale",
+    "About Applite" : {
+      "comment" : "About Applite menubar item",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "À propos de %@"
+            "value" : "À propos de Applite"
           }
         },
         "hu" : {
@@ -697,30 +571,19 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@について"
+            "value" : "Appliteについて"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "关于 %@"
+            "value" : "关于 Applite"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "关于%@"
-          }
-        }
-      }
-    },
-    "About Applite" : {
-      "comment" : "About Applite menubar item",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az Applite névjegye"
+            "value" : "关于Applite"
           }
         }
       }
@@ -795,89 +658,37 @@
         }
       }
     },
-    "After reinstalling, all currently installed apps will be unlinked from %@. They won't be deleted, but you won't be able to update or uninstall them via %@." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "After reinstalling, all currently installed apps will be unlinked from %1$@. They won't be deleted, but you won't be able to update or uninstall them via %2$@."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Après la réinstallation, toutes les applications actuellement installées seront dissociées de %1$@. Ils ne seront pas supprimés, mais vous ne pourrez pas les mettre à jour ou les désinstaller via %2$@."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az újratelepítés után az összes jelenleg letöltött alkalmazás nem lesz elérhető az %1$@ felületén. Nem törlődnek, de nem lehet majd őket frissíteni vagy letörölni az %2$@-on keresztül."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "再インストール後、現在インストールされている全てのアプリは %1$@からリンク解除されます\nこれらは削除されませんが、%2$@経由で更新又はアンインストールする事は出来ません"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新安装后，所有当前安装的应用程序将从 %1$@ 解除链接。它们不会被删除，但您将无法通过 %2$@ 更新或卸载它们。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新安裝後，所有目前安裝的應用程式都將從 %1$@ 取消連結。 它們不會被刪除，但您將無法透過 %2$@ 更新或卸載它們。"
-          }
-        }
-      }
-    },
     "After reinstalling, all currently installed apps will be unlinked from Applite. They won't be deleted, but you won't be able to update or uninstall them via Applite." : {
       "comment" : "Brew reinstall warning",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Après la réinstallation, toutes les applications actuellement installées seront dissociées de Applite. Ils ne seront pas supprimés, mais vous ne pourrez pas les mettre à jour ou les désinstaller via Applite."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Az újratelepítés után az összes jelenleg letöltött alkalmazás nem lesz elérhető az Applite felületén. Nem törlődnek, de nem lehet majd őket frissíteni vagy letörölni az Applite-on keresztül."
           }
-        }
-      }
-    },
-    "All currently installed apps will be unlinked from %@." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toutes les applications actuellement installées seront dissociées de %@."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minden jelenleg letöltött alkalmazás nem lesz elérhető az %@-on keresztül."
-          }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "現在インストールされている全てのアプリケーションは %@からリンク解除されます"
+            "value" : "再インストール後、現在インストールされている全てのアプリは Appliteからリンク解除されます\nこれらは削除されませんが、Applite経由で更新又はアンインストールする事は出来ません"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "所有当前安装的应用程序将从 %@ 解除链接。"
+            "value" : "重新安装后，所有当前安装的应用程序将从 Applite 解除链接。它们不会被删除，但您将无法通过 Applite 更新或卸载它们。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "所有目前安裝的應用程式將從 %@ 取消連結。"
+            "value" : "重新安裝後，所有目前安裝的應用程式都將從 Applite 取消連結。 它們不會被刪除，但您將無法透過 Applite 更新或卸載它們。"
           }
         }
       }
@@ -885,10 +696,34 @@
     "All currently installed apps will be unlinked from Applite." : {
       "comment" : "Brew reinstallation alert warning",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les applications actuellement installées seront dissociées de Applite."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minden jelenleg letöltött alkalmazás nem lesz elérhető az Applite-on keresztül."
+            "value" : "A jelenleg letöltött alkalmazások nem lesz elérhetőek az Applite felületén keresztül."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在インストールされている全てのアプリケーションは Appliteからリンク解除されます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有当前安装的应用程序将从 Applite 解除链接。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有目前安裝的應用程式將從 Applite 取消連結。"
           }
         }
       }
@@ -1174,10 +1009,34 @@
     "Applite uses the system network proxy, but it can only use one protocol (HTTP, HTTPS, or SOCKS5). Select your preferred method." : {
       "comment" : "Proxy settings description",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite utilise le proxy réseau du système, mais il ne peut utiliser qu'un seul protocole (HTTP, HTTPS, ou SOCKS5). Sélectionnez la méthode que vous préférez."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ez az alkalmazás a rendszer hálózati proxy beállításait használja, de csak egy protokollt tud használni (HTTP, HTTPS vagy SOCKS5). Válassza ki a kívánt módszert."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appliteはシステムネットワークプロキシを使用しますが、使用できるプロトコルは1つだけです\n(HTTP、HTTPS、SOCKS5)お好みの方法を選択して下さい"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite 使用系统网络代理，但只能使用一种协议（HTTP、HTTPS 或 SOCKS5）。请选择您首选的方法。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite 使用系統網路代理，但只能使用一種協定（HTTP、HTTPS 或 SOCKS5）。 選擇您喜歡的方法。"
           }
         }
       }
@@ -1309,48 +1168,37 @@
         }
       }
     },
-    "Are you sure you want to permanently uninstall %@?" : {
-      "extractionState" : "stale",
+    "Are you sure you want to permanently uninstall Applite?" : {
+      "comment" : "Applite uninstall confirmation",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Êtes-vous sûr de vouloir désinstaller définitivement %@?"
+            "value" : "Êtes-vous sûr de vouloir désinstaller définitivement Applite?"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Biztos véglegesen törli az %@-tot?"
+            "value" : "Biztos véglegesen törli az Applite-ot?"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@を完全にアンインストールしてもよろしいですか?"
+            "value" : "Appliteを完全にアンインストールしてもよろしいですか?"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "您确定要永久卸载 %@ 吗？"
+            "value" : "您确定要永久卸载 Applite 吗？"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "您確定要永久卸載%@嗎？"
-          }
-        }
-      }
-    },
-    "Are you sure you want to permanently uninstall Applite?" : {
-      "comment" : "Applite uninstall confirmation",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Biztos véglegesen törli az Applite-ot?"
+            "value" : "您確定要永久卸載Applite嗎？"
           }
         }
       }
@@ -4837,7 +4685,7 @@
         }
       }
     },
-    "Sort by" : {
+    "Sort By" : {
       "comment" : "Sorting option picker",
       "localizations" : {
         "fr" : {
@@ -4907,13 +4755,13 @@
         }
       }
     },
-    "Start Using %@" : {
-      "extractionState" : "stale",
+    "Start Using Applite" : {
+      "comment" : "Onboarding finish button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Commence à utiliser %@"
+            "value" : "Commence à utiliser Applite"
           }
         },
         "hu" : {
@@ -4925,30 +4773,19 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@の使用を開始する"
+            "value" : "Appliteの使用を開始する"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "开始使用 %@"
+            "value" : "开始使用 Applite"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "使用%@開始"
-          }
-        }
-      }
-    },
-    "Start Using Applite" : {
-      "comment" : "Onboarding finish button",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kezdjünk bele!"
+            "value" : "使用Applite開始"
           }
         }
       }
@@ -5223,65 +5060,37 @@
         }
       }
     },
-    "This will (re)install %@'s Homebrew installation at: ~/Library/Application Support/%@/homebrew" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "This will (re)install %1$@'s Homebrew installation at: ~/Library/Application Support/%2$@/homebrew"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cela installera un Homebrew spécifiquement pour %1$@ dans ~/Library/Application Support/%2$@/homebrew"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ez a ~/Library/Application Support/%2$@/homebrew elérési útvonalon található Homebrew telepítést fogja (újra)telepíteni."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "これにより、%1$@のHomebrewのインストール先が\n~/Library/Application Support/%2$@/homebrew に(再)インストールされます"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "这将在以下位置（重新）安装%1$@的Homebrew：~/Library/Application Support/%2$@/homebrew"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "這將（重新）安裝 %1$@ 的 Homebrew 安裝：~/Library/Application Support/%2$@/homebrew"
-          }
-        }
-      }
-    },
     "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/homebrew`" : {
       "comment" : "Homebrew reinstallation note",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cela installera un Homebrew spécifiquement pour Applite dans `~/Library/Application Support/Applite/homebrew`"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ez a `~/Library/Application Support/Applite/homebrew` elérési útvonalon található Homebrew telepítést fogja (újra)telepíteni."
           }
-        }
-      }
-    },
-    "This will (re)install Applite's Homebrew installation at: ~/Library/Application Support/Applite/homebrew" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "hu" : {
+        },
+        "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ez (újra)telepíti az Applite Homebrew telepítését a ~/Library/Application Support/Applite/homebrew helyen"
+            "value" : "これにより、AppliteのHomebrewのインストール先が\n`~/Library/Application Support/Applite/homebrew` に(再)インストールされます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这将在以下位置（重新）安装Applite的Homebrew：`~/Library/Application Support/Applite/homebrew`"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這將（重新）安裝 Applite 的 Homebrew 安裝：`~/Library/Application Support/Applite/homebrew`"
           }
         }
       }
@@ -5321,48 +5130,37 @@
         }
       }
     },
-    "This will uninstall all files and cache associated with %@." : {
-      "extractionState" : "stale",
+    "This will uninstall all files and cache associated with Applite." : {
+      "comment" : "Uninstall applite window description",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cela désinstallera tous les fichiers ainsi que le cache associés à %@."
+            "value" : "Cela désinstallera tous les fichiers ainsi que le cache associés à Applite."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ez az %@-al kapcsolatos összes fájlt és cachet törölni fogja."
+            "value" : "Ez eltávolítja az Applite-hoz kapcsolódó összes fájlt és gyorsítótárat."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "これにより%@に関連付けられた全てのファイルとキャッシュがアンインストールされます"
+            "value" : "これによりAppliteに関連付けられた全てのファイルとキャッシュがアンインストールされます"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "这将卸载与 %@ 相关的所有文件和缓存。"
+            "value" : "这将卸载与 Applite 相关的所有文件和缓存。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "這將卸載與 %@ 關聯的所有檔案和快取。"
-          }
-        }
-      }
-    },
-    "This will uninstall all files and cache associated with Applite." : {
-      "comment" : "Uninstall applite window description",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ez eltávolítja az Applite-hoz kapcsolódó összes fájlt és gyorsítótárat."
+            "value" : "這將卸載與 Applite 關聯的所有檔案和快取。"
           }
         }
       }
@@ -5472,83 +5270,37 @@
         }
       }
     },
-    "Uninstall %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Désinstaller %@"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ törlése"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@をアンインストール"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "卸载 %@"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "卸載%@"
-          }
-        }
-      }
-    },
-    "Uninstall %@, related files and cache." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Désinstallez %@, les fichiers associés ainsi que le cache."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az %@ és minden kapcsolatos fájl törlése."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@関連ファイル及びキャッシュをアンインストール"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "卸载 %@ 相关文件和缓存。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "卸載%@、相關文件和快取。"
-          }
-        }
-      }
-    },
     "Uninstall Applite" : {
       "comment" : "Uninstall Applite window title",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désinstaller Applite"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Applite törlése"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appliteをアンインストール"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载 Applite"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸載Applite"
           }
         }
       }
@@ -5556,10 +5308,34 @@
     "Uninstall Applite, related files and cache." : {
       "comment" : "Settings Uninstall Applite view description",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désinstallez Applite, les fichiers associés ainsi que le cache."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Az Applite és hozzátartozó fájlok törlése"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite関連ファイル及びキャッシュをアンインストール"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载 Applite 相关文件和缓存。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸載Applite、相關文件和快取。"
           }
         }
       }
@@ -6116,6 +5892,16 @@
         }
       }
     },
+    "Warning" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Figyelem"
+          }
+        }
+      }
+    },
     "Website" : {
       "comment" : "Applite website link",
       "localizations" : {
@@ -6151,48 +5937,37 @@
         }
       }
     },
-    "Welcome to %@" : {
-      "extractionState" : "stale",
+    "Welcome to Applite" : {
+      "comment" : "Setup welcome page title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bienvenue sur %@"
+            "value" : "Bienvenue sur Applite"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Üdvözöljük a %@-on"
+            "value" : "Üdvözöljük az Applite-on"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@へようこそ"
+            "value" : "Appliteへようこそ"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "欢迎使用 %@"
+            "value" : "欢迎使用 Applite"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "歡迎來到 ％@"
-          }
-        }
-      }
-    },
-    "Welcome to Applite" : {
-      "comment" : "Setup welcome page title",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Üdvözöljük az Applite-on"
+            "value" : "歡迎來到 Applite"
           }
         }
       }
