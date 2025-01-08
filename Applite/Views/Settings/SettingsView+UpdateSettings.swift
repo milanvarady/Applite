@@ -27,7 +27,7 @@ extension SettingsView {
                     Label("Check for Updates...", systemImage: "arrow.uturn.down")
                 }
 
-                Text("Current app version: \(Bundle.main.version) (\(Bundle.main.buildNumber))")
+                Text("Current app version: \(Bundle.main.version) (\(Bundle.main.buildNumber))", comment: "Update settings current app version text (version, build number)")
                     .font(.system(.body, weight: .light))
                     .foregroundColor(.secondary)
 

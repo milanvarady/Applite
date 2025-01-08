@@ -64,7 +64,7 @@ struct AppliteApp: App {
         }
         .windowResizability(.contentSize)
         
-        Window("Uninstall \(Bundle.main.appName)", id: "uninstall-self") {
+        Window("Uninstall Applite", id: "uninstall-self") {
             UninstallSelfView()
                 .padding()
                 .preferredColorScheme(selectedColorScheme)

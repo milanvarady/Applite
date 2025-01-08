@@ -10,7 +10,7 @@ import SwiftUI
 extension BrewPathSelectorView {
     func pathOption(_ option: BrewPaths.PathOption, showPath: Bool = true) -> some View {
         HStack {
-            Text("\(getPathDescription(for: option))")
+            Text(getPathDescription(for: option))
 
             if showPath {
                 Text("(\(BrewPaths.getBrewExectuablePath(for: option, shellFriendly: false)))")

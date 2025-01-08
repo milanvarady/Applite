@@ -22,7 +22,7 @@ extension UpdateView {
                 Image(systemName: "arrow.2.circlepath")
                     .rotationEffect(.degrees(updateAllButtonRotation))
                 
-                Text("Update All")
+                Text("Update All", comment: "Update all button title")
             }
         }
         .buttonStyle(.borderedProminent)

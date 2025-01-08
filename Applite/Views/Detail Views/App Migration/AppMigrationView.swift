@@ -35,11 +35,14 @@ struct AppMigrationView: View {
 
     var titleAndDescription: some View {
         VStack(alignment: .leading) {
-            Text("App Migration")
+            Text("App Migration", comment: "App Migration view title")
                 .font(.appliteMediumTitle)
                 .padding(.bottom, 2)
 
-            Text("Export all of your currently installed apps to a file. Import the file to another device to install them all. Useful when setting up a new Mac.")
+            Text(
+                "Export all of your currently installed apps to a file. Import the file to another device to install them all. Useful when setting up a new Mac.",
+                comment: "App migration view description"
+            )
         }
     }
 }

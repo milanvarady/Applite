@@ -95,7 +95,7 @@ extension AppView {
 
         case .failed(let output):
             HStack {
-                Text("Error")
+                Text("Error", comment: "Cask action failed (e.g. installation failed)")
                     .foregroundStyle(.red)
 
                 Button {

@@ -20,7 +20,7 @@ extension AppMigrationView {
 
         var body: some View {
             VStack(alignment: .leading) {
-                Text("Import")
+                Text("Import", comment: "App Migration import card title")
                     .font(.appliteSmallTitle)
 
                 HStack {
@@ -39,7 +39,10 @@ extension AppMigrationView {
                 }
                 .padding(.bottom, 10)
 
-                Text("**Tip:** You can also import apps from a Brewfile. However, only casks will be installed, other items like formulae and taps will be skipped.")
+                Text(
+                    "**Tip:** You can also import apps from a Brewfile. However, only casks will be installed, other items like formulae and taps will be skipped.",
+                    comment: "App Migration import card tip"
+                )
 
                 Spacer()
             }

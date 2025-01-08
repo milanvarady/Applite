@@ -19,7 +19,7 @@ extension BrewManagementView {
 
         var body: some View {
             VStack(alignment: .leading) {
-                Text("Info")
+                Text("Info", comment: "Brew Management view info section title")
                     .font(.appliteSmallTitle)
 
                 HStack {

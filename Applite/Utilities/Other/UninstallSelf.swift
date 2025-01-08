@@ -27,12 +27,12 @@ func uninstallSelf(deleteBrewCache: Bool) async throws {
 
     // Delete related files and cache
     let command = """
-    rm -r "$HOME/Library/Application Support/\(Bundle.main.appName)";
+    rm -r "$HOME/Library/Application Support/Applite";
     rm -r "$HOME/Library/Application Support/\(Bundle.main.bundleIdentifier!)";
     rm -r $HOME/Library/Containers/\(Bundle.main.bundleIdentifier!);
-    rm -r $HOME/Library/Caches/\(Bundle.main.appName);
+    rm -r $HOME/Library/Caches/Applite;
     rm -r $HOME/Library/Caches/\(Bundle.main.bundleIdentifier!);
-    rm -r $HOME/Library/\(Bundle.main.appName);
+    rm -r $HOME/Library/Applite;
     rm -r $HOME/Library/Preferences/*\(Bundle.main.bundleIdentifier!)*.plist;
     rm -r "$HOME/Library/Saved Application State/\(Bundle.main.bundleIdentifier!).savedState";
     rm -r $HOME/Library/SyncedPreferences/\(Bundle.main.bundleIdentifier!)*.plist;
@@ -56,6 +56,6 @@ func uninstallSelf(deleteBrewCache: Bool) async throws {
     // Quit the app and remove it
     let process = Process()
     process.launchPath = "/bin/bash"
-    process.arguments = ["-c", "osascript -e 'tell application \"\(Bundle.main.appName)\" to quit' && sleep 2 && rm -rf \"\(Bundle.main.bundlePath)\" && defaults write \(Bundle.main.bundleIdentifier!) setupComplete 0"]
+    process.arguments = ["-c", "osascript -e 'tell application \"Applite\" to quit' && sleep 2 && rm -rf \"\(Bundle.main.bundlePath)\" && defaults write \(Bundle.main.bundleIdentifier!) setupComplete 0"]
     process.launch()
 }

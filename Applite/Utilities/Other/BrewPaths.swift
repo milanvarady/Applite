@@ -68,12 +68,12 @@ struct BrewPaths {
     
     /// Brew directory when installing brew separately into Application Support
     static let appBrewDirectory = URL.applicationSupportDirectory
-        .appendingPathComponent(Bundle.main.appName, isDirectory: true)
+        .appendingPathComponent("Applite", isDirectory: true)
         .appendingPathComponent("homebrew", isDirectory: true)
     
     /// Brew exectuable path when installing brew separately into Application Support
     static let appBrewExetutable = URL.applicationSupportDirectory
-        .appendingPathComponent(Bundle.main.appName, isDirectory: true)
+        .appendingPathComponent("Applite", isDirectory: true)
         .appendingPathComponent("homebrew", isDirectory: true)
         .appendingPathComponent("bin", isDirectory: true)
         .appendingPathComponent("brew")

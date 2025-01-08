@@ -15,6 +15,17 @@ public enum ColorSchemePreference: String, CaseIterable, Identifiable {
     case dark
 
     public var id: Self { self }
+
+    var description: LocalizedStringKey {
+        switch self {
+        case .system:
+            "System"
+        case .light:
+            "Light"
+        case .dark:
+            "Dark"
+        }
+    }
 }
 
 /// Settings pane

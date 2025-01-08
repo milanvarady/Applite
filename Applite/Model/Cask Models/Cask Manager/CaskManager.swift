@@ -7,6 +7,7 @@
 
 import Foundation
 import OSLog
+import SwiftUI
 
 typealias CaskId = String
 typealias BrewAnalyticsDictionary = [CaskId: Int]
@@ -39,7 +40,7 @@ final class CaskManager: ObservableObject {
         do {
             let categories = try loadCategoryJSON()
             let categoryViewModels = categories.map {
-                CategoryViewModel(name: $0.id, sfSymbol: $0.sfSymbol, casks: [], casksCoupled: [])
+                CategoryViewModel(name: LocalizedStringKey($0.id), sfSymbol: $0.sfSymbol, casks: [], casksCoupled: [])
             }
 
             self.categories = categoryViewModels

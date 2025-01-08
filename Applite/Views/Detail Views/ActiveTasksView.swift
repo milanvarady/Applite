@@ -14,7 +14,7 @@ struct ActiveTasksView: View {
         ScrollView {
             VStack {
                 if caskManager.activeTasks.isEmpty {
-                    Text("No Active Tasks")
+                    Text("No Active Tasks", comment: "No active tasks available message")
                         .font(.title)
                 } else {
                     AppGridView(casks: caskManager.activeTasks.map { $0.cask }, appRole: .update)

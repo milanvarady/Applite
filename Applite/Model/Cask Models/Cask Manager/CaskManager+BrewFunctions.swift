@@ -50,7 +50,7 @@ extension CaskManager {
                 let alertMessage = switch completeOutput {
                     // Already installed
                 case _ where completeOutput.contains("It seems there is already an App"):
-                    String(localized: "\(cask.info.name) is already installed. If you want to add it to \(Bundle.main.appName) click more options (chevron icon) and press Force Install.")
+                    String(localized: "\(cask.info.name) is already installed. If you want to add it to Applite click more options (chevron icon) and press Force Install.")
                     // Network error
                 case _ where completeOutput.contains("Could not resolve host"):
                     String(localized: "Couldn't download app. No internet connection, or host is unreachable.")

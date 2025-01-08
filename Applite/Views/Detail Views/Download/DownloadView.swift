@@ -27,7 +27,7 @@ struct DownloadView: View {
 
         var id: SortingOptions { self }
 
-        var description: String {
+        var description: LocalizedStringKey {
             switch self {
             case .mostDownloaded: return "Most downloaded (default)"
             case .bestMatch: return "Best match"

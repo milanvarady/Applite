@@ -26,10 +26,10 @@ struct AppliteAppView: View {
             
             // Name and description
             VStack(alignment: .leading) {
-                Text("Applite")
+                Text("Applite", comment: "Applite app card title")
                     .font(.system(size: 16, weight: .bold))
                 
-                Text("This app")
+                Text("This app", comment: "Applite app card description")
                     .foregroundColor(.secondary)
             }
             

@@ -8,10 +8,10 @@
 import SwiftUI
 
 extension BrewPathSelectorView {
-    func getPathDescription(for option: BrewPaths.PathOption) -> String {
+    func getPathDescription(for option: BrewPaths.PathOption) -> LocalizedStringKey {
         switch option {
         case .appPath:
-            return "\(Bundle.main.appName)'s installation"
+            return "Applite's installation"
 
         case .defaultAppleSilicon:
             return "Apple Silicon Mac"

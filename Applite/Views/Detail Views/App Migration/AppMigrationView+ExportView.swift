@@ -19,7 +19,7 @@ extension AppMigrationView {
 
         var body: some View {
             VStack(alignment: .leading) {
-                Text("Export")
+                Text("Export", comment: "App migration export card title")
                     .font(.appliteSmallTitle)
 
                 HStack {
@@ -45,7 +45,7 @@ extension AppMigrationView {
                 }
                 .padding(.bottom, 10)
 
-                Text("Export all apps currently installed by \(Bundle.main.appName) to a file.")
+                Text("Export all apps currently installed by Appname to a file.", comment: "App Migration export card description")
 
                 Spacer()
             }

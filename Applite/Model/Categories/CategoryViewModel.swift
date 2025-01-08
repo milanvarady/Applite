@@ -5,13 +5,17 @@
 //  Created by Milán Várady on 2025.01.01.
 //
 
-import Foundation
+import SwiftUI
 
 struct CategoryViewModel: Identifiable, Equatable, Hashable {
-    let name: String
+    let name: LocalizedStringKey
     let sfSymbol: String
     let casks: [Cask]
     let casksCoupled: [[Cask]]
 
-    var id: String { name }
+    var id: String { sfSymbol }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(sfSymbol)
+    }
 }

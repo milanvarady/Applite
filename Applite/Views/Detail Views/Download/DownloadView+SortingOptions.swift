@@ -13,14 +13,14 @@ extension DownloadView {
             Menu {
                 Picker("Sort by", selection: $sortBy) {
                     ForEach(SortingOptions.allCases) { option in
-                        Text(LocalizedStringKey(option.description))
+                        Text(option.description)
                             .tag(option)
                     }
                 }
                 .pickerStyle(.inline)
                 
                 Toggle(isOn: $hideUnpopularApps) {
-                    Text("Hide apps with few downloads")
+                    Text("Hide apps with few downloads", comment: "Few downloads search filter")
                 }
             } label: {
                 Label("Search Sorting Options", systemImage: "slider.horizontal.3")

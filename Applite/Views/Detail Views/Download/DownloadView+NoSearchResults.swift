@@ -14,7 +14,10 @@ extension DownloadView {
                 Image(systemName: "magnifyingglass")
                     .font(.appliteMediumTitle)
 
-                Text("\"\(searchText)\" didn't match any app. Either it's not available in the Homebrew catalog or you misspelled it.")
+                Text(
+                    "\"\(searchText)\" didn't match any app. Either it's not available in the Homebrew catalog or you misspelled it.",
+                    comment: "Empty search results message"
+                )
                     .font(.system(size: 20))
             }
 

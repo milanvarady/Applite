@@ -17,7 +17,7 @@ struct CommandsMenu: Commands {
         SidebarCommands()
         
         CommandGroup(replacing: .appInfo) {
-            Button("About \(Bundle.main.appName)") {
+            Button("About Applite") {
                 NSApplication.shared.orderFrontStandardAboutPanel(
                     options: [
                         NSApplication.AboutPanelOptionKey.credits: NSAttributedString(
@@ -41,7 +41,7 @@ struct CommandsMenu: Commands {
             }
             
             CheckForUpdatesView(updater: updaterController.updater) {
-                Text("Check for Updates...")
+                Text("Check for Updates...", comment: "Check for update menu bar item")
             }
             
             Divider()

@@ -98,6 +98,7 @@
       }
     },
     "\"%@\" didn't match any app. Either it's not available in the Homebrew catalog or you misspelled it." : {
+      "comment" : "Empty search results message",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -166,6 +167,7 @@
       }
     },
     "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. %@ uses Homebrew under the hood to download and manage applications." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -199,10 +201,29 @@
         }
       }
     },
+    "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az alkalmazás a [Homebrew](https://brew.sh) nevű csomagkezelőt használja az appok letöltéséhez. A Homebrew egy ingyenes és nyílt forráskódú szoftver, ami megkönnyíti az appok letöltését."
+          }
+        }
+      }
+    },
     "**Tip:** You can also import apps from a Brewfile. However, only casks will be installed, other items like formulae and taps will be skipped." : {
-
+      "comment" : "App Migration import card tip",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Tip:** Alkalmazásokat egy Brewfile-ból is importálhat. Azonban csak a caskok lesznek telepítve, más elemek (formula, tap) figyelmen kívül lesznek hagyva."
+          }
+        }
+      }
     },
     "**Warning**: Homebrew cache is shared between Homebrew installations. Deleting the cache will remove the cache for all installations!" : {
+      "comment" : "Uninstall Applite window cache warning",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -305,6 +326,7 @@
       }
     },
     "%@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -338,17 +360,8 @@
         }
       }
     },
-    "%@ couldn't open %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ couldn't open %2$@"
-          }
-        }
-      }
-    },
     "%@ is already installed. If you want to add it to %@ click more options (chevron icon) and press Force Install." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -384,6 +397,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ 已經安裝。如果您想將其添加到 %2$@，請點擊更多選項（向下箭頭圖標）並按下強制安裝。"
+          }
+        }
+      }
+    },
+    "%@ is already installed. If you want to add it to Applite click more options (chevron icon) and press Force Install." : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A(z) %1$@ már telepítve van. Ha hozzá akarja adni az Applite-hoz, kattintson a további opciók gombra, és válassza a Kényszerített telepítés opciót."
           }
         }
       }
@@ -529,6 +552,7 @@
       }
     },
     "%@ uses the system network proxy, but it can only use one protocol (HTTP, HTTPS, or SOCKS5). Select your preferred method." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -563,9 +587,29 @@
       }
     },
     "A brew installation was detected at:" : {
-
+      "comment" : "Setup brew path detected view text",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Úgy tűnik a brew már telepítve van a következő helyen:"
+          }
+        }
+      }
+    },
+    "A new Homebrew installation will be installed into `~/Library/Application Support/Applite`" : {
+      "comment" : "Brew installation alert notice",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egy új Homebrew telepítés fog kerülni a `~/Library/Application Support/Applite` elérési helyre"
+          }
+        }
+      }
     },
     "A new Homebrew installation will be installed into ~/Library/Application Support/%@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -599,7 +643,30 @@
         }
       }
     },
+    "A new Homebrew installation will be installed into ~/Library/Application Support/Applite" : {
+      "comment" : "Brew installation alert notice",
+      "extractionState" : "stale",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egy új Homebrew telepítés fog kerülni a ~/Library/Application Support/Applite elérési helyre"
+          }
+        }
+      }
+    },
+    "A to Z" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A-Z"
+          }
+        }
+      }
+    },
     "About %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -633,7 +700,18 @@
         }
       }
     },
+    "About Applite" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az Applite névjegye"
+          }
+        }
+      }
+    },
     "Actions" : {
+      "comment" : "Brew Management view action section title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -702,6 +780,7 @@
       }
     },
     "After reinstalling, all currently installed apps will be unlinked from %@. They won't be deleted, but you won't be able to update or uninstall them via %@." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -741,7 +820,18 @@
         }
       }
     },
+    "After reinstalling, all currently installed apps will be unlinked from Applite. They won't be deleted, but you won't be able to update or uninstall them via Applite." : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az újratelepítés után az összes jelenleg letöltött alkalmazás nem lesz elérhető az Applite felületén. Nem törlődnek, de nem lehet majd őket frissíteni vagy letörölni az Applite-on keresztül."
+          }
+        }
+      }
+    },
     "All currently installed apps will be unlinked from %@." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -771,6 +861,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "所有目前安裝的應用程式將從 %@ 取消連結。"
+          }
+        }
+      }
+    },
+    "All currently installed apps will be unlinked from Applite." : {
+      "comment" : "Brew reinstallation alert warning",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minden jelenleg letöltött alkalmazás nem lesz elérhető az Applite-on keresztül."
           }
         }
       }
@@ -810,6 +911,7 @@
       }
     },
     "All set!" : {
+      "comment" : "Setup done message",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -877,45 +979,19 @@
         }
       }
     },
-    "App couldn't be located" : {
-      "extractionState" : "stale",
+    "App Migration" : {
+      "comment" : "App Migration view title",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'application est introuvable"
-          }
-        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nem található elérési útvonal az alkalmazáshoz"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アプリケーションが見つかりません"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法找到应用程序"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無法找到應用程式"
+            "value" : "App Költöztetés"
           }
         }
       }
     },
-    "App Migration" : {
-
-    },
     "Appdir" : {
+      "comment" : "Brew settings appdir section title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -950,6 +1026,7 @@
       }
     },
     "Appdir (optional)" : {
+      "comment" : "Setup brew appdir parameter",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -984,6 +1061,7 @@
       }
     },
     "Appearance" : {
+      "comment" : "Appearnace settings title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1017,7 +1095,18 @@
         }
       }
     },
+    "Apple Silicon Mac" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Silicon Mac"
+          }
+        }
+      }
+    },
     "Applite" : {
+      "comment" : "Applite app card title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1051,8 +1140,46 @@
         }
       }
     },
+    "Applite couldn't open %@" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az Applite nem tudta megnyitni a %@ alkalmazást"
+          }
+        }
+      }
+    },
+    "Applite uses the system network proxy, but it can only use one protocol (HTTP, HTTPS, or SOCKS5). Select your preferred method." : {
+      "comment" : "Proxy settings description",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az alkalmazás a rendszer hálózati proxy beállításait használja, de csak egy protokollt tud használni (HTTP, HTTPS vagy SOCKS5). Válassza ki a kívánt módszert."
+          }
+        }
+      }
+    },
+    "Applite's installation" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite telepítése"
+          }
+        }
+      }
+    },
     "Apps Installed" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letöltött appok száma"
+          }
+        }
+      }
     },
     "Apps with few downloads are hidden, consider turning off this filter" : {
       "localizations" : {
@@ -1157,6 +1284,7 @@
       }
     },
     "Are you sure you want to permanently uninstall %@?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1186,6 +1314,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "您確定要永久卸載%@嗎？"
+          }
+        }
+      }
+    },
+    "Are you sure you want to permanently uninstall Applite?" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biztos véglegesen törli az Applite-ot?"
           }
         }
       }
@@ -1293,10 +1431,28 @@
         }
       }
     },
+    "Best match" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legjobb találat"
+          }
+        }
+      }
+    },
     "Brew" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew"
+          }
+        }
+      }
     },
     "Brew Executable Path" : {
+      "comment" : "Settings brew path selector",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1331,7 +1487,15 @@
       }
     },
     "Brew Installation Detected" : {
-
+      "comment" : "Setup brew path detected view title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew telepítés észlelve"
+          }
+        }
+      }
     },
     "Brew Path" : {
       "extractionState" : "stale",
@@ -1369,6 +1533,7 @@
       }
     },
     "Brew path has been modified. Restart app for changes to take effect." : {
+      "comment" : "Settings brew path changed message",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1575,7 +1740,14 @@
       }
     },
     "Cask Info" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask információ"
+          }
+        }
+      }
     },
     "Cask list (.txt file)" : {
       "extractionState" : "manual",
@@ -1647,6 +1819,7 @@
       }
     },
     "Check for Updates..." : {
+      "comment" : "Check for update menu bar item",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1784,7 +1957,15 @@
       }
     },
     "Continue to use detected installation or select another option below." : {
-
+      "comment" : "Setup brew path detected view text",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ha az észlelt brew telepítést szeretné használni lépjen tovább, ellenkező esetben válasszon a lenti opciók közül."
+          }
+        }
+      }
     },
     "Couldn't download app. No internet connection, or host is unreachable." : {
       "localizations" : {
@@ -1856,6 +2037,7 @@
       }
     },
     "Current app version: %@ (%@)" : {
+      "comment" : "Update settings current app version text (version, build number)",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1896,6 +2078,7 @@
       }
     },
     "Currently selected brew path is invalid" : {
+      "comment" : "Settings invalid brew path message",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1925,6 +2108,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "目前選擇的沖泡路徑無效"
+          }
+        }
+      }
+    },
+    "Custom" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egyedi"
           }
         }
       }
@@ -2136,6 +2329,7 @@
       }
     },
     "Discover" : {
+      "comment" : "Discover view title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2165,41 +2359,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "發現"
-          }
-        }
-      }
-    },
-    "Do you already have Homebrew installed?" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avez-vous déjà installé Homebrew ?"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ön már rendelkezik a Homebrew csomagkezelővel?"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrewはインストール済みですか？"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "你已经安装了 Homebrew 吗？"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "您已經安裝了 Homebrew 嗎？"
           }
         }
       }
@@ -2309,6 +2468,7 @@
       }
     },
     "Error" : {
+      "comment" : "Cask action failed (e.g. installation failed)",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2343,7 +2503,15 @@
       }
     },
     "Export" : {
-
+      "comment" : "App migration export card title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportálás"
+          }
+        }
+      }
     },
     "Export a file containing all currently installed applications. This can be imported to another device." : {
       "extractionState" : "stale",
@@ -2380,11 +2548,27 @@
         }
       }
     },
-    "Export all apps currently installed by %@ to a file." : {
-
+    "Export all apps currently installed by Appname to a file." : {
+      "comment" : "App Migration export card description",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A jelenleg telepített alkalmazások fájlba exportálása."
+          }
+        }
+      }
     },
     "Export all of your currently installed apps to a file. Import the file to another device to install them all. Useful when setting up a new Mac." : {
-
+      "comment" : "App migration view description",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportálja a jelenleg letöltött alkalmazásokat egy fájlba. Ezt később egy másik eszközön importálhatja, ezzel az összes alkalmazást telepíti. Hasznos egy új eszköz beállításához."
+          }
+        }
+      }
     },
     "Export apps to file" : {
       "extractionState" : "stale",
@@ -2422,7 +2606,14 @@
       }
     },
     "Export Apps to File" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appok fájlba exportálása"
+          }
+        }
+      }
     },
     "Export failed" : {
       "extractionState" : "stale",
@@ -2668,7 +2859,14 @@
       }
     },
     "Get Info" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Infó megjelenítése"
+          }
+        }
+      }
     },
     "GitHub" : {
       "localizations" : {
@@ -2705,6 +2903,7 @@
       }
     },
     "Hide apps with few downloads" : {
+      "comment" : "Few downloads search filter",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2773,10 +2972,25 @@
       }
     },
     "Homebrew Installation" : {
-
+      "comment" : "Setup Applite's brew installation info view title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew telepítés"
+          }
+        }
+      }
     },
     "Homebrew Version" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew verzió"
+          }
+        }
+      }
     },
     "Homebrew version: " : {
       "extractionState" : "stale",
@@ -2848,7 +3062,14 @@
       }
     },
     "I already have brew installed" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Már van egy brew telepítésem"
+          }
+        }
+      }
     },
     "IDEs" : {
       "extractionState" : "manual",
@@ -2886,7 +3107,15 @@
       }
     },
     "Import" : {
-
+      "comment" : "App Migration import card title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importálás"
+          }
+        }
+      }
     },
     "Import apps" : {
       "extractionState" : "stale",
@@ -2924,7 +3153,14 @@
       }
     },
     "Import Apps" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appok importálása"
+          }
+        }
+      }
     },
     "Import failed" : {
       "extractionState" : "stale",
@@ -2997,6 +3233,7 @@
       }
     },
     "In progress..." : {
+      "comment" : "Brew Management view progress indicator",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3031,6 +3268,7 @@
       }
     },
     "Info" : {
+      "comment" : "Brew Management view info section title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3099,7 +3337,14 @@
       }
     },
     "Install separate brew for Applite" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Külön brew telepítése"
+          }
+        }
+      }
     },
     "Installation failed" : {
       "localizations" : {
@@ -3136,6 +3381,7 @@
       }
     },
     "Installed" : {
+      "comment" : "Brew dependency installed badge text",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3205,6 +3451,7 @@
       }
     },
     "Installing dependencies" : {
+      "comment" : "Brew dependency installation view title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3234,6 +3481,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "安裝依賴項"
+          }
+        }
+      }
+    },
+    "Intel Mac" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intel Mac"
           }
         }
       }
@@ -3309,6 +3566,7 @@
       }
     },
     "Manage Homebrew" : {
+      "comment" : "Manage Homebrew view title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3483,6 +3741,7 @@
       }
     },
     "No Active Tasks" : {
+      "comment" : "No active tasks available message",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3550,8 +3809,16 @@
         }
       }
     },
-    "No Quartine" : {
-
+    "No Quarantine" : {
+      "comment" : "Brew no quarantine flag toggle title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Quarantine"
+          }
+        }
+      }
     },
     "No Selection" : {
       "extractionState" : "stale",
@@ -3589,6 +3856,7 @@
       }
     },
     "No Updates Available" : {
+      "comment" : "Update view no updates available",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3692,6 +3960,7 @@
       }
     },
     "Notifications" : {
+      "comment" : "Notification settings title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3864,7 +4133,15 @@
       }
     },
     "Other Flags" : {
-
+      "comment" : "Brew settings command line flags section title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "További beállítások"
+          }
+        }
+      }
     },
     "Password Managers" : {
       "extractionState" : "manual",
@@ -3971,9 +4248,17 @@
       }
     },
     "Property" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tulajdonság"
+          }
+        }
+      }
     },
     "Provide Brew Executable Path" : {
+      "comment" : "Setup brew path selector",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4349,6 +4634,7 @@
       }
     },
     "Retry the installation or visit the troubleshooting page." : {
+      "comment" : "Brew dependency installation failure alert",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4383,10 +4669,24 @@
       }
     },
     "Search Sorting Options" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keresés szűrési opciók"
+          }
+        }
+      }
     },
     "Searching..." : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keresés…"
+          }
+        }
+      }
     },
     "See All" : {
       "localizations" : {
@@ -4457,6 +4757,7 @@
       }
     },
     "Selected brew path is invalid!" : {
+      "comment" : "Setup view invalid brew path message",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4662,6 +4963,7 @@
       }
     },
     "Start Using %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4691,6 +4993,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "使用%@開始"
+          }
+        }
+      }
+    },
+    "Start Using Applite" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kezdjünk bele!"
           }
         }
       }
@@ -4834,6 +5146,7 @@
       }
     },
     "This app" : {
+      "comment" : "Applite app card description",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4868,6 +5181,7 @@
       }
     },
     "This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications." : {
+      "comment" : "Manage Homebrew view description",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4901,8 +5215,28 @@
         }
       }
     },
+    "This application uses the free and open source [Homebrew](https://brew.sh/) package manager to download and manage applications. Applite has detected that you don't have brew installed, so it will create a new brew installation just for Applite under `~/Library/Application Support/Applite.`" : {
+      "comment" : "Setup Applite's brew installtion info view description",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az alkalmazás az ingyenes és nyílt forráskódú [Homebrew](https://brew.sh/) csomagkezelőt használja az alkalmazások letöltésére és kezelésére. Az Applite érzékelte, hogy nincs telepítve a brew, ezért létrehoz egy új brew telepítést csak az Applite számára a `~/Library/Application Support/Applite` elérési útvonalon."
+          }
+        }
+      }
+    },
     "This application uses the free and open source [Homebrew](https://brew.sh/) package manager to download and manage applications. Applite has detected that you don't have brew installed, so it will create a new brew installation just for Applite under ~/Library/Application Support/Applite." : {
-
+      "comment" : "Setup Applite's brew installtion info view description",
+      "extractionState" : "stale",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az alkalmazás az ingyenes és nyílt forráskódú [Homebrew](https://brew.sh/) csomagkezelőt használja az alkalmazások letöltésére és kezelésére. Az Applite érzékelte, hogy nincs telepítve a brew, ezért létrehoz egy új brew telepítést csak az Applite számára a ~/Library/Application Support/Applite elérési útvonalon."
+          }
+        }
+      }
     },
     "This application uses the free and open source [Homebrew](https://brew.sh/) package manager to download and manage applications. If you already have it installed on your system, you can use it right away. If you don't have brew installed or don't know what it is, select **No**. This will create a new brew installation just for %@." : {
       "extractionState" : "stale",
@@ -4940,6 +5274,7 @@
       }
     },
     "This will (re)install %@'s Homebrew installation at: ~/Library/Application Support/%@/homebrew" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4979,7 +5314,29 @@
         }
       }
     },
+    "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/homebrew`" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez a `~/Library/Application Support/Applite/homebrew` elérési útvonalon található Homebrew telepítést fogja (újra)telepíteni."
+          }
+        }
+      }
+    },
+    "This will (re)install Applite's Homebrew installation at: ~/Library/Application Support/Applite/homebrew" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez (újra)telepíti az Applite Homebrew telepítését a ~/Library/Application Support/Applite/homebrew helyen"
+          }
+        }
+      }
+    },
     "This will show updates from applications that have auto-update turned off, i.e., applications that are taking care of their own updates." : {
+      "comment" : "Greedy update check alert message",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5014,6 +5371,7 @@
       }
     },
     "This will uninstall all files and cache associated with %@." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5043,6 +5401,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這將卸載與 %@ 關聯的所有檔案和快取。"
+          }
+        }
+      }
+    },
+    "This will uninstall all files and cache associated with Applite." : {
+      "comment" : "Uninstall applite window description",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez eltávolítja az Applite-hoz kapcsolódó összes fájlt és gyorsítótárat."
           }
         }
       }
@@ -5150,6 +5519,7 @@
       }
     },
     "Uninstall %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5184,6 +5554,7 @@
       }
     },
     "Uninstall %@, related files and cache." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5213,6 +5584,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "卸載%@、相關文件和快取。"
+          }
+        }
+      }
+    },
+    "Uninstall Applite" : {
+      "comment" : "Uninstall Applite window title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite törlése"
+          }
+        }
+      }
+    },
+    "Uninstall Applite, related files and cache." : {
+      "comment" : "Settings Uninstall Applite view description",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az Applite és hozzátartozó fájlok törlése"
           }
         }
       }
@@ -5355,6 +5748,7 @@
       }
     },
     "Update All" : {
+      "comment" : "Update all button title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5595,7 +5989,14 @@
       }
     },
     "Use different brew path" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Másik brew elérési útvonal használata"
+          }
+        }
+      }
     },
     "Use system proxy" : {
       "localizations" : {
@@ -5667,7 +6068,14 @@
       }
     },
     "Value" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Érték"
+          }
+        }
+      }
     },
     "View Error" : {
       "extractionState" : "stale",
@@ -5809,6 +6217,7 @@
       }
     },
     "Welcome to %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5838,6 +6247,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "歡迎來到 ％@"
+          }
+        }
+      }
+    },
+    "Welcome to Applite" : {
+      "comment" : "Setup welcome page title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üdvözöljük az Applite-on"
           }
         }
       }
@@ -5980,6 +6400,7 @@
       }
     },
     "You will be prompted to install Xcode Command Line Tools. Please select \"Install\" as it is required for this application to work." : {
+      "comment" : "Brew dependency installation alert",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

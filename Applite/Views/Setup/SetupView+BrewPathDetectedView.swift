@@ -15,11 +15,11 @@ extension SetupView {
             VStack {
                 Spacer()
 
-                Text("Brew Installation Detected")
+                Text("Brew Installation Detected", comment: "Setup brew path detected view title")
                     .font(.appliteSmallTitle)
                     .padding(.bottom)
 
-                Text("A brew installation was detected at:")
+                Text("A brew installation was detected at:", comment: "Setup brew path detected view text")
 
                 Card {
                     HStack {
@@ -31,10 +31,11 @@ extension SetupView {
                 .frame(maxWidth: 200, maxHeight: 20)
                 .padding(.bottom)
 
-                Text("Continue to use detected installation or select another option below.")
+                Text("Continue to use detected installation or select another option below.", comment: "Setup brew path detected view text")
 
                 Spacer()
             }
+            .frame(maxWidth: 500)
         }
     }
 }

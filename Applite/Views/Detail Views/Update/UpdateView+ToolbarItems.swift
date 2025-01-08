@@ -41,7 +41,10 @@ extension UpdateView {
 
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This will show updates from applications that have auto-update turned off, i.e., applications that are taking care of their own updates.")
+            Text(
+                "This will show updates from applications that have auto-update turned off, i.e., applications that are taking care of their own updates.",
+                comment: "Greedy update check alert message"
+            )
         }
     }
 

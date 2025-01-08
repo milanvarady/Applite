@@ -13,11 +13,11 @@ extension SetupView {
         @AppStorage(Preferences.setupComplete.rawValue) var setupComplete = false
 
         var body: some View {
-            Text("All set!")
+            Text("All set!", comment: "Setup done message")
                 .font(.appliteLargeTitle)
                 .padding(.top, 40)
 
-            Button("Start Using \(Bundle.main.appName)") {
+            Button("Start Using Applite") {
                 setupComplete = true
             }
             .buttonStyle(.borderedProminent)

@@ -22,7 +22,7 @@ extension SettingsView {
                 .tint(.red)
                 .controlSize(.large)
 
-                Text("Uninstall \(Bundle.main.appName), related files and cache.")
+                Text("Uninstall Applite, related files and cache.", comment: "Settings Uninstall Applite view description")
             }
             .padding()
         }

@@ -24,9 +24,12 @@ extension SettingsView {
                 }
                 .padding(.bottom)
 
-                Text("\(Bundle.main.appName) uses the system network proxy, but it can only use one protocol (HTTP, HTTPS, or SOCKS5). Select your preferred method.")
-                    .font(.system(.body, weight: .light))
-                    .frame(minHeight: 60)
+                Text(
+                    "Applite uses the system network proxy, but it can only use one protocol (HTTP, HTTPS, or SOCKS5). Select your preferred method.",
+                    comment: "Proxy settings description"
+                )
+                .font(.system(.body, weight: .light))
+                .frame(minHeight: 60)
             }
             .padding()
         }

@@ -12,7 +12,7 @@ extension UpdateView {
         VStack {
             Spacer()
 
-            Text("No Updates Available")
+            Text("No Updates Available", comment: "Update view no updates available")
                 .font(.title)
 
             Spacer()

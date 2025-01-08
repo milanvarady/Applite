@@ -16,7 +16,7 @@ struct DiscoverView: View {
 
     var body: some View {
         LazyVStack(alignment: .leading) {
-            Text("Discover")
+            Text("Discover", comment: "Discover view title")
                 .font(.appliteLargeTitle)
                 .padding(.bottom)
 

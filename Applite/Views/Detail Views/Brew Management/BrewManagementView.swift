@@ -44,11 +44,14 @@ struct BrewManagementView: View {
 
     var titleAndDescription: some View {
         VStack(alignment: .leading) {
-            Text("Manage Homebrew")
+            Text("Manage Homebrew", comment: "Manage Homebrew view title")
                 .font(.appliteMediumTitle)
                 .padding(.bottom, 2)
 
-            Text("This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications.")
+            Text(
+                "This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications.",
+                comment: "Manage Homebrew view description"
+            )
         }
     }
 }

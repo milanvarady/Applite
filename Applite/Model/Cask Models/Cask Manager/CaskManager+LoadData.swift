@@ -6,18 +6,19 @@
 //
 
 import Foundation
+import SwiftUI
 
 extension CaskManager {
     // URLs
     private static let cacheDirectory = URL.cachesDirectory
-        .appendingPathComponent(Bundle.main.appName, conformingTo: .directory)
+        .appendingPathComponent("Applite", conformingTo: .directory)
 
     private static let caskCacheURL = URL.cachesDirectory
-        .appendingPathComponent(Bundle.main.appName, conformingTo: .directory)
+        .appendingPathComponent("Applite", conformingTo: .directory)
         .appendingPathComponent("cask.json", conformingTo: .json)
 
     private static let analyicsCacheURL = URL.cachesDirectory
-        .appendingPathComponent(Bundle.main.appName, conformingTo: .directory)
+        .appendingPathComponent("Applite", conformingTo: .directory)
         .appendingPathComponent("caskAnalytics.json", conformingTo: .json)
 
     /// Gathers all necessary information and combines them to a list of ``Cask`` objects
@@ -256,7 +257,7 @@ extension CaskManager {
 
                 categoryViewModels.append(
                     CategoryViewModel(
-                        name: category.id,
+                        name: LocalizedStringKey(category.id),
                         sfSymbol: category.sfSymbol,
                         casks: casks,
                         casksCoupled: chunkedCasks

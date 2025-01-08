@@ -16,7 +16,7 @@ extension SetupView {
             VStack(alignment: .center) {
                 Spacer()
 
-                Text("Provide Brew Executable Path")
+                Text("Provide Brew Executable Path", comment: "Setup brew path selector")
                     .font(.system(size: 26, weight: .bold))
                     .padding(.bottom, 30)
 
@@ -24,12 +24,12 @@ extension SetupView {
                 VStack(alignment: .leading) {
                     BrewPathSelectorView(isSelectedPathValid: $isBrewPathValid)
 
-                    Text("Selected brew path is invalid!")
+                    Text("Selected brew path is invalid!", comment: "Setup view invalid brew path message")
                         .foregroundColor(.red)
                         .opacity(isBrewPathValid ? 0 : 1)
                         .padding(.bottom)
 
-                    Text("Appdir (optional)")
+                    Text("Appdir (optional)", comment: "Setup brew appdir parameter")
                         .font(.system(size: 16, weight: .bold))
 
                     AppdirSelectorView()

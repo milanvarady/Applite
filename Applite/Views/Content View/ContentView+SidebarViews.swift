@@ -30,7 +30,7 @@ extension ContentView {
 
             Section("Categories") {
                 ForEach(caskManager.categories) { category in
-                    Label(LocalizedStringKey(category.name), systemImage: category.sfSymbol)
+                    Label(category.name, systemImage: category.sfSymbol)
                         .tag(SidebarItem.appCategory(category: category))
                 }
             }

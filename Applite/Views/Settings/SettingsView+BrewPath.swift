@@ -20,24 +20,27 @@ extension SettingsView {
 
         var body: some View {
             VStack(alignment: .leading) {
-                Text("Brew Executable Path")
+                Text("Brew Executable Path", comment: "Settings brew path selector")
                     .bold()
 
                 BrewPathSelectorView(isSelectedPathValid: $isSelectedBrewPathValid)
 
-                Text("Currently selected brew path is invalid")
+                Text("Currently selected brew path is invalid", comment: "Settings invalid brew path message")
                     .foregroundColor(.red)
                     .opacity(isSelectedBrewPathValid ? 0 : 1)
 
                 // Brew path changed
                 if previousBrewOption != brewPathOption && isSelectedBrewPathValid {
-                    Text("Brew path has been modified. Restart app for changes to take effect.")
-                        .foregroundColor(.red)
-                        .fixedSize(horizontal: false, vertical: true)
+                    Text(
+                        "Brew path has been modified. Restart app for changes to take effect.",
+                        comment: "Settings brew path changed message"
+                    )
+                    .foregroundColor(.red)
+                    .fixedSize(horizontal: false, vertical: true)
 
                     Button("Relaunch", role: .destructive) {
                         Task.detached {
-                            try? await Shell.runAsync("/usr/bin/osascript -e 'tell application \"\(Bundle.main.appName)\" to quit' && sleep 2 && open \"\(Bundle.main.bundlePath)\"")
+                            try? await Shell.runAsync("/usr/bin/osascript -e 'tell application \"Applite\" to quit' && sleep 2 && open \"\(Bundle.main.bundlePath)\"")
                         }
                     }
                 }
@@ -45,7 +48,7 @@ extension SettingsView {
                 Divider()
                     .padding(.vertical, 8)
 
-                Text("Appdir")
+                Text("Appdir", comment: "Brew settings appdir section title")
                     .bold()
 
                 AppdirSelectorView()
@@ -53,11 +56,11 @@ extension SettingsView {
                 Divider()
                     .padding(.vertical, 8)
 
-                Text("Other Flags")
+                Text("Other Flags", comment: "Brew settings command line flags section title")
                     .bold()
 
                 Toggle(isOn: $noQuarantine) {
-                    Text("No Quartine")
+                    Text("No Quarantine", comment: "Brew no quarantine flag toggle title")
                 }
             }
             .onAppear {

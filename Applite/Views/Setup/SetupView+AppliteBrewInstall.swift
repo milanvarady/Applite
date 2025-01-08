@@ -23,7 +23,7 @@ extension SetupView {
 
         var body: some View {
             VStack {
-                Text("Installing dependencies")
+                Text("Installing dependencies", comment: "Brew dependency installation view title")
                     .font(.appliteSmallTitle)
                     .padding(.vertical)
                     .padding(.top, 10)
@@ -38,7 +38,7 @@ extension SetupView {
 
                     // Homebrew
                     dependencyView(title: "Homebrew",
-                                   description: "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. \(Bundle.main.appName) uses Homebrew under the hood to download and manage applications.",
+                                   description: "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. Applite uses Homebrew under the hood to download and manage applications.",
                                    progressOrder: .fetchingHomebrew)
 
                     // Retry button
@@ -63,7 +63,10 @@ extension SetupView {
                     await installDependencies()
                 }
                 .alert("Xcode Command Line Tools", isPresented: $showCommandLineToolsInstallAlert) {} message: {
-                    Text("You will be prompted to install Xcode Command Line Tools. Please select \"Install\" as it is required for this application to work.")
+                    Text(
+                        "You will be prompted to install Xcode Command Line Tools. Please select \"Install\" as it is required for this application to work.",
+                        comment: "Brew dependency installation alert"
+                    )
                 }
                 .alert("Installation failed", isPresented: $showInstallFailAlert) {
                     Button("Troubleshooting") {
@@ -74,7 +77,10 @@ extension SetupView {
 
                     Button("Quit", role: .destructive) { NSApplication.shared.terminate(self) }
                 } message: {
-                    Text("Retry the installation or visit the troubleshooting page.")
+                    Text(
+                        "Retry the installation or visit the troubleshooting page.",
+                        comment: "Brew dependency installation failure alert"
+                    )
                 }
             }
         }
@@ -125,7 +131,7 @@ extension SetupView {
         private var installedBadge: some View {
             HStack {
                 Image(systemName: "checkmark")
-                Text("Installed")
+                Text("Installed", comment: "Brew dependency installed badge text")
             }
             .padding(3)
             .foregroundColor(.white)

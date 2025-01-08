@@ -33,7 +33,7 @@ extension BrewManagementView {
 
         var body: some View {
             VStack(alignment: .leading) {
-                Text("Actions")
+                Text("Actions", comment: "Brew Management view action section title")
                     .font(.appliteSmallTitle)
 
                 HStack {
@@ -52,8 +52,8 @@ extension BrewManagementView {
                         paddig: cardPadding,
                         actionSuccessful: $reinstallDone,
                         remarks: [
-                            .init(title: "Note", color: .blue, remark: "This will (re)install \(Bundle.main.appName)'s Homebrew installation at: ~/Library/Application Support/\(Bundle.main.appName)/homebrew"),
-                            .init(title: "Warning", color: .orange, remark: "After reinstalling, all currently installed apps will be unlinked from \(Bundle.main.appName). They won't be deleted, but you won't be able to update or uninstall them via \(Bundle.main.appName).")
+                            .init(title: "Note", color: .blue, remark: "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/homebrew`"),
+                            .init(title: "Warning", color: .orange, remark: "After reinstalling, all currently installed apps will be unlinked from Applite. They won't be deleted, but you won't be able to update or uninstall them via Applite.")
                         ]
                     ) {
                         reinstallButton
@@ -65,7 +65,7 @@ extension BrewManagementView {
                 // Progress indicator
                 if modifyingBrew {
                     HStack {
-                        Text("In progress...")
+                        Text("In progress...", comment: "Brew Management view progress indicator")
                             .bold()
                         
                         SmallProgressView()
@@ -189,9 +189,9 @@ extension BrewManagementView {
                 Button("Cancel", role: .cancel) { }
             } message: {
                 if isAppBrewInstalled {
-                    Text("All currently installed apps will be unlinked from \(Bundle.main.appName).")
+                    Text("All currently installed apps will be unlinked from Applite.", comment: "Brew reinstallation alert warning")
                 } else {
-                    Text("A new Homebrew installation will be installed into ~/Library/Application Support/\(Bundle.main.appName)")
+                    Text("A new Homebrew installation will be installed into `~/Library/Application Support/Applite`", comment: "Brew installation alert notice")
                 }
             }
             .alert("Reinstall failed", isPresented: $reinstallFailed, actions: {

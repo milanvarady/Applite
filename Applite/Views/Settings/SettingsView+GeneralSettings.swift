@@ -18,12 +18,12 @@ extension SettingsView {
 
         var body: some View {
             VStack(alignment: .leading) {
-                Text("Appearance")
+                Text("Appearance", comment: "Appearnace settings title")
                     .bold()
 
                 Picker("Color Scheme:", selection: $colorSchemePreference) {
                     ForEach(ColorSchemePreference.allCases) { color in
-                        Text(LocalizedStringKey(color.rawValue.capitalized))
+                        Text(color.description)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -31,7 +31,7 @@ extension SettingsView {
                 Divider()
                     .padding(.vertical)
 
-                Text("Notifications")
+                Text("Notifications", comment: "Notification settings title")
                     .bold()
 
                 Toggle("Task completions", isOn: $notificationOnSuccess)

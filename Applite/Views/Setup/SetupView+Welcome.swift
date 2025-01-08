@@ -12,7 +12,7 @@ extension SetupView {
     struct Welcome: View {
         var body: some View {
             VStack {
-                Text("Welcome to \(Bundle.main.appName)")
+                Text("Welcome to Applite", comment: "Setup welcome page title")
                     .font(.appliteSmallTitle)
                     .padding(.top, 50)
                     .padding(.bottom, 25)
