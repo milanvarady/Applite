@@ -23,4 +23,8 @@ extension String {
 
         return cleaned
     }
+
+    func paddedWithQuotes() -> String {
+        "\"\(self)\""
+    }
 }

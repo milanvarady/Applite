@@ -23,7 +23,7 @@ extension CaskManager {
 
     /// Gathers all necessary information and combines them to a list of ``Cask`` objects
     /// - Returns: Void
-    func loadData() async throws -> Void {
+    func loadData() async throws {
         /// Gets cask information from the Homebrew API and decodes it into a list of ``Cask`` objects
         /// - Returns: List of ``Cask`` objects
         @Sendable
@@ -51,6 +51,38 @@ extension CaskManager {
 
             // Decode static cask data
             async let casks = try JSONDecoder().decode([CaskInfo].self, from: caskData)
+
+            return try await casks
+        }
+
+        func loadTapCaskInfo() async throws -> [CaskInfo] {
+            // Check if taps are enabled
+            let enabled = UserDefaults.standard.value(forKey: Preferences.includeCasksFromTaps.rawValue) as? Bool ?? true
+
+            // If not return empty array
+            guard enabled else {
+                return []
+            }
+
+            guard let tapInfoRubyScriptPath = Bundle.main.path(forResource: "brew-tap-cask-info", ofType: "rb") else {
+                throw CaskLoadError.failedToLocateTapInfoScript
+            }
+
+            let arguments = [BrewPaths.currentBrewExecutable, "ruby", tapInfoRubyScriptPath.paddedWithQuotes()]
+            let command = arguments.joined(separator: " ")
+
+            var jsonString = ""
+
+            // We need to use stream here because the regular runAsync cannot handle an output this long
+            for try await line in Shell.stream(command) {
+                jsonString += line + "\n"
+            }
+
+            guard let jsonData = jsonString.data(using: .utf8) else {
+                throw CaskLoadError.failedToConvertTapStringToData
+            }
+
+            async let casks = try JSONDecoder().decode([CaskInfo].self, from: jsonData)
 
             return try await casks
         }
@@ -228,19 +260,25 @@ extension CaskManager {
             return (casks, categoryDict)
         }
 
+        Self.logger.info("Initial model load started")
 
         // Get data components concurrently
         async let categories = loadCategoryJSONAsync()
         async let caskInfo = loadCaskInfo()
+        async let tapCaskInfo = loadTapCaskInfo()
         async let analyticsDict = loadAnalyticsData()
         async let installedCasks = getInstalledCasks()
 
+        let combinedCaskInfo = try await caskInfo + tapCaskInfo
+
         // Set casks reseve capacity for better performance
-        await self.casks.reserveCapacity(try caskInfo.count)
-        await self.allCasks.setReserveCapacity(try caskInfo.count)
+        self.casks.reserveCapacity(combinedCaskInfo.count)
+        self.allCasks.setReserveCapacity(combinedCaskInfo.count)
+
+        Self.logger.info("Precompiling cask view models")
 
         let (processedCasks, categoryDict) = try await createCasks(
-            from: caskInfo,
+            from: combinedCaskInfo,
             installedCasks: installedCasks,
             analyticsDict: analyticsDict,
             categories: categories
@@ -248,7 +286,7 @@ extension CaskManager {
 
         self.casks = processedCasks
 
-        Self.logger.info("Compiling categories")
+        Self.logger.info("Precompiling category view models")
 
         var categoryViewModels: [CategoryViewModel] = []
 
@@ -272,6 +310,7 @@ extension CaskManager {
         self.categories = categoryViewModels
 
         Self.logger.info("Cask data loaded successfully!")
+        Self.logger.info("Refreshing outdated casks")
 
         try await self.refreshOutdated()
     }

@@ -11,6 +11,8 @@ enum CaskLoadError: LocalizedError {
     case failedToLoadCategoryJSON
     case failedToLoadFromCache
     case failedToLoadAdditionalInfo
+    case failedToLocateTapInfoScript
+    case failedToConvertTapStringToData
 
     var errorDescription: String? {
         switch self {
@@ -20,6 +22,10 @@ enum CaskLoadError: LocalizedError {
             return "Failed to load app catalog from cache, check your internet connection"
         case .failedToLoadAdditionalInfo:
             return "Failed to load additional info"
+        case .failedToLocateTapInfoScript:
+            return "Failed to locate tap info ruby script"
+        case .failedToConvertTapStringToData:
+            return "Failed to load data from thirdparty taps"
         }
     }
 
@@ -31,6 +37,10 @@ enum CaskLoadError: LocalizedError {
             return "The file doesn't exist or couldn't be read"
         case .failedToLoadAdditionalInfo:
             return "The response object was empty"
+        case .failedToLocateTapInfoScript:
+            return "The script wasn't found in resources"
+        case .failedToConvertTapStringToData:
+            return "Couldn't convert tap string to data"
         }
     }
 }
