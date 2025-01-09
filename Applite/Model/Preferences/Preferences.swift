@@ -8,15 +8,23 @@
 import Foundation
 
 enum Preferences: String {
-    case colorSchemePreference
+    // Setup
     case setupComplete
-    case noQuarantine
+
+    // General
+    case colorSchemePreference
     case notificationSuccess
     case notificationFailure
+
+    // Brew
     case brewPathOption
     case customUserBrewPath
+    case includeCasksFromTaps
     case appdirOn
     case appdirPath
+    case noQuarantine
+
+    // Proxy
     case networkProxyEnabled
     case preferredProxyType
 }

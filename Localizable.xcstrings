@@ -1342,6 +1342,7 @@
     },
     "Brew path has been modified. Restart app for changes to take effect." : {
       "comment" : "Settings brew path changed message",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3095,6 +3096,9 @@
         }
       }
     },
+    "Include Casks from Thidparty Taps" : {
+
+    },
     "Info" : {
       "comment" : "Brew Management view info section title",
       "localizations" : {
@@ -4315,6 +4319,9 @@
         }
       }
     },
+    "Restart Applite for changes to take effect." : {
+      "comment" : "Brew settings relaunch app prompt"
+    },
     "Retry" : {
       "localizations" : {
         "fr" : {
@@ -4825,6 +4832,9 @@
           }
         }
       }
+    },
+    "Taps" : {
+      "comment" : "Brew settings tap section title"
     },
     "Task completions" : {
       "comment" : "Notification settings toggle",
