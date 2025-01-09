@@ -127,7 +127,7 @@ extension CaskManager {
         /// - Returns: A list of Cask ID's
         @Sendable
         func getInstalledCasks() async throws -> Set<CaskId> {
-            let output = try await Shell.runBrewCommand(["list", "--cask"])
+            let output = try await Shell.runBrewCommand(["list", "--cask", "--full-name"])
 
             if output.isEmpty {
                 await Self.logger.notice("No installed casks were found. Output: \(output)")
@@ -217,7 +217,7 @@ extension CaskManager {
                         var tapAssignments: [(TapId, Cask)] = []
 
                         for caskInfo in chunk {
-                            let isInstalled = installedCasks.contains(caskInfo.token)
+                            let isInstalled = installedCasks.contains(caskInfo.fullToken)
                             let cask = await Cask(
                                 info: caskInfo,
                                 downloadsIn365days: analyticsDict[caskInfo.token] ?? 0,
