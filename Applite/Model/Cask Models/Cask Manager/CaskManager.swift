@@ -10,6 +10,7 @@ import OSLog
 import SwiftUI
 
 typealias CaskId = String
+typealias TapId = String
 typealias BrewAnalyticsDictionary = [CaskId: Int]
 typealias BrewTask = (cask: Cask, task: Task<Void, Never>)
 
@@ -26,6 +27,7 @@ final class CaskManager: ObservableObject {
     let allCasks = SearchableCaskCollection()
     let installedCasks = SearchableCaskCollection()
     let outdatedCasks = SearchableCaskCollection()
+    var taps: [TapViewModel] = []
 
     // Precompiled cask category dicts
     var categories: [CategoryViewModel] = []

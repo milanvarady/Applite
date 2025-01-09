@@ -56,7 +56,9 @@ class SearchableCaskCollection: ObservableObject {
                 break
             }
 
-            matchedCasks.append(self.casks[result.index])
+            if let match = self.casks[safeIndex: result.index] {
+                matchedCasks.append(match)
+            }
         }
 
         self.casksMatchingSearch = matchedCasks

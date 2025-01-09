@@ -36,6 +36,9 @@ extension ContentView {
             
         case .appCategory(let category):
             CategoryView(category: category)
+
+        case .tap(let tap):
+            TapView(tap: tap)
             
         case .brew:
             BrewManagementView(modifyingBrew: $modifyingBrew)

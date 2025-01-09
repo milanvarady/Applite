@@ -126,7 +126,7 @@ extension CaskManager {
         /// Gets the list of installed casks
         /// - Returns: A list of Cask ID's
         @Sendable
-        func getInstalledCasks() async throws -> Set<String> {
+        func getInstalledCasks() async throws -> Set<CaskId> {
             let output = try await Shell.runBrewCommand(["list", "--cask"])
 
             if output.isEmpty {
@@ -185,15 +185,17 @@ extension CaskManager {
         }
 
         /// Creates ``Cask`` objects concurrently in batches
+        /// - Returns: Cask ID to Cask dict, Category ID to Casks dict, Tap ID to Casks dict
         func createCasks(
             from caskInfos: [CaskInfo],
-            installedCasks: Set<String>,
+            installedCasks: Set<CaskId>,
             analyticsDict: BrewAnalyticsDictionary,
             categories: [Category],
             batchSize: Int = 1024
-        ) async throws -> ([String: Cask], [CategoryId: [Cask]]) {
-            var casks: [String: Cask] = [:]
+        ) async throws -> ([CaskId: Cask], [CategoryId: [Cask]], [TapId: [Cask]]) {
+            var casks: [CaskId: Cask] = [:]
             var categoryDict: [CategoryId: [Cask]] = [:]
+            var tapDict: [TapId: [Cask]] = [:]
 
             /// Precomputed cask IDs that are in any of the cateogires for faster lookup
             let casksInCategories: Set<CaskId> = Set(
@@ -205,13 +207,14 @@ extension CaskManager {
             // Break caskInfos into chunks of ~100 items
             let chunks = caskInfos.chunked(into: batchSize)
 
-            try await withThrowingTaskGroup(of: ([(String, Cask)], [(CategoryId, Cask)])?.self) { group in
+            try await withThrowingTaskGroup(of: ([(CaskId, Cask)], [(CategoryId, Cask)], [(TapId, Cask)])?.self) { group in
                 // Process each chunk concurrently instead of individual casks
                 // Creating too many tasks at once will slow down the loading process
                 for chunk in chunks {
                     group.addTask {
-                        var chunkCasks: [(String, Cask)] = []
+                        var chunkCasks: [(CaskId, Cask)] = []
                         var categoryAssignments: [(CategoryId, Cask)] = []
+                        var tapAssignments: [(TapId, Cask)] = []
 
                         for caskInfo in chunk {
                             let isInstalled = installedCasks.contains(caskInfo.token)
@@ -231,15 +234,20 @@ extension CaskManager {
                                     }
                                 }
                             }
+
+                            // Pre-compute tap assignments
+                            if cask.info.tap != "homebrew/cask" {
+                                tapAssignments.append((cask.info.tap, cask))
+                            }
                         }
 
-                        return (chunkCasks, categoryAssignments)
+                        return (chunkCasks, categoryAssignments, tapAssignments)
                     }
                 }
 
                 // Process chunk results
                 for try await result in group {
-                    guard let (chunkCasks, categoryAssignments) = result else { continue }
+                    guard let (chunkCasks, categoryAssignments, tapAssignments) = result else { continue }
 
                     // Store casks from chunk
                     for (id, cask) in chunkCasks {
@@ -254,10 +262,15 @@ extension CaskManager {
                     for (categoryId, cask) in categoryAssignments {
                         categoryDict[categoryId, default: []].append(cask)
                     }
+
+                    // Process tap assignments
+                    for (tapId, cask) in tapAssignments {
+                        tapDict[tapId, default: []].append(cask)
+                    }
                 }
             }
 
-            return (casks, categoryDict)
+            return (casks, categoryDict, tapDict)
         }
 
         Self.logger.info("Initial model load started")
@@ -277,7 +290,7 @@ extension CaskManager {
 
         Self.logger.info("Precompiling cask view models")
 
-        let (processedCasks, categoryDict) = try await createCasks(
+        let (processedCasks, categoryDict, tapDict) = try await createCasks(
             from: combinedCaskInfo,
             installedCasks: installedCasks,
             analyticsDict: analyticsDict,
@@ -286,11 +299,11 @@ extension CaskManager {
 
         self.casks = processedCasks
 
+        // Make category view models
         Self.logger.info("Precompiling category view models")
 
         var categoryViewModels: [CategoryViewModel] = []
 
-        // Make category view models
         for category in try await categories {
             if let casksInCategory = categoryDict[category.id] {
                 let casks = casksInCategory.sorted(by: { $0.downloadsIn365days > $1.downloadsIn365days })
@@ -308,6 +321,20 @@ extension CaskManager {
         }
 
         self.categories = categoryViewModels
+
+        // Make tap view models
+        Self.logger.info("Precomping tap view models")
+
+        var tapViewModels: [TapViewModel] = []
+
+        for (tapId, casks) in tapDict {
+            let tapViewModel = TapViewModel(tapId: tapId, caskCollection: SearchableCaskCollection(casks: casks))
+            tapViewModels.append(tapViewModel)
+        }
+
+        self.taps = tapViewModels
+
+        Self.logger.info("Precompiling category view models")
 
         Self.logger.info("Cask data loaded successfully!")
         Self.logger.info("Refreshing outdated casks")

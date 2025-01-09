@@ -28,6 +28,8 @@
 		414074FC28DF53EB0073EB22 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 414074FB28DF53EB0073EB22 /* Preview Assets.xcassets */; };
 		4140750528DF5FA60073EB22 /* AppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4140750428DF5FA60073EB22 /* AppView.swift */; };
 		41483CCD29101C9900BB10C2 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41483CCC29101C9900BB10C2 /* Category.swift */; };
+		4151355F2D307A420025DB70 /* TapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4151355E2D307A420025DB70 /* TapViewModel.swift */; };
+		415135612D307BF60025DB70 /* TapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415135602D307BF60025DB70 /* TapView.swift */; };
 		41524B99295E352200D0046A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41524B98295E352200D0046A /* SettingsView.swift */; };
 		415563A22A98BB2500AE2F2E /* ErrorWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */; };
 		415563A42A98C54300AE2F2E /* AppdirSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */; };
@@ -147,6 +149,8 @@
 		414074FD28DF53EB0073EB22 /* Applite.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Applite.entitlements; sourceTree = "<group>"; };
 		4140750428DF5FA60073EB22 /* AppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppView.swift; sourceTree = "<group>"; };
 		41483CCC29101C9900BB10C2 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		4151355E2D307A420025DB70 /* TapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapViewModel.swift; sourceTree = "<group>"; };
+		415135602D307BF60025DB70 /* TapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapView.swift; sourceTree = "<group>"; };
 		41524B98295E352200D0046A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorWindowView.swift; sourceTree = "<group>"; };
 		415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppdirSelectorView.swift; sourceTree = "<group>"; };
@@ -405,6 +409,7 @@
 				4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */,
 				419256B32D26B8A200D9EF10 /* CaskAdditionalInfo.swift */,
 				419256BF2D273B2800D9EF10 /* SearchableCaskCollection.swift */,
+				4151355E2D307A420025DB70 /* TapViewModel.swift */,
 			);
 			path = "Cask Models";
 			sourceTree = "<group>";
@@ -651,6 +656,7 @@
 				41B731382A879353008BF6B9 /* ActiveTasksView.swift */,
 				419256A22D25CFBF00D9EF10 /* App Migration */,
 				41857B742912D94A004A1894 /* CategoryView.swift */,
+				415135602D307BF60025DB70 /* TapView.swift */,
 				419256A92D25E17900D9EF10 /* Brew Management */,
 			);
 			path = "Detail Views";
@@ -788,6 +794,7 @@
 				4125BB8A29539907000FBD25 /* PlaceholderAppView.swift in Sources */,
 				419256182D1DEA4400D9EF10 /* AppView+ActionsView.swift in Sources */,
 				413F77A52972B2E70053349A /* DependencyManager.swift in Sources */,
+				4151355F2D307A420025DB70 /* TapViewModel.swift in Sources */,
 				419256AB2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift in Sources */,
 				419256352D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift in Sources */,
 				4192563C2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift in Sources */,
@@ -819,6 +826,7 @@
 				419506A62964A5EF00FE5802 /* BrewPathSelectorView.swift in Sources */,
 				419256402D1DF41300D9EF10 /* ContentView+LoadCasks.swift in Sources */,
 				419256452D1E0A7000D9EF10 /* BrewPathSelectorView+CustomPathOption.swift in Sources */,
+				415135612D307BF60025DB70 /* TapView.swift in Sources */,
 				419256642D1E164600D9EF10 /* UpdateView+ToolbarItems.swift in Sources */,
 				4192560A2D1C9FF800D9EF10 /* StringExtension.swift in Sources */,
 				4191392C29159B5C00F1D75D /* CaskDTO.swift in Sources */,
