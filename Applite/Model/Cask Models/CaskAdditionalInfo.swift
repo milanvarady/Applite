@@ -13,6 +13,7 @@ struct CaskAdditionalInfoResponse: Decodable {
 
 struct CaskAdditionalInfo: Codable, Hashable {
     let token: String
+    let full_token: String
     let tap: String
     let homepage: URL
     let url: URL
@@ -32,7 +33,9 @@ struct CaskAdditionalInfo: Codable, Hashable {
     let disable_replacement: String?
 
     static let dummy = CaskAdditionalInfo(
-        token: "Applite",        tap: "homebrew/cask",
+        token: "applite",
+        full_token: "applite",
+        tap: "homebrew/cask",
         homepage: URL(string: "https://aerolite.dev/applite")!,
         url: URL(string: "https://github.com/milanvarady/Applite/releases/download/v1.2.5/Applite.dmg")!,
         installed: "1.2.5",

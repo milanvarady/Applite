@@ -35,7 +35,9 @@ final class Cask: ObservableObject, Identifiable, Hashable {
     }
 
     static let dummy = Cask(info: CaskInfo(
-        id: "test",
+        token: "test",
+        fullToken: "test",
+        tap: "homebrew/cask",
         name: "Test",
         description: "Test application",
         homepageURL: URL(string: "https://aerolite.dev/"),
@@ -46,7 +48,7 @@ final class Cask: ObservableObject, Identifiable, Hashable {
     // MARK: - Protocols
 
     nonisolated var id: String {
-        self.info.id
+        self.info.fullToken
     }
 
     // Equatable

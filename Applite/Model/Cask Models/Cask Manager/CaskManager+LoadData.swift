@@ -182,10 +182,10 @@ extension CaskManager {
                         var categoryAssignments: [(CategoryId, Cask)] = []
 
                         for caskInfo in chunk {
-                            let isInstalled = installedCasks.contains(caskInfo.id)
+                            let isInstalled = installedCasks.contains(caskInfo.token)
                             let cask = await Cask(
                                 info: caskInfo,
-                                downloadsIn365days: analyticsDict[caskInfo.id] ?? 0,
+                                downloadsIn365days: analyticsDict[caskInfo.token] ?? 0,
                                 isInstalled: isInstalled
                             )
 

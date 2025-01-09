@@ -13,4 +13,12 @@ extension Array {
             Array(self[$0 ..< Swift.min($0 + size, count)])
         }
     }
+
+    public subscript(safeIndex index: Int) -> Element? {
+        guard index >= 0, index < endIndex else {
+            return nil
+        }
+
+        return self[index]
+    }
 }
