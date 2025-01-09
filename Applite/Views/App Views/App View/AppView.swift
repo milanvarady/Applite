@@ -40,7 +40,14 @@ struct AppView: View {
         HStack {
             // Icon name and description
             iconAndDescriptionView
-            
+
+            // Show tap icon if from a third-party tap
+            if cask.info.tap != "homebrew/cask" {
+                Image(systemName: "spigot.fill")
+                        .controlSize(.large)
+                        .help("This app is from a third-party tap")
+            }
+
             // Buttons
             actionsView
         }

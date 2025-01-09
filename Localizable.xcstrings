@@ -172,6 +172,7 @@
     },
     "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
       "comment" : "Manage Homebrew view description",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -204,6 +205,9 @@
           }
         }
       }
+    },
+    "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third-party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
+
     },
     "**Tip:** You can also import apps from a Brewfile. However, only casks will be installed, other items like formulae and taps will be skipped." : {
       "comment" : "App Migration import card tip",
@@ -2263,6 +2267,9 @@
           }
         }
       }
+    },
+    "Download third-party applications with a single click. No more \"Drag to Applications folder\"." : {
+
     },
     "Error" : {
       "comment" : "Cask action failed (e.g. installation failed)",
@@ -4976,6 +4983,9 @@
           }
         }
       }
+    },
+    "This app is from a third-party tap" : {
+
     },
     "This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications." : {
       "comment" : "Manage Homebrew view description",

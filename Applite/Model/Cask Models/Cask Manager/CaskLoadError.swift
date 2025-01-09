@@ -25,7 +25,7 @@ enum CaskLoadError: LocalizedError {
         case .failedToLocateTapInfoScript:
             return "Failed to locate tap info ruby script"
         case .failedToConvertTapStringToData:
-            return "Failed to load data from thirdparty taps"
+            return "Failed to load data from third-party taps"
         }
     }
 

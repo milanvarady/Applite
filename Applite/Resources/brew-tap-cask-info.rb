@@ -1,4 +1,4 @@
-# Prints the JSON representation of all casks in thirdparty taps
+# Prints the JSON representation of all casks in third-party taps
 
 # Suppress all warnings and logs
 $stderr.reopen(File.new("/dev/null", "w"))
