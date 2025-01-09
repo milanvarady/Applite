@@ -71,7 +71,7 @@ extension SettingsView {
                 Text("Taps", comment: "Brew settings tap section title")
                     .bold()
                 
-                Toggle("Include Casks from Thidparty Taps", isOn: $includeCasksFromTaps)
+                Toggle("Include Casks from Taps", isOn: $includeCasksFromTaps)
                     .onChange(of: includeCasksFromTaps) { _ in
                         relaunchNeeded = true
                     }

@@ -170,9 +170,8 @@
       },
       "shouldTranslate" : false
     },
-    "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
+    "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third-party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
       "comment" : "Manage Homebrew view description",
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -205,9 +204,6 @@
           }
         }
       }
-    },
-    "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third-party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
-
     },
     "**Tip:** You can also import apps from a Brewfile. However, only casks will be installed, other items like formulae and taps will be skipped." : {
       "comment" : "App Migration import card tip",
@@ -2232,9 +2228,8 @@
         }
       }
     },
-    "Download third party applications with a single click. No more \"Drag to Applications folder\"." : {
+    "Download third-party applications with a single click. No more \"Drag to Applications folder\"." : {
       "comment" : "Onboarding",
-      "extractionState" : "manual",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2257,7 +2252,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "单击一下即可下载第三方应用程序。再也不用“拖到应用程序文件夹”了。\n"
+            "value" : "单击一下即可下载第三方应用程序。再也不用“拖到应用程序文件夹”了。"
           }
         },
         "zh-HK" : {
@@ -2267,9 +2262,6 @@
           }
         }
       }
-    },
-    "Download third-party applications with a single click. No more \"Drag to Applications folder\"." : {
-
     },
     "Error" : {
       "comment" : "Cask action failed (e.g. installation failed)",
@@ -3103,8 +3095,16 @@
         }
       }
     },
-    "Include Casks from Thidparty Taps" : {
-
+    "Include Casks from Taps" : {
+      "comment" : "Third-party taps settings toggle",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tappokból származó caskok megjelenítése "
+          }
+        }
+      }
     },
     "Info" : {
       "comment" : "Brew Management view info section title",
@@ -4327,7 +4327,15 @@
       }
     },
     "Restart Applite for changes to take effect." : {
-      "comment" : "Brew settings relaunch app prompt"
+      "comment" : "Brew settings relaunch app prompt",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indítsa újra az Applite-ot, hogy a módosítások életbe lépjenek."
+          }
+        }
+      }
     },
     "Retry" : {
       "localizations" : {
@@ -4841,7 +4849,15 @@
       }
     },
     "Taps" : {
-      "comment" : "Brew settings tap section title"
+      "comment" : "Brew settings tap section title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tappok"
+          }
+        }
+      }
     },
     "Task completions" : {
       "comment" : "Notification settings toggle",
@@ -4985,7 +5001,14 @@
       }
     },
     "This app is from a third-party tap" : {
-
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az alkalmazás egy harmadik feltől származó tapból van"
+          }
+        }
+      }
     },
     "This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications." : {
       "comment" : "Manage Homebrew view description",
