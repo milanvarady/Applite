@@ -46,6 +46,9 @@ extension CaskManager {
                 caskData = try await loadDataFromCache(dataURL: Self.caskCacheURL)
             }
 
+            // Chache json file
+            await cacheData(data: caskData, to: Self.caskCacheURL)
+
             // Decode static cask data
             async let casks = try JSONDecoder().decode([CaskInfo].self, from: caskData)
 
