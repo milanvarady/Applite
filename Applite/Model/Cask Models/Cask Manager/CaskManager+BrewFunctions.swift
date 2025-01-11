@@ -97,6 +97,7 @@ extension CaskManager {
             // Add -- zap argument
             if zap {
                 arguments.append("--zap")
+                arguments.append("--force")
             }
 
             var output: String = ""
