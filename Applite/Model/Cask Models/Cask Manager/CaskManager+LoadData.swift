@@ -185,6 +185,7 @@ extension CaskManager {
         }
 
         struct CompiledCaskViewModels {
+            var allCasksList: [Cask] = []
             var allCasksDict: [CaskId: Cask] = [:]
             var installedCasks: [Cask] = []
             var categoryDict: [CategoryId: [Cask]] = [:]
@@ -256,6 +257,7 @@ extension CaskManager {
 
                     // Store casks from chunk
                     for (id, cask) in chunkCasks {
+                        viewModels.allCasksList.append(cask)
                         viewModels.allCasksDict[id] = cask
 
                         if cask.isInstalled {
@@ -303,6 +305,7 @@ extension CaskManager {
         )
 
         self.casks = caskViewModels.allCasksDict
+        self.allCasks.defineCasks(caskViewModels.allCasksList)
         self.installedCasks.defineCasks(caskViewModels.installedCasks.sorted())
 
         // Make category view models
