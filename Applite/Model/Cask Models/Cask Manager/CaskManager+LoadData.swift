@@ -66,6 +66,7 @@ extension CaskManager {
 
             guard let tapInfoRubyScriptPath = Bundle.main.path(forResource: "brew-tap-cask-info", ofType: "rb") else {
                 Self.logger.error("Failed to locate tap info ruby script")
+                return []
             }
 
             let arguments = [BrewPaths.currentBrewExecutable.quotedPath(), "ruby", tapInfoRubyScriptPath.paddedWithQuotes()]

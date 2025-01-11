@@ -20,6 +20,7 @@ enum CaskLoadError: LocalizedError {
             return "Failed to load app catalog from cache, check your internet connection"
         case .failedToLoadAdditionalInfo:
             return "Failed to load additional info"
+        }
     }
 
     var failureReason: String? {
@@ -30,5 +31,6 @@ enum CaskLoadError: LocalizedError {
             return "The file doesn't exist or couldn't be read"
         case .failedToLoadAdditionalInfo:
             return "The response object was empty"
+        }
     }
 }
