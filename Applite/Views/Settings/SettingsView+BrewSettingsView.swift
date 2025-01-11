@@ -92,8 +92,12 @@ extension SettingsView {
                 Text("Other Flags", comment: "Brew settings command line flags section title")
                     .bold()
 
-                Toggle(isOn: $noQuarantine) {
-                    Text("No Quarantine", comment: "Brew no quarantine flag toggle title")
+                HStack {
+                    Toggle(isOn: $noQuarantine) {
+                        Text("No Quarantine", comment: "Brew no quarantine flag toggle title")
+                    }
+
+                    InfoPopup(text: "Bypasses the Apple Gatekeeper check, which can be useful if the app is from an unregistered developer. **Use it at your own risk!**")
                 }
             }
         }

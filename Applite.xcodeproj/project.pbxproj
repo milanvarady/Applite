@@ -23,6 +23,7 @@
 		413E60C22BBFF98A00978F6A /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E60C12BBFF98A00978F6A /* AppIconView.swift */; };
 		413F77A52972B2E70053349A /* DependencyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F77A42972B2E70053349A /* DependencyManager.swift */; };
 		413F87242D32D2B100D4BE10 /* IfritStatic in Frameworks */ = {isa = PBXBuildFile; productRef = 413F87232D32D2B100D4BE10 /* IfritStatic */; };
+		413F87262D33048800D4BE10 /* InfoPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F87252D33048800D4BE10 /* InfoPopup.swift */; };
 		414074F528DF53E80073EB22 /* AppliteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F428DF53E80073EB22 /* AppliteApp.swift */; };
 		414074F728DF53E80073EB22 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F628DF53E80073EB22 /* ContentView.swift */; };
 		414074F928DF53EB0073EB22 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 414074F828DF53EB0073EB22 /* Assets.xcassets */; };
@@ -158,6 +159,7 @@
 		413E60B62BBAE5E000978F6A /* NetworkProxyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkProxyManager.swift; sourceTree = "<group>"; };
 		413E60C12BBFF98A00978F6A /* AppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconView.swift; sourceTree = "<group>"; };
 		413F77A42972B2E70053349A /* DependencyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyManager.swift; sourceTree = "<group>"; };
+		413F87252D33048800D4BE10 /* InfoPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoPopup.swift; sourceTree = "<group>"; };
 		414074F128DF53E80073EB22 /* Applite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Applite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		414074F428DF53E80073EB22 /* AppliteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppliteApp.swift; sourceTree = "<group>"; };
 		414074F628DF53E80073EB22 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -327,6 +329,7 @@
 				418989AE2A33B65A004AC23B /* SmallProgressView.swift */,
 				419256902D23F93E00D9EF10 /* Card.swift */,
 				4120AB662A755B0700F68EFE /* Sparkle Updater */,
+				413F87252D33048800D4BE10 /* InfoPopup.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -794,6 +797,7 @@
 				415563A42A98C54300AE2F2E /* AppdirSelectorView.swift in Sources */,
 				4140750528DF5FA60073EB22 /* AppView.swift in Sources */,
 				415135642D32C4360025DB70 /* Cask+Identifiable.swift in Sources */,
+				413F87262D33048800D4BE10 /* InfoPopup.swift in Sources */,
 				418F332428EC8BA10023D76F /* Cask.swift in Sources */,
 				4126353E2A77C6EF00155034 /* ArrayExtension.swift in Sources */,
 				4192564B2D1E0B9B00D9EF10 /* DownloadView+NoSearchResults.swift in Sources */,

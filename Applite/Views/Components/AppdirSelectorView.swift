@@ -15,8 +15,12 @@ struct AppdirSelectorView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Toggle("Use Custom Installation Directory", isOn: $appdirOn)
-            
+            HStack {
+                Toggle("Use Custom Installation Directory", isOn: $appdirOn)
+
+                InfoPopup(text: "Download apps to a custom directory instead of `/Applications`")
+            }
+
             HStack {
                 TextField("Custom Installation Directory", text: $appdirPath, prompt: Text("/path/to/dir"))
                     .autocorrectionDisabled()
