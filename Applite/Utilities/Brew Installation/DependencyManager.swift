@@ -97,18 +97,27 @@ struct DependencyManager {
         
         try await Shell.runAsync("curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C \(BrewPaths.appBrewDirectory.quotedPath())")
 
+        // Set selected Homebrew path to Applite's installation
+        BrewPaths.selectedBrewOption = .appPath
+
         Self.logger.info("Brew install done")
     }
 
-    static func detectHomebrew() async -> BrewPaths.PathOption? {
+    static func detectHomebrew(setPathOption: Bool) async -> BrewPaths.PathOption? {
         async let appleSilicon = BrewPaths.isBrewPathValid(at: BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon))
         async let intel = BrewPaths.isBrewPathValid(at: BrewPaths.getBrewExectuablePath(for: .defaultIntel))
 
         if await appleSilicon {
+            if setPathOption {
+                BrewPaths.selectedBrewOption = .defaultAppleSilicon
+            }
             return .defaultAppleSilicon
         }
 
         if await intel {
+            if setPathOption {
+                BrewPaths.selectedBrewOption = .defaultIntel
+            }
             return .defaultIntel
         }
 

@@ -83,11 +83,7 @@ struct SetupView: View {
             }
         }
         .task {
-            detectedBrewInstallation = await DependencyManager.detectHomebrew()
-
-            if let brewInstallation = detectedBrewInstallation {
-                BrewPaths.selectedBrewOption = brewInstallation
-            }
+            detectedBrewInstallation = await DependencyManager.detectHomebrew(setPathOption: true)
         }
     }
 }
