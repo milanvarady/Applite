@@ -170,7 +170,7 @@
       },
       "shouldTranslate" : false
     },
-    "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
+    "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third-party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
       "comment" : "Manage Homebrew view description",
       "localizations" : {
         "fr" : {
@@ -1342,6 +1342,7 @@
     },
     "Brew path has been modified. Restart app for changes to take effect." : {
       "comment" : "Settings brew path changed message",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2227,9 +2228,8 @@
         }
       }
     },
-    "Download third party applications with a single click. No more \"Drag to Applications folder\"." : {
+    "Download third-party applications with a single click. No more \"Drag to Applications folder\"." : {
       "comment" : "Onboarding",
-      "extractionState" : "manual",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2252,7 +2252,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "单击一下即可下载第三方应用程序。再也不用“拖到应用程序文件夹”了。\n"
+            "value" : "单击一下即可下载第三方应用程序。再也不用“拖到应用程序文件夹”了。"
           }
         },
         "zh-HK" : {
@@ -3091,6 +3091,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "進行中…"
+          }
+        }
+      }
+    },
+    "Include Casks from Taps" : {
+      "comment" : "Third-party taps settings toggle",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tappokból származó caskok megjelenítése "
           }
         }
       }
@@ -4315,6 +4326,17 @@
         }
       }
     },
+    "Restart Applite for changes to take effect." : {
+      "comment" : "Brew settings relaunch app prompt",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indítsa újra az Applite-ot, hogy a módosítások életbe lépjenek."
+          }
+        }
+      }
+    },
     "Retry" : {
       "localizations" : {
         "fr" : {
@@ -4826,6 +4848,17 @@
         }
       }
     },
+    "Taps" : {
+      "comment" : "Brew settings tap section title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tappok"
+          }
+        }
+      }
+    },
     "Task completions" : {
       "comment" : "Notification settings toggle",
       "localizations" : {
@@ -4963,6 +4996,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這個應用程式"
+          }
+        }
+      }
+    },
+    "This app is from a third-party tap" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az alkalmazás egy harmadik feltől származó tapból van"
           }
         }
       }

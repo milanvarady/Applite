@@ -11,6 +11,8 @@ import Foundation
 /// Data from the json file is loaded into this object first and later passed into a ``Cask`` object
 struct CaskDTO: Decodable {
     let token: String
+    let fullToken: String
+    let tap: String
     let desc: String?
     let nameArray: Array<String>
     let homepage: String
@@ -19,6 +21,8 @@ struct CaskDTO: Decodable {
     
     enum CodingKeys: String, CodingKey {
         case token
+        case fullToken = "full_token"
+        case tap
         case desc
         case nameArray = "name"
         case homepage

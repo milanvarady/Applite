@@ -35,6 +35,15 @@ extension ContentView {
                 }
             }
 
+            if !caskManager.taps.isEmpty {
+                Section("Taps") {
+                    ForEach(caskManager.taps) { tap in
+                        Label(tap.title, systemImage: "spigot")
+                            .tag(SidebarItem.tap(tap: tap))
+                    }
+                }
+            }
+
             Section("Homebrew") {
                 Label("Manage Homebrew", systemImage: "mug")
                     .tag(SidebarItem.brew)

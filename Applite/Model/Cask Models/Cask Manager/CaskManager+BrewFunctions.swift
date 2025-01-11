@@ -92,7 +92,7 @@ extension CaskManager {
         runTask(for: cask) {
             cask.progressState = .busy(withTask: String(localized: "Uninstalling", comment: "Uninstall progress text"))
 
-            var arguments: [String] = ["uninstall", "--cask", cask.info.id]
+            var arguments: [String] = ["uninstall", "--cask", cask.info.fullToken]
 
             // Add -- zap argument
             if zap {
@@ -116,7 +116,7 @@ extension CaskManager {
 
             await self.showSuccess(
                 for: cask,
-                logMessage: "Successfully uninstalled \(cask.info.id)",
+                logMessage: "Successfully uninstalled \(cask.info.fullToken)",
                 notificationTitle: String(localized: "\(cask.info.name) successfully uninstalled", comment: "Successful app uninstall notification")
             )
 
@@ -134,7 +134,7 @@ extension CaskManager {
             var output: String = ""
 
             do {
-                output = try await Shell.runBrewCommand(["upgrade", "--cask", cask.info.id])
+                output = try await Shell.runBrewCommand(["upgrade", "--cask", cask.info.fullToken])
             } catch {
                 await self.showFailure(
                     for: cask,
@@ -165,7 +165,7 @@ extension CaskManager {
             var output: String = ""
 
             do {
-                output = try await Shell.runBrewCommand(["reinstall", "--cask", cask.info.id])
+                output = try await Shell.runBrewCommand(["reinstall", "--cask", cask.info.fullToken])
             } catch {
                 await self.showFailure(
                     for: cask,
@@ -179,7 +179,7 @@ extension CaskManager {
 
             await self.showSuccess(
                 for: cask,
-                logMessage: "Successfully reinstalled \(cask.info.id)",
+                logMessage: "Successfully reinstalled \(cask.info.fullToken)",
                 notificationTitle: String(localized: "\(cask.info.name) successfully reinstalled", comment: "Successful reinstall notification")
             )
         }
@@ -200,7 +200,7 @@ extension CaskManager {
     }
 
     func getAdditionalInfoForCask(_ cask: Cask) async throws -> CaskAdditionalInfo {
-        let json = try await Shell.runBrewCommand(["info", "--json=v2", "--cask", cask.info.id])
+        let json = try await Shell.runBrewCommand(["info", "--json=v2", "--cask", cask.info.fullToken])
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
         let decoder = JSONDecoder()
@@ -209,7 +209,7 @@ extension CaskManager {
         let responseObject = try decoder.decode(CaskAdditionalInfoResponse.self, from: json.data(using: .utf8)!)
 
         guard let additionalInfo = responseObject.casks.first else {
-            Self.logger.error("Couldn't find cask \(cask.info.id)")
+            Self.logger.error("Couldn't find cask \(cask.info.fullToken)")
             throw CaskLoadError.failedToLoadAdditionalInfo
         }
 

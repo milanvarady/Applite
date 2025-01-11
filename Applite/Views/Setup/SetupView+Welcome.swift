@@ -20,7 +20,7 @@ extension SetupView {
                 VStack(alignment: .leading, spacing: 16) {
                     Feature(sfSymbol: "square.and.arrow.down.on.square",
                             title: "Download apps with ease",
-                            description: "Download third party applications with a single click. No more \"Drag to Applications folder\".")
+                            description: "Download third-party applications with a single click. No more \"Drag to Applications folder\".")
 
                     Feature(sfSymbol: "cursorarrow.and.square.on.square.dashed",
                             title: "Manage applications",

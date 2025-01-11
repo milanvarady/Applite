@@ -38,7 +38,7 @@ extension SetupView {
 
                     // Homebrew
                     dependencyView(title: "Homebrew",
-                                   description: "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third party applications really easy. Applite uses Homebrew under the hood to download and manage applications.",
+                                   description: "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third-party applications really easy. Applite uses Homebrew under the hood to download and manage applications.",
                                    progressOrder: .fetchingHomebrew)
 
                     // Retry button

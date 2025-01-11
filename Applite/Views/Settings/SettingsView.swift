@@ -59,7 +59,6 @@ struct SettingsView: View {
                     Label("Uninstall", systemImage: "trash")
                 }
         }
-        .scenePadding()
         .labelStyle(.titleAndIcon)
         .presentedWindowToolbarStyle(.expanded)
         .contentShape(Rectangle())

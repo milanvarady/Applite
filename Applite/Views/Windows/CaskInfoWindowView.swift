@@ -52,6 +52,7 @@ struct CaskInfoWindowView: View {
     private var rows: [Row] {
         var result: [Row] = [
             Row(property: "Token", value: info.token),
+            Row(property: "Full Token", value: info.full_token),
             Row(property: "Tap", value: info.tap),
             Row(property: "Homepage", value: info.homepage.absoluteString, url: info.homepage),
             Row(property: "URL", value: info.url.absoluteString, url: info.url),

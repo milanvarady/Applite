@@ -23,7 +23,7 @@ extension CaskManager {
 
     /// Gathers all necessary information and combines them to a list of ``Cask`` objects
     /// - Returns: Void
-    func loadData() async throws -> Void {
+    func loadData() async throws {
         /// Gets cask information from the Homebrew API and decodes it into a list of ``Cask`` objects
         /// - Returns: List of ``Cask`` objects
         @Sendable
@@ -51,6 +51,38 @@ extension CaskManager {
 
             // Decode static cask data
             async let casks = try JSONDecoder().decode([CaskInfo].self, from: caskData)
+
+            return try await casks
+        }
+
+        func loadTapCaskInfo() async throws -> [CaskInfo] {
+            // Check if taps are enabled
+            let enabled = UserDefaults.standard.value(forKey: Preferences.includeCasksFromTaps.rawValue) as? Bool ?? true
+
+            // If not return empty array
+            guard enabled else {
+                return []
+            }
+
+            guard let tapInfoRubyScriptPath = Bundle.main.path(forResource: "brew-tap-cask-info", ofType: "rb") else {
+                throw CaskLoadError.failedToLocateTapInfoScript
+            }
+
+            let arguments = [BrewPaths.currentBrewExecutable, "ruby", tapInfoRubyScriptPath.paddedWithQuotes()]
+            let command = arguments.joined(separator: " ")
+
+            var jsonString = ""
+
+            // We need to use stream here because the regular runAsync cannot handle an output this long
+            for try await line in Shell.stream(command) {
+                jsonString += line + "\n"
+            }
+
+            guard let jsonData = jsonString.data(using: .utf8) else {
+                throw CaskLoadError.failedToConvertTapStringToData
+            }
+
+            async let casks = try JSONDecoder().decode([CaskInfo].self, from: jsonData)
 
             return try await casks
         }
@@ -94,8 +126,8 @@ extension CaskManager {
         /// Gets the list of installed casks
         /// - Returns: A list of Cask ID's
         @Sendable
-        func getInstalledCasks() async throws -> Set<String> {
-            let output = try await Shell.runBrewCommand(["list", "--cask"])
+        func getInstalledCasks() async throws -> Set<CaskId> {
+            let output = try await Shell.runBrewCommand(["list", "--cask", "--full-name"])
 
             if output.isEmpty {
                 await Self.logger.notice("No installed casks were found. Output: \(output)")
@@ -152,16 +184,23 @@ extension CaskManager {
             try loadCategoryJSON()
         }
 
+        struct CompiledCaskViewModels {
+            var allCasksDict: [CaskId: Cask] = [:]
+            var installedCasks: [Cask] = []
+            var categoryDict: [CategoryId: [Cask]] = [:]
+            var tapDict: [TapId: [Cask]] = [:]
+        }
+
         /// Creates ``Cask`` objects concurrently in batches
+        /// - Returns: Cask ID to Cask dict, Category ID to Casks dict, Tap ID to Casks dict
         func createCasks(
             from caskInfos: [CaskInfo],
-            installedCasks: Set<String>,
+            installedCasks: Set<CaskId>,
             analyticsDict: BrewAnalyticsDictionary,
             categories: [Category],
             batchSize: Int = 1024
-        ) async throws -> ([String: Cask], [CategoryId: [Cask]]) {
-            var casks: [String: Cask] = [:]
-            var categoryDict: [CategoryId: [Cask]] = [:]
+        ) async throws -> CompiledCaskViewModels {
+            var viewModels = CompiledCaskViewModels()
 
             /// Precomputed cask IDs that are in any of the cateogires for faster lookup
             let casksInCategories: Set<CaskId> = Set(
@@ -173,19 +212,20 @@ extension CaskManager {
             // Break caskInfos into chunks of ~100 items
             let chunks = caskInfos.chunked(into: batchSize)
 
-            try await withThrowingTaskGroup(of: ([(String, Cask)], [(CategoryId, Cask)])?.self) { group in
+            try await withThrowingTaskGroup(of: ([(CaskId, Cask)], [(CategoryId, Cask)], [(TapId, Cask)])?.self) { group in
                 // Process each chunk concurrently instead of individual casks
                 // Creating too many tasks at once will slow down the loading process
                 for chunk in chunks {
                     group.addTask {
-                        var chunkCasks: [(String, Cask)] = []
+                        var chunkCasks: [(CaskId, Cask)] = []
                         var categoryAssignments: [(CategoryId, Cask)] = []
+                        var tapAssignments: [(TapId, Cask)] = []
 
                         for caskInfo in chunk {
-                            let isInstalled = installedCasks.contains(caskInfo.id)
+                            let isInstalled = installedCasks.contains(caskInfo.fullToken)
                             let cask = await Cask(
                                 info: caskInfo,
-                                downloadsIn365days: analyticsDict[caskInfo.id] ?? 0,
+                                downloadsIn365days: analyticsDict[caskInfo.token] ?? 0,
                                 isInstalled: isInstalled
                             )
 
@@ -199,62 +239,79 @@ extension CaskManager {
                                     }
                                 }
                             }
+
+                            // Pre-compute tap assignments
+                            if cask.info.tap != "homebrew/cask" {
+                                tapAssignments.append((cask.info.tap, cask))
+                            }
                         }
 
-                        return (chunkCasks, categoryAssignments)
+                        return (chunkCasks, categoryAssignments, tapAssignments)
                     }
                 }
 
                 // Process chunk results
                 for try await result in group {
-                    guard let (chunkCasks, categoryAssignments) = result else { continue }
+                    guard let (chunkCasks, categoryAssignments, tapAssignments) = result else { continue }
 
                     // Store casks from chunk
                     for (id, cask) in chunkCasks {
-                        casks[id] = cask
-                        self.allCasks.addCask(cask)
+                        viewModels.allCasksDict[id] = cask
+
                         if cask.isInstalled {
-                            self.installedCasks.addCask(cask)
+                            viewModels.installedCasks.append(cask)
                         }
                     }
 
                     // Process category assignments
                     for (categoryId, cask) in categoryAssignments {
-                        categoryDict[categoryId, default: []].append(cask)
+                        viewModels.categoryDict[categoryId, default: []].append(cask)
+                    }
+
+                    // Process tap assignments
+                    for (tapId, cask) in tapAssignments {
+                        viewModels.tapDict[tapId, default: []].append(cask)
                     }
                 }
             }
 
-            return (casks, categoryDict)
+            return viewModels
         }
 
+        Self.logger.info("Initial model load started")
 
         // Get data components concurrently
         async let categories = loadCategoryJSONAsync()
         async let caskInfo = loadCaskInfo()
+        async let tapCaskInfo = loadTapCaskInfo()
         async let analyticsDict = loadAnalyticsData()
         async let installedCasks = getInstalledCasks()
 
-        // Set casks reseve capacity for better performance
-        await self.casks.reserveCapacity(try caskInfo.count)
-        await self.allCasks.setReserveCapacity(try caskInfo.count)
+        let combinedCaskInfo = try await caskInfo + tapCaskInfo
 
-        let (processedCasks, categoryDict) = try await createCasks(
-            from: caskInfo,
+        // Set casks reseve capacity for better performance
+        self.casks.reserveCapacity(combinedCaskInfo.count)
+        self.allCasks.setReserveCapacity(combinedCaskInfo.count)
+
+        Self.logger.info("Precompiling cask view models")
+
+        let caskViewModels = try await createCasks(
+            from: combinedCaskInfo,
             installedCasks: installedCasks,
             analyticsDict: analyticsDict,
             categories: categories
         )
 
-        self.casks = processedCasks
+        self.casks = caskViewModels.allCasksDict
+        self.installedCasks.defineCasks(caskViewModels.installedCasks.sorted())
 
-        Self.logger.info("Compiling categories")
+        // Make category view models
+        Self.logger.info("Precompiling category view models")
 
         var categoryViewModels: [CategoryViewModel] = []
 
-        // Make category view models
         for category in try await categories {
-            if let casksInCategory = categoryDict[category.id] {
+            if let casksInCategory = caskViewModels.categoryDict[category.id] {
                 let casks = casksInCategory.sorted(by: { $0.downloadsIn365days > $1.downloadsIn365days })
                 let chunkedCasks = casks.chunked(into: 2)
 
@@ -271,7 +328,22 @@ extension CaskManager {
 
         self.categories = categoryViewModels
 
+        // Make tap view models
+        Self.logger.info("Precomping tap view models")
+
+        var tapViewModels: [TapViewModel] = []
+
+        for (tapId, casks) in caskViewModels.tapDict {
+            let tapViewModel = TapViewModel(tapId: tapId, caskCollection: SearchableCaskCollection(casks: casks.sorted()))
+            tapViewModels.append(tapViewModel)
+        }
+
+        self.taps = tapViewModels
+
+        Self.logger.info("Precompiling category view models")
+
         Self.logger.info("Cask data loaded successfully!")
+        Self.logger.info("Refreshing outdated casks")
 
         try await self.refreshOutdated()
     }

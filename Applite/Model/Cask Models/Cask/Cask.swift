@@ -10,7 +10,7 @@ import OSLog
 
 /// A view model that holds all essential data of a Homebrew cask
 @MainActor
-final class Cask: ObservableObject, Identifiable, Hashable {
+final class Cask: ObservableObject {
     /// Static cask information
     let info: CaskInfo
 
@@ -35,27 +35,13 @@ final class Cask: ObservableObject, Identifiable, Hashable {
     }
 
     static let dummy = Cask(info: CaskInfo(
-        id: "test",
+        token: "test",
+        fullToken: "test",
+        tap: "homebrew/cask",
         name: "Test",
         description: "Test application",
         homepageURL: URL(string: "https://aerolite.dev/"),
         caveats: nil,
         pkgInstaller: false
     ), downloadsIn365days: 100)
-
-    // MARK: - Protocols
-
-    nonisolated var id: String {
-        self.info.id
-    }
-
-    // Equatable
-    nonisolated static func == (lhs: Cask, rhs: Cask) -> Bool {
-        lhs.id == rhs.id
-    }
-
-    // Hashable
-    nonisolated func hash(into hasher: inout Hasher) {
-        hasher.combine(self.id)
-    }
 }

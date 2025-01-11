@@ -9,13 +9,13 @@ import SwiftUI
 
 extension AppView {
     var iconAndDescriptionView: some View {
-        return HStack {
-            if let iconURL = URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.info.id)/AppIcon.png"),
+        HStack {
+            if let iconURL = URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.info.token)/AppIcon.png"),
                let faviconURL = URL(string: "https://icon.horse/icon/\(cask.info.homepageURL?.host ?? "")") {
                 AppIconView(
                     iconURL: iconURL,
                     faviconURL: faviconURL,
-                    cacheKey: cask.info.id
+                    cacheKey: cask.info.token
                 )
                 .padding(.leading, 5)
             }

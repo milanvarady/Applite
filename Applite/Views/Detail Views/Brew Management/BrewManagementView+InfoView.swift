@@ -34,7 +34,7 @@ extension BrewManagementView {
                 // Get version
                 guard let versionOutput = try? await Shell.runBrewCommand(["--version"]),
                       let version = versionOutput.firstMatch(of: /Homebrew ([\d\.]+)/),
-                      let casksInstalled = try? await Shell.runAsync("\(BrewPaths.currentBrewExecutable) list --cask | wc -w") else {
+                      let casksInstalled = try? await Shell.runAsync("\(BrewPaths.currentBrewExecutable) list --cask --full-name | wc -w") else {
 
                     homebrewVersion = "Error"
                     numberOfCasks = "Error"
