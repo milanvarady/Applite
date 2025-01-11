@@ -28,7 +28,7 @@ extension Cask {
             appPath = "\"\(applicationsDirectory)/\(self.info.name).app\""
         } else {
             // Open normal app
-            let brewDirectory = BrewPaths.currentBrewDirectory
+            let brewDirectory = BrewPaths.currentBrewDirectory.path(percentEncoded: false)
 
             appPath = "\(brewDirectory.replacingOccurrences(of: " ", with: "\\ ") )/Caskroom/\(self.id)/*/*.app"
         }

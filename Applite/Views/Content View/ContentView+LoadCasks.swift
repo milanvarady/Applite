@@ -18,7 +18,7 @@ extension ContentView {
             logger.error(
                 """
                 Initial cask load failure. Reason: selected brew path seems invalid.
-                Brew executable path path: \(BrewPaths.currentBrewExecutable)
+                Brew executable path path: \(BrewPaths.currentBrewExecutable.path(percentEncoded: false))
                 brew --version output: \(output)
                 """
             )

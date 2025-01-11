@@ -24,7 +24,7 @@ extension SetupView {
                 Card {
                     HStack {
                         Image(systemName: "mug")
-                        Text(BrewPaths.currentBrewDirectory)
+                        Text(BrewPaths.currentBrewDirectory.path(percentEncoded: false))
                             .font(.system(size: 12, design: .monospaced))
                     }
                 }

@@ -71,19 +71,20 @@ struct BrewPaths {
         .appendingPathComponent("brew")
     
     /// Dynamically returns the current brew directory in use
-    static var currentBrewDirectory: String {
+    static var currentBrewDirectory: URL {
         switch Self.selectedBrewOption {
         case .appPath:
-            return appBrewDirectory.path
+            return appBrewDirectory
 
         case .defaultAppleSilicon:
-            return "/opt/homebrew"
+            return URL(fileURLWithPath: "/opt/homebrew")
 
         case .defaultIntel:
-            return "/usr/local"
+            return URL(fileURLWithPath: "/usr/local")
 
         case .custom:
-            return UserDefaults.standard.string(forKey: "customUserBrewPath")?.replacing("/bin/brew", with: "") ?? ""
+            let path = UserDefaults.standard.string(forKey: "customUserBrewPath")?.replacing("/bin/brew", with: "") ?? ""
+            return URL(fileURLWithPath: path)
         }
     }
     
