@@ -55,7 +55,7 @@ extension CaskManager {
             return try await casks
         }
 
-        func loadTapCaskInfo() async throws -> [CaskInfo] {
+        func loadTapCaskInfo() async -> [CaskInfo] {
             // Check if taps are enabled
             let enabled = UserDefaults.standard.value(forKey: Preferences.includeCasksFromTaps.rawValue) as? Bool ?? true
 
@@ -65,26 +65,39 @@ extension CaskManager {
             }
 
             guard let tapInfoRubyScriptPath = Bundle.main.path(forResource: "brew-tap-cask-info", ofType: "rb") else {
-                throw CaskLoadError.failedToLocateTapInfoScript
+                Self.logger.error("Failed to locate tap info ruby script")
             }
 
             let arguments = [BrewPaths.currentBrewExecutable.quotedPath(), "ruby", tapInfoRubyScriptPath.paddedWithQuotes()]
             let command = arguments.joined(separator: " ")
 
-            var jsonString = ""
+            var shellOutput = ""
 
             // We need to use stream here because the regular runAsync cannot handle an output this long
-            for try await line in Shell.stream(command) {
-                jsonString += line + "\n"
+            do {
+                for try await line in Shell.stream(command) {
+                    shellOutput += line + "\n"
+                }
+            } catch {
+                Self.logger.error("Failed to load tap cask info from shell: \(error).\nOutput: \(shellOutput)")
             }
+
+            // Extract JSON data (text between [] marks)
+            guard let match = shellOutput.firstMatch(of: /\[((.|\n|\r)*)\]/) else {
+                return []
+            }
+
+            let jsonString = match.0
 
             guard let jsonData = jsonString.data(using: .utf8) else {
-                throw CaskLoadError.failedToConvertTapStringToData
+                return []
             }
 
-            async let casks = try JSONDecoder().decode([CaskInfo].self, from: jsonData)
+            guard let casks = try? JSONDecoder().decode([CaskInfo].self, from: jsonData) else {
+                return []
+            }
 
-            return try await casks
+            return casks
         }
 
         /// Gets cask analytics information from the Homebrew API and decodes it into a dictionary
