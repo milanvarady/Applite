@@ -68,7 +68,7 @@ extension CaskManager {
                 throw CaskLoadError.failedToLocateTapInfoScript
             }
 
-            let arguments = [BrewPaths.currentBrewExecutable, "ruby", tapInfoRubyScriptPath.paddedWithQuotes()]
+            let arguments = [BrewPaths.currentBrewExecutable.quotedPath(), "ruby", tapInfoRubyScriptPath.paddedWithQuotes()]
             let command = arguments.joined(separator: " ")
 
             var jsonString = ""

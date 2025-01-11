@@ -9,6 +9,10 @@ import Foundation
 import CryptoKit
 
 extension URL {
+    func quotedPath() -> String {
+        return "\"\(self.path(percentEncoded: false))\""
+    }
+
     func checksumInBase64() -> String? {
         let bufferSize = 16*1024
 

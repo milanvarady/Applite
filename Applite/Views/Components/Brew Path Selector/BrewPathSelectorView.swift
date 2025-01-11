@@ -12,7 +12,7 @@ import DebouncedOnChange
 struct BrewPathSelectorView: View {
     @Binding var isSelectedPathValid: Bool
 
-    @AppStorage(Preferences.customUserBrewPath.rawValue) var customUserBrewPath: String = BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon, shellFriendly: false)
+    @AppStorage(Preferences.customUserBrewPath.rawValue) var customUserBrewPath: String = BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon).path(percentEncoded: false)
     @AppStorage(Preferences.brewPathOption.rawValue) var brewPathOption = BrewPaths.PathOption.defaultAppleSilicon.rawValue
     
     @State var choosingCustomFolder = false
@@ -45,7 +45,7 @@ struct BrewPathSelectorView: View {
 
             if brewPathOption == BrewPaths.PathOption.custom.rawValue {
                 Task { @MainActor in
-                    isSelectedPathValid = await BrewPaths.isBrewPathValid(path: newPath)
+                    isSelectedPathValid = await BrewPaths.isBrewPathValid(at: URL(fileURLWithPath: newPath))
                 }
             }
         }

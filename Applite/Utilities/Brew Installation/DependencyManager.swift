@@ -27,7 +27,7 @@ struct DependencyManager {
     ///   - keepCurrentInstall: (default: `false`) If `true`, then if a  brew installation already exists it won't be deleted and reinstalled
     ///
     /// - Returns: `Void`
-    static func install(progressObject: BrewInstallationProgress, keepCurrentInstall: Bool = false) async throws {
+    static func install(progressObject: BrewInstallationProgress) async throws {
         Self.logger.info("Brew installation started")
         
         // Install command line tools
@@ -57,9 +57,9 @@ struct DependencyManager {
         }
         
         // Skip Homebrew installation if keepCurrentInstall is set to true
-        let brewPathValid = await BrewPaths.isBrewPathValid(path: BrewPaths.appBrewExetutable.path)
+        let brewPathValid = await BrewPaths.isBrewPathValid(at: BrewPaths.appBrewExetutable)
 
-        guard keepCurrentInstall && !brewPathValid else {
+        guard !brewPathValid else {
             Self.logger.notice("Brew is already installed, skipping installation")
             await MainActor.run { progressObject.phase = .done }
             return
@@ -95,14 +95,14 @@ struct DependencyManager {
         // Fetch Homebrew tarball
         Self.logger.info("Fetching tarball and unpacking")
         
-        try await Shell.runAsync("curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C \"\(BrewPaths.appBrewDirectory.path)\"")
+        try await Shell.runAsync("curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C \(BrewPaths.appBrewDirectory.quotedPath())")
 
         Self.logger.info("Brew install done")
     }
 
     static func detectHomebrew() async -> BrewPaths.PathOption? {
-        async let appleSilicon = BrewPaths.isBrewPathValid(path: BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon))
-        async let intel = BrewPaths.isBrewPathValid(path: BrewPaths.getBrewExectuablePath(for: .defaultIntel))
+        async let appleSilicon = BrewPaths.isBrewPathValid(at: BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon))
+        async let intel = BrewPaths.isBrewPathValid(at: BrewPaths.getBrewExectuablePath(for: .defaultIntel))
 
         if await appleSilicon {
             return .defaultAppleSilicon

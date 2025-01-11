@@ -22,6 +22,7 @@
 		413E60C02BBF0E5C00978F6A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 413E60BF2BBF0E5C00978F6A /* Kingfisher */; };
 		413E60C22BBFF98A00978F6A /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E60C12BBFF98A00978F6A /* AppIconView.swift */; };
 		413F77A52972B2E70053349A /* DependencyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F77A42972B2E70053349A /* DependencyManager.swift */; };
+		413F87242D32D2B100D4BE10 /* IfritStatic in Frameworks */ = {isa = PBXBuildFile; productRef = 413F87232D32D2B100D4BE10 /* IfritStatic */; };
 		414074F528DF53E80073EB22 /* AppliteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F428DF53E80073EB22 /* AppliteApp.swift */; };
 		414074F728DF53E80073EB22 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F628DF53E80073EB22 /* ContentView.swift */; };
 		414074F928DF53EB0073EB22 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 414074F828DF53EB0073EB22 /* Assets.xcassets */; };
@@ -112,7 +113,6 @@
 		419256B42D26B8A200D9EF10 /* CaskAdditionalInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B32D26B8A200D9EF10 /* CaskAdditionalInfo.swift */; };
 		419256B62D26BBBD00D9EF10 /* AppView+GetInfoButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B52D26BBBD00D9EF10 /* AppView+GetInfoButton.swift */; };
 		419256B92D26C02E00D9EF10 /* CaskInfoWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B82D26C02E00D9EF10 /* CaskInfoWindowView.swift */; };
-		419256BC2D2724C200D9EF10 /* Ifrit in Frameworks */ = {isa = PBXBuildFile; productRef = 419256BB2D2724C200D9EF10 /* Ifrit */; };
 		419256BE2D27253D00D9EF10 /* Cask+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256BD2D27253D00D9EF10 /* Cask+Searchable.swift */; };
 		419256C02D273B2800D9EF10 /* SearchableCaskCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256BF2D273B2800D9EF10 /* SearchableCaskCollection.swift */; };
 		419506A42964A27F00FE5802 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419506A32964A27F00FE5802 /* SetupView.swift */; };
@@ -129,6 +129,19 @@
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
 		BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BD7546562A868DA30083996B /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		413F87212D32D12A00D4BE10 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		4104D7422A8FC52C00F84F9B /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
@@ -260,7 +273,7 @@
 				41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */,
 				419256B22D26033400D9EF10 /* DebouncedOnChange in Frameworks */,
 				4189CE392937CD41009C836D /* Shimmer in Frameworks */,
-				419256BC2D2724C200D9EF10 /* Ifrit in Frameworks */,
+				413F87242D32D2B100D4BE10 /* IfritStatic in Frameworks */,
 				418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */,
 				413E60C02BBF0E5C00978F6A /* Kingfisher in Frameworks */,
 			);
@@ -692,6 +705,7 @@
 				414074ED28DF53E80073EB22 /* Sources */,
 				414074EE28DF53E80073EB22 /* Frameworks */,
 				414074EF28DF53E80073EB22 /* Resources */,
+				413F87212D32D12A00D4BE10 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -704,7 +718,7 @@
 				418E9EF32AACD9C000046A58 /* CircularProgress */,
 				413E60BF2BBF0E5C00978F6A /* Kingfisher */,
 				419256B12D26033400D9EF10 /* DebouncedOnChange */,
-				419256BB2D2724C200D9EF10 /* Ifrit */,
+				413F87232D32D2B100D4BE10 /* IfritStatic */,
 			);
 			productName = Applite;
 			productReference = 414074F128DF53E80073EB22 /* Applite.app */;
@@ -744,7 +758,7 @@
 				418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */,
 				413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */,
-				419256BA2D2724C200D9EF10 /* XCRemoteSwiftPackageReference "Ifrit" */,
+				413F87222D32D2B100D4BE10 /* XCRemoteSwiftPackageReference "Ifrit" */,
 			);
 			productRefGroup = 414074F228DF53E80073EB22 /* Products */;
 			projectDirPath = "";
@@ -1022,7 +1036,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Applite/Preview Content\"";
 				DEVELOPMENT_TEAM = 9CLTNBW4Z3;
@@ -1057,7 +1071,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Applite/Preview Content\"";
 				DEVELOPMENT_TEAM = 9CLTNBW4Z3;
@@ -1114,6 +1128,14 @@
 				minimumVersion = 8.1.0;
 			};
 		};
+		413F87222D32D2B100D4BE10 /* XCRemoteSwiftPackageReference "Ifrit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ukushu/Ifrit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.3;
+			};
+		};
 		4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/markiv/SwiftUI-Shimmer";
@@ -1138,14 +1160,6 @@
 				minimumVersion = 2.0.0;
 			};
 		};
-		419256BA2D2724C200D9EF10 /* XCRemoteSwiftPackageReference "Ifrit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ukushu/Ifrit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
-			};
-		};
 		41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -1162,6 +1176,11 @@
 			package = 413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
+		413F87232D32D2B100D4BE10 /* IfritStatic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 413F87222D32D2B100D4BE10 /* XCRemoteSwiftPackageReference "Ifrit" */;
+			productName = IfritStatic;
+		};
 		4189CE382937CD41009C836D /* Shimmer */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
@@ -1176,11 +1195,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */;
 			productName = DebouncedOnChange;
-		};
-		419256BB2D2724C200D9EF10 /* Ifrit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 419256BA2D2724C200D9EF10 /* XCRemoteSwiftPackageReference "Ifrit" */;
-			productName = Ifrit;
 		};
 		41C8FA282A7A598B000BB9A2 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;

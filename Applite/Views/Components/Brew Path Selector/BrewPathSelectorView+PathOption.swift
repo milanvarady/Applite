@@ -13,7 +13,7 @@ extension BrewPathSelectorView {
             Text(getPathDescription(for: option))
 
             if showPath {
-                Text("(\(BrewPaths.getBrewExectuablePath(for: option, shellFriendly: false)))")
+                Text("(\(BrewPaths.getBrewExectuablePath(for: option)))")
                     .truncationMode(.middle)
                     .lineLimit(1)
                     .foregroundColor(.gray)

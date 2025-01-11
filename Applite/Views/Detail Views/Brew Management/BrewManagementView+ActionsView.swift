@@ -74,7 +74,7 @@ extension BrewManagementView {
             }
             .task {
                 // Check if brew is installed in application support
-                isAppBrewInstalled = await BrewPaths.isBrewPathValid(path: BrewPaths.getBrewExectuablePath(for: .appPath))
+                isAppBrewInstalled = await BrewPaths.isBrewPathValid(at: BrewPaths.getBrewExectuablePath(for: .appPath))
             }
         }
 
