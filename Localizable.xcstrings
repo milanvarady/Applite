@@ -518,41 +518,6 @@
         }
       }
     },
-    "About Applite" : {
-      "comment" : "About Applite menubar item",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À propos de Applite"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az Applite névjegye"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appliteについて"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关于 Applite"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关于Applite"
-          }
-        }
-      }
-    },
     "Actions" : {
       "comment" : "Brew Management view action section title",
       "localizations" : {

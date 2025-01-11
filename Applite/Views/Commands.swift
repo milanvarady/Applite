@@ -16,25 +16,6 @@ struct CommandsMenu: Commands {
     var body: some Commands {
         SidebarCommands()
         
-        CommandGroup(replacing: .appInfo) {
-            Button("About Applite") {
-                NSApplication.shared.orderFrontStandardAboutPanel(
-                    options: [
-                        NSApplication.AboutPanelOptionKey.credits: NSAttributedString(
-                            string: "MIT Licence",
-                            attributes: [
-                                NSAttributedString.Key.font: NSFont.systemFont(
-                                    ofSize: NSFont.smallSystemFontSize)
-                                ]
-                        ),
-                        NSApplication.AboutPanelOptionKey(
-                            rawValue: "Copyright"
-                        ): "© 2023 Milán Várady"
-                    ]
-                )
-            }
-        }
-        
         CommandGroup(before: .systemServices) {
             Button("Uninstall Applite...") {
                 openWindow(id: "uninstall-self")
