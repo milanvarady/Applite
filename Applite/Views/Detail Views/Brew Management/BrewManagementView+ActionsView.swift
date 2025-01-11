@@ -112,6 +112,7 @@ extension BrewManagementView {
                                 Text(remark.remark)
                             }
                         }
+                        .frame(maxHeight: .infinity, alignment: .topLeading) // Don't trucate text
 
                         Spacer()
                     }
