@@ -30,6 +30,10 @@
 		41483CCD29101C9900BB10C2 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41483CCC29101C9900BB10C2 /* Category.swift */; };
 		4151355F2D307A420025DB70 /* TapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4151355E2D307A420025DB70 /* TapViewModel.swift */; };
 		415135612D307BF60025DB70 /* TapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415135602D307BF60025DB70 /* TapView.swift */; };
+		415135642D32C4360025DB70 /* Cask+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415135632D32C4360025DB70 /* Cask+Identifiable.swift */; };
+		415135662D32C4570025DB70 /* Cask+Equtable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415135652D32C4570025DB70 /* Cask+Equtable.swift */; };
+		415135682D32C4720025DB70 /* Cask+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415135672D32C4710025DB70 /* Cask+Hashable.swift */; };
+		4151356A2D32C48A0025DB70 /* Cask+Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415135692D32C48A0025DB70 /* Cask+Comparable.swift */; };
 		41524B99295E352200D0046A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41524B98295E352200D0046A /* SettingsView.swift */; };
 		415563A22A98BB2500AE2F2E /* ErrorWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */; };
 		415563A42A98C54300AE2F2E /* AppdirSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */; };
@@ -151,6 +155,10 @@
 		41483CCC29101C9900BB10C2 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		4151355E2D307A420025DB70 /* TapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapViewModel.swift; sourceTree = "<group>"; };
 		415135602D307BF60025DB70 /* TapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapView.swift; sourceTree = "<group>"; };
+		415135632D32C4360025DB70 /* Cask+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+Identifiable.swift"; sourceTree = "<group>"; };
+		415135652D32C4570025DB70 /* Cask+Equtable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+Equtable.swift"; sourceTree = "<group>"; };
+		415135672D32C4710025DB70 /* Cask+Hashable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+Hashable.swift"; sourceTree = "<group>"; };
+		415135692D32C48A0025DB70 /* Cask+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+Comparable.swift"; sourceTree = "<group>"; };
 		41524B98295E352200D0046A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorWindowView.swift; sourceTree = "<group>"; };
 		415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppdirSelectorView.swift; sourceTree = "<group>"; };
@@ -586,6 +594,10 @@
 				418F332328EC8BA10023D76F /* Cask.swift */,
 				4192566D2D1F293700D9EF10 /* Cask+LaunchApp.swift */,
 				419256BD2D27253D00D9EF10 /* Cask+Searchable.swift */,
+				415135632D32C4360025DB70 /* Cask+Identifiable.swift */,
+				415135652D32C4570025DB70 /* Cask+Equtable.swift */,
+				415135672D32C4710025DB70 /* Cask+Hashable.swift */,
+				415135692D32C48A0025DB70 /* Cask+Comparable.swift */,
 			);
 			path = Cask;
 			sourceTree = "<group>";
@@ -767,6 +779,7 @@
 				4196C90028F9E1F400EADDDA /* InstalledView.swift in Sources */,
 				415563A42A98C54300AE2F2E /* AppdirSelectorView.swift in Sources */,
 				4140750528DF5FA60073EB22 /* AppView.swift in Sources */,
+				415135642D32C4360025DB70 /* Cask+Identifiable.swift in Sources */,
 				418F332428EC8BA10023D76F /* Cask.swift in Sources */,
 				4126353E2A77C6EF00155034 /* ArrayExtension.swift in Sources */,
 				4192564B2D1E0B9B00D9EF10 /* DownloadView+NoSearchResults.swift in Sources */,
@@ -833,6 +846,7 @@
 				41CE28C02D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift in Sources */,
 				413E60C22BBFF98A00978F6A /* AppIconView.swift in Sources */,
 				418989AD2A33A5C4004AC23B /* BrewManagementView.swift in Sources */,
+				4151356A2D32C48A0025DB70 /* Cask+Comparable.swift in Sources */,
 				419256A12D25ACC300D9EF10 /* CategoryViewModel.swift in Sources */,
 				419256832D22055200D9EF10 /* CaskInfo.swift in Sources */,
 				4192560D2D1CA02C00D9EF10 /* ShellError.swift in Sources */,
@@ -857,6 +871,8 @@
 				413E60B72BBAE5E000978F6A /* NetworkProxyManager.swift in Sources */,
 				4196C8F928F9CDF700EADDDA /* DownloadView.swift in Sources */,
 				4120AB682A755B5A00F68EFE /* CheckForUpdatesView.swift in Sources */,
+				415135662D32C4570025DB70 /* Cask+Equtable.swift in Sources */,
+				415135682D32C4720025DB70 /* Cask+Hashable.swift in Sources */,
 				4120AB652A754B1700F68EFE /* AppliteAppView.swift in Sources */,
 				412635442A77FB1600155034 /* BrewInstallationProgress.swift in Sources */,
 				419256202D1DEC0D00D9EF10 /* AppView+UpdateButton.swift in Sources */,

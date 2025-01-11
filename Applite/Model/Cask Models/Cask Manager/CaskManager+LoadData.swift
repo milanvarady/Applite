@@ -184,6 +184,13 @@ extension CaskManager {
             try loadCategoryJSON()
         }
 
+        struct CompiledCaskViewModels {
+            var allCasksDict: [CaskId: Cask] = [:]
+            var installedCasks: [Cask] = []
+            var categoryDict: [CategoryId: [Cask]] = [:]
+            var tapDict: [TapId: [Cask]] = [:]
+        }
+
         /// Creates ``Cask`` objects concurrently in batches
         /// - Returns: Cask ID to Cask dict, Category ID to Casks dict, Tap ID to Casks dict
         func createCasks(
@@ -192,10 +199,8 @@ extension CaskManager {
             analyticsDict: BrewAnalyticsDictionary,
             categories: [Category],
             batchSize: Int = 1024
-        ) async throws -> ([CaskId: Cask], [CategoryId: [Cask]], [TapId: [Cask]]) {
-            var casks: [CaskId: Cask] = [:]
-            var categoryDict: [CategoryId: [Cask]] = [:]
-            var tapDict: [TapId: [Cask]] = [:]
+        ) async throws -> CompiledCaskViewModels {
+            var viewModels = CompiledCaskViewModels()
 
             /// Precomputed cask IDs that are in any of the cateogires for faster lookup
             let casksInCategories: Set<CaskId> = Set(
@@ -251,26 +256,26 @@ extension CaskManager {
 
                     // Store casks from chunk
                     for (id, cask) in chunkCasks {
-                        casks[id] = cask
-                        self.allCasks.addCask(cask)
+                        viewModels.allCasksDict[id] = cask
+
                         if cask.isInstalled {
-                            self.installedCasks.addCask(cask)
+                            viewModels.installedCasks.append(cask)
                         }
                     }
 
                     // Process category assignments
                     for (categoryId, cask) in categoryAssignments {
-                        categoryDict[categoryId, default: []].append(cask)
+                        viewModels.categoryDict[categoryId, default: []].append(cask)
                     }
 
                     // Process tap assignments
                     for (tapId, cask) in tapAssignments {
-                        tapDict[tapId, default: []].append(cask)
+                        viewModels.tapDict[tapId, default: []].append(cask)
                     }
                 }
             }
 
-            return (casks, categoryDict, tapDict)
+            return viewModels
         }
 
         Self.logger.info("Initial model load started")
@@ -290,14 +295,15 @@ extension CaskManager {
 
         Self.logger.info("Precompiling cask view models")
 
-        let (processedCasks, categoryDict, tapDict) = try await createCasks(
+        let caskViewModels = try await createCasks(
             from: combinedCaskInfo,
             installedCasks: installedCasks,
             analyticsDict: analyticsDict,
             categories: categories
         )
 
-        self.casks = processedCasks
+        self.casks = caskViewModels.allCasksDict
+        self.installedCasks.defineCasks(caskViewModels.installedCasks.sorted())
 
         // Make category view models
         Self.logger.info("Precompiling category view models")
@@ -305,7 +311,7 @@ extension CaskManager {
         var categoryViewModels: [CategoryViewModel] = []
 
         for category in try await categories {
-            if let casksInCategory = categoryDict[category.id] {
+            if let casksInCategory = caskViewModels.categoryDict[category.id] {
                 let casks = casksInCategory.sorted(by: { $0.downloadsIn365days > $1.downloadsIn365days })
                 let chunkedCasks = casks.chunked(into: 2)
 
@@ -327,8 +333,8 @@ extension CaskManager {
 
         var tapViewModels: [TapViewModel] = []
 
-        for (tapId, casks) in tapDict {
-            let tapViewModel = TapViewModel(tapId: tapId, caskCollection: SearchableCaskCollection(casks: casks))
+        for (tapId, casks) in caskViewModels.tapDict {
+            let tapViewModel = TapViewModel(tapId: tapId, caskCollection: SearchableCaskCollection(casks: casks.sorted()))
             tapViewModels.append(tapViewModel)
         }
 
