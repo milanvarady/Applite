@@ -1449,7 +1449,15 @@
       }
     },
     "Bypasses the Apple Gatekeeper check, which can be useful if the app is from an unregistered developer. **Use it at your own risk!**" : {
-
+      "comment" : "No quarantine toggle info popup",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kikapcsolja az Apple Gatekeeper ellenőrzését, ami hasznos lehet, ha az alkalmazás nem bejegyzett fejlesztőtől származik. **Használja saját felelősségére!**"
+          }
+        }
+      }
     },
     "Cancel" : {
       "comment" : "Alert cancel button",
@@ -2126,7 +2134,15 @@
       }
     },
     "Download apps to a custom directory instead of `/Applications`" : {
-
+      "comment" : "Appdir toggle info popup ",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alkalmazások letöltése egyéni könyvtárba az `/Applications` könyvtár helyett"
+          }
+        }
+      }
     },
     "Download apps with ease" : {
       "comment" : "Onboarding",
