@@ -29,7 +29,11 @@ extension CaskManager {
 
         for caskID in outdatedCaskIDs {
             if let cask = self.casks[caskID] {
-                outdatedCasks.append(cask)
+                // Check if cask is installed because sometimes random casks appear
+                // in the outdated section for reasons beyond my comprehension
+                if cask.isInstalled {
+                    outdatedCasks.append(cask)
+                }
             }
         }
 
