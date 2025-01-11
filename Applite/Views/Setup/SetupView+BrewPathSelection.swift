@@ -18,7 +18,7 @@ extension SetupView {
 
                 Text("Provide Brew Executable Path", comment: "Setup brew path selector")
                     .font(.system(size: 26, weight: .bold))
-                    .padding(.bottom, 30)
+                    .padding(.bottom, 24)
 
 
                 VStack(alignment: .leading) {
@@ -28,11 +28,6 @@ extension SetupView {
                         .foregroundColor(.red)
                         .opacity(isBrewPathValid ? 0 : 1)
                         .padding(.bottom)
-
-                    Text("Appdir (optional)", comment: "Setup brew appdir parameter")
-                        .font(.system(size: 16, weight: .bold))
-
-                    AppdirSelectorView()
                 }
                 .frame(width: 500)
 

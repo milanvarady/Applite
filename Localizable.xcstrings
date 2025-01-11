@@ -844,41 +844,6 @@
         }
       }
     },
-    "Appdir (optional)" : {
-      "comment" : "Setup brew appdir parameter",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appdir (Optionnel)"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appdir (nem kötelező)"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アプリケーションディレクトリ(オプション)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "应用目录（可选）"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "應用程式目錄（可選）"
-          }
-        }
-      }
-    },
     "Appearance" : {
       "comment" : "Appearnace settings title",
       "localizations" : {
