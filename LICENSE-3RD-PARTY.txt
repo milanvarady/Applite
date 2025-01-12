@@ -1,8 +1,10 @@
 --------------------------------------------------------------------------------------------------------------------
                         The MIT License (MIT)
-        applies to: 
-        - Fuse, Kiro Risk (https://github.com/krisk/fuse-swift)
+        Applies to: 
+        - Ifrit, Kusia (https://github.com/ukushu/ifrit)
         - Kingfisher, Wei Wang (https://github.com/onevcat/Kingfisher)
+        - DebouncedOnChange, Łukasz Rutkowski (https://github.com/Tunous/DebouncedOnChange)
+        - ButtonKit, Thomas Durand (https://github.com/Dean151/ButtonKit)
         - SwiftUI-Shimmer, Vikram Kriplaney (https://github.com/markiv/SwiftUI-Shimmer)
         - CircularProgressSwiftUI, Arnav Motwani (https://github.com/ArnavMotwani/CircularProgressSwiftUI)
 --------------------------------------------------------------------------------------------------------------------
