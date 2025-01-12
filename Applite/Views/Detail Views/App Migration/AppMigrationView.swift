@@ -30,6 +30,7 @@ struct AppMigrationView: View {
                 Spacer()
             }
             .frame(maxWidth: width)
+            .padding()
         }
     }
 

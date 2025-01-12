@@ -22,15 +22,22 @@ struct UpdateView: View {
     @StateObject var loadAlert = AlertManager()
 
     var body: some View {
-        ScrollView {
-            // App grid
-            AppGridView(casks: caskCollection.casksMatchingSearch, appRole: .update)
-                .padding()
-            
-            if caskCollection.casksMatchingSearch.count > 1 {
-                updateAllButton
-            } else {
+        VStack {
+            if caskCollection.casks.isEmpty {
                 updateUnavailable
+                    .padding(.vertical)
+
+                Spacer()
+            } else {
+                // App grid
+                AppGridView(casks: caskCollection.casksMatchingSearch, appRole: .update)
+                    .overlay(alignment: .bottom) {
+                        if caskCollection.casksMatchingSearch.count > 1 {
+                            updateAllButton
+                                .shadow(radius: 8)
+                                .padding(.vertical)
+                        }
+                    }
             }
         }
         .searchable(text: $searchText, placement: .toolbar)

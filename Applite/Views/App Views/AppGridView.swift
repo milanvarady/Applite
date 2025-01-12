@@ -21,17 +21,20 @@ struct AppGridView: View {
     ]
     
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 20) {
-            if appRole == .installed {
-                AppliteAppView()
-            }
-            
-            ForEach(casks) { cask in
-                // Filter out self
-                if cask.info.token != "applite" {
-                    AppView(cask: cask, role: appRole)
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 20) {
+                if appRole == .installed {
+                    AppliteAppView()
+                }
+
+                ForEach(casks) { cask in
+                    // Filter out self
+                    if cask.info.token != "applite" {
+                        AppView(cask: cask, role: appRole)
+                    }
                 }
             }
+            .padding()
         }
     }
 }

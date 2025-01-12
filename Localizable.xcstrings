@@ -4403,17 +4403,6 @@
         }
       }
     },
-    "Searching..." : {
-      "comment" : "App search in progress",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keresés…"
-          }
-        }
-      }
-    },
     "See All" : {
       "comment" : "See all apps in category button",
       "localizations" : {

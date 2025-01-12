@@ -15,19 +15,21 @@ struct DiscoverView: View {
     @State var currentPage: Float = 0
 
     var body: some View {
-        LazyVStack(alignment: .leading) {
-            Text("Discover", comment: "Discover view title")
-                .font(.appliteLargeTitle)
-                .padding(.bottom)
-
-            ForEach(caskManager.categories) { category in
-                DiscoverSectionView(category: category, navigationSelection: $navigationSelection)
-
-                Divider()
-                    .padding(.vertical, 20)
+        ScrollView {
+            LazyVStack(alignment: .leading) {
+                Text("Discover", comment: "Discover view title")
+                    .font(.appliteLargeTitle)
+                    .padding(.bottom)
+                
+                ForEach(caskManager.categories) { category in
+                    DiscoverSectionView(category: category, navigationSelection: $navigationSelection)
+                    
+                    Divider()
+                        .padding(.vertical, 20)
+                }
             }
+            .padding()
         }
-        .padding()
     }
 }
 

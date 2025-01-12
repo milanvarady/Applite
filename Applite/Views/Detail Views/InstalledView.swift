@@ -16,10 +16,7 @@ struct InstalledView: View {
 
     var body: some View {
         VStack {
-            ScrollView {
-                AppGridView(casks: caskCollection.casksMatchingSearch, appRole: .installed)
-                    .padding()
-            }
+            AppGridView(casks: caskCollection.casksMatchingSearch, appRole: .installed)
         }
         .searchable(text: $searchText, placement: .toolbar)
         .task(id: searchText, debounceTime: .seconds(0.2)) {

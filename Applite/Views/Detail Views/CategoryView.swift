@@ -24,10 +24,7 @@ struct CategoryView: View {
             .padding()
             
             // Apps
-            ScrollView {
-                AppGridView(casks: category.casks, appRole: .installAndManage)
-                    .padding()
-            }
+            AppGridView(casks: category.casks, appRole: .installAndManage)
         }
     }
 }

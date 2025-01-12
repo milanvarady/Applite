@@ -13,9 +13,10 @@ extension ContentView {
         switch selection {
         case .home:
             if !brokenInstall {
-                DownloadView(
+                HomeView(
                     navigationSelection: $selection,
-                    searchText: $searchText,
+                    searchText: $searchInput,
+                    showSearchResults: $showSearchResults,
                     caskCollection: caskManager.allCasks
                 )
             } else {
@@ -45,7 +46,7 @@ extension ContentView {
         }
     }
 
-    var brokenInstallView: some View {
+    private var brokenInstallView: some View {
         VStack(alignment: .center) {
             Text(DependencyManager.brokenPathOrIstallMessage)
 

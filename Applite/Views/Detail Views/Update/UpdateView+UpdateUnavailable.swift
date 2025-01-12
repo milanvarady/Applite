@@ -10,12 +10,8 @@ import SwiftUI
 extension UpdateView {
     var updateUnavailable: some View {
         VStack {
-            Spacer()
-
             Text("No Updates Available", comment: "Update view no updates available")
                 .font(.title)
-
-            Spacer()
         }
     }
 }
