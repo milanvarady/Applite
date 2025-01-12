@@ -17,7 +17,7 @@ User-friendly GUI macOS application for Homebrew Casks
 4. [Download](#download)
 5. [Contact](#contact)
 6. [Contributing](#contributing)
-7. [Acknowledgements](#acknowledgements)
+7. [Packages Used](#packages-used)
 8. [License](#license)
 9. [Alternatives](#alternatives)
 
@@ -63,16 +63,17 @@ Or join the [Official Discord Server](https://discord.gg/ZgB6pRE8Qx).
 
 The project is open to contributions. See the [Contribution Guidelines](docs/CONTRIBUTING.md) for more information.
 
-## Acknowledgements
+## Packages used
 
  - [Homebrew](https://github.com/homebrew)
- - [Fuse](https://github.com/krisk/fuse-swift), Kiro Risk - search result filtering
+ - [Sparkle](https://github.com/sparkle-project/Sparkle) - app updates
+ - [Ifrit](https://github.com/krisk/fuse-swift), Kusia - fuzzy search
  - [Kingfisher](https://github.com/onevcat/Kingfisher) - web image downloading and caching
+ - [ButtonKit](https://github.com/Dean151/ButtonKit), Thomas Durand
+ - [DebouncedOnChange](https://github.com/Tunous/DebouncedOnChange), Łukasz Rutkowski
  - [SwiftUI-Shimmer](https://github.com/markiv/SwiftUI-Shimmer), Vikram Kriplaney
  - [CircularProgressSwiftUI](https://github.com/ArnavMotwani/CircularProgressSwiftUI), Arnav Motwani
- - [Sparkle](https://github.com/sparkle-project/Sparkle) - app updates
  - [Appcasks](https://github.com/App-Fair/appcasks/) ([App Fair](https://github.com/App-Fair/App) project) - app icons
- - [pinentry-mac](https://github.com/GPGTools/pinentry), GPGTools - for secure admin password retrieval
 
 ## License
 
