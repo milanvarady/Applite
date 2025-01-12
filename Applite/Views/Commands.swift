@@ -36,6 +36,7 @@ struct CommandsMenu: Commands {
             Link("Troubleshooting", destination: URL(string: "https://aerolite.dev/applite/troubleshooting.html")!)
             Link("GitHub", destination: URL(string: "https://github.com/milanvarady/Applite")!)
             Link("Discord", destination: URL(string: "https://discord.gg/ZgB6pRE8Qx")!)
+            Link("Sponsor", destination: URL(string: "https://www.paypal.com/donate/?hosted_button_id=ZMDZSRG9CRY2Y")!)
         }
     }
 }

@@ -4683,6 +4683,16 @@
         }
       }
     },
+    "Sponsor" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Támogatás"
+          }
+        }
+      }
+    },
     "Start Using Applite" : {
       "comment" : "Onboarding finish button",
       "localizations" : {
