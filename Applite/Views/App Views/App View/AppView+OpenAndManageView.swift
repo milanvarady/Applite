@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ButtonKit
 
 extension AppView {
     /// Button used in the Download section, launches, uninstalls or reinstalls the app
@@ -22,18 +23,15 @@ extension AppView {
 
         var body: some View {
             // Lauch app
-            Button("Open") {
-                Task {
-                    do {
-                        try await cask.launchApp()
-                    } catch {
-                        showAppNotFoundAlert = true
-                    }
-                }
+            AsyncButton("Open") {
+                try await cask.launchApp()
             }
             .font(.system(size: 14))
             .buttonStyle(.bordered)
             .clipShape(Capsule())
+            .onButtonError { error in
+                showAppNotFoundAlert = true
+            }
             .alert("Applite couldn't open \(cask.info.name)", isPresented: $showAppNotFoundAlert) {}
 
             if deleteButton {
@@ -61,9 +59,7 @@ extension AppView {
 
                     // Uninstall button
                     Button(role: .destructive) {
-                        Task {
-                            caskManager.uninstall(cask)
-                        }
+                        caskManager.uninstall(cask)
                     } label: {
                         Label("Uninstall", systemImage: "trash")
                             .foregroundStyle(.red)
@@ -71,9 +67,7 @@ extension AppView {
 
                     // Uninstall completely button
                     Button(role: .destructive) {
-                        Task {
-                            caskManager.uninstall(cask, zap: true)
-                        }
+                        caskManager.uninstall(cask, zap: true)
                     } label: {
                         Label("Uninstall Completely", systemImage: "trash.fill")
                             .foregroundStyle(.red)

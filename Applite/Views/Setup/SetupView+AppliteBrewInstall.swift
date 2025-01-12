@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ButtonKit
 
 extension SetupView {
     /// Brew installation page
@@ -43,10 +44,8 @@ extension SetupView {
 
                     // Retry button
                     if failed {
-                        Button {
-                            Task {
-                                await installDependencies()
-                            }
+                        AsyncButton {
+                            await installDependencies()
                         } label: {
                             Label("Retry Install", systemImage: "arrow.clockwise.circle")
                         }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ButtonKit
 
 extension BrewManagementView {
     struct ActionsView: View {
@@ -122,36 +123,18 @@ extension BrewManagementView {
 
         @MainActor
         private var updateButton: some View {
-            Button {
-                withAnimation {
-                    modifyingBrew = true
-                }
-
-                Task {
-                    logger.info("Updating brew started")
-
-                    do {
-                        try await Shell.runBrewCommand(["update"])
-                    } catch {
-                        logger.error("Brew update failed. Error: \(error.localizedDescription)")
-                        updateFailed = true
-                    }
-
-                    logger.info("Brew update successful")
-
-                    updateDone = true
-
-                    withAnimation {
-                        modifyingBrew = false
-                    }
-
-                }
+            AsyncButton {
+                try await updateHomebrew()
             } label: {
                 Label("Update Homebrew", systemImage: "arrow.uturn.down.circle")
             }
             .controlSize(.large)
             .disabled(modifyingBrew)
             .padding(.trailing, 3)
+            .onButtonError { error in
+                logger.error("Brew update failed. Error: \(error.localizedDescription)")
+                updateFailed = true
+            }
             .alert("Update failed", isPresented: $updateFailed, actions: {})
         }
 
@@ -198,6 +181,24 @@ extension BrewManagementView {
             .alert("Reinstall failed", isPresented: $reinstallFailed, actions: {
                 Button("OK", role: .cancel) { }
             })
+        }
+
+        func updateHomebrew() async throws {
+            withAnimation {
+                modifyingBrew = true
+            }
+
+            logger.info("Updating brew started")
+
+            try await Shell.runBrewCommand(["update"])
+
+            logger.info("Brew update successful")
+
+            updateDone = true
+
+            withAnimation {
+                modifyingBrew = false
+            }
         }
     }
 }

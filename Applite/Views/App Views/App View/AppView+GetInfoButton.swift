@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ButtonKit
 import OSLog
 
 extension AppView {
@@ -19,18 +20,15 @@ extension AppView {
         private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "GetInfoButton")
 
         var body: some View {
-            Button {
-                Task {
-                    do {
-                        let caskInfo = try await caskManager.getAdditionalInfoForCask(cask)
-                        openWindow(value: caskInfo)
-                    } catch {
-                        alert.show(error: error, title: "Failed to gather cask info")
-                        logger.error("Failed to gather additional cask info: \(error.localizedDescription)")
-                    }
-                }
+            AsyncButton {
+                let caskInfo = try await caskManager.getAdditionalInfoForCask(cask)
+                openWindow(value: caskInfo)
             } label: {
                 Label("Get Info", systemImage: "info.circle")
+            }
+            .onButtonError { error in
+                alert.show(error: error, title: "Failed to gather cask info")
+                logger.error("Failed to gather additional cask info: \(error.localizedDescription)")
             }
             .alertManager(alert)
         }

@@ -29,6 +29,7 @@
 		413F872E2D33E1CA00D4BE10 /* HomeView+NoSearchResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F872D2D33E1CA00D4BE10 /* HomeView+NoSearchResults.swift */; };
 		413F87302D33E29A00D4BE10 /* HomeView+SortingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F872F2D33E29A00D4BE10 /* HomeView+SortingOptions.swift */; };
 		413F87322D33E30400D4BE10 /* SortingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F87312D33E30400D4BE10 /* SortingOptions.swift */; };
+		413F87352D34109000D4BE10 /* ButtonKit in Frameworks */ = {isa = PBXBuildFile; productRef = 413F87342D34109000D4BE10 /* ButtonKit */; };
 		414074F528DF53E80073EB22 /* AppliteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F428DF53E80073EB22 /* AppliteApp.swift */; };
 		414074F728DF53E80073EB22 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F628DF53E80073EB22 /* ContentView.swift */; };
 		414074F928DF53EB0073EB22 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 414074F828DF53EB0073EB22 /* Assets.xcassets */; };
@@ -276,6 +277,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				413F87352D34109000D4BE10 /* ButtonKit in Frameworks */,
 				41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */,
 				419256B22D26033400D9EF10 /* DebouncedOnChange in Frameworks */,
 				4189CE392937CD41009C836D /* Shimmer in Frameworks */,
@@ -728,6 +730,7 @@
 				413E60BF2BBF0E5C00978F6A /* Kingfisher */,
 				419256B12D26033400D9EF10 /* DebouncedOnChange */,
 				413F87232D32D2B100D4BE10 /* IfritStatic */,
+				413F87342D34109000D4BE10 /* ButtonKit */,
 			);
 			productName = Applite;
 			productReference = 414074F128DF53E80073EB22 /* Applite.app */;
@@ -768,6 +771,7 @@
 				413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */,
 				413F87222D32D2B100D4BE10 /* XCRemoteSwiftPackageReference "Ifrit" */,
+				413F87332D34109000D4BE10 /* XCRemoteSwiftPackageReference "ButtonKit" */,
 			);
 			productRefGroup = 414074F228DF53E80073EB22 /* Products */;
 			projectDirPath = "";
@@ -1048,7 +1052,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Applite/Preview Content\"";
 				DEVELOPMENT_TEAM = 9CLTNBW4Z3;
@@ -1083,7 +1087,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Applite/Preview Content\"";
 				DEVELOPMENT_TEAM = 9CLTNBW4Z3;
@@ -1148,6 +1152,14 @@
 				minimumVersion = 2.0.3;
 			};
 		};
+		413F87332D34109000D4BE10 /* XCRemoteSwiftPackageReference "ButtonKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Dean151/ButtonKit?tab=readme-ov-file";
+			requirement = {
+				branch = "on-button-error-modifier";
+				kind = branch;
+			};
+		};
 		4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/markiv/SwiftUI-Shimmer";
@@ -1192,6 +1204,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 413F87222D32D2B100D4BE10 /* XCRemoteSwiftPackageReference "Ifrit" */;
 			productName = IfritStatic;
+		};
+		413F87342D34109000D4BE10 /* ButtonKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 413F87332D34109000D4BE10 /* XCRemoteSwiftPackageReference "ButtonKit" */;
+			productName = ButtonKit;
 		};
 		4189CE382937CD41009C836D /* Shimmer */ = {
 			isa = XCSwiftPackageProductDependency;

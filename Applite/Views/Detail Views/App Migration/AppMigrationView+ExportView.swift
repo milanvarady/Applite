@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ButtonKit
 import OSLog
 
 extension AppMigrationView {
@@ -23,19 +24,16 @@ extension AppMigrationView {
                     .font(.appliteSmallTitle)
 
                 HStack {
-                    Button {
-                        Task {
-                            do {
-                                exportFile = try await AppMigration.export()
-                                showFileExporter = true
-                            } catch {
-                                alert.show(error: error, title: "Failed to export")
-                            }
-                        }
+                    AsyncButton {
+                        exportFile = try await AppMigration.export()
+                        showFileExporter = true
                     } label: {
                         Label("Export Apps to File", systemImage: "square.and.arrow.up")
                     }
                     .controlSize(.large)
+                    .onButtonError { error in
+                        alert.show(error: error, title: "Failed to export")
+                    }
 
                     if exportSuccessful {
                         Image(systemName: "square.and.arrow.down.badge.checkmark")

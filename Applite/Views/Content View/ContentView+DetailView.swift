@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ButtonKit
 
 extension ContentView {
     @ViewBuilder
@@ -50,10 +51,8 @@ extension ContentView {
         VStack(alignment: .center) {
             Text(DependencyManager.brokenPathOrIstallMessage)
 
-            Button {
-                Task {
-                    await loadCasks()
-                }
+            AsyncButton {
+                await loadCasks()
             } label: {
                 Label("Retry load", systemImage: "arrow.clockwise.circle")
             }

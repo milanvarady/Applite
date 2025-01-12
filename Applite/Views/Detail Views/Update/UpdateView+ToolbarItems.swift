@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ButtonKit
 
 extension UpdateView {
     var toolbarItems: some ToolbarContent {
@@ -29,14 +30,11 @@ extension UpdateView {
         }
         .labelStyle(.titleAndIcon)
         .alert("Notice", isPresented: $showingGreedyUpdateConfirm) {
-            Button("Show All") {
-                Task {
-                    do {
-                        try await caskManager.refreshOutdated(greedy: true)
-                    } catch {
-                        loadAlert.show(title: "Failed to load updates", message: error.localizedDescription)
-                    }
-                }
+            AsyncButton("Show All") {
+                try await caskManager.refreshOutdated(greedy: true)
+            }
+            .onButtonError { error in
+                loadAlert.show(title: "Failed to load updates", message: error.localizedDescription)
             }
 
             Button("Cancel", role: .cancel) {}
@@ -49,20 +47,15 @@ extension UpdateView {
     }
 
     private var refreshButton: some View {
-        Button {
-            Task {
-                refreshing = true
-
-                do {
-                    try await caskManager.refreshOutdated()
-                } catch {
-                    loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
-                }
-
-                refreshing = false
-            }
+        AsyncButton {
+            refreshing = true
+            try await caskManager.refreshOutdated()
+            refreshing = false
         } label: {
             Image(systemName: "arrow.clockwise")
+        }
+        .onButtonError { error in
+            loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
         }
     }
 }

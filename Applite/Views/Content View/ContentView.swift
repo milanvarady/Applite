@@ -7,6 +7,7 @@
 
 import SwiftUI
 import OSLog
+import ButtonKit
 
 struct ContentView: View {
     @EnvironmentObject var caskManager: CaskManager
@@ -82,10 +83,8 @@ struct ContentView: View {
         }
         // Load failure alert
         .alert(loadAlert.title, isPresented: $loadAlert.isPresented) {
-            Button {
-                Task { @MainActor in
-                    await loadCasks()
-                }
+            AsyncButton {
+                await loadCasks()
             } label: {
                 Label("Retry", systemImage: "arrow.clockwise")
             }
