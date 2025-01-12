@@ -210,7 +210,8 @@
             "zoc",
             "wezterm",
             "fig",
-            "alacritty"
+            "alacritty",
+            "ghostty"
         ],
         "sfSymbol": "terminal"
     },
