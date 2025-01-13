@@ -1,6 +1,7 @@
 [
     {
         "id": "Browsers",
+        "sfSymbol": "network",
         "casks": [
             "arc",
             "brave-browser",
@@ -13,11 +14,11 @@
             "orion",
             "tor-browser",
             "vivaldi"
-        ],
-        "sfSymbol": "network"
+        ]
     },
     {
         "id": "Communication",
+        "sfSymbol": "text.bubble",
         "casks": [
             "discord",
             "messenger",
@@ -28,18 +29,17 @@
             "viber",
             "wechat",
             "whatsapp",
-            "zoom"
-        ],
-        "sfSymbol": "text.bubble"
+            "zoom",
+            "beeper"
+        ]
     },
     {
         "id": "Productivity",
+        "sfSymbol": "gauge.high",
         "casks": [
             "alt-tab",
             "bettertouchtool",
-            "cheatsheet",
             "cleanshot",
-            "clipy",
             "evernote",
             "fantastical",
             "hazel",
@@ -53,13 +53,12 @@
             "rectangle",
             "shottr",
             "soulver",
-            "spectacle",
             "unclutter"
-        ],
-        "sfSymbol": "gauge.high"
+        ]
     },
     {
         "id": "Office Tools",
+        "sfSymbol": "doc.text",
         "casks": [
             "asana",
             "dropbox",
@@ -72,16 +71,15 @@
             "onedrive",
             "openoffice",
             "slack"
-        ],
-        "sfSymbol": "doc.text"
+        ]
     },
     {
         "id": "Menu Bar",
+        "sfSymbol": "menubar.rectangle",
         "casks": [
             "airbuddy",
             "bartender",
             "caffeine",
-            "dozer",
             "flux",
             "hiddenbar",
             "hot",
@@ -92,11 +90,11 @@
             "tomatobar",
             "vanilla",
             "meetingbar"
-        ],
-        "sfSymbol": "menubar.rectangle"
+        ]
     },
     {
         "id": "Utilities",
+        "sfSymbol": "wrench.and.screwdriver",
         "casks": [
             "adobe-acrobat-reader",
             "appcleaner",
@@ -117,12 +115,13 @@
             "raspberry-pi-imager",
             "the-unarchiver",
             "transmission",
-            "xcodes"
-        ],
-        "sfSymbol": "wrench.and.screwdriver"
+            "xcodes",
+            "permute"
+        ]
     },
     {
         "id": "Creative Tools",
+        "sfSymbol": "paintbrush.pointed",
         "casks": [
             "acron",
             "adobe-creative-cloud",
@@ -136,14 +135,14 @@
             "godot",
             "inkscape",
             "krita",
-            "sketch"
-        ],
-        "sfSymbol": "paintbrush.pointed"
+            "sketch",
+            "scribus"
+        ]
     },
     {
         "id": "Media",
+        "sfSymbol": "play.tv",
         "casks": [
-            "deezer",
             "iina",
             "jellyfin-media-player",
             "kodi",
@@ -152,11 +151,11 @@
             "spotify",
             "tidal",
             "vlc"
-        ],
-        "sfSymbol": "play.tv"
+        ]
     },
     {
         "id": "Developer Tools",
+        "sfSymbol": "desktopcomputer",
         "casks": [
             "android-studio",
             "dash",
@@ -172,11 +171,11 @@
             "ssh-config-editor",
             "tower",
             "transmit"
-        ],
-        "sfSymbol": "desktopcomputer"
+        ]
     },
     {
         "id": "IDEs",
+        "sfSymbol": "chevron.left.slash.chevron.right",
         "casks": [
             "clion",
             "dataspell",
@@ -191,43 +190,41 @@
             "rubymine",
             "sublime-text",
             "textmate",
-            "visual-studio",
             "visual-studio-code",
             "vscodium",
-            "zed"
-        ],
-        "sfSymbol": "chevron.left.slash.chevron.right"
+            "zed",
+            "cursor"
+        ]
     },
     {
         "id": "Terminals",
+        "sfSymbol": "terminal",
         "casks": [
             "iterm2",
             "warp",
             "tabby",
             "hyper",
             "kitty",
-            "macterm",
             "zoc",
             "wezterm",
-            "fig",
             "alacritty",
             "ghostty"
-        ],
-        "sfSymbol": "terminal"
+        ]
     },
     {
         "id": "Virtualization",
+        "sfSymbol": "shippingbox",
         "casks": [
             "multipass",
             "parallels",
             "utm",
             "virtualbox",
             "vmware-fusion"
-        ],
-        "sfSymbol": "shippingbox"
+        ]
     },
     {
         "id": "Gaming",
+        "sfSymbol": "gamecontroller",
         "casks": [
             "chiaki",
             "gog-galaxy",
@@ -242,27 +239,25 @@
             "the-battle-for-wesnoth",
             "widelands",
             "whisky"
-        ],
-        "sfSymbol": "gamecontroller"
+        ]
     },
     {
         "id": "VPN",
+        "sfSymbol": "externaldrive.badge.icloud",
         "casks": [
             "cloudflare-warp",
             "cyberghost-vpn",
             "nordvpn",
             "openvpn-connect",
             "protonvpn",
-            "tunnelbear",
-            "vpn-by-google-one"
-        ],
-        "sfSymbol": "externaldrive.badge.icloud"
+            "tunnelbear"
+        ]
     },
     {
         "id": "Password Managers",
+        "sfSymbol": "lock.square",
         "casks": [
             "1password",
-            "authy",
             "bitwarden",
             "enpass",
             "keeper-password-manager",
@@ -270,7 +265,6 @@
             "lastpass",
             "nordpass",
             "roboform"
-        ],
-        "sfSymbol": "lock.square"
+        ]
     }
 ]
