@@ -12,13 +12,7 @@ extension UpdateView {
     var toolbarItems: some ToolbarContent {
         ToolbarItemGroup {
             greedyUpdateButton
-
-            // Refresh outdated casks
-            if refreshing {
-                SmallProgressView()
-            } else {
-                refreshButton
-            }
+            refreshButton
         }
     }
 
@@ -36,6 +30,7 @@ extension UpdateView {
             .onButtonError { error in
                 loadAlert.show(title: "Failed to load updates", message: error.localizedDescription)
             }
+            .asyncButtonStyle(.none)
 
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -48,9 +43,7 @@ extension UpdateView {
 
     private var refreshButton: some View {
         AsyncButton {
-            refreshing = true
             try await caskManager.refreshOutdated()
-            refreshing = false
         } label: {
             Image(systemName: "arrow.clockwise")
         }

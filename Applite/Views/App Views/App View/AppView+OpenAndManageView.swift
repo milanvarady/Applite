@@ -32,6 +32,7 @@ extension AppView {
             .onButtonError { error in
                 showAppNotFoundAlert = true
             }
+            .asyncButtonStyle(.none)
             .alert("Applite couldn't open \(cask.info.name)", isPresented: $showAppNotFoundAlert) {}
 
             if deleteButton {

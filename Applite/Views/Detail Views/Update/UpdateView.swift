@@ -14,7 +14,6 @@ struct UpdateView: View {
     @EnvironmentObject var caskManager: CaskManager
 
     @State var searchText = ""
-    @State var refreshing = false
     @State var isUpdatingAll = false
     @State var updateAllButtonRotation = 0.0
     

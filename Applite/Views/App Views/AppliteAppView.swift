@@ -37,7 +37,7 @@ struct AppliteAppView: View {
                 
             CheckForUpdatesView(updater: updaterController.updater) {
                 Label("Update", systemImage: "arrow.uturn.down")
-                    .foregroundColor(.blue)
+                    .buttonStyle(.borderedProminent)
             }
             .clipShape(Capsule())
             
