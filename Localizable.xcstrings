@@ -171,21 +171,35 @@
       }
     },
     "**This app is deprecated**\n**Reason:** %@\n**Date:** %@" : {
+      "comment" : "App deprecated alert message",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "**This app is deprecated**\n**Reason:** %1$@\n**Date:** %2$@"
           }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Ez az alkalmazás elavult**\n**Ok:** %1$@\n**Dátum:** %2$@"
+          }
         }
       }
     },
     "**This app is disabled**\n**Reason:** %@\n**Date:** %@" : {
+      "comment" : "App disabled alert message",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "**This app is disabled**\n**Reason:** %1$@\n**Date:** %2$@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Ez az alkalmazás le van tiltva**\n**Ok:** %1$@\n**Dátum:** %2$@"
           }
         }
       }
@@ -785,13 +799,37 @@
       }
     },
     "App has Caveats" : {
-
+      "comment" : "App has caveats alert title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Figyelmeztetés"
+          }
+        }
+      }
     },
     "App is Deprecated" : {
-
+      "comment" : "App is deprecated alert title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az alkalmazás elavult"
+          }
+        }
+      }
     },
     "App is Disabled" : {
-
+      "comment" : "App is disabled alert title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az alkalmazás le van tiltva"
+          }
+        }
+      }
     },
     "App Migration" : {
       "comment" : "App Migration view title",
@@ -4946,19 +4984,16 @@
         }
       }
     },
-    "This app is from a third-party tap" : {
-      "extractionState" : "stale",
+    "This app is from a third-party tap:\n`%@`" : {
+      "comment" : "Tap popup info",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ez az alkalmazás egy harmadik feltől származó tapból van"
+            "value" : "Ez az alkalmazás egy harmadik feltől származó tapból van:\n`%@`"
           }
         }
       }
-    },
-    "This app is from a third-party tap:\n`%@`" : {
-
     },
     "This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications." : {
       "comment" : "Manage Homebrew view description",
