@@ -16,27 +16,34 @@ extension AppView {
 
         // Alerts
         @State var showingPopover = false
-        @State var showingCaveats = false
         @State var showingBrewError = false
         @State var showingForceInstallConfirmation = false
+        @State var showCaveatsAndWarnings = false
 
         @State var buttonFill = false
 
         var body: some View {
             /// Download button
             Button {
-                if cask.info.caveats != nil {
-                    // Show caveats dialog
-                    showingCaveats = true
+                if cask.info.warning != nil {
+                    // Show download confirmation
+                    showCaveatsAndWarnings = true
                     return
                 }
 
                 caskManager.install(cask)
             } label: {
-                Image(systemName: "arrow.down.to.line.circle\(buttonFill ? ".fill" : "")")
-                    .font(.system(size: 22))
-                    .foregroundColor(.accentColor)
+                if case .disabled(_, _) = cask.info.warning {
+                    Image(systemName: "xmark.circle")
+                        .foregroundStyle(.red)
+                        .font(.system(size: 22))
+                } else {
+                    Image(systemName: "arrow.down.to.line.circle\(buttonFill ? ".fill" : "")")
+                        .foregroundStyle(Color.accentColor)
+                        .font(.system(size: 22))
+                }
             }
+            .disabled(cask.info.warning?.isDisabled ?? false)
             .padding(.trailing, -8)
             .onHover { isHovering in
                 // Hover effect
@@ -44,14 +51,23 @@ extension AppView {
                     buttonFill = isHovering
                 }
             }
-            .alert("App caveats", isPresented: $showingCaveats) {
+            .alert(cask.info.warning?.title ?? "", isPresented: $showCaveatsAndWarnings) {
                 Button("Download Anyway") {
                     caskManager.install(cask)
                 }
 
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text(cask.info.caveats ?? "")
+                if let warning = cask.info.warning {
+                    switch warning {
+                    case .hasCaveat(let caveat):
+                        Text(caveat)
+                    case .deprecated(let date, let reason):
+                        Text("**This app is deprecated**\n**Reason:** \(reason)\n**Date:** \(date)")
+                    case .disabled(let date, let reason):
+                        Text("**This app is disabled**\n**Reason:** \(reason)\n**Date:** \(date)")
+                    }
+                }
             }
             .alert("Broken Brew Path", isPresented: $showingBrewError) {} message: {
                 Text(DependencyManager.brokenPathOrIstallMessage)

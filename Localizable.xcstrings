@@ -170,6 +170,26 @@
         }
       }
     },
+    "**This app is deprecated**\n**Reason:** %@\n**Date:** %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "**This app is deprecated**\n**Reason:** %1$@\n**Date:** %2$@"
+          }
+        }
+      }
+    },
+    "**This app is disabled**\n**Reason:** %@\n**Date:** %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "**This app is disabled**\n**Reason:** %1$@\n**Date:** %2$@"
+          }
+        }
+      }
+    },
     "**Tip:** You can also import apps from a Brewfile. However, only casks will be installed, other items like formulae and taps will be skipped." : {
       "comment" : "App Migration import card tip",
       "localizations" : {
@@ -730,6 +750,7 @@
     },
     "App caveats" : {
       "comment" : "App caveats alert title",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -762,6 +783,15 @@
           }
         }
       }
+    },
+    "App has Caveats" : {
+
+    },
+    "App is Deprecated" : {
+
+    },
+    "App is Disabled" : {
+
     },
     "App Migration" : {
       "comment" : "App Migration view title",
@@ -4917,6 +4947,7 @@
       }
     },
     "This app is from a third-party tap" : {
+      "extractionState" : "stale",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -4925,6 +4956,9 @@
           }
         }
       }
+    },
+    "This app is from a third-party tap:\n`%@`" : {
+
     },
     "This application uses the [Homebrew](https://brew.sh/) (brew for short) package manager to download apps. Homebrew is a free and open source command line utility that can download useful developer tools as well as desktop applications." : {
       "comment" : "Manage Homebrew view description",

@@ -8,29 +8,33 @@
 import SwiftUI
 
 extension AppView {
-    var iconAndDescriptionView: some View {
-        HStack {
-            if let iconURL = URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.info.token)/AppIcon.png"),
-               let faviconURL = URL(string: "https://icon.horse/icon/\(cask.info.homepageURL?.host ?? "")") {
-                AppIconView(
-                    iconURL: iconURL,
-                    faviconURL: faviconURL,
-                    cacheKey: cask.info.token
-                )
-                .padding(.leading, 5)
+    struct IconAndDescriptionView: View {
+        @ObservedObject var cask: Cask
+
+        var body: some View {
+            HStack {
+                if let iconURL = URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.info.token)/AppIcon.png"),
+                   let faviconURL = URL(string: "https://icon.horse/icon/\(cask.info.homepageURL?.host ?? "")") {
+                    AppIconView(
+                        iconURL: iconURL,
+                        faviconURL: faviconURL,
+                        cacheKey: cask.info.token
+                    )
+                    .padding(.leading, 5)
+                }
+                
+                // Name and description
+                VStack(alignment: .leading) {
+                    Text(cask.info.name)
+                        .font(.system(size: 16, weight: .bold))
+                    
+                    Text(cask.info.description)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
             }
-
-            // Name and description
-            VStack(alignment: .leading) {
-                Text(cask.info.name)
-                    .font(.system(size: 16, weight: .bold))
-
-                Text(cask.info.description)
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
+            .contentShape(Rectangle())
         }
-        .contentShape(Rectangle())
     }
 }

@@ -15,6 +15,8 @@
 		411EDDD72A9F58180051E07B /* URLExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411EDDD62A9F58180051E07B /* URLExtension.swift */; };
 		4120AB652A754B1700F68EFE /* AppliteAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4120AB642A754B1700F68EFE /* AppliteAppView.swift */; };
 		4120AB682A755B5A00F68EFE /* CheckForUpdatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4120AB672A755B5A00F68EFE /* CheckForUpdatesView.swift */; };
+		4122B4792D3574A6002E9D6E /* CaskWarning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4122B4782D3574A6002E9D6E /* CaskWarning.swift */; };
+		4122B47B2D3576FB002E9D6E /* AppView+IconsAndWarnings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4122B47A2D3576FB002E9D6E /* AppView+IconsAndWarnings.swift */; };
 		4125BB8A29539907000FBD25 /* PlaceholderAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4125BB8929539907000FBD25 /* PlaceholderAppView.swift */; };
 		4126353E2A77C6EF00155034 /* ArrayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4126353D2A77C6EF00155034 /* ArrayExtension.swift */; };
 		412635442A77FB1600155034 /* BrewInstallationProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412635432A77FB1600155034 /* BrewInstallationProgress.swift */; };
@@ -156,6 +158,8 @@
 		411EDDD62A9F58180051E07B /* URLExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtension.swift; sourceTree = "<group>"; };
 		4120AB642A754B1700F68EFE /* AppliteAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppliteAppView.swift; sourceTree = "<group>"; };
 		4120AB672A755B5A00F68EFE /* CheckForUpdatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckForUpdatesView.swift; sourceTree = "<group>"; };
+		4122B4782D3574A6002E9D6E /* CaskWarning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskWarning.swift; sourceTree = "<group>"; };
+		4122B47A2D3576FB002E9D6E /* AppView+IconsAndWarnings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppView+IconsAndWarnings.swift"; sourceTree = "<group>"; };
 		4125BB8929539907000FBD25 /* PlaceholderAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderAppView.swift; sourceTree = "<group>"; };
 		4126353D2A77C6EF00155034 /* ArrayExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtension.swift; sourceTree = "<group>"; };
 		412635432A77FB1600155034 /* BrewInstallationProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewInstallationProgress.swift; sourceTree = "<group>"; };
@@ -516,6 +520,7 @@
 				4192561D2D1DEBE700D9EF10 /* AppView+UninstallButton.swift */,
 				4192561F2D1DEC0D00D9EF10 /* AppView+UpdateButton.swift */,
 				419256B52D26BBBD00D9EF10 /* AppView+GetInfoButton.swift */,
+				4122B47A2D3576FB002E9D6E /* AppView+IconsAndWarnings.swift */,
 			);
 			path = "App View";
 			sourceTree = "<group>";
@@ -622,6 +627,7 @@
 				415135652D32C4570025DB70 /* Cask+Equtable.swift */,
 				415135672D32C4710025DB70 /* Cask+Hashable.swift */,
 				415135692D32C48A0025DB70 /* Cask+Comparable.swift */,
+				4122B4782D3574A6002E9D6E /* CaskWarning.swift */,
 			);
 			path = Cask;
 			sourceTree = "<group>";
@@ -849,6 +855,7 @@
 				419256572D1E0E5F00D9EF10 /* DiscoverSectionView+AppRow.swift in Sources */,
 				4192568F2D22DC9E00D9EF10 /* FontExtension.swift in Sources */,
 				419506A42964A27F00FE5802 /* SetupView.swift in Sources */,
+				4122B47B2D3576FB002E9D6E /* AppView+IconsAndWarnings.swift in Sources */,
 				4192561E2D1DEBE700D9EF10 /* AppView+UninstallButton.swift in Sources */,
 				413F872E2D33E1CA00D4BE10 /* HomeView+NoSearchResults.swift in Sources */,
 				4192569B2D24335900D9EF10 /* CaskTaskError.swift in Sources */,
@@ -892,6 +899,7 @@
 				4192569D2D2433E200D9EF10 /* CaskProgressState.swift in Sources */,
 				418F331C28EB3D540023D76F /* AppGridView.swift in Sources */,
 				419256332D1DF2E000D9EF10 /* SettingsView+BrewSettingsView.swift in Sources */,
+				4122B4792D3574A6002E9D6E /* CaskWarning.swift in Sources */,
 				419256962D2430C500D9EF10 /* CaskManager+LoadData.swift in Sources */,
 				419256552D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift in Sources */,
 				41062C972A3A20F900FD48EA /* UninstallSelf.swift in Sources */,

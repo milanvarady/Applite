@@ -18,10 +18,9 @@ struct CaskInfo: Codable {
     /// Short description
     let description: String
     let homepageURL: URL?
-    /// Description of any caveats with the app
-    let caveats: String?
     /// If true app has a .pkg installer
     let pkgInstaller: Bool
+    let warning: CaskWarning?
 
     /// Initialize from a ``CaskDTO`` data transfer object
     init(from decoder: Decoder) throws {
@@ -33,18 +32,27 @@ struct CaskInfo: Codable {
         self.name = rawData.nameArray[safeIndex: 0] ?? "N/A"
         self.description = rawData.desc ?? "N/A"
         self.homepageURL = URL(string: rawData.homepage)
-        self.caveats = rawData.caveats
         self.pkgInstaller = rawData.url.hasSuffix("pkg")
+
+        if rawData.disabled {
+            self.warning = .disabled(date: rawData.disableDate ?? "N/A", reason: rawData.disableReason ?? "N/A")
+        } else if rawData.deprecated {
+            self.warning = .deprecated(date: rawData.deprecationDate ?? "N/A", reason: rawData.deprecationReason ?? "N/A")
+        } else if let caveat = rawData.caveats {
+            self.warning = .hasCaveat(caveat: caveat)
+        } else {
+            self.warning = nil
+        }
     }
 
-    init(token: String, fullToken: String, tap: String, name: String, description: String, homepageURL: URL?, caveats: String?, pkgInstaller: Bool) {
+    init(token: String, fullToken: String, tap: String, name: String, description: String, homepageURL: URL?, pkgInstaller: Bool, warning: CaskWarning?) {
         self.token = token
         self.fullToken = fullToken
         self.tap = tap
         self.name = name
         self.description = description
         self.homepageURL = homepageURL
-        self.caveats = caveats
         self.pkgInstaller = pkgInstaller
+        self.warning = warning
     }
 }

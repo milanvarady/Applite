@@ -13,20 +13,32 @@ struct CaskDTO: Decodable {
     let token: String
     let fullToken: String
     let tap: String
-    let desc: String?
     let nameArray: Array<String>
+    let desc: String?
     let homepage: String
     let caveats: String?
     let url: String
-    
+    let deprecated: Bool
+    let deprecationDate: String?
+    let deprecationReason: String?
+    let disabled: Bool
+    let disableDate: String?
+    let disableReason: String?
+
     enum CodingKeys: String, CodingKey {
         case token
         case fullToken = "full_token"
         case tap
-        case desc
         case nameArray = "name"
+        case desc
         case homepage
         case caveats
         case url
+        case deprecated
+        case deprecationDate = "deprecation_date"
+        case deprecationReason = "deprecation_reason"
+        case disabled
+        case disableDate = "disable_date"
+        case disableReason = "disable_reason"
     }
 }
