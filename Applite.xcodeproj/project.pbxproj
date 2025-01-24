@@ -1157,15 +1157,15 @@
 			repositoryURL = "https://github.com/ukushu/Ifrit";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.3;
+				minimumVersion = 2.0.4;
 			};
 		};
 		413F87332D34109000D4BE10 /* XCRemoteSwiftPackageReference "ButtonKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Dean151/ButtonKit?tab=readme-ov-file";
 			requirement = {
-				branch = "on-button-error-modifier";
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.1;
 			};
 		};
 		4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
