@@ -10,8 +10,9 @@ import SwiftUI
 extension HomeView {
     struct SortingOptionsToolbar: ToolbarContent {
         // Sorting options
-        @AppStorage("searchSortOption") var sortBy = SortingOptions.mostDownloaded
-        @AppStorage("hideUnpopularApps") var hideUnpopularApps = false
+        @AppStorage(Preferences.searchSortOption.rawValue) var sortBy = SortingOptions.mostDownloaded
+        @AppStorage(Preferences.hideUnpopularApps.rawValue) var hideUnpopularApps = false
+        @AppStorage(Preferences.hideDisabledApps.rawValue) var hideDisabledApps = false
 
         var body: some ToolbarContent {
             ToolbarItem {
@@ -26,6 +27,10 @@ extension HomeView {
 
                     Toggle(isOn: $hideUnpopularApps) {
                         Text("Hide apps with few downloads", comment: "Few downloads search filter")
+                    }
+
+                    Toggle(isOn: $hideDisabledApps) {
+                        Text("Hide disabled apps", comment: "Disabled apps search filter")
                     }
                 } label: {
                     Label("Search Sorting Options", systemImage: "slider.horizontal.3")

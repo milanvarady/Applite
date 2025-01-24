@@ -27,4 +27,9 @@ enum Preferences: String {
     // Proxy
     case networkProxyEnabled
     case preferredProxyType
+
+    // Sorting options
+    case searchSortOption
+    case hideUnpopularApps
+    case hideDisabledApps
 }

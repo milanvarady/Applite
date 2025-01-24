@@ -11,12 +11,19 @@ extension ContentView {
     func searchAndSort() async {
         await caskManager.allCasks.search(query: searchInput, diffScroreThreshold: 0.3, limitResults: 25)
         if hideUnpopularApps { await filterUnpopular() }
+        if hideDisabledApps { await filterDisabled() }
         await sortCasks(ignoreBestMatch: true)
     }
 
     func filterUnpopular(threshold: Int = 500) async {
         caskManager.allCasks.filterSearch { casks in
             casks.filter { $0.downloadsIn365days > threshold }
+        }
+    }
+
+    func filterDisabled() async {
+        caskManager.allCasks.filterSearch { casks in
+            casks.filter { !($0.info.warning?.isDisabled ?? false) }
         }
     }
 

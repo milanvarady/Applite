@@ -27,8 +27,9 @@ struct ContentView: View {
     @State var showSearchResults = false
 
     // Sorting options
-    @AppStorage("searchSortOption") var sortBy = SortingOptions.mostDownloaded
-    @AppStorage("hideUnpopularApps") var hideUnpopularApps = false
+    @AppStorage(Preferences.searchSortOption.rawValue) var sortBy = SortingOptions.mostDownloaded
+    @AppStorage(Preferences.hideUnpopularApps.rawValue) var hideUnpopularApps = false
+    @AppStorage(Preferences.hideDisabledApps.rawValue) var hideDisabledApps = false
 
     let logger = Logger()
 
@@ -77,6 +78,13 @@ struct ContentView: View {
         .task(id: hideUnpopularApps) {
             if hideUnpopularApps {
                 await filterUnpopular()
+            } else {
+                await caskManager.allCasks.search(query: searchInput)
+            }
+        }
+        .task(id: hideDisabledApps) {
+            if hideDisabledApps {
+                await filterDisabled()
             } else {
                 await caskManager.allCasks.search(query: searchInput)
             }

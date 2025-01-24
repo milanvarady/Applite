@@ -10,7 +10,7 @@ import SwiftUI
 extension HomeView {
     struct NoSearchResults: View {
         @Binding var searchText: String
-        @AppStorage("hideUnpopularApps") var hideUnpopularApps = false
+        @AppStorage(Preferences.hideUnpopularApps.rawValue) var hideUnpopularApps = false
 
         var body: some View {
             VStack {

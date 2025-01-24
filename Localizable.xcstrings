@@ -2745,6 +2745,17 @@
         }
       }
     },
+    "Hide disabled apps" : {
+      "comment" : "Disabled apps search filter",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letiltott alkalmazások elrejtése"
+          }
+        }
+      }
+    },
     "Homebrew" : {
       "comment" : "Sidebar item",
       "localizations" : {
