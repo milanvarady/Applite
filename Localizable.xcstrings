@@ -3370,6 +3370,18 @@
         }
       }
     },
+    "Maintenance" : {
+      "comment" : "App category",
+      "extractionState" : "manual",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbantartás"
+          }
+        }
+      }
+    },
     "Manage applications" : {
       "comment" : "Onboarding",
       "extractionState" : "manual",

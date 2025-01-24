@@ -13,7 +13,8 @@
             "opera-gx",
             "orion",
             "tor-browser",
-            "vivaldi"
+            "vivaldi",
+            "zen-browser"
         ]
     },
     {
@@ -66,7 +67,7 @@
             "microsoft-excel",
             "microsoft-outlook",
             "microsoft-powerpoint",
-            "microsoft-teams",
+            "microsoft-tebs",
             "microsoft-word",
             "onedrive",
             "openoffice",
@@ -82,6 +83,7 @@
             "caffeine",
             "flux",
             "hiddenbar",
+            "jordanbaird-ice",
             "hot",
             "istat-menus",
             "itsycal",
@@ -89,7 +91,8 @@
             "ticktick",
             "tomatobar",
             "vanilla",
-            "meetingbar"
+            "meetingbar",
+            "coconutbattery"
         ]
     },
     {
@@ -97,26 +100,38 @@
         "sfSymbol": "wrench.and.screwdriver",
         "casks": [
             "adobe-acrobat-reader",
-            "appcleaner",
             "android-file-transfer",
             "altserver",
             "balenaetcher",
-            "cleanmymac",
             "couleurs",
-            "daisydisk",
             "downie",
             "fing",
             "handbrake",
             "imageoptim",
-            "latest",
             "obs",
-            "onyx",
             "pdf-expert",
             "raspberry-pi-imager",
             "the-unarchiver",
             "transmission",
-            "xcodes",
-            "permute"
+            "permute",
+            "calibre",
+            "keepingyouawake",
+            "pika",
+            "upscayl"
+        ]
+    },
+    {
+        "id": "Maintenance",
+        "sfSymbol": "wrench.adjustable",
+        "casks": [
+            "neo-network-utility",
+            "appcleaner",
+            "pearcleaner",
+            "daisydisk",
+            "latest",
+            "onyx",
+            "grandperspective",
+            "omnidisksweeper"
         ]
     },
     {
@@ -136,7 +151,8 @@
             "inkscape",
             "krita",
             "sketch",
-            "scribus"
+            "scribus",
+            "freecad"
         ]
     },
     {
@@ -170,7 +186,8 @@
             "rapidapi",
             "ssh-config-editor",
             "tower",
-            "transmit"
+            "transmit",
+            "xcodes"
         ]
     },
     {
