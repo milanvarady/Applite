@@ -882,42 +882,6 @@
         }
       }
     },
-    "App caveats" : {
-      "comment" : "App caveats alert title",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mises en garde concernant l'application"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az alkalmazással kapcsolatos fenntartások"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用上の注意"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "应用程序注意事项"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "應用注意事項"
-          }
-        }
-      }
-    },
     "App has Caveats" : {
       "comment" : "App has caveats alert title",
       "localizations" : {
@@ -1683,42 +1647,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "偵測到 Brew 安裝"
-          }
-        }
-      }
-    },
-    "Brew path has been modified. Restart app for changes to take effect." : {
-      "comment" : "Settings brew path changed message",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le chemin d'accès à Homebrew a été modifié. Redémarrez l'application pour que les modifications prennent effet."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A Brew elérési útja megváltozott. Indítsa újra az alkalmazást, hogy a változtatás érvénybe lépjen."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrewのパスが変更されました\n変更を有効にするにはAppliteを再起動します"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brew 路径已修改。重新启动应用程序以使更改生效。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brew路徑已被修改。 重新啟動應用程式以使變更生效。"
           }
         }
       }
@@ -2822,41 +2750,6 @@
         }
       }
     },
-    "Export a file containing all currently installed applications. This can be imported to another device." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exportez un fichier contenant toutes les applications actuellement installées. Le fichier peut être importé sur un autre appareil."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az összes jelenleg telepített alkalmazást tartalmazó fájl exportálása. Ez importálható egy másik eszközre."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "現在インストールされている全てのアプリケーションを含むファイルをエクスポートします。ファイルは別のデバイスにインポート出来ます"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "导出一个包含所有当前已安装应用程序的文件。可以导入到另一台设备。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "匯出包含所有目前安裝的應用程式的檔案。 這可以導入到另一台設備。"
-          }
-        }
-      }
-    },
     "Export all apps currently installed by Applite to a file." : {
       "comment" : "App Migration export card description",
       "localizations" : {
@@ -2888,18 +2781,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "將 Applite 目前安裝的所有應用程式匯出至一個檔案。"
-          }
-        }
-      }
-    },
-    "Export all apps currently installed by Appname to a file." : {
-      "comment" : "App Migration export card description",
-      "extractionState" : "stale",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A jelenleg telepített alkalmazások fájlba exportálása."
           }
         }
       }
@@ -2939,41 +2820,6 @@
         }
       }
     },
-    "Export apps to file" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exporter les applications vers un fichier"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alakalmazások exportálása fájlba"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アプリをファイルにエクスポートする"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "导出应用程序到文件"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "將應用程式匯出到文件"
-          }
-        }
-      }
-    },
     "Export Apps to File" : {
       "comment" : "App export button",
       "localizations" : {
@@ -3005,111 +2851,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "將應用程式匯出至檔案"
-          }
-        }
-      }
-    },
-    "Export failed" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Echec de l'export"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exportálás sikertelen"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エクスポートに失敗しました"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "导出失败"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "匯出失敗"
-          }
-        }
-      }
-    },
-    "Export file type" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Type de fichier d'exportation"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exportált fálj formátum"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エクスポートファイルの種類"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "导出文件类型"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "匯出文件類型"
-          }
-        }
-      }
-    },
-    "Failed to download %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Echec du téléchargement de %@"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ letöltése sikertelen"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@のダウンロードに失敗しました"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法下载 %@"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下載%@失敗"
           }
         }
       }
@@ -3569,41 +3310,6 @@
         }
       }
     },
-    "Homebrew version: " : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version Homebrew: "
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew verzió: "
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrewのバージョン : "
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew 版本："
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew版本："
-          }
-        }
-      }
-    },
     "Homepage" : {
       "localizations" : {
         "fr" : {
@@ -3744,41 +3450,6 @@
         }
       }
     },
-    "Import apps" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importer des applications"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alkalmazások importálása"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アプリをインポートする"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "导入应用程序"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "導入應用程式"
-          }
-        }
-      }
-    },
     "Import Apps" : {
       "comment" : "Import apps button",
       "localizations" : {
@@ -3810,76 +3481,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "匯入應用程式"
-          }
-        }
-      }
-    },
-    "Import failed" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Echec de l'importation"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importálás sikertelen"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インポートに失敗しました"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "导入失败"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "導入失敗"
-          }
-        }
-      }
-    },
-    "Import/Export apps" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importer/Exporter des applications"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alkalmazások importálása/exportálása"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アプリのインポート/エクスポート"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "导入/导出应用程序"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "導入/導出應用程式"
           }
         }
       }
@@ -4727,41 +4328,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "通知"
-          }
-        }
-      }
-    },
-    "Number of apps installed: " : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nombre d'applications installées:"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Letöltött alkalmazások száma: "
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インストールされているアプリケーションの数 : "
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已安装应用程序数量： "
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "安裝的應用程式數量："
           }
         }
       }
@@ -5783,41 +5349,6 @@
         }
       }
     },
-    "Sorting Options" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trier"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rendezési opciók"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "並べ替えオプション"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "排序选项"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "排序選項"
-          }
-        }
-      }
-    },
     "Sponsor" : {
       "localizations" : {
         "fr" : {
@@ -6200,53 +5731,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "此應用程式使用免費開源嘅 [Homebrew](https://brew.sh/) 套件管理器來下載同管理應用程式。Applite 偵測到您未安裝 brew，因此佢會喺 `~/Library/Application Support/Applite` 下為 Applite 創建一個新嘅 brew 安裝。"
-          }
-        }
-      }
-    },
-    "This application uses the free and open source [Homebrew](https://brew.sh/) package manager to download and manage applications. Applite has detected that you don't have brew installed, so it will create a new brew installation just for Applite under ~/Library/Application Support/Applite." : {
-      "comment" : "Setup Applite's brew installtion info view description",
-      "extractionState" : "stale",
-      "localizations" : {
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ez az alkalmazás az ingyenes és nyílt forráskódú [Homebrew](https://brew.sh/) csomagkezelőt használja az alkalmazások letöltésére és kezelésére. Az Applite érzékelte, hogy nincs telepítve a brew, ezért létrehoz egy új brew telepítést csak az Applite számára a ~/Library/Application Support/Applite elérési útvonalon."
-          }
-        }
-      }
-    },
-    "This application uses the free and open source [Homebrew](https://brew.sh/) package manager to download and manage applications. If you already have it installed on your system, you can use it right away. If you don't have brew installed or don't know what it is, select **No**. This will create a new brew installation just for %@." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette application utilise le gestionnaire de packages gratuit et open source [Homebrew](https://brew.sh/) pour télécharger et gérer les applications. Si vous l'avez déjà installé sur votre système, vous pouvez l'utiliser immédiatement. Si vous n'avez pas installé Homebrew ou si vous ne savez pas ce que c'est, sélectionnez **Non**. Cela créera une nouvelle installation de Homebrew juste pour %@."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ez az alkalmazás az ingyenes és nyílt forráskódú [Homebrew](https://brew.sh/) csomagkezelőt használja az alkalmazások letöltésére és kezelésére. Ha már telepítve van a számítógépére, használhatja azt. Ha nincs telepítve a brew, vagy nem tudja, mi az, válassza a **Nem** lehetőséget. Ez egy új brew telepítést hoz létre csak az %@ számára."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "このアプリケーションは無料のオープンソースパッケージマネージャー[Homebrew](https://brew.sh/)を使用してアプリケーションのダウンロードと管理を行います。すでにシステムにインストールされている場合はすぐに使用できます。Homebrewがインストールされていない場合、又はHomebrewが何であるかわからない場合は、**いいえ** を選択して下さい。これにより %@専用のHomebrewの新しいインストール先が作成されます"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "此应用程序使用免费且开源的[Homebrew](https://brew.sh/)包管理器来下载和管理应用程序。如果你的系统已经安装了它，你可以立即使用。如果你没有安装 brew 或不知道它是什么，请选择**否**。这将为 %@ 创建一个新的 brew 安装。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "該應用程式使用免費開源的[Homebrew](https://brew.sh/)套件管理器來下載和管理應用程式。 如果您的系統上已經安裝了它，則可以立即使用它。 如果您沒有安裝brew或不知道它是什麼，請選擇**否**。 這將為%@ 創建一個新的brew 安裝。"
           }
         }
       }
@@ -7060,41 +6544,6 @@
         }
       }
     },
-    "View Error" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voir l'erreur"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hiba Megtekintése"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エラーを参照して下さい"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示错误"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "查看錯誤"
-          }
-        }
-      }
-    },
     "Virtualization" : {
       "comment" : "App category",
       "extractionState" : "manual",
@@ -7231,41 +6680,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "歡迎來到 Applite"
-          }
-        }
-      }
-    },
-    "When importing a Brewfile only casks will be installed. Other items like formulae and taps will be skipped." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lors de l'importation d'un Brewfile, seuls les casks seront installés. D'autres éléments tels que les formules et les taps seront ignorés."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A Brewfile importálásakor csak a cask-ok kerülnek telepítésre. A többi elem, mint például a formulák és a tapok mellőzve lesznek."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BrewfileをインポートするとCaskのみがインストールされます。FormulaやTapなどの他の要素は無視されます"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当导入 Brewfile 时，只会安装 casks。其他项，如 formulae 和 taps，将被跳过。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "導入 Brewfile 時，只會安裝木桶。 其他項目（例如公式和點擊）將被跳過。"
           }
         }
       }
