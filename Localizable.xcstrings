@@ -184,6 +184,12 @@
             "state" : "translated",
             "value" : "**Ez az alkalmazás elavult**\n**Ok:** %1$@\n**Dátum:** %2$@"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**此应用已弃用**\n**原因：** %1$@\n**日期：** %2$@"
+          }
         }
       }
     },
@@ -201,6 +207,12 @@
             "state" : "translated",
             "value" : "**Ez az alkalmazás le van tiltva**\n**Ok:** %1$@\n**Dátum:** %2$@"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**此应用已停用**\n**原因：** %1$@\n**日期：** %2$@"
+          }
         }
       }
     },
@@ -211,6 +223,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "**Tip:** Alkalmazásokat egy Brewfile-ból is importálhat. Azonban csak a caskok lesznek telepítve, más elemek (formula, tap) figyelmen kívül lesznek hagyva."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**提示：** 您可以从 Brewfile 导入应用。但是只会安装 Casks，其他项目如 Formulae 和 Taps 将被跳过。"
           }
         }
       }
@@ -503,6 +521,12 @@
             "state" : "translated",
             "value" : "Úgy tűnik a brew már telepítve van a következő helyen:"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在以下位置检测到已安装的 brew："
+          }
         }
       }
     },
@@ -548,6 +572,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A-Z"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A 至 Z"
           }
         }
       }
@@ -806,6 +836,12 @@
             "state" : "translated",
             "value" : "Figyelmeztetés"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用有注意事项"
+          }
         }
       }
     },
@@ -816,6 +852,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Az alkalmazás elavult"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用已过时"
           }
         }
       }
@@ -828,6 +870,12 @@
             "state" : "translated",
             "value" : "Az alkalmazás le van tiltva"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用已停用"
+          }
         }
       }
     },
@@ -838,6 +886,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "App Költöztetés"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用迁移"
           }
         }
       }
@@ -920,6 +974,12 @@
             "state" : "translated",
             "value" : "Apple Silicon Mac"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Silicon Mac"
+          }
         }
       }
     },
@@ -965,6 +1025,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Az Applite nem tudta megnyitni a %@ alkalmazást"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite 无法打开 %@"
           }
         }
       }
@@ -1012,6 +1078,12 @@
             "state" : "translated",
             "value" : "Applite telepítése"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite 安装"
+          }
         }
       }
     },
@@ -1022,6 +1094,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Letöltött appok száma"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装应用"
           }
         }
       }
@@ -1244,12 +1322,24 @@
             "state" : "translated",
             "value" : "Legjobb találat"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最佳匹配"
+          }
         }
       }
     },
     "Brew" : {
       "localizations" : {
         "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Brew"
@@ -1299,6 +1389,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Brew telepítés észlelve"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "检测到 Brew 安装"
           }
         }
       }
@@ -1489,6 +1585,12 @@
             "state" : "translated",
             "value" : "Kikapcsolja az Apple Gatekeeper ellenőrzését, ami hasznos lehet, ha az alkalmazás nem bejegyzett fejlesztőtől származik. **Használja saját felelősségére!**"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "绕过 Apple Gatekeeper 检查，这在应用来自未经注册的开发者时可能很有用。**使用需自担风险！**"
+          }
         }
       }
     },
@@ -1534,6 +1636,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cask információ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask 信息"
           }
         }
       }
@@ -1722,6 +1830,12 @@
             "state" : "translated",
             "value" : "Ha az észlelt brew telepítést szeretné használni lépjen tovább, ellenkező esetben válasszon a lenti opciók közül."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "继续使用检测到的安装选项，或者选择下方的其他选项"
+          }
         }
       }
     },
@@ -1879,6 +1993,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Egyedi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义"
           }
         }
       }
@@ -2174,6 +2294,12 @@
             "state" : "translated",
             "value" : "Alkalmazások letöltése egyéni könyvtárba az `/Applications` könyvtár helyett"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将应用下载到自定义目录，而不是 `/Applications`"
+          }
         }
       }
     },
@@ -2291,6 +2417,12 @@
             "state" : "translated",
             "value" : "Exportálás"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出"
+          }
         }
       }
     },
@@ -2337,6 +2469,12 @@
             "state" : "translated",
             "value" : "A jelenleg telepített alkalmazások fájlba exportálása."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出已安装应用名称到文件"
+          }
         }
       }
     },
@@ -2347,6 +2485,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exportálja a jelenleg letöltött alkalmazásokat egy fájlba. Ezt később egy másik eszközön importálhatja, ezzel az összes alkalmazást telepíti. Hasznos egy új eszköz beállításához."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将您当前安装的所有应用导出到一个文件中。您可以在另一台设备上导入该文件以安装所有应用。在设置新 Mac 时非常有用。"
           }
         }
       }
@@ -2393,6 +2537,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appok fájlba exportálása"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出应用到文件"
           }
         }
       }
@@ -2510,6 +2660,12 @@
             "state" : "translated",
             "value" : "%@ letöltése sikertelen"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装 %@ 失败"
+          }
         }
       }
     },
@@ -2555,6 +2711,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ törlése sikertelen"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载 %@ 失败"
           }
         }
       }
@@ -2672,6 +2834,12 @@
             "state" : "translated",
             "value" : "Infó megjelenítése"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "获取信息"
+          }
         }
       }
     },
@@ -2753,6 +2921,12 @@
             "state" : "translated",
             "value" : "Letiltott alkalmazások elrejtése"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏已停用应用"
+          }
         }
       }
     },
@@ -2799,6 +2973,12 @@
             "state" : "translated",
             "value" : "Homebrew telepítés"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 安装"
+          }
         }
       }
     },
@@ -2809,6 +2989,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew verzió"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 版本"
           }
         }
       }
@@ -2890,6 +3076,12 @@
             "state" : "translated",
             "value" : "Már van egy brew telepítésem"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装brew"
+          }
         }
       }
     },
@@ -2937,6 +3129,12 @@
             "state" : "translated",
             "value" : "Importálás"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入"
+          }
         }
       }
     },
@@ -2982,6 +3180,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appok importálása"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入应用"
           }
         }
       }
@@ -3099,6 +3303,12 @@
             "state" : "translated",
             "value" : "Tappokból származó caskok megjelenítése "
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从 Taps 中包含 Casks"
+          }
         }
       }
     },
@@ -3179,6 +3389,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Külön brew telepítése"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "为 Applite 安装独立的 Brew"
           }
         }
       }
@@ -3331,6 +3547,12 @@
             "state" : "translated",
             "value" : "Intel Mac"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intel Silicon Mac"
+          }
         }
       }
     },
@@ -3378,6 +3600,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Karbantartás"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "维护"
           }
         }
       }
@@ -3639,6 +3867,12 @@
             "state" : "translated",
             "value" : "No Quarantine"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无隔离"
+          }
         }
       }
     },
@@ -3807,7 +4041,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已安装应用程序数量： "
+            "value" : "已安装应用数量： "
           }
         },
         "zh-HK" : {
@@ -3932,6 +4166,12 @@
             "state" : "translated",
             "value" : "További beállítások"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "其他标志"
+          }
         }
       }
     },
@@ -4049,6 +4289,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tulajdonság"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "属性"
           }
         }
       }
@@ -4342,6 +4588,12 @@
             "state" : "translated",
             "value" : "Indítsa újra az Applite-ot, hogy a módosítások életbe lépjenek."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重启 Applite 以使更改生效。"
+          }
         }
       }
     },
@@ -4490,6 +4742,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keresés szűrési opciók"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索排序选项"
           }
         }
       }
@@ -4781,6 +5039,12 @@
             "state" : "translated",
             "value" : "Támogatás"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "赞助"
+          }
         }
       }
     },
@@ -4862,6 +5126,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tappok"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taps"
           }
         }
       }
@@ -5015,6 +5285,12 @@
             "state" : "translated",
             "value" : "Ez az alkalmazás egy harmadik feltől származó tapból van:\n`%@`"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此应用来自第三方 Taps：`%@`"
+          }
         }
       }
     },
@@ -5061,6 +5337,12 @@
             "state" : "translated",
             "value" : "Ez az alkalmazás az ingyenes és nyílt forráskódú [Homebrew](https://brew.sh/) csomagkezelőt használja az alkalmazások letöltésére és kezelésére. Az Applite érzékelte, hogy nincs telepítve a brew, ezért létrehoz egy új brew telepítést csak az Applite számára a `~/Library/Application Support/Applite` elérési útvonalon."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此应用使用免费且开源的 [Homebrew](https://brew.sh/) 包管理器来下载和管理应用。Applite 检测到您尚未安装 Brew，因此它将在 `~/Library/Application Support/Applite.` 下为 Applite 创建一个新的 Brew 安装。"
+          }
         }
       }
     },
@@ -5072,6 +5354,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ez az alkalmazás az ingyenes és nyílt forráskódú [Homebrew](https://brew.sh/) csomagkezelőt használja az alkalmazások letöltésére és kezelésére. Az Applite érzékelte, hogy nincs telepítve a brew, ezért létrehoz egy új brew telepítést csak az Applite számára a ~/Library/Application Support/Applite elérési útvonalon."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此应用使用免费且开源的 [Homebrew](https://brew.sh/) 包管理器来下载和管理应用。Applite 检测到您尚未安装 Brew，因此它将在 `~/Library/Application Support/Applite.` 下为 Applite 创建一个新的 Brew 安装。"
           }
         }
       }
@@ -5787,6 +6075,12 @@
             "state" : "translated",
             "value" : "Másik brew elérési útvonal használata"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用不同的 Brew 路径"
+          }
         }
       }
     },
@@ -5869,6 +6163,12 @@
             "state" : "translated",
             "value" : "Érték"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "值"
+          }
         }
       }
     },
@@ -5949,6 +6249,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Figyelem"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告"
           }
         }
       }
