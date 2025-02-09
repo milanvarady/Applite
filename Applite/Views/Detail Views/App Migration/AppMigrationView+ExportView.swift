@@ -43,7 +43,7 @@ extension AppMigrationView {
                 }
                 .padding(.bottom, 10)
 
-                Text("Export all apps currently installed by Appname to a file.", comment: "App Migration export card description")
+                Text("Export all apps currently installed by Applite to a file.", comment: "App Migration export card description")
 
                 Spacer()
             }
