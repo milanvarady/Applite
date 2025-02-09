@@ -12,7 +12,7 @@
             <sparkle:releaseNotesLink>
                 https://aerolite.dev/applite/releases/1.3.0.html
             </sparkle:releaseNotesLink>
-            <enclosure url="https://milanvarady.github.io/Applite/Applite.dmg" length="3945282" type="application/octet-stream" sparkle:edSignature="h/S3/yNeBCYe07BrmuZ16ZzTBeKabZmSqB0ifr84ya/1HeBRD9vL19jh7BX4p2UCLJvv6y1l1Uzea7ZwbuLsDg=="/>
+            <enclosure url="https://github.com/milanvarady/Applite/releases/download/v1.3.0/Applite.dmg" length="3945282" type="application/octet-stream" sparkle:edSignature="h/S3/yNeBCYe07BrmuZ16ZzTBeKabZmSqB0ifr84ya/1HeBRD9vL19jh7BX4p2UCLJvv6y1l1Uzea7ZwbuLsDg=="/>
         </item>
         <item>
             <title>1.2.5</title>
