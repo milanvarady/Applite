@@ -241,7 +241,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**此应用已禁用**\n**原因：**  %1$@\n**日期：** %2$@"
+            "value" : "**此应用已停用**\n**原因：** %1$@\n**日期：** %2$@"
           }
         },
         "zh-HK" : {
@@ -276,7 +276,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**提示：** 你也可以从 Brewfile 导入应用。但只会安装 casks，其他项目如 formulae 和 taps 将被跳过。"
+            "value" : "**提示：** 您可以从 Brewfile 导入应用。但是只会安装 Casks，其他项目如 Formulae 和 Taps 将被跳过。"
           }
         },
         "zh-HK" : {
@@ -591,7 +591,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "检测到 brew 安装位置："
+            "value" : "在以下位置检测到已安装的 brew："
           }
         },
         "zh-HK" : {
@@ -661,7 +661,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "按字母顺序"
+            "value" : "A 至 Z"
           }
         },
         "zh-HK" : {
@@ -941,7 +941,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "应用已弃用"
+            "value" : "应用已过时"
           }
         },
         "zh-HK" : {
@@ -976,7 +976,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "应用已禁用"
+            "value" : "应用已停用"
           }
         },
         "zh-HK" : {
@@ -1256,7 +1256,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applite 的安装"
+            "value" : "Applite 安装"
           }
         },
         "zh-HK" : {
@@ -1291,7 +1291,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已安装应用程序数量"
+            "value" : "已安装应用"
           }
         },
         "zh-HK" : {
@@ -1817,7 +1817,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "绕过 Apple Gatekeeper 检查，如果应用程序来自未注册的开发者，这可能很有用。**使用时需自行承担风险！**"
+            "value" : "绕过 Apple Gatekeeper 检查，这在应用来自未经注册的开发者时可能很有用。**使用需自担风险！**"
           }
         },
         "zh-HK" : {
@@ -2098,7 +2098,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "继续使用检测到的安装，或在下面选择其他选项。"
+            "value" : "继续使用检测到的安装选项，或者选择下方的其他选项"
           }
         },
         "zh-HK" : {
@@ -2598,7 +2598,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将应用下载到自定义目录而非 `/Applications`"
+            "value" : "将应用下载到自定义目录，而不是 `/Applications`"
           }
         },
         "zh-HK" : {
@@ -2774,7 +2774,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将 Applite 当前安装的所有应用导出到一个文件。"
+            "value" : "导出已安装应用名称到文件"
           }
         },
         "zh-HK" : {
@@ -2809,7 +2809,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将当前安装的所有应用导出到一个文件。将该文件导入另一台设备以安装所有应用。在设置新 Mac 时非常有用。"
+            "value" : "将您当前安装的所有应用导出到一个文件中。您可以在另一台设备上导入该文件以安装所有应用。在设置新 Mac 时非常有用。"
           }
         },
         "zh-HK" : {
@@ -2844,7 +2844,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将应用导出到文件"
+            "value" : "导出应用到文件"
           }
         },
         "zh-HK" : {
@@ -3194,7 +3194,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "隐藏已禁用的应用"
+            "value" : "隐藏已停用应用"
           }
         },
         "zh-HK" : {
@@ -3368,7 +3368,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "我已安装 Brew"
+            "value" : "已安装 Brew"
           }
         },
         "zh-HK" : {
@@ -3544,7 +3544,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "包括来自 Tap 的 Cask"
+            "value" : "从 Taps 中包含 Casks"
           }
         },
         "zh-HK" : {
@@ -4180,7 +4180,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No Quarantine"
+            "value" : "无隔离"
           }
         },
         "zh-HK" : {
@@ -4462,7 +4462,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "其他选项"
+            "value" : "其他标志"
           }
         },
         "zh-HK" : {
@@ -4920,7 +4920,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "重新启动 Applite 以使更改生效。"
+            "value" : "重启 Applite 以使更改生效。"
           }
         },
         "zh-HK" : {
@@ -5478,7 +5478,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap"
+            "value" : "Taps"
           }
         },
         "zh-HK" : {
@@ -5654,7 +5654,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "这个应用来自第三方 Tap：\n`%@`"
+            "value" : "此应用来自第三方 Tap：\n`%@`"
           }
         },
         "zh-HK" : {
@@ -5724,7 +5724,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "此应用程序使用免费开源的 [Homebrew](https://brew.sh/) 包管理器来下载和管理应用程序。Applite 检测到您尚未安装 brew，因此它将在 `~/Library/Application Support/Applite` 下为 Applite 创建一个新的 brew 安装。"
+            "value" : "此应用使用免费且开源的 [Homebrew](https://brew.sh/) 包管理器来下载和管理应用。Applite 检测到您尚未安装 Brew，因此它将在 `~/Library/Application Support/Applite.` 下为 Applite 创建一个新的 Brew 安装"
           }
         },
         "zh-HK" : {
