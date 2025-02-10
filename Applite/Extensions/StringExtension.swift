@@ -27,4 +27,8 @@ extension String {
     func paddedWithQuotes() -> String {
         "\"\(self)\""
     }
+
+    var numberOfLines: Int {
+        self.components(separatedBy: .newlines).count - 1
+    }
 }

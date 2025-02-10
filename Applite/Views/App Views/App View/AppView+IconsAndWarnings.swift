@@ -26,8 +26,9 @@ extension AppView {
                     switch warning {
                     case .hasCaveat(let caveat):
                         InfoPopup(
-                            text: LocalizedStringKey(caveat),
-                            sfSymbol: "exclamationmark.circle"
+                            text: LocalizedStringKey(caveat.cleanTerminalOutput()),
+                            sfSymbol: "exclamationmark.circle",
+                            extraPaddingForLines: caveat.numberOfLines
                         )
 
                     case .deprecated(let date, let reason):
