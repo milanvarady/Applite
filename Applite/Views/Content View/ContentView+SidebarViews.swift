@@ -40,6 +40,7 @@ extension ContentView {
                     ForEach(caskManager.taps) { tap in
                         Label(tap.title, systemImage: "spigot")
                             .tag(SidebarItem.tap(tap: tap))
+                            .truncationMode(.head)
                     }
                 }
             }

@@ -12,7 +12,21 @@ struct TapViewModel: Identifiable, Equatable, Hashable {
     let caskCollection: SearchableCaskCollection
 
     var title: String {
-        tapId.components(separatedBy: "/").last ?? "?"
+        // If tap name short enough or if it's ambigous (it only says tap) we show the full name
+        // Otherwise if the name is too long we just show the part after the "/"
+        if tapId.count < 16 || tapComponent.lowercased() == "tap" {
+            return tapId
+        } else {
+            return tapComponent
+        }
+    }
+
+    var userCompnent: String {
+        tapId.components(separatedBy: "/").first ?? ""
+    }
+
+    var tapComponent: String {
+        tapId.components(separatedBy: "/").last ?? ""
     }
 
     var id: TapId {
