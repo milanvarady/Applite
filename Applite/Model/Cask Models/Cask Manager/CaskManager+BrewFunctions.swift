@@ -42,24 +42,30 @@ extension CaskManager {
             // Run install command and stream output
             do {
                 for try await line in Shell.stream(command, pty: true) {
-                    completeOutput += line
+                    completeOutput += line + "\n"
 
                     let newProgress = self.parseBrewInstall(output: line)
                     cask.progressState = newProgress
                 }
             } catch {
-                let alertMessage = switch completeOutput {
+                var alertMessage = error.localizedDescription
+
+                // Show a more helpful message in specific cases
+                switch completeOutput {
                     // Already installed
                 case _ where completeOutput.contains("It seems there is already an App"):
-                    String(
+                    alertMessage = String(
                         localized: "\(cask.info.name) is already installed. If you want to add it to Applite click more options (chevron icon) and press Force Install.",
                         comment: "App already installed alert message (parameter: app name)"
                     )
                     // Network error
                 case _ where completeOutput.contains("Could not resolve host"):
-                    String(localized: "Couldn't download app. No internet connection, or host is unreachable.", comment: "No internet alert message")
+                    alertMessage = String(localized: "Couldn't download app. No internet connection, or host is unreachable.", comment: "No internet alert message")
                 default:
-                    error.localizedDescription
+                    // Homebrew error
+                    if let result = completeOutput.firstMatch(of: /Error:(.+)/) {
+                        alertMessage = String(result.1)
+                    }
                 }
 
                 await self.showFailure(
@@ -69,6 +75,7 @@ extension CaskManager {
                     alertTitle: String(localized: "Failed to install \(cask.info.name)", comment: "Install failure alert title"),
                     alertMessage: alertMessage
                 )
+
                 return
             }
 
