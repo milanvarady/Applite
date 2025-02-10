@@ -10,6 +10,7 @@ import SwiftUI
 extension AppView {
     struct IconAndDescriptionView: View {
         @ObservedObject var cask: Cask
+        @AppStorage("showToken") var showToken: Bool = false
 
         var body: some View {
             HStack {
@@ -25,9 +26,14 @@ extension AppView {
                 
                 // Name and description
                 VStack(alignment: .leading) {
-                    Text(cask.info.name)
-                        .font(.system(size: 16, weight: .bold))
-                    
+                    Button {
+                        showToken.toggle()
+                    } label: {
+                        Text(showToken ? cask.info.token : cask.info.name)
+                            .font(.system(size: 16, weight: .bold))
+                    }
+                    .buttonStyle(.plain)
+
                     Text(cask.info.description)
                         .foregroundColor(.secondary)
                 }
