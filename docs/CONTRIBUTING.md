@@ -56,7 +56,7 @@ Your suggestion is likely to be rejected if it doesn't align with the [project g
 ## If you want to contribute code
 
 > - If you find a typo or a minor bug, feel free to create a pull request right away
-> - If you want to do something bigger, let's discuss it first, so you don't waste time on something that won't be accepted. Open a GitHub issue or join the [Official Discord Server](https://discord.gg/ZgB6pRE8Qx).
+> - If you want to do something bigger, let's discuss it first, so you don't waste time on something that won't be accepted. Open a GitHub issue or join the [Official Discord Server](https://discord.gg/MpDMH9cPbK).
 
 I'm open to all kinds of contributions!
 
