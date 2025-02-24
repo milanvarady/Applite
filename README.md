@@ -57,7 +57,7 @@ Minimum OS version: **macOS 13+**
 
 If you have any questions, feel free to e-mail me: [milan@aerolite.dev](mailto:milan@aerolite.dev)
 
-Or join the [Official Discord Server](https://discord.gg/ZgB6pRE8Qx).
+Or join the [Official Discord Server](https://discord.gg/MpDMH9cPbK).
 
 ## Contributing
 
