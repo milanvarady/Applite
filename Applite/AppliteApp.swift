@@ -36,7 +36,7 @@ struct AppliteApp: App {
     init() {
         updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
 
-        // Setup network proxy for Kinfisher
+        // Setup network proxy for Kingfisher
         KingfisherManager.shared.downloader.sessionConfiguration = NetworkProxyManager.getURLSessionConfiguration()
     }
     
