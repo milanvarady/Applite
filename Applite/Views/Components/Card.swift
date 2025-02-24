@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// A reusabe view that adds a rounded rectange background shadow
+/// A reusable view that adds a rounded rectangle background shadow
 struct Card<Content: View>: View {
     let paddig: CGFloat
     @ViewBuilder let content: Content
