@@ -47,7 +47,7 @@ extension BrewManagementView {
         }
 
         private func infoCard(title: LocalizedStringKey, info: String) -> some View {
-            Card(paddig: 8) {
+            Card(padding: 8) {
                 VStack {
                     Text(title)
                         .font(.system(size: 16, weight: .bold))

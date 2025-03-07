@@ -39,7 +39,7 @@ extension BrewManagementView {
 
                 HStack {
                     ActionCard(
-                        paddig: cardPadding,
+                        padding: cardPadding,
                         actionSuccessful: $updateDone,
                         remarks: [
                             .init(title: "Warning", color: .orange, remark: "All other app functions will be disabled during the update!")
@@ -50,7 +50,7 @@ extension BrewManagementView {
                     .frame(width: cardWidth)
 
                     ActionCard(
-                        paddig: cardPadding,
+                        padding: cardPadding,
                         actionSuccessful: $reinstallDone,
                         remarks: [
                             .init(title: "Note", color: .blue, remark: "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/homebrew`"),
@@ -80,13 +80,13 @@ extension BrewManagementView {
         }
 
         private struct ActionCard<ActionButton: View>: View {
-            let paddig: CGFloat
+            let padding: CGFloat
             @Binding var actionSuccessful: Bool
             let remarks: [Remark]
             @ViewBuilder let actionButton: ActionButton
 
             var body: some View {
-                Card(paddig: paddig) {
+                Card(padding: padding) {
                     VStack(alignment: .leading) {
                         HStack {
                             actionButton
