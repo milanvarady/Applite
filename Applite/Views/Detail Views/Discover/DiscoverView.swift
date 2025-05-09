@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Shimmer
 
 /// Shows apps in categories
 struct DiscoverView: View {

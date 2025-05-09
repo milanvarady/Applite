@@ -32,7 +32,7 @@ extension SettingsView {
                 appdirSettings
                 divider
 
-                noQuarantineSettings
+                otherFlags
 
                 if relaunchNeeded {
                     relauchAppPrompt
@@ -87,10 +87,12 @@ extension SettingsView {
             }
         }
 
-        var noQuarantineSettings: some View {
+        var otherFlags: some View {
             VStack(alignment: .leading) {
                 Text("Other Flags", comment: "Brew settings command line flags section title")
                     .bold()
+
+                GreedyUpgradeToggle()
 
                 HStack {
                     Toggle(isOn: $noQuarantine) {

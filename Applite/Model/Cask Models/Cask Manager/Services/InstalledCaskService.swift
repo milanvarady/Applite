@@ -37,8 +37,7 @@ struct InstalledCaskService {
     func getOutdatedCasks() async throws -> Set<CaskId> {
         var arguments: [String] = ["outdated", "--cask", "-q"]
 
-        // TODO: greedy toggle
-        let greedy = false
+        let greedy = UserDefaults.standard.bool(forKey: Preferences.greedyUpgrade.rawValue)
 
         if greedy {
             arguments.append("-g")

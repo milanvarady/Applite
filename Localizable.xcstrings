@@ -3147,6 +3147,9 @@
       },
       "shouldTranslate" : false
     },
+    "Greedy Upgrade" : {
+      "comment" : "Brew greedy flag toggle title"
+    },
     "Hide apps with few downloads" : {
       "comment" : "Few downloads search filter",
       "localizations" : {
@@ -4279,6 +4282,7 @@
     },
     "Notice" : {
       "comment" : "Alert title",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4734,6 +4738,9 @@
           }
         }
       }
+    },
+    "Refresh" : {
+
     },
     "Reinstall" : {
       "comment" : "Reinstall app button",
@@ -5259,76 +5266,6 @@
         }
       }
     },
-    "Show All" : {
-      "comment" : "Show all updates confirmation",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afficher tout"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mutasd mindet"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "全て表示"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示全部"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "顯示所有"
-          }
-        }
-      }
-    },
-    "Show All Updates" : {
-      "comment" : "Show all updates button",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afficher toutes les mises à jour"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Összes frissítés megjelenítése"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "全てのアップデートを表示"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示所有更新"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "顯示所有更新"
-          }
-        }
-      }
-    },
     "Sort By" : {
       "comment" : "Sorting option picker",
       "localizations" : {
@@ -5785,41 +5722,6 @@
         }
       }
     },
-    "This will show updates from applications that have auto-update turned off, i.e., applications that are taking care of their own updates." : {
-      "comment" : "Greedy update check alert message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette option affiche les mises à jour des applications dont la mise à jour automatique est désactivée, c'est-à-dire les applications qui s'occupent elles-mêmes de leurs mises à jour."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ez olyan alkalmazások frissítéseit jeleníti meg, amelyeknél az automatikus frissítés ki van kapcsolva, azaz amelyek maguk gondoskodnak a saját frissítéseikről."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "このオプションは自動更新が無効になっているアプリケーション、つまり独自の更新を処理するアプリケーションの更新を表示します"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "这将显示那些关闭了自动更新的应用程序的更新信息，即，那些自行管理更新的应用程序。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "這將顯示來自已關閉自動更新的應用程式的更新，即正在處理自己更新的應用程式。"
-          }
-        }
-      }
-    },
     "This will uninstall all files and cache associated with Applite." : {
       "comment" : "Uninstall applite window description",
       "localizations" : {
@@ -5889,6 +5791,9 @@
           }
         }
       }
+    },
+    "Turing on greedy upgrade will list all outdated apps, even those that have built-in update mechanisms and handle their own updates." : {
+
     },
     "Turn off few downloads filter" : {
       "comment" : "Filter disable button",

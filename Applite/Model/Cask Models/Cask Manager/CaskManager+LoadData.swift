@@ -45,7 +45,7 @@ extension CaskManager {
             }
         }
 
-        self.outdatedCasks.defineCasks(outdatedCasks)
+        self.outdatedCasks.defineCasks(outdatedCasks.sorted())
 
         Self.logger.info("Outdated casks refreshed successfully")
     }

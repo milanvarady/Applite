@@ -23,6 +23,7 @@ enum Preferences: String {
     case includeCasksFromTaps
     case appdirOn
     case appdirPath
+    case greedyUpgrade
     case noQuarantine
 
     // Proxy
