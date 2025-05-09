@@ -10,6 +10,7 @@ import SwiftUI
 extension SettingsView {
     struct GeneralSettingsView: View {
         @AppStorage(Preferences.colorSchemePreference.rawValue) var colorSchemePreference: ColorSchemePreference = .system
+        @AppStorage(Preferences.catalogUpdateFrequency.rawValue) var catalogUpdateFrequency: CatalogUpdateFrequency = .everyAppLaunch
         @AppStorage(Preferences.notificationSuccess.rawValue) var notificationOnSuccess: Bool = false
         @AppStorage(Preferences.notificationFailure.rawValue) var notificationOnFailure: Bool = true
 
@@ -27,6 +28,18 @@ extension SettingsView {
                     }
                 }
                 .pickerStyle(.segmented)
+
+                Divider()
+                    .padding(.vertical)
+
+                Text("App Catalog", comment: "Catalog settings title")
+                    .bold()
+
+                Picker("App Catalog Update Frequency", selection: $catalogUpdateFrequency) {
+                    ForEach(CatalogUpdateFrequency.allCases) { freq in
+                        Text(freq.description)
+                    }
+                }
 
                 Divider()
                     .padding(.vertical)

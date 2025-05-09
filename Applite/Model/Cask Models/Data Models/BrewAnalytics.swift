@@ -8,11 +8,11 @@
 import Foundation
 
 /// Used when decoding download count analytics from Homebrew API
-struct BrewAnalytics: Decodable {
+struct BrewAnalytics: Codable {
     let items: [AnalyticsItem]
 }
 
 /// Used in the ``BrewAnalytics`` object to decode cask download count data
-struct AnalyticsItem: Decodable {
+struct AnalyticsItem: Codable {
     let cask, count: String
 }

@@ -25,7 +25,7 @@ extension UpdateView {
         .labelStyle(.titleAndIcon)
         .alert("Notice", isPresented: $showingGreedyUpdateConfirm) {
             AsyncButton("Show All") {
-                try await caskManager.refreshOutdated(greedy: true)
+                try await caskManager.refreshOutdated()
             }
             .onButtonError { error in
                 loadAlert.show(title: "Failed to load updates", message: error.localizedDescription)

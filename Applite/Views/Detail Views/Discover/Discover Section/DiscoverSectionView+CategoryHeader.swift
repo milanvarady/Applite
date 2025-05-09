@@ -15,7 +15,7 @@ extension DiscoverSectionView {
             Image(systemName: category.sfSymbol)
                 .font(.system(size: fontSize))
 
-            Text(category.name)
+            Text(category.localizedName)
                 .font(.system(size: fontSize, weight: .bold))
 
             Button("See All") {

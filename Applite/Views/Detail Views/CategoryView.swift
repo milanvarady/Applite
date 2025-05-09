@@ -15,7 +15,7 @@ struct CategoryView: View {
         VStack(alignment: .leading) {
             // Category name
             Group {
-                Text(category.name)
+                Text(category.localizedName)
                     .font(.appliteMediumTitle)
                     .padding(.bottom, -20)
                 
