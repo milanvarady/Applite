@@ -25,7 +25,7 @@ final class AlertManager: ObservableObject {
         primaryAction: (() -> Void)? = nil
     ) {
         self.title = title
-        self.message = message
+        self.message = message.limitedToLines(20, suffix: "...")
         self.primaryButtonTitle = primaryButtonTitle
         self.primaryAction = primaryAction
         self.isPresented = true

@@ -2686,6 +2686,9 @@
         }
       }
     },
+    "Enabling greedy upgrade will list all outdated apps, even those that have built-in update mechanisms and handle their own updates." : {
+
+    },
     "Error" : {
       "comment" : "Cask action failed (e.g. installation failed)",
       "localizations" : {
@@ -4280,42 +4283,6 @@
         }
       }
     },
-    "Notice" : {
-      "comment" : "Alert title",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Attention"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Figyelem!"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "注意"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "通知"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "注意"
-          }
-        }
-      }
-    },
     "Notifications" : {
       "comment" : "Notification settings title",
       "localizations" : {
@@ -5791,9 +5758,6 @@
           }
         }
       }
-    },
-    "Turing on greedy upgrade will list all outdated apps, even those that have built-in update mechanisms and handle their own updates." : {
-
     },
     "Turn off few downloads filter" : {
       "comment" : "Filter disable button",

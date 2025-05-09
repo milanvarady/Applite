@@ -1,8 +1,8 @@
 //
-//  StringExtension.swift
+//  String+CleanTerminalOutput.swift
 //  Applite
 //
-//  Created by Milán Várady on 2024.12.25.
+//  Created by Milán Várady on 2025.05.09.
 //
 
 import Foundation
@@ -15,20 +15,12 @@ extension String {
         let backspacePattern = ".\\u{08}"
         // Regex for other unwanted characters
         let unwantedPattern = "[\\r\\f]"
-
+        
         let cleaned = self
             .replacingOccurrences(of: ansiEscapePattern, with: "", options: .regularExpression)
             .replacingOccurrences(of: backspacePattern, with: "", options: .regularExpression)
             .replacingOccurrences(of: unwantedPattern, with: "", options: .regularExpression)
-
+        
         return cleaned
-    }
-
-    func paddedWithQuotes() -> String {
-        "\"\(self)\""
-    }
-
-    var numberOfLines: Int {
-        self.components(separatedBy: .newlines).count - 1
     }
 }

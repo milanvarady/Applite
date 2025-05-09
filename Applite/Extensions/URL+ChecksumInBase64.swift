@@ -1,18 +1,14 @@
 //
-//  URLExtension.swift
+//  URL+ChecksumInBase64.swift
 //  Applite
 //
-//  Created by Milán Várady on 2023. 08. 30..
+//  Created by Milán Várady on 2025.05.09.
 //
 
 import Foundation
 import CryptoKit
 
 extension URL {
-    func quotedPath() -> String {
-        return "\"\(self.path(percentEncoded: false))\""
-    }
-
     func checksumInBase64() -> String? {
         let bufferSize = 16*1024
 
@@ -25,7 +21,7 @@ extension URL {
 
             // Create and initialize MD5 context:
             var md5 = CryptoKit.Insecure.MD5()
-            
+
             // Read up to `bufferSize` bytes, until EOF is reached, and update MD5 context:
             while autoreleasepool(invoking: {
                 let data = file.readData(ofLength: bufferSize)
@@ -39,7 +35,7 @@ extension URL {
 
             // Compute the MD5 digest:
             let data = Data(md5.finalize())
-            
+
             return data.base64EncodedString()
         } catch {
             return nil
