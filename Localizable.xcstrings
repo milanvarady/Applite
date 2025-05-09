@@ -882,6 +882,12 @@
         }
       }
     },
+    "App Catalog" : {
+      "comment" : "Catalog settings title"
+    },
+    "App Catalog Update Frequency" : {
+
+    },
     "App has Caveats" : {
       "comment" : "App has caveats alert title",
       "localizations" : {
@@ -2715,6 +2721,12 @@
         }
       }
     },
+    "Every 3 Days" : {
+
+    },
+    "Every App Launch" : {
+
+    },
     "Export" : {
       "comment" : "App migration export card title",
       "localizations" : {
@@ -4049,6 +4061,9 @@
           }
         }
       }
+    },
+    "Monthly" : {
+
     },
     "Most downloaded (default)" : {
       "comment" : "Sorting option",
@@ -6648,6 +6663,9 @@
           }
         }
       }
+    },
+    "Weekly" : {
+
     },
     "Welcome to Applite" : {
       "comment" : "Setup welcome page title",

@@ -10,6 +10,9 @@ import SwiftUI
 
 extension CaskManager {
     // URLs
+    private static let caskAPIURL = URL(string: "https://formulae.brew.sh/api/cask.json")!
+    private static let analyticsAPIURL = URL(string: "https://formulae.brew.sh/api/analytics/cask-install/365d.json")!
+
     private static let cacheDirectory = URL.cachesDirectory
         .appendingPathComponent("Applite", conformingTo: .directory)
 
@@ -24,35 +27,53 @@ extension CaskManager {
     /// Gathers all necessary information and combines them to a list of ``Cask`` objects
     /// - Returns: Void
     func loadData() async throws {
+        @Sendable
+        func loadModel<T: Decodable>(apiURL: URL, cacheURL: URL, as type: T.Type) async throws -> T {
+            // Load from cache if fresh enough
+            do {
+                let updateFreqRawValue = UserDefaults.standard.integer(forKey: Preferences.catalogUpdateFrequency.rawValue)
+
+                guard let updateFreq = CatalogUpdateFrequency(rawValue: updateFreqRawValue) else {
+                    throw CaskLoadError.failedToGetUpdateFrequency
+                }
+
+                if try updateFreq.shouldLoadFromCache(at: cacheURL) {
+                    await Self.logger.notice("Cache for \(type) is up to date.")
+                    return try await loadModelFromCache(from: cacheURL, as: type)
+                }
+            } catch {
+                await Self.logger.error("Failed to load \(type) from cache. Error: \(error.localizedDescription).")
+                await Self.logger.notice("Defaulting to API load for \(type).")
+            }
+
+            // Load from web API
+            do {
+                let sessionConfiguration = NetworkProxyManager.getURLSessionConfiguration()
+                let urlSession = URLSession(configuration: sessionConfiguration)
+
+                let (modelData, _) = try await urlSession.data(from: apiURL)
+
+                // Chache json file
+                await cacheData(data: modelData, to: cacheURL)
+
+                return try JSONDecoder().decode(type, from: modelData)
+            } catch {
+                await Self.logger.error("Couldn't get cask data from brew API. Error: \(error.localizedDescription)")
+            }
+
+            await Self.logger.notice("Loading of \(type) has failed. Attempting to load from cache.")
+            return try await loadModelFromCache(from: cacheURL, as: type)
+        }
+
         /// Gets cask information from the Homebrew API and decodes it into a list of ``Cask`` objects
         /// - Returns: List of ``Cask`` objects
         @Sendable
         func loadCaskInfo() async throws -> [CaskInfo] {
-            // Get json data from api
-            guard let casksURL = URL(string: "https://formulae.brew.sh/api/cask.json") else { return [] }
-
-            let caskData: Data
-
-            let sessionConfiguration = NetworkProxyManager.getURLSessionConfiguration()
-            let urlSession = URLSession(configuration: sessionConfiguration)
-
-            do {
-                (caskData, _) = try await urlSession.data(from: casksURL)
-            } catch {
-                await Self.logger.error("Couldn't get cask data from brew API. Error: \(error.localizedDescription)")
-
-                // Try to load from cache
-                await Self.logger.notice("Attempting to load cask data from cache")
-                caskData = try await loadDataFromCache(dataURL: Self.caskCacheURL)
-            }
-
-            // Chache json file
-            await cacheData(data: caskData, to: Self.caskCacheURL)
-
-            // Decode static cask data
-            async let casks = try JSONDecoder().decode([CaskInfo].self, from: caskData)
-
-            return try await casks
+            return try await loadModel(
+                apiURL: Self.caskAPIURL,
+                cacheURL: Self.caskCacheURL,
+                as: [CaskInfo].self
+            )
         }
 
         func loadTapCaskInfo() async -> [CaskInfo] {
@@ -105,32 +126,14 @@ extension CaskManager {
         /// - Returns: A Cask ID to download count dictionary
         @Sendable
         func loadAnalyticsData() async throws -> BrewAnalyticsDictionary {
-            // Get json data from api
-            guard let analyticsURL = URL(string: "https://formulae.brew.sh/api/analytics/cask-install/365d.json") else { return [:] }
-
-            let analyticsData: Data
-
-            let sessionConfiguration = NetworkProxyManager.getURLSessionConfiguration()
-            let urlSession = URLSession(configuration: sessionConfiguration)
-
-            do {
-                (analyticsData, _) = try await urlSession.data(from: analyticsURL)
-            } catch {
-                await Self.logger.error("Couldn't get analytics data from brew API. Error: \(error.localizedDescription)")
-
-                // Try to load from cache
-                await Self.logger.notice("Attempting to load analytics data from cache")
-                analyticsData = try await loadDataFromCache(dataURL: Self.analyicsCacheURL)
-            }
-
-            // Chache json file
-            await cacheData(data: analyticsData, to: Self.analyicsCacheURL)
-
-            // Decode data
-            async let analyticsDecoded = try JSONDecoder().decode(BrewAnalytics.self, from: analyticsData)
+            let analyticsModel = try await loadModel(
+                apiURL: Self.analyticsAPIURL,
+                cacheURL: Self.analyicsCacheURL,
+                as: BrewAnalytics.self
+            )
 
             // Convert analytics to a cask ID to download count dictionary
-            let analyticsDict: BrewAnalyticsDictionary = Dictionary(uniqueKeysWithValues: try await analyticsDecoded.items.map {
+            let analyticsDict: BrewAnalyticsDictionary = Dictionary(uniqueKeysWithValues: analyticsModel.items.map {
                 ($0.cask, Int($0.count.replacingOccurrences(of: ",", with: "")) ?? 0)
             })
 
@@ -186,9 +189,10 @@ extension CaskManager {
         /// Loads data from cache
         /// - Returns: A ``Data`` object
         @Sendable
-        func loadDataFromCache(dataURL: URL) async throws -> Data {
+        func loadModelFromCache<T: Decodable>(from url: URL, as type: T.Type) async throws -> T {
             do {
-                return try Data(contentsOf: dataURL)
+                let modelData = try Data(contentsOf: url)
+                return try JSONDecoder().decode(type, from: modelData)
             } catch {
                 throw CaskLoadError.failedToLoadFromCache
             }

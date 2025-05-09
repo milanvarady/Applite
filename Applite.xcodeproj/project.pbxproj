@@ -127,6 +127,7 @@
 		4196C8F528F9CB2600EADDDA /* DiscoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8F428F9CB2600EADDDA /* DiscoverView.swift */; };
 		4196C8FE28F9E13600EADDDA /* UpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8FD28F9E13600EADDDA /* UpdateView.swift */; };
 		4196C90028F9E1F400EADDDA /* InstalledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4196C8FF28F9E1F400EADDDA /* InstalledView.swift */; };
+		41A32F082D66689D0015A0C5 /* CatalogUpdateFrequency.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A32F072D66689D0015A0C5 /* CatalogUpdateFrequency.swift */; };
 		41B731392A879353008BF6B9 /* ActiveTasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41B731382A879353008BF6B9 /* ActiveTasksView.swift */; };
 		41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 41C8FA282A7A598B000BB9A2 /* Sparkle */; };
 		41CE28C02D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CE28BF2D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift */; };
@@ -268,6 +269,7 @@
 		4196C8FD28F9E13600EADDDA /* UpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateView.swift; sourceTree = "<group>"; };
 		4196C8FF28F9E1F400EADDDA /* InstalledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledView.swift; sourceTree = "<group>"; };
 		4196C90128FAF57A00EADDDA /* AppliteDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppliteDebug.entitlements; sourceTree = "<group>"; };
+		41A32F072D66689D0015A0C5 /* CatalogUpdateFrequency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogUpdateFrequency.swift; sourceTree = "<group>"; };
 		41B731382A879353008BF6B9 /* ActiveTasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveTasksView.swift; sourceTree = "<group>"; };
 		41CE28BF2D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+AppliteBrewInfoView.swift"; sourceTree = "<group>"; };
 		41CE28C12D2DA0690018483F /* SetupView+BrewPathDetectedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+BrewPathDetectedView.swift"; sourceTree = "<group>"; };
@@ -298,6 +300,7 @@
 			isa = PBXGroup;
 			children = (
 				4104D7422A8FC52C00F84F9B /* Preferences.swift */,
+				41A32F072D66689D0015A0C5 /* CatalogUpdateFrequency.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -869,6 +872,7 @@
 				419256372D1DF34200D9EF10 /* SettingsView+ProxySettings.swift in Sources */,
 				414074F528DF53E80073EB22 /* AppliteApp.swift in Sources */,
 				41062C9B2A3E4AFA00FD48EA /* BundleExtension.swift in Sources */,
+				41A32F082D66689D0015A0C5 /* CatalogUpdateFrequency.swift in Sources */,
 				419256522D1E0D0500D9EF10 /* DiscoverSectionView.swift in Sources */,
 				41CE28C22D2DA0690018483F /* SetupView+BrewPathDetectedView.swift in Sources */,
 				418989AF2A33B65A004AC23B /* SmallProgressView.swift in Sources */,

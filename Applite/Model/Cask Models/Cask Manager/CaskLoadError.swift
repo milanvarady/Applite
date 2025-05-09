@@ -11,6 +11,7 @@ enum CaskLoadError: LocalizedError {
     case failedToLoadCategoryJSON
     case failedToLoadFromCache
     case failedToLoadAdditionalInfo
+    case failedToGetUpdateFrequency
 
     var errorDescription: String? {
         switch self {
@@ -20,6 +21,8 @@ enum CaskLoadError: LocalizedError {
             return "Failed to load app catalog from cache, check your internet connection"
         case .failedToLoadAdditionalInfo:
             return "Failed to load additional info"
+        case .failedToGetUpdateFrequency:
+            return "Failed to get update frequency"
         }
     }
 
@@ -31,6 +34,8 @@ enum CaskLoadError: LocalizedError {
             return "The file doesn't exist or couldn't be read"
         case .failedToLoadAdditionalInfo:
             return "The response object was empty"
+        case .failedToGetUpdateFrequency:
+            return "Couldn't init update frequency from raw value"
         }
     }
 }

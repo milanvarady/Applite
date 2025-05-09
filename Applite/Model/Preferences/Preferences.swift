@@ -13,6 +13,7 @@ enum Preferences: String {
 
     // General
     case colorSchemePreference
+    case catalogUpdateFrequency
     case notificationSuccess
     case notificationFailure
 
