@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct CategoryViewModel: Identifiable, Equatable, Hashable {
-    let name: LocalizedStringKey
+struct CategoryViewModel: Identifiable, Equatable, Hashable, Sendable {
+    let name: String
     let sfSymbol: String
     let casks: [Cask]
     let casksCoupled: [[Cask]]

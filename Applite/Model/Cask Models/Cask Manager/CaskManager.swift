@@ -23,6 +23,9 @@ final class CaskManager: ObservableObject {
     @Published var activeTasks: [BrewTask] = []
     @Published var alert = AlertManager()
 
+    /// The data coordinator that orchestrates data loading
+    lazy var dataCoordinator = CaskDataCoordinator()
+
     // Searchble cask collections
     let allCasks = SearchableCaskCollection()
     let installedCasks = SearchableCaskCollection()
@@ -42,7 +45,7 @@ final class CaskManager: ObservableObject {
         do {
             let categories = try loadCategoryJSON()
             let categoryViewModels = categories.map {
-                CategoryViewModel(name: LocalizedStringKey($0.id), sfSymbol: $0.sfSymbol, casks: [], casksCoupled: [])
+                CategoryViewModel(name: $0.id, sfSymbol: $0.sfSymbol, casks: [], casksCoupled: [])
             }
 
             self.categories = categoryViewModels
