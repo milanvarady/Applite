@@ -20,6 +20,7 @@
 		4101EB4A2DCE669500BE0670 /* String+NumberOfLines.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4101EB492DCE669500BE0670 /* String+NumberOfLines.swift */; };
 		4101EB4C2DCE66D100BE0670 /* Array+SafeSubscript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4101EB4B2DCE66D100BE0670 /* Array+SafeSubscript.swift */; };
 		4101EB4E2DCE670400BE0670 /* URL+ChecksumInBase64.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4101EB4D2DCE670400BE0670 /* URL+ChecksumInBase64.swift */; };
+		4101EB502DCE6BBB00BE0670 /* SettingsView+Mirrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4101EB4F2DCE6BBB00BE0670 /* SettingsView+Mirrors.swift */; };
 		4104D7432A8FC52C00F84F9B /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4104D7422A8FC52C00F84F9B /* Preferences.swift */; };
 		41062C952A3794EA00FD48EA /* BrewPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C942A3794EA00FD48EA /* BrewPaths.swift */; };
 		41062C972A3A20F900FD48EA /* UninstallSelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C962A3A20F900FD48EA /* UninstallSelf.swift */; };
@@ -174,6 +175,7 @@
 		4101EB492DCE669500BE0670 /* String+NumberOfLines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NumberOfLines.swift"; sourceTree = "<group>"; };
 		4101EB4B2DCE66D100BE0670 /* Array+SafeSubscript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+SafeSubscript.swift"; sourceTree = "<group>"; };
 		4101EB4D2DCE670400BE0670 /* URL+ChecksumInBase64.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+ChecksumInBase64.swift"; sourceTree = "<group>"; };
+		4101EB4F2DCE6BBB00BE0670 /* SettingsView+Mirrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+Mirrors.swift"; sourceTree = "<group>"; };
 		4104D7422A8FC52C00F84F9B /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		41062C942A3794EA00FD48EA /* BrewPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewPaths.swift; sourceTree = "<group>"; };
 		41062C962A3A20F900FD48EA /* UninstallSelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallSelf.swift; sourceTree = "<group>"; };
@@ -614,6 +616,7 @@
 				419256342D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift */,
 				419256362D1DF34200D9EF10 /* SettingsView+ProxySettings.swift */,
 				419256382D1DF35C00D9EF10 /* SettingsView+Uninstaller.swift */,
+				4101EB4F2DCE6BBB00BE0670 /* SettingsView+Mirrors.swift */,
 				4101EB402DCE217500BE0670 /* GreedyUpgradeToggle.swift */,
 			);
 			path = Settings;
@@ -986,6 +989,7 @@
 				4120AB682A755B5A00F68EFE /* CheckForUpdatesView.swift in Sources */,
 				415135662D32C4570025DB70 /* Cask+Equtable.swift in Sources */,
 				415135682D32C4720025DB70 /* Cask+Hashable.swift in Sources */,
+				4101EB502DCE6BBB00BE0670 /* SettingsView+Mirrors.swift in Sources */,
 				4120AB652A754B1700F68EFE /* AppliteAppView.swift in Sources */,
 				412635442A77FB1600155034 /* BrewInstallationProgress.swift in Sources */,
 				419256202D1DEC0D00D9EF10 /* AppView+UpdateButton.swift in Sources */,

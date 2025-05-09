@@ -30,6 +30,13 @@ enum Preferences: String {
     case networkProxyEnabled
     case preferredProxyType
 
+    // Mirrors
+    case mirrorEnabled
+    case mirrorAPIDomain
+    case mirrorBrewGitRemote
+    case mirrorCoreGitRemote
+    case mirrorBottleDomain
+
     // Sorting options
     case searchSortOption
     case hideUnpopularApps

@@ -2686,6 +2686,9 @@
         }
       }
     },
+    "Enabled" : {
+
+    },
     "Enabling greedy upgrade will list all outdated apps, even those that have built-in update mechanisms and handle their own updates." : {
 
     },
@@ -4068,6 +4071,12 @@
         }
       }
     },
+    "Mirror" : {
+
+    },
+    "Mirrors" : {
+
+    },
     "Monthly" : {
 
     },
@@ -4529,6 +4538,9 @@
           }
         }
       }
+    },
+    "Presets" : {
+
     },
     "Productivity" : {
       "comment" : "App category",

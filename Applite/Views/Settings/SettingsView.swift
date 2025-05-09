@@ -54,6 +54,11 @@ struct SettingsView: View {
                     Label("Proxy", systemImage: "network.badge.shield.half.filled")
                 }
 
+            MirrorsView()
+                .tabItem {
+                    Label("Mirrors", systemImage: "arrow.left.arrow.right")
+                }
+
             UninstallView()
                 .tabItem {
                     Label("Uninstall", systemImage: "trash")
@@ -68,12 +73,16 @@ struct SettingsView: View {
                 NSApp.keyWindow?.makeFirstResponder(nil)
             }
         }
-        .frame(width: 400)
+        .frame(width: 440)
     }
 }
 
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsView(updater: SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil).updater)
-    }
+#Preview {
+    SettingsView(
+        updater: SPUStandardUpdaterController(
+            startingUpdater: false,
+            updaterDelegate: nil,
+            userDriverDelegate: nil
+        ).updater
+    )
 }

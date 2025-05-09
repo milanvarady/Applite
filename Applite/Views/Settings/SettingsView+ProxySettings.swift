@@ -13,7 +13,7 @@ extension SettingsView {
         @AppStorage(Preferences.preferredProxyType.rawValue) var preferredProxyType: NetworkProxyType = .http
 
         var body: some View {
-            VStack(alignment: .center) {
+            VStack(alignment: .leading) {
                 Toggle("Use system proxy", isOn: $proxyEnabled)
 
                 Picker("Preferred proxy protocol", selection: $preferredProxyType) {
@@ -31,6 +31,7 @@ extension SettingsView {
                 .font(.system(.body, weight: .light))
                 .frame(minHeight: 60)
             }
+            .frame(maxWidth: 350)
             .padding()
         }
     }
