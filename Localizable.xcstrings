@@ -1660,6 +1660,9 @@
         }
       }
     },
+    "Brew path is invalid" : {
+
+    },
     "Broken Brew Path" : {
       "comment" : "Broken brew path alert title",
       "localizations" : {
@@ -2152,6 +2155,12 @@
           }
         }
       }
+    },
+    "Couldn't load app catalog" : {
+
+    },
+    "Couldn't load categories" : {
+
     },
     "Creative Tools" : {
       "comment" : "App category",
@@ -2870,6 +2879,15 @@
         }
       }
     },
+    "Failed to export" : {
+
+    },
+    "Failed to gather cask info" : {
+
+    },
+    "Failed to import" : {
+
+    },
     "Failed to install %@" : {
       "comment" : "Install failure alert title",
       "localizations" : {
@@ -2905,6 +2923,9 @@
         }
       }
     },
+    "Failed to refresh updates" : {
+
+    },
     "Failed to reinstall %@" : {
       "comment" : "Failed reinstall alert title",
       "localizations" : {
@@ -2939,6 +2960,9 @@
           }
         }
       }
+    },
+    "Failed to uninstall" : {
+
     },
     "Failed to uninstall %@" : {
       "comment" : "Failed app install alert title",
@@ -3506,6 +3530,9 @@
         }
       }
     },
+    "Imported file contains no valid apps" : {
+
+    },
     "In progress..." : {
       "comment" : "Brew Management view progress indicator",
       "localizations" : {
@@ -3683,7 +3710,6 @@
     },
     "Installation failed" : {
       "comment" : "App install alert",
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5033,42 +5059,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重試加載"
-          }
-        }
-      }
-    },
-    "Retry the installation or visit the troubleshooting page." : {
-      "comment" : "Brew dependency installation failure alert",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Réessayez l'installation ou visitez la page de dépannage."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próbálja meg újra a telepítést, vagy látogasson el a hibaelhárítási oldalra."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インストールを再試行するかトラブルシューティングページにアクセスして下さい"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重试安装或访问故障排除页面。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重試安裝或存取故障排除頁面。"
           }
         }
       }

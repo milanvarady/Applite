@@ -12,14 +12,14 @@ import SwiftUI
 @MainActor
 final class AlertManager: ObservableObject {
     @Published var isPresented: Bool = false
-    @Published var title: String = ""
+    @Published var title: LocalizedStringKey = ""
     @Published var message: String = ""
     @Published var primaryButtonTitle: String = "OK"
     @Published var primaryAction: (() -> Void)?
 
     /// Presents alert
     func show(
-        title: String,
+        title: LocalizedStringKey,
         message: String = "",
         primaryButtonTitle: String = "OK",
         primaryAction: (() -> Void)? = nil
@@ -34,7 +34,7 @@ final class AlertManager: ObservableObject {
     /// Shows an alert based on an error
     func show(
         error: Error,
-        title: String,
+        title: LocalizedStringKey,
         primaryButtonTitle: String = "OK",
         primaryAction: (() -> Void)? = nil
     ) {

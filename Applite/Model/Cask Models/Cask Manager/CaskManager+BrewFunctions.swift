@@ -308,7 +308,7 @@ extension CaskManager {
         Self.logger.error("\(alertTitle)\nError: \(error.localizedDescription)\nOutput: \(output)")
 
         // Alert
-        alert.show(title: alertTitle, message: alertMessage)
+        alert.show(title: LocalizedStringKey(alertTitle), message: alertMessage)
 
         // Send notification
         let notificationTitle = notificationTitle ?? alertTitle
