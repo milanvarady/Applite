@@ -21,17 +21,16 @@
         "id": "Communication",
         "sfSymbol": "text.bubble",
         "casks": [
+            "beeper",
             "discord",
             "messenger",
             "microsoft-teams",
             "signal",
-            "skype",
             "telegram-desktop",
             "viber",
             "wechat",
             "whatsapp",
-            "zoom",
-            "beeper"
+            "zoom"
         ]
     },
     {
@@ -39,6 +38,7 @@
         "sfSymbol": "gauge.high",
         "casks": [
             "alt-tab",
+            "antinote",
             "bettertouchtool",
             "cleanshot",
             "evernote",
@@ -79,21 +79,21 @@
         "sfSymbol": "menubar.rectangle",
         "casks": [
             "airbuddy",
+            "badgeify",
             "bartender",
             "caffeine",
+            "coconutbattery",
             "flux",
             "hiddenbar",
-            "jordanbaird-ice",
             "hot",
             "istat-menus",
             "itsycal",
+            "jordanbaird-ice",
+            "meetingbar",
             "stats",
             "ticktick",
             "tomatobar",
-            "vanilla",
-            "meetingbar",
-            "coconutbattery",
-            "badgeify"
+            "vanilla"
         ]
     },
     {
@@ -101,23 +101,22 @@
         "sfSymbol": "wrench.and.screwdriver",
         "casks": [
             "adobe-acrobat-reader",
-            "android-file-transfer",
             "altserver",
+            "android-file-transfer",
             "balenaetcher",
-            "couleurs",
+            "calibre",
             "downie",
             "fing",
             "handbrake",
             "imageoptim",
+            "keepingyouawake",
             "obs",
             "pdf-expert",
+            "permute",
+            "pika",
             "raspberry-pi-imager",
             "the-unarchiver",
             "transmission",
-            "permute",
-            "calibre",
-            "keepingyouawake",
-            "pika",
             "upscayl"
         ]
     },
@@ -125,14 +124,14 @@
         "id": "Maintenance",
         "sfSymbol": "wrench.adjustable",
         "casks": [
-            "neo-network-utility",
             "appcleaner",
-            "pearcleaner",
             "daisydisk",
-            "latest",
-            "onyx",
             "grandperspective",
-            "omnidisksweeper"
+            "latest",
+            "neo-network-utility",
+            "omnidisksweeper",
+            "onyx",
+            "pearcleaner"
         ]
     },
     {
@@ -147,15 +146,15 @@
             "audacity",
             "blender",
             "figma",
+            "freecad",
+            "gamemaker",
             "gimp",
             "godot",
-            "gamemaker",
-            "unity",
             "inkscape",
             "krita",
-            "sketch",
             "scribus",
-            "freecad"
+            "sketch",
+            "unity"
         ]
     },
     {
@@ -198,6 +197,7 @@
         "sfSymbol": "chevron.left.slash.chevron.right",
         "casks": [
             "clion",
+            "cursor",
             "dataspell",
             "goland",
             "intellij-idea",
@@ -212,23 +212,22 @@
             "textmate",
             "visual-studio-code",
             "vscodium",
-            "zed",
-            "cursor"
+            "zed"
         ]
     },
     {
         "id": "Terminals",
         "sfSymbol": "terminal",
         "casks": [
-            "iterm2",
-            "warp",
-            "tabby",
-            "hyper",
-            "kitty",
-            "zoc",
-            "wezterm",
             "alacritty",
-            "ghostty"
+            "ghostty",
+            "hyper",
+            "iterm2",
+            "kitty",
+            "tabby",
+            "warp",
+            "wezterm",
+            "zoc"
         ]
     },
     {
@@ -246,19 +245,18 @@
         "id": "Gaming",
         "sfSymbol": "gamecontroller",
         "casks": [
-            "chiaki",
-            "gog-galaxy",
             "battle-net",
+            "chiaki",
             "epic-games",
-            "openemu",
+            "gog-galaxy",
             "league-of-legends",
             "minecraft",
             "modrinth",
+            "openemu",
             "prismlauncher",
             "steam",
             "the-battle-for-wesnoth",
-            "widelands",
-            "whisky"
+            "widelands"
         ]
     },
     {
@@ -280,8 +278,8 @@
             "1password",
             "bitwarden",
             "enpass",
-            "keeper-password-manager",
             "keepassxc",
+            "keeper-password-manager",
             "lastpass",
             "nordpass",
             "roboform"
