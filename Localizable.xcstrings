@@ -570,10 +570,34 @@
     "3 days" : {
       "comment" : "App catalog frequency option",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les 3 jours"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "3 naponta"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3日ごと"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每 3 天"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每 3 天"
           }
         }
       }
@@ -896,10 +920,34 @@
     "App Catalog" : {
       "comment" : "Catalog settings title",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Catalogue d'applications"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alkalmazáslista"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリケーションカタログ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用目录"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "應用程式目錄"
           }
         }
       }
@@ -1012,10 +1060,34 @@
     "App launch" : {
       "comment" : "App catalog frequency option",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au lancement de l'application"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mindig"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリ起動時"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用启动时"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "應用程式啟動時"
           }
         }
       }
@@ -1688,10 +1760,34 @@
     "Brew path is invalid" : {
       "comment" : "Alert title",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le chemin Brew est invalide"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "A Brew elérési útvonal hibás"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew パスが無効です"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew 路径无效"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew 路徑無效"
           }
         }
       }
@@ -2192,10 +2288,34 @@
     "Couldn't load app catalog" : {
       "comment" : "Alert message",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger le catalogue"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alkalmazáslista betöltése sikertelen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カタログを読み込めませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法加载应用目录"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法載入應用程式目錄"
           }
         }
       }
@@ -2203,10 +2323,34 @@
     "Couldn't load categories" : {
       "comment" : "Alert message",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger les catégories"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alkalmazáskategóriák betöltése sikertelen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カテゴリを読み込めませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法加载类别"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法載入類別"
           }
         }
       }
@@ -2750,10 +2894,34 @@
     "Enabled" : {
       "comment" : "Brew mirror option enabled toggle",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activé"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktív"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有効"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已启用"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已啟用"
           }
         }
       }
@@ -2761,10 +2929,34 @@
     "Enabling greedy upgrade will list all outdated apps, even those that have built-in update mechanisms and handle their own updates." : {
       "comment" : "Greedy update info popup",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'activation de la mise à niveau \"greedy\" listera toutes les applications obsolètes, même celles qui disposent de mécanismes de mise à jour intégrés et gèrent leurs propres mises à jour."
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "A “Greedy upgrade” bekapcsolásával az összes elavult alkalmazás megjelenítésre kerül. Azok is, amelyek saját frissítési módszerrel rendelkeznek és maguk kezelik frissítéseiket."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「Greedy アップグレード」を有効にすると、組み込みの更新メカニズムを持ち、独自の更新を処理するアプリも含め、すべての古いアプリが一覧表示されます。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用贪婪升级将列出所有过时的应用，即使是那些具有内置更新机制并自行处理更新的应用。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "啟用貪婪升級將列出所有過時的應用程式，即使是那些具有內建更新機制並自行處理更新的應用程式。"
           }
         }
       }
@@ -2947,10 +3139,34 @@
     "Failed to export" : {
       "comment" : "Alert message",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de l'exportation"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exportálás sikertelen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エクスポートに失敗しました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出失败"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "匯出失敗"
           }
         }
       }
@@ -2958,10 +3174,34 @@
     "Failed to gather cask info" : {
       "comment" : "Alert message",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de la collecte des informations cask"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nem sikerült összegyűjteni a cask információkat"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cask 情報の収集に失敗しました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "收集 cask 信息失败"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "收集 cask 資訊失敗"
           }
         }
       }
@@ -2969,10 +3209,34 @@
     "Failed to import" : {
       "comment" : "Alert message",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de l'importation"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Importálás sikertelen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インポートに失敗しました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入失败"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "匯入失敗"
           }
         }
       }
@@ -3015,10 +3279,34 @@
     "Failed to refresh updates" : {
       "comment" : "Alert message",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de l'actualisation des mises à jour"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frissítések betöltése sikertelen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新の更新に失敗しました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刷新更新失败"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新整理更新失敗"
           }
         }
       }
@@ -3061,10 +3349,34 @@
     "Failed to uninstall" : {
       "comment" : "Alert message",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de la désinstallation"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Törlés sikertelen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アンインストールに失敗しました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载失败"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解除安裝失敗"
           }
         }
       }
@@ -3142,10 +3454,34 @@
     "Fetch app catalog every:" : {
       "comment" : "App Catalog update frequency picker label",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualiser le catalogue toutes les :"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Az alkalmazáslista frissítése:"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カタログの取得頻度："
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用目录刷新频率："
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "應用程式目錄更新頻率："
           }
         }
       }
@@ -3293,10 +3629,34 @@
     "Greedy Upgrade" : {
       "comment" : "Brew greedy flag toggle title",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à niveau \"Greedy\""
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Greedy Upgrade"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Greedy アップグレード"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "贪婪升级"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "貪婪升級"
           }
         }
       }
@@ -3655,10 +4015,34 @@
     "Imported file contains no valid apps" : {
       "comment" : "Alert message",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le fichier importé ne contient aucune application valide"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Az importált fájl nem tartalmaz érvényes alkalmazásokat"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インポートされたファイルに有効なアプリが含まれていません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入的文件不包含任何有效的应用"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "匯入的檔案不包含任何有效的應用程式"
           }
         }
       }
@@ -4231,10 +4615,34 @@
     "Mirror" : {
       "comment" : "Homebrew mirror",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miroir"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mirror"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミラー"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "镜像"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鏡像"
           }
         }
       }
@@ -4242,10 +4650,34 @@
     "Mirrors" : {
       "comment" : "Homebrew mirror settings tab title",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miroirs"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mirrorok"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミラー"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "镜像"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鏡像"
           }
         }
       }
@@ -4253,10 +4685,34 @@
     "Month" : {
       "comment" : "App catalog frequency option",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les mois"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Havonta"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "毎月"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每月"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每月"
           }
         }
       }
@@ -4723,10 +5179,34 @@
     "Presets" : {
       "comment" : "Brew mirror preset picker label",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Préréglages"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sablonok"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プリセット"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预设"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預設"
           }
         }
       }
@@ -4910,10 +5390,34 @@
     "Refresh" : {
       "comment" : "Update refresh button",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualiser"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Firssítés"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刷新"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新整理"
           }
         }
       }
@@ -6007,10 +6511,34 @@
     "Uninstall & delete app data" : {
       "comment" : "Uninstall and delete related files button",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désinstaller et supprimer les données"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Törlés app adatokkal együtt"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アンインストールとデータ削除"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载并删除应用数据"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解除安裝並刪除應用程式資料"
           }
         }
       }
@@ -6116,42 +6644,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "卸載Applite…"
-          }
-        }
-      }
-    },
-    "Uninstall Completely" : {
-      "comment" : "Uninstall app completely button",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Désinstaller totalement"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Teljes törlés"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "完全にアンインストールする"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "完全卸载"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "卸載完成"
           }
         }
       }
@@ -6724,10 +7216,34 @@
     "Week" : {
       "comment" : "App catalog frequency option",
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les semaines"
+          }
+        },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hetente"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "毎週"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每周"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每週"
           }
         }
       }
