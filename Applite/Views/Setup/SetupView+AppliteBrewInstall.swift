@@ -11,6 +11,8 @@ import ButtonKit
 extension SetupView {
     /// Brew installation page
     struct AppliteBrewInstall: View {
+        @Environment(\.openURL) var openURL
+
         /// This is needed so the parent view knows it can continue to the next page
         @Binding var isDone: Bool
 
@@ -18,7 +20,7 @@ extension SetupView {
 
         // Alerts
         @State var showCommandLineToolsInstallAlert = false
-        @State var showInstallFailAlert = false
+        @StateObject var installAlert = AlertManager()
 
         @StateObject var installationProgress = BrewInstallationProgress()
 
@@ -67,19 +69,14 @@ extension SetupView {
                         comment: "Brew dependency installation alert"
                     )
                 }
-                .alert("Installation failed", isPresented: $showInstallFailAlert) {
-                    Button("Troubleshooting") {
-                        if let url = URL(string: "https://aerolite.dev/applite/troubleshooting.html") {
-                            NSWorkspace.shared.open(url)
-                        }
+                .alert(installAlert.title, isPresented: $installAlert.isPresented) {
+                    Button("Troubleshooting", systemImage: "exclamationmark.magnifyingglass") {
+                        openURL(URL(string: "https://aerolite.dev/applite/troubleshooting.html")!)
                     }
 
                     Button("Quit", role: .destructive) { NSApplication.shared.terminate(self) }
                 } message: {
-                    Text(
-                        "Retry the installation or visit the troubleshooting page.",
-                        comment: "Brew dependency installation failure alert"
-                    )
+                    Text(installAlert.message)
                 }
             }
         }
@@ -118,6 +115,7 @@ extension SetupView {
             do {
                 try await DependencyManager.install(progressObject: installationProgress)
             } catch {
+                installAlert.show(title: "Installation failed", message: error.localizedDescription)
                 failed = true
             }
 

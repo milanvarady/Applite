@@ -3683,6 +3683,7 @@
     },
     "Installation failed" : {
       "comment" : "App install alert",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5038,6 +5039,7 @@
     },
     "Retry the installation or visit the troubleshooting page." : {
       "comment" : "Brew dependency installation failure alert",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

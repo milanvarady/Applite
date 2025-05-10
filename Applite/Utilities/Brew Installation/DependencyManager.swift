@@ -94,8 +94,12 @@ struct DependencyManager {
         
         // Fetch Homebrew tarball
         Self.logger.info("Fetching tarball and unpacking")
-        
         try await Shell.runAsync("curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C \(BrewPaths.appBrewDirectory.quotedPath())")
+
+        // Verify Homebrew installation
+        guard await BrewPaths.isBrewPathValid(at: BrewPaths.appBrewExetutable) else {
+            throw DependencyError.invalidBrewInstallation
+        }
 
         // Set selected Homebrew path to Applite's installation
         BrewPaths.selectedBrewOption = .appPath
