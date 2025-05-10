@@ -71,12 +71,16 @@ struct CaskNetworkService {
         let jsonString = match.0
 
         guard let jsonData = jsonString.data(using: .utf8) else {
+            logger.error("Failed to conver json string to data during tap compilation")
             return []
         }
 
-        guard let casks = try? JSONDecoder().decode([CaskInfo].self, from: jsonData) else {
+        guard let caskDTOs = try? JSONDecoder().decode([CaskDTO].self, from: jsonData) else {
+            logger.error("Failed to decode json data during tap compilation")
             return []
         }
+
+        let casks = caskDTOs.compactMap { try? CaskInfo(fromDTO: $0) }
 
         return casks
     }
