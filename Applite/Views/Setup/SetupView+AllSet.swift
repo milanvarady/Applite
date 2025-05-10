@@ -22,6 +22,7 @@ extension SetupView {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+            .keyboardShortcut(.defaultAction)
         }
     }
 }

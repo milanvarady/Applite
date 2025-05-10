@@ -63,6 +63,7 @@ extension SetupView {
                 .disabled(!canContinue)
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
+                .keyboardShortcut(.defaultAction)
             }
             .padding(.trailing)
             .padding(.bottom, 8)
