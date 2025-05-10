@@ -568,7 +568,15 @@
       }
     },
     "3 days" : {
-
+      "comment" : "App catalog frequency option",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 naponta"
+          }
+        }
+      }
     },
     "A brew installation was detected at:" : {
       "comment" : "Setup brew path detected view text",
@@ -886,7 +894,15 @@
       }
     },
     "App Catalog" : {
-      "comment" : "Catalog settings title"
+      "comment" : "Catalog settings title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alkalmazáslista"
+          }
+        }
+      }
     },
     "App has Caveats" : {
       "comment" : "App has caveats alert title",
@@ -994,7 +1010,15 @@
       }
     },
     "App launch" : {
-
+      "comment" : "App catalog frequency option",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mindig"
+          }
+        }
+      }
     },
     "App Migration" : {
       "comment" : "App Migration view title",
@@ -1588,7 +1612,8 @@
             "value" : "Brew"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "Brew Executable Path" : {
       "comment" : "Settings brew path selector",
@@ -1661,7 +1686,15 @@
       }
     },
     "Brew path is invalid" : {
-
+      "comment" : "Alert title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Brew elérési útvonal hibás"
+          }
+        }
+      }
     },
     "Broken Brew Path" : {
       "comment" : "Broken brew path alert title",
@@ -2157,10 +2190,26 @@
       }
     },
     "Couldn't load app catalog" : {
-
+      "comment" : "Alert message",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alkalmazáslista betöltése sikertelen"
+          }
+        }
+      }
     },
     "Couldn't load categories" : {
-
+      "comment" : "Alert message",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alkalmazáskategóriák betöltése sikertelen"
+          }
+        }
+      }
     },
     "Creative Tools" : {
       "comment" : "App category",
@@ -2699,10 +2748,26 @@
       }
     },
     "Enabled" : {
-
+      "comment" : "Brew mirror option enabled toggle",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktív"
+          }
+        }
+      }
     },
     "Enabling greedy upgrade will list all outdated apps, even those that have built-in update mechanisms and handle their own updates." : {
-
+      "comment" : "Greedy update info popup",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A “Greedy upgrade” bekapcsolásával az összes elavult alkalmazás megjelenítésre kerül. Azok is, amelyek saját frissítési módszerrel rendelkeznek és maguk kezelik frissítéseiket."
+          }
+        }
+      }
     },
     "Error" : {
       "comment" : "Cask action failed (e.g. installation failed)",
@@ -2880,13 +2945,37 @@
       }
     },
     "Failed to export" : {
-
+      "comment" : "Alert message",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportálás sikertelen"
+          }
+        }
+      }
     },
     "Failed to gather cask info" : {
-
+      "comment" : "Alert message",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nem sikerült összegyűjteni a cask információkat"
+          }
+        }
+      }
     },
     "Failed to import" : {
-
+      "comment" : "Alert message",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importálás sikertelen"
+          }
+        }
+      }
     },
     "Failed to install %@" : {
       "comment" : "Install failure alert title",
@@ -2924,7 +3013,15 @@
       }
     },
     "Failed to refresh updates" : {
-
+      "comment" : "Alert message",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frissítések betöltése sikertelen"
+          }
+        }
+      }
     },
     "Failed to reinstall %@" : {
       "comment" : "Failed reinstall alert title",
@@ -2962,7 +3059,15 @@
       }
     },
     "Failed to uninstall" : {
-
+      "comment" : "Alert message",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Törlés sikertelen"
+          }
+        }
+      }
     },
     "Failed to uninstall %@" : {
       "comment" : "Failed app install alert title",
@@ -3035,7 +3140,15 @@
       }
     },
     "Fetch app catalog every:" : {
-
+      "comment" : "App Catalog update frequency picker label",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az alkalmazáslista frissítése:"
+          }
+        }
+      }
     },
     "Force Install" : {
       "comment" : "Force install app button",
@@ -3178,7 +3291,15 @@
       "shouldTranslate" : false
     },
     "Greedy Upgrade" : {
-      "comment" : "Brew greedy flag toggle title"
+      "comment" : "Brew greedy flag toggle title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Greedy Upgrade"
+          }
+        }
+      }
     },
     "Hide apps with few downloads" : {
       "comment" : "Few downloads search filter",
@@ -3356,6 +3477,7 @@
       }
     },
     "Homepage" : {
+      "comment" : "Homepage link",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3531,7 +3653,15 @@
       }
     },
     "Imported file contains no valid apps" : {
-
+      "comment" : "Alert message",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az importált fájl nem tartalmaz érvényes alkalmazásokat"
+          }
+        }
+      }
     },
     "In progress..." : {
       "comment" : "Brew Management view progress indicator",
@@ -4099,13 +4229,37 @@
       }
     },
     "Mirror" : {
-
+      "comment" : "Homebrew mirror",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mirror"
+          }
+        }
+      }
     },
     "Mirrors" : {
-
+      "comment" : "Homebrew mirror settings tab title",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mirrorok"
+          }
+        }
+      }
     },
     "Month" : {
-
+      "comment" : "App catalog frequency option",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Havonta"
+          }
+        }
+      }
     },
     "Most downloaded (default)" : {
       "comment" : "Sorting option",
@@ -4567,7 +4721,15 @@
       }
     },
     "Presets" : {
-
+      "comment" : "Brew mirror preset picker label",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sablonok"
+          }
+        }
+      }
     },
     "Productivity" : {
       "comment" : "App category",
@@ -4746,7 +4908,15 @@
       }
     },
     "Refresh" : {
-
+      "comment" : "Update refresh button",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firssítés"
+          }
+        }
+      }
     },
     "Reinstall" : {
       "comment" : "Reinstall app button",
@@ -4960,6 +5130,7 @@
       }
     },
     "Retry" : {
+      "comment" : "Retry button title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5834,7 +6005,15 @@
       }
     },
     "Uninstall & delete app data" : {
-
+      "comment" : "Uninstall and delete related files button",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Törlés app adatokkal együtt"
+          }
+        }
+      }
     },
     "Uninstall Applite" : {
       "comment" : "Uninstall Applite window title",
@@ -6473,6 +6652,7 @@
       }
     },
     "Warning" : {
+      "comment" : "Alert title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -6542,7 +6722,15 @@
       }
     },
     "Week" : {
-
+      "comment" : "App catalog frequency option",
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hetente"
+          }
+        }
+      }
     },
     "Welcome to Applite" : {
       "comment" : "Setup welcome page title",
@@ -6611,7 +6799,8 @@
             "value" : "Xcode 命令列工具"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "Yes" : {
       "comment" : "Confirmation",
