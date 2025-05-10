@@ -35,7 +35,7 @@ extension SettingsView {
                 Text("App Catalog", comment: "Catalog settings title")
                     .bold()
 
-                Picker("App Catalog Update Frequency", selection: $catalogUpdateFrequency) {
+                Picker("Fetch app catalog every:", selection: $catalogUpdateFrequency) {
                     ForEach(CatalogUpdateFrequency.allCases) { freq in
                         Text(freq.description)
                     }

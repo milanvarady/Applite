@@ -17,13 +17,13 @@ enum CatalogUpdateFrequency: Int, CaseIterable, Identifiable {
     var description: LocalizedStringKey {
         switch self {
         case .everyAppLaunch:
-            "Every App Launch"
+            "App launch"
         case .everyThreeDays:
-            "Every 3 Days"
+            "3 days"
         case .weekly:
-            "Weekly"
+            "Week"
         case .monthly:
-            "Monthly"
+            "Month"
         }
     }
 

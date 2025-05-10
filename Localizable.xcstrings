@@ -567,6 +567,9 @@
         }
       }
     },
+    "3 days" : {
+
+    },
     "A brew installation was detected at:" : {
       "comment" : "Setup brew path detected view text",
       "localizations" : {
@@ -885,9 +888,6 @@
     "App Catalog" : {
       "comment" : "Catalog settings title"
     },
-    "App Catalog Update Frequency" : {
-
-    },
     "App has Caveats" : {
       "comment" : "App has caveats alert title",
       "localizations" : {
@@ -992,6 +992,9 @@
           }
         }
       }
+    },
+    "App launch" : {
+
     },
     "App Migration" : {
       "comment" : "App Migration view title",
@@ -2727,12 +2730,6 @@
         }
       }
     },
-    "Every 3 Days" : {
-
-    },
-    "Every App Launch" : {
-
-    },
     "Export" : {
       "comment" : "App migration export card title",
       "localizations" : {
@@ -3012,6 +3009,9 @@
           }
         }
       }
+    },
+    "Fetch app catalog every:" : {
+
     },
     "Force Install" : {
       "comment" : "Force install app button",
@@ -4078,7 +4078,7 @@
     "Mirrors" : {
 
     },
-    "Monthly" : {
+    "Month" : {
 
     },
     "Most downloaded (default)" : {
@@ -6551,7 +6551,7 @@
         }
       }
     },
-    "Weekly" : {
+    "Week" : {
 
     },
     "Welcome to Applite" : {
