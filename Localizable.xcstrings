@@ -5843,6 +5843,9 @@
         }
       }
     },
+    "Uninstall & delete app data" : {
+
+    },
     "Uninstall Applite" : {
       "comment" : "Uninstall Applite window title",
       "localizations" : {
@@ -5950,6 +5953,7 @@
     },
     "Uninstall Completely" : {
       "comment" : "Uninstall app completely button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

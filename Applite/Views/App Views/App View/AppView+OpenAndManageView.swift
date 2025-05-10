@@ -70,7 +70,7 @@ extension AppView {
                     Button(role: .destructive) {
                         caskManager.uninstall(cask, zap: true)
                     } label: {
-                        Label("Uninstall Completely", systemImage: "trash.fill")
+                        Label("Uninstall & delete app data", systemImage: "trash.fill")
                             .foregroundStyle(.red)
                     }
                 }
