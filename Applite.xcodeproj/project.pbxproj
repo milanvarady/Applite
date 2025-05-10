@@ -21,6 +21,7 @@
 		4101EB4C2DCE66D100BE0670 /* Array+SafeSubscript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4101EB4B2DCE66D100BE0670 /* Array+SafeSubscript.swift */; };
 		4101EB4E2DCE670400BE0670 /* URL+ChecksumInBase64.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4101EB4D2DCE670400BE0670 /* URL+ChecksumInBase64.swift */; };
 		4101EB502DCE6BBB00BE0670 /* SettingsView+Mirrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4101EB4F2DCE6BBB00BE0670 /* SettingsView+Mirrors.swift */; };
+		4101EB552DCE7FA000BE0670 /* MirrorEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4101EB542DCE7FA000BE0670 /* MirrorEnvironment.swift */; };
 		4104D7432A8FC52C00F84F9B /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4104D7422A8FC52C00F84F9B /* Preferences.swift */; };
 		41062C952A3794EA00FD48EA /* BrewPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C942A3794EA00FD48EA /* BrewPaths.swift */; };
 		41062C972A3A20F900FD48EA /* UninstallSelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C962A3A20F900FD48EA /* UninstallSelf.swift */; };
@@ -176,6 +177,7 @@
 		4101EB4B2DCE66D100BE0670 /* Array+SafeSubscript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+SafeSubscript.swift"; sourceTree = "<group>"; };
 		4101EB4D2DCE670400BE0670 /* URL+ChecksumInBase64.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+ChecksumInBase64.swift"; sourceTree = "<group>"; };
 		4101EB4F2DCE6BBB00BE0670 /* SettingsView+Mirrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+Mirrors.swift"; sourceTree = "<group>"; };
+		4101EB542DCE7FA000BE0670 /* MirrorEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirrorEnvironment.swift; sourceTree = "<group>"; };
 		4104D7422A8FC52C00F84F9B /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		41062C942A3794EA00FD48EA /* BrewPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewPaths.swift; sourceTree = "<group>"; };
 		41062C962A3A20F900FD48EA /* UninstallSelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallSelf.swift; sourceTree = "<group>"; };
@@ -359,6 +361,14 @@
 				4101EB492DCE669500BE0670 /* String+NumberOfLines.swift */,
 			);
 			path = String;
+			sourceTree = "<group>";
+		};
+		4101EB532DCE7F7F00BE0670 /* Mirror */ = {
+			isa = PBXGroup;
+			children = (
+				4101EB542DCE7FA000BE0670 /* MirrorEnvironment.swift */,
+			);
+			path = Mirror;
 			sourceTree = "<group>";
 		};
 		4104D7442A8FC53200F84F9B /* Preferences */ = {
@@ -560,6 +570,7 @@
 				4126353F2A77C71F00155034 /* Shell */,
 				41B731352A878993008BF6B9 /* App Migration */,
 				413E60B52BBAE58B00978F6A /* Network Proxy */,
+				4101EB532DCE7F7F00BE0670 /* Mirror */,
 				419256652D1E18A500D9EF10 /* Alert Manager */,
 				419256102D1DDB9700D9EF10 /* Other */,
 			);
@@ -879,6 +890,7 @@
 			files = (
 				413F87322D33E30400D4BE10 /* SortingOptions.swift in Sources */,
 				4196C90028F9E1F400EADDDA /* InstalledView.swift in Sources */,
+				4101EB552DCE7FA000BE0670 /* MirrorEnvironment.swift in Sources */,
 				415563A42A98C54300AE2F2E /* AppdirSelectorView.swift in Sources */,
 				4140750528DF5FA60073EB22 /* AppView.swift in Sources */,
 				415135642D32C4360025DB70 /* Cask+Identifiable.swift in Sources */,
@@ -1142,7 +1154,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Applite/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1158,7 +1170,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.aerolite.Applite;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1176,7 +1188,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Applite/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1192,7 +1204,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.aerolite.Applite;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

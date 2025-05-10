@@ -163,6 +163,11 @@ enum Shell {
             environment["ALL_PROXY"] = proxySettings.fullString
         }
 
+        if let mirrorEnvironmentVariables = MirrorEnvironment.getEnvironmentVariables() {
+            logger.info("Mirror enabled. API domain: \(mirrorEnvironmentVariables["HOMEBREW_API_DOMAIN"] ?? "not set")")
+            environment.merge(mirrorEnvironmentVariables) { (_, new) in new }
+        }
+
         task.standardOutput = pipe
         task.standardError = pipe
         task.environment = environment
