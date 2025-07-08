@@ -25,6 +25,7 @@ struct CategoryView: View {
             
             // Apps
             AppGridView(casks: category.casks, appRole: .installAndManage)
+                .id(category.id)
         }
     }
 }
