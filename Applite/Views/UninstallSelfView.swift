@@ -39,10 +39,9 @@ struct UninstallSelfView: View {
                 }
             
             Text(
-                "**Warning**: This will run the Homebrew uninstaller and remove Homebrew from all known locations and all packages installed.",
+                "**Warning**: This will run the Homebrew uninstaller and remove Homebrew from all known locations and all packages installed. Administrator privileges may be required.",
                 comment: "Uninstall Homebrew warning"
             )
-            .opacity(uninstallHomebrew ? 1 : 0)
 
             Divider()
                 .padding(.vertical)

@@ -74,14 +74,32 @@ private func uninstallHomebrewCompletely() async throws {
     
     logger.notice("Starting Homebrew uninstallation using official uninstaller script")
     
-    // Run the official Homebrew uninstaller script
-    let uninstallCommand = "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)\""
+    // First try to run the uninstaller non-interactively
+    let uninstallCommand = """
+    export NONINTERACTIVE=1; \
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+    """
     
     do {
         let output = try await Shell.runAsync(uninstallCommand)
         logger.notice("Homebrew uninstall output: \(output)")
     } catch {
         logger.error("Failed to uninstall Homebrew: \(error.localizedDescription)")
+        
+        // Check if it's a ShellError and provide better error message
+        if case .nonZeroExit(_, let exitCode, let output) = error as? ShellError {
+            if exitCode == 127 || output.contains("Permission denied") || output.contains("sudo") || output.contains("administrator") {
+                throw NSError(
+                    domain: "HomebrewUninstallError",
+                    code: Int(exitCode),
+                    userInfo: [
+                        NSLocalizedDescriptionKey: "Homebrew uninstallation requires administrator privileges",
+                        NSLocalizedRecoverySuggestionErrorKey: "The Homebrew uninstaller requires admin privileges to remove system files. Please run this operation as an administrator or manually uninstall Homebrew using Terminal with 'sudo' privileges."
+                    ]
+                )
+            }
+        }
+        
         throw error
     }
 }
