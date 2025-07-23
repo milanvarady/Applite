@@ -10,10 +10,10 @@ import OSLog
 import Kingfisher
 
 /// This function will uninstall Applite and all it's related files
-func uninstallSelf(deleteBrewCache: Bool) async throws {
+func uninstallSelf(deleteBrewCache: Bool, uninstallHomebrew: Bool = false) async throws {
     let logger = Logger()
     
-    logger.notice("Applite uninstallation stated. deleteBrewCache: \(deleteBrewCache)")
+    logger.notice("Applite uninstallation stated. deleteBrewCache: \(deleteBrewCache), uninstallHomebrew: \(uninstallHomebrew)")
 
     logger.notice("Clearing Kingfisher image cache")
 
@@ -46,8 +46,16 @@ func uninstallSelf(deleteBrewCache: Bool) async throws {
 
     logger.notice("Uninstall result: \(output)")
     
-    // Homebrew cache
-    if deleteBrewCache {
+    // If uninstalling Homebrew, delete cache first and then uninstall Homebrew
+    if uninstallHomebrew {
+        logger.notice("Deleting Homebrew cache before uninstalling Homebrew")
+        try await Shell.runAsync("rm -rf $HOME/Library/Caches/Homebrew")
+        
+        logger.notice("Uninstalling Homebrew")
+        try await uninstallHomebrewCompletely()
+    } else if deleteBrewCache {
+        // Only delete cache if not uninstalling Homebrew (since it would be redundant)
+        logger.notice("Deleting Homebrew cache")
         try await Shell.runAsync("rm -rf $HOME/Library/Caches/Homebrew")
     }
     
@@ -58,4 +66,22 @@ func uninstallSelf(deleteBrewCache: Bool) async throws {
     process.launchPath = "/bin/bash"
     process.arguments = ["-c", "osascript -e 'tell application \"Applite\" to quit' && sleep 2 && rm -rf \"\(Bundle.main.bundlePath)\" && defaults write \(Bundle.main.bundleIdentifier!) setupComplete 0"]
     process.launch()
+}
+
+/// Uninstalls Homebrew completely using the official uninstaller script
+private func uninstallHomebrewCompletely() async throws {
+    let logger = Logger()
+    
+    logger.notice("Starting Homebrew uninstallation using official uninstaller script")
+    
+    // Run the official Homebrew uninstaller script
+    let uninstallCommand = "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)\""
+    
+    do {
+        let output = try await Shell.runAsync(uninstallCommand)
+        logger.notice("Homebrew uninstall output: \(output)")
+    } catch {
+        logger.error("Failed to uninstall Homebrew: \(error.localizedDescription)")
+        throw error
+    }
 }
