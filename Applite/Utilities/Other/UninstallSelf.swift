@@ -25,19 +25,19 @@ func uninstallSelf(deleteBrewCache: Bool, uninstallHomebrew: Bool = false) async
 
     logger.notice("Deleting library files")
 
-    // Delete related files and cache
+    // Delete related files and cache (using -rf to ignore missing files)
     let command = """
-    rm -r "$HOME/Library/Application Support/Applite";
-    rm -r "$HOME/Library/Application Support/\(Bundle.main.bundleIdentifier!)";
-    rm -r $HOME/Library/Containers/\(Bundle.main.bundleIdentifier!);
-    rm -r $HOME/Library/Caches/Applite;
-    rm -r $HOME/Library/Caches/\(Bundle.main.bundleIdentifier!);
-    rm -r $HOME/Library/Applite;
-    rm -r $HOME/Library/Preferences/*\(Bundle.main.bundleIdentifier!)*.plist;
-    rm -r "$HOME/Library/Saved Application State/\(Bundle.main.bundleIdentifier!).savedState";
-    rm -r $HOME/Library/SyncedPreferences/\(Bundle.main.bundleIdentifier!)*.plist;
-    rm -r $HOME/Library/WebKit/\(Bundle.main.bundleIdentifier!);
-    rm -r $HOME/Library/HTTPStorages/dev.aerolite.Applite
+    rm -rf "$HOME/Library/Application Support/Applite";
+    rm -rf "$HOME/Library/Application Support/\(Bundle.main.bundleIdentifier!)";
+    rm -rf $HOME/Library/Containers/\(Bundle.main.bundleIdentifier!);
+    rm -rf $HOME/Library/Caches/Applite;
+    rm -rf $HOME/Library/Caches/\(Bundle.main.bundleIdentifier!);
+    rm -rf $HOME/Library/Applite;
+    rm -rf $HOME/Library/Preferences/*\(Bundle.main.bundleIdentifier!)*.plist;
+    rm -rf "$HOME/Library/Saved Application State/\(Bundle.main.bundleIdentifier!).savedState";
+    rm -rf $HOME/Library/SyncedPreferences/\(Bundle.main.bundleIdentifier!)*.plist;
+    rm -rf $HOME/Library/WebKit/\(Bundle.main.bundleIdentifier!);
+    rm -rf $HOME/Library/HTTPStorages/dev.aerolite.Applite
     """
     
     logger.notice("Running command: \(command)")
