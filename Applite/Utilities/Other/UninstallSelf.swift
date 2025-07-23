@@ -88,6 +88,14 @@ private func uninstallHomebrewCompletely() async throws {
         
         // Check if it's a ShellError and provide better error message
         if case .nonZeroExit(_, let exitCode, let output) = error as? ShellError {
+            // Handle case where Homebrew is not found (this is not really an error)
+            if output.contains("Failed to locate Homebrew") || 
+               output.contains("Homebrew is not installed") ||
+               output.contains("No such file or directory") && output.contains("brew") {
+                logger.notice("Homebrew not found - it may already be uninstalled or never installed")
+                return // Exit successfully since there's nothing to uninstall
+            }
+            
             if exitCode == 127 || output.contains("Permission denied") || output.contains("sudo") || output.contains("administrator") {
                 throw NSError(
                     domain: "HomebrewUninstallError",
