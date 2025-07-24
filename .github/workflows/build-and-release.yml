@@ -38,13 +38,13 @@ jobs:
       run: |
         # Auto-detect optimal Xcode version for this project
         if grep -q 'compatibilityVersion = "Xcode 14.0"' Applite.xcodeproj/project.pbxproj; then
-          XCODE_VERSION="14.3.1"  # Highest 14.x version with better Swift package support
+          XCODE_VERSION="15.0.1"  # Minimum Xcode version that supports swift-tools-version:5.9
         elif grep -q 'compatibilityVersion = "Xcode 15.0"' Applite.xcodeproj/project.pbxproj; then
           XCODE_VERSION="15.4"
         elif grep -q 'compatibilityVersion = "Xcode 16.0"' Applite.xcodeproj/project.pbxproj; then
           XCODE_VERSION="16.1"
         else
-          XCODE_VERSION="14.3.1"  # Default to 14.3.1 for better 14.x compatibility
+          XCODE_VERSION="15.0.1"  # Default to 15.0.1 - minimum for swift-tools-version:5.9 support
         fi
         
         # Auto-detect macOS deployment target
@@ -147,43 +147,32 @@ jobs:
         DETECTED_SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
         echo "📋 Detected Swift version: ${DETECTED_SWIFT_VERSION}"
         
-        # Xcode 14.3.1 has much better Swift package compatibility than 14.1
-        # It supports Swift 5.8 natively and has improved package resolution
+        # Xcode 15.0.1+ has proper support for swift-tools-version:5.9 which Ifrit requires
+        # This should resolve the tools version compatibility issue
         
-        echo "🔧 Using Xcode 14.3.1 for improved Swift package compatibility..."
+        echo "🔧 Using Xcode 15.0.1+ with native swift-tools-version:5.9 support..."
         
         # Clean any existing package resolution
         rm -rf DerivedData ~/Library/Developer/Xcode/DerivedData/Applite-* ~/Library/Caches/org.swift.swiftpm
         
-        # For Xcode 14.3.1, try Swift 5.8 first (native version) for package resolution only
-        echo "🔄 Attempting package resolution with Swift 5.8 (Xcode 14.3.1 native)..."
+        # With Xcode 15+, try without explicit Swift version first (let Xcode handle it)
+        echo "🔄 Attempting package resolution with default Swift version..."
         if xcodebuild -resolvePackageDependencies \
           -project "${{ env.XCODE_PROJECT }}" \
           -scheme "${{ env.SCHEME }}" \
-          -derivedDataPath DerivedData \
-          SWIFT_VERSION=5.8; then
-          echo "✅ Package resolution successful with Swift 5.8"
+          -derivedDataPath DerivedData; then
+          echo "✅ Package resolution successful with default Swift version"
         else
-          echo "⚠️ Swift 5.8 failed, trying Swift 5.9 for Ifrit compatibility..."
+          echo "⚠️ Default failed, trying with Swift 5.9 explicitly..."
           rm -rf DerivedData
           
-          if xcodebuild -resolvePackageDependencies \
+          xcodebuild -resolvePackageDependencies \
             -project "${{ env.XCODE_PROJECT }}" \
             -scheme "${{ env.SCHEME }}" \
             -derivedDataPath DerivedData \
-            SWIFT_VERSION=5.9; then
-            echo "✅ Package resolution successful with Swift 5.9"
-          else
-            echo "⚠️ Final fallback - trying package resolution without explicit Swift version..."
-            rm -rf DerivedData
-            
-            xcodebuild -resolvePackageDependencies \
-              -project "${{ env.XCODE_PROJECT }}" \
-              -scheme "${{ env.SCHEME }}" \
-              -derivedDataPath DerivedData
-            
-            echo "✅ Package resolution successful with default Swift version"
-          fi
+            SWIFT_VERSION=5.9
+          
+          echo "✅ Package resolution successful with Swift 5.9"
         fi
         
         echo "✅ Package dependencies resolved successfully"
