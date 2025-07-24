@@ -38,13 +38,13 @@ jobs:
       run: |
         # Auto-detect optimal Xcode version for this project
         if grep -q 'compatibilityVersion = "Xcode 14.0"' Applite.xcodeproj/project.pbxproj; then
-          XCODE_VERSION="15.4"  # Need 15.4+ for Swift 6.0 support
+          XCODE_VERSION="15.2"  # Xcode 15.2+ supports Swift 6.0 and swift-tools-version:5.9
         elif grep -q 'compatibilityVersion = "Xcode 15.0"' Applite.xcodeproj/project.pbxproj; then
-          XCODE_VERSION="15.4"
+          XCODE_VERSION="15.2"
         elif grep -q 'compatibilityVersion = "Xcode 16.0"' Applite.xcodeproj/project.pbxproj; then
           XCODE_VERSION="16.1"
         else
-          XCODE_VERSION="15.4"  # Default to 15.4 for Swift 6.0 and swift-tools-version:5.9 support
+          XCODE_VERSION="15.2"  # Default to 15.2 for Swift 6.0 and swift-tools-version:5.9 support
         fi
         
         # Auto-detect macOS deployment target
