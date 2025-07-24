@@ -72,96 +72,134 @@ jobs:
         api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
     
-    - name: Setup environment variables
-      run: |
-        get_environment_info() {
-          MACOS_VERSION=$(sw_vers -productVersion)
-          MACOS_BUILD=$(sw_vers -buildVersion)
-          
-          XCODE_VERSION_OUTPUT=$(xcodebuild -version 2>/dev/null || echo "Xcode 16.0\nBuild version 16A242d")
-          XCODE_VERSION=$(echo "$XCODE_VERSION_OUTPUT" | head -1 | awk '{print $2}')
-          XCODE_BUILD=$(echo "$XCODE_VERSION_OUTPUT" | tail -1 | awk '{print $3}')
-          XCODE_MAJOR_VERSION=$(echo $XCODE_VERSION | cut -d. -f1)
-          XCODE_PATH=$(xcode-select -p)
-          
-          SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "${{ env.SWIFT_VERSION_DEFAULT }}")
-          MACOS_TARGET=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "${{ env.MACOS_TARGET_DEFAULT }}")
-          XCODE_COMPATIBILITY=$(grep -o 'compatibilityVersion = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f2 || echo "Xcode 14.0")
-          SCHEME=$(grep -o 'name = [^;]*;' ${{ env.XCODE_PROJECT }}/project.pbxproj | grep -v 'productName' | head -1 | cut -d' ' -f3 | tr -d ';' || echo "Applite")
-          BUNDLE_ID=$(grep -o 'PRODUCT_BUNDLE_IDENTIFIER = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "dev.aerolite.Applite")
-          
-          {
-            echo "MACOS_VERSION=$MACOS_VERSION"
-            echo "MACOS_BUILD=$MACOS_BUILD"
-            echo "XCODE_VERSION=$XCODE_VERSION"
-            echo "XCODE_BUILD=$XCODE_BUILD"
-            echo "XCODE_MAJOR_VERSION=$XCODE_MAJOR_VERSION"
-            echo "XCODE_PATH=$XCODE_PATH"
-            echo "SWIFT_VERSION=${SWIFT_VERSION:-${{ env.SWIFT_VERSION_DEFAULT }}}"
-            echo "MACOS_TARGET=${MACOS_TARGET:-${{ env.MACOS_TARGET_DEFAULT }}}"
-            echo "XCODE_COMPATIBILITY=${XCODE_COMPATIBILITY:-Xcode 14.0}"
-            echo "SCHEME=${SCHEME:-Applite}"
-            echo "BUNDLE_ID=${BUNDLE_ID:-dev.aerolite.Applite}"
-          } >> $GITHUB_ENV
-        }
-        
-        get_environment_info
-    
     - name: Prepare build environment
       run: |
         echo "🔄 Preparing build environment..."
+        
+        # Setup environment variables
+        MACOS_VERSION=$(sw_vers -productVersion)
+        MACOS_BUILD=$(sw_vers -buildVersion)
+        
+        XCODE_VERSION_OUTPUT=$(xcodebuild -version 2>/dev/null || echo "Xcode 16.0\nBuild version 16A242d")
+        XCODE_VERSION=$(echo "$XCODE_VERSION_OUTPUT" | head -1 | awk '{print $2}')
+        XCODE_BUILD=$(echo "$XCODE_VERSION_OUTPUT" | tail -1 | awk '{print $3}')
+        XCODE_MAJOR_VERSION=$(echo $XCODE_VERSION | cut -d. -f1)
+        XCODE_PATH=$(xcode-select -p)
+        
+        # Extract project configuration
+        SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "${{ env.SWIFT_VERSION_DEFAULT }}")
+        MACOS_TARGET=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "${{ env.MACOS_TARGET_DEFAULT }}")
+        XCODE_COMPATIBILITY=$(grep -o 'compatibilityVersion = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f2 || echo "Xcode 14.0")
+        
+        # Extract scheme from target name (more reliable than random name fields)
+        SCHEME=$(grep -A1 'PBXNativeTarget' ${{ env.XCODE_PROJECT }}/project.pbxproj | grep 'name = ' | head -1 | cut -d' ' -f3 | tr -d ';' || echo "Applite")
+        
+        BUNDLE_ID=$(grep -o 'PRODUCT_BUNDLE_IDENTIFIER = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "dev.aerolite.Applite")
+        
+        # Extract code signing configuration (prioritize platform-specific settings)
+        CODE_SIGN_IDENTITY_RAW=$(grep -o 'CODE_SIGN_IDENTITY\[sdk=macosx\*\]" = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f4 || grep -o 'CODE_SIGN_IDENTITY = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f2 || echo "")
+        
+        # Handle special cases for code sign identity
+        if [ "$CODE_SIGN_IDENTITY_RAW" = "-" ] || [ -z "$CODE_SIGN_IDENTITY_RAW" ]; then
+          PROJECT_CODE_SIGN_IDENTITY="None (Ad Hoc)"
+        else
+          PROJECT_CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY_RAW"
+        fi
+        
+        # Extract provisioning profile
+        PROVISIONING_PROFILE_RAW=$(grep -o 'PROVISIONING_PROFILE_SPECIFIER = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "")
+        
+        if [ -z "$PROVISIONING_PROFILE_RAW" ]; then
+          PROJECT_PROVISIONING_PROFILE="None"
+        else
+          PROJECT_PROVISIONING_PROFILE="$PROVISIONING_PROFILE_RAW"
+        fi
+        
+        # Export to GitHub environment
+        {
+          echo "MACOS_VERSION=$MACOS_VERSION"
+          echo "MACOS_BUILD=$MACOS_BUILD"
+          echo "XCODE_VERSION=$XCODE_VERSION"
+          echo "XCODE_BUILD=$XCODE_BUILD"
+          echo "XCODE_MAJOR_VERSION=$XCODE_MAJOR_VERSION"
+          echo "XCODE_PATH=$XCODE_PATH"
+          echo "SWIFT_VERSION=${SWIFT_VERSION:-${{ env.SWIFT_VERSION_DEFAULT }}}"
+          echo "MACOS_TARGET=${MACOS_TARGET:-${{ env.MACOS_TARGET_DEFAULT }}}"
+          echo "XCODE_COMPATIBILITY=${XCODE_COMPATIBILITY:-Xcode 14.0}"
+          echo "SCHEME=${SCHEME:-Applite}"
+          echo "BUNDLE_ID=${BUNDLE_ID:-dev.aerolite.Applite}"
+          echo "PROJECT_CODE_SIGN_IDENTITY=$PROJECT_CODE_SIGN_IDENTITY"
+          echo "PROJECT_PROVISIONING_PROFILE=$PROJECT_PROVISIONING_PROFILE"
+        } >> $GITHUB_ENV
+        
+        # Check secret availability for display purposes
+        SECRET_BUILD_CERT="${{ secrets.BUILD_CERTIFICATE_BASE64 != '' && 'Set' || 'Not Set' }}"
+        SECRET_P12_PASSWORD="${{ secrets.P12_PASSWORD != '' && 'Set' || 'Not Set' }}"
+        SECRET_APPSTORE_ISSUER="${{ secrets.APPSTORE_ISSUER_ID != '' && 'Set' || 'Not Set' }}"
+        SECRET_APPSTORE_KEY_ID="${{ secrets.APPSTORE_KEY_ID != '' && 'Set' || 'Not Set' }}"
+        SECRET_APPSTORE_PRIVATE_KEY="${{ secrets.APPSTORE_PRIVATE_KEY != '' && 'Set' || 'Not Set' }}"
         
         # Create build info templates using direct variable substitution
         {
           echo "Build Environment:"
           echo "================="
+          echo "Project Configuration:"
+          echo "  • Scheme: $SCHEME"
+          echo "  • Xcode Project: ${{ env.XCODE_PROJECT }}"
+          echo "  • Xcode Targeted: $XCODE_COMPATIBILITY"
+          echo "  • Swift Version: $SWIFT_VERSION"
+          echo "  • macOS Targeted: $MACOS_TARGET"
+          echo ""
           echo "System:"
           echo "  • macOS: $MACOS_VERSION ($MACOS_BUILD)"
           echo "  • Runner: macos-15"
           echo "  • Xcode Installed: $XCODE_VERSION ($XCODE_BUILD)"
           echo ""
-          echo "Project Configuration:"
-          echo "  • Xcode Project: ${{ env.XCODE_PROJECT }}"
-          echo "  • Scheme: $SCHEME"
-          echo "  • Xcode Targeted: $XCODE_COMPATIBILITY"
-          echo "  • Swift Version: $SWIFT_VERSION"
-          echo "  • macOS Targeted: $MACOS_TARGET"
-          echo "  • Bundle ID: $BUNDLE_ID"
-          echo "  • Derived Data Path: ${{ env.DERIVED_DATA_PATH }}"
-          echo ""
-          echo "Code Signing:"
-          echo "  • Code Signing: ${{ github.event.inputs.code_signing }}"
-          echo "  • Code Sign Identity: ${{ env.CODE_SIGN_IDENTITY }}"
-          echo "  • Provisioning Profile: ${{ env.PROVISIONING_PROFILE_SPECIFIER }}"
-          echo ""
           echo "Build Options:"
           echo "  • Build Config: ${{ github.event.inputs.configuration }}"
           echo "  • Create DMG: ${{ github.event.inputs.create_dmg }}"
+          echo ""
+          echo "Code Signing:"
+          echo "  • Code Signing: ${{ github.event.inputs.code_signing }}"
+          echo "  • Bundle ID: $BUNDLE_ID"
+          echo "  • Code Sign Identity: $PROJECT_CODE_SIGN_IDENTITY"
+          echo "  • Provisioning Profile: $PROJECT_PROVISIONING_PROFILE"
+          echo "  • Build Certificate: $SECRET_BUILD_CERT"
+          echo "  • P12 Password: $SECRET_P12_PASSWORD"
+          echo "  • App Store Issuer ID: $SECRET_APPSTORE_ISSUER"
+          echo "  • App Store Key ID: $SECRET_APPSTORE_KEY_ID"
+          echo "  • App Store Private Key: $SECRET_APPSTORE_PRIVATE_KEY"
+          echo ""
         } > /tmp/build_info_console.txt
         
         {
+          echo "### Project Configuration"
+          echo "- **Scheme:** $SCHEME"
+          echo "- **Xcode Project:** ${{ env.XCODE_PROJECT }}"
+          echo "- **Xcode Targeted:** $XCODE_COMPATIBILITY"
+          echo "- **Swift Version:** $SWIFT_VERSION"
+          echo "- **macOS Targeted:** $MACOS_TARGET"
+          echo ""
           echo "### System"
           echo "- **macOS:** $MACOS_VERSION ($MACOS_BUILD)"
           echo "- **Runner:** macos-15"
           echo "- **Xcode Installed:** $XCODE_VERSION ($XCODE_BUILD)"
           echo ""
-          echo "### Project Configuration"
-          echo "- **Xcode Project:** ${{ env.XCODE_PROJECT }}"
-          echo "- **Scheme:** $SCHEME"
-          echo "- **Xcode Targeted:** $XCODE_COMPATIBILITY"
-          echo "- **Swift Version:** $SWIFT_VERSION"
-          echo "- **macOS Targeted:** $MACOS_TARGET"
-          echo "- **Bundle ID:** $BUNDLE_ID"
-          echo "- **Derived Data Path:** ${{ env.DERIVED_DATA_PATH }}"
-          echo ""
-          echo "### Code Signing"
-          echo "- **Code Signing:** ${{ github.event.inputs.code_signing }}"
-          echo "- **Code Sign Identity:** ${{ env.CODE_SIGN_IDENTITY }}"
-          echo "- **Provisioning Profile:** ${{ env.PROVISIONING_PROFILE_SPECIFIER }}"
-          echo ""
           echo "### Build Options"
           echo "- **Build Config:** ${{ github.event.inputs.configuration }}"
           echo "- **Create DMG:** ${{ github.event.inputs.create_dmg }}"
+          echo ""
+          echo "### Code Signing"
+          echo "- **Code Signing:** ${{ github.event.inputs.code_signing }}"
+          echo "- **Bundle ID:** $BUNDLE_ID"
+          echo "- **Code Sign Identity:** $PROJECT_CODE_SIGN_IDENTITY"
+          echo "- **Provisioning Profile:** $PROJECT_PROVISIONING_PROFILE"
+          echo "- **Build Certificate:** $SECRET_BUILD_CERT"
+          echo "- **P12 Password:** $SECRET_P12_PASSWORD"
+          echo "- **App Store Issuer ID:** $SECRET_APPSTORE_ISSUER"
+          echo "- **App Store Key ID:** $SECRET_APPSTORE_KEY_ID"
+          echo "- **App Store Private Key:** $SECRET_APPSTORE_PRIVATE_KEY"
+          echo ""
         } > /tmp/build_info_markdown.txt
         
         cat /tmp/build_info_console.txt
