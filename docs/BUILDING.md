@@ -80,14 +80,14 @@ This comprehensive guide explains how to build, test, and develop Applite using 
 #### 1. Launch Codespace
 ```bash
 # Option 1: From GitHub web interface
-# 1. Go to github.com/computeronix/Applite
+# 1. Go to github.com/milanvarady/Applite
 # 2. Click "Code" → "Codespaces" → "Create codespace on main"
 
 # Option 2: From command line (with GitHub CLI)
-gh codespace create --repo computeronix/Applite
+gh codespace create --repo milanvarady/Applite
 
 # Option 3: Direct URL
-# https://github.com/computeronix/Applite/codespaces
+# https://github.com/milanvarady/Applite/codespaces
 ```
 
 #### 2. Codespace Environment
@@ -153,7 +153,7 @@ git push
 ssh your-username@your-mac-ip
 
 # Copy build artifacts from GitHub Actions
-wget https://github.com/computeronix/Applite/actions/runs/xxx/artifacts/xxx
+wget https://github.com/milanvarady/Applite/actions/runs/xxx/artifacts/xxx
 
 # Or build locally on your Mac from Codespace changes
 git pull origin main
@@ -234,7 +234,7 @@ xcodebuild -project Applite.xcodeproj -scheme Applite -configuration Debug
 #### Log Analysis
 ```bash
 # View GitHub Actions logs
-gh run list --repo computeronix/Applite
+gh run list --repo milanvarady/Applite
 gh run view <run-id> --log
 
 # Download and analyze build artifacts
@@ -267,7 +267,7 @@ xcodebuild -showBuildSettings -project Applite.xcodeproj -scheme Applite
 
 ### 1. Clone and Open
 ```bash
-git clone https://github.com/computeronix/Applite.git
+git clone https://github.com/milanvarady/Applite.git
 cd Applite
 open Applite.xcodeproj
 ```
@@ -1037,10 +1037,10 @@ This guide covers three main development approaches for Applite:
 ### Quick Reference Commands
 ```bash
 # Codespaces development
-gh codespace create --repo computeronix/Applite
+gh codespace create --repo milanvarady/Applite
 
 # Local development
-git clone https://github.com/computeronix/Applite.git
+git clone https://github.com/milanvarady/Applite.git
 open Applite.xcodeproj
 
 # Command line builds
@@ -1061,7 +1061,7 @@ xcodebuild -project Applite.xcodeproj -scheme Applite -configuration Release
 4. Use GitHub Actions to build and test
 
 # Local macOS (recommended for Mac users)  
-1. git clone https://github.com/computeronix/Applite.git
+1. git clone https://github.com/milanvarady/Applite.git
 2. open Applite.xcodeproj
 3. Build and run with ⌘R
 4. Test changes locally before pushing
