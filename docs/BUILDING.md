@@ -685,6 +685,19 @@ The workflow will:
 
 ### Common Issues
 
+#### Swift Package Dependencies
+**Error**: "Dependencies could not be resolved because 'ifrit' contains incompatible tools version (5.9.0)"
+- This occurs when Swift Package dependencies have different tools version requirements
+- **Solution 1**: The workflow automatically handles this with package resolution retry logic
+- **Solution 2**: In Xcode: File → Packages → Reset Package Dependencies, then Update to Latest Package Versions
+- **Solution 3**: Clean Build Folder (Product → Clean Build Folder)
+- **Root Cause**: Some packages declare older Swift tools versions but are compatible with newer Swift versions
+
+**Error**: "Swift version: 'Not specified'"
+- The workflow will automatically detect Swift version from project settings
+- If not detected, it falls back to project defaults
+- This doesn't affect the build process
+
 #### Build Issues
 **Error**: "No Xcode version detected"
 - Check that your `.xcodeproj` file is in the repository root
