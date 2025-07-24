@@ -2,24 +2,7 @@
 
 > **📋 Note**: This guide focuses on building and developing Applite. For general contribution guidelines (reporting bugs, suggesting features), see [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-This comprehensive guide explains how to build, test, and deve### When to Use Automated Builds
-
-✅ **Use GitHub Actions for:**
-- 🎯 **Release builds** - Final builds for distribution
-- 🧪 **Testing pull requests** - Verify changes work across environments  
-- 📦 **Creating installers** - DMG files for end users
-- 🔐 **Signed/notarized builds** - App Store or direct distribution
-- 👥 **Team collaboration** - Consistent builds for all contributors
-- 🔄 **Integration testing** - Validate changes don't break builds
-- 🌥️ **Codespaces development** - Build while coding in the cloud
-
-❌ **Don't use GitHub Actions for:**
-- 🐛 **Active debugging** - Too slow for iterative development (use local Xcode or remote debugging)
-- 🔬 **Exploratory coding** - Use local Xcode or Codespaces with remote Mac
-- 📝 **Documentation changes** - Usually don't need building (Codespaces is perfect)
-- ⚡ **Quick fixes** - Test locally first, then use Actions for verification
-
-> **🌥️ Codespaces Tip**: GitHub Actions pairs perfectly with Codespaces development - code in the cloud, build with Actions, test on your devices.ng various environments and tools. Whether you're making a quick fix or preparing a release, this document covers automated GitHub Actions builds, local development workflows, and cloud-based development with GitHub Codespaces.
+This comprehensive guide explains how to build, test, and develop Applite using various environments and tools. Whether you're making a quick fix or preparing a release, this document covers automated GitHub Actions builds, local development workflows, and cloud-based development with GitHub Codespaces.
 
 ## Table of Contents
 
@@ -349,8 +332,8 @@ The build system automatically detects project settings for maximum compatibilit
 
 **Xcode Version (Enhanced Detection):**
 - **Primary**: Reads `compatibilityVersion` from `Applite.xcodeproj/project.pbxproj` (currently "Xcode 14.0")
+- **Smart Mapping**: Maps project versions to available GitHub Actions versions (e.g., 14.0 → 14.1)
 - **Fallback**: Uses `LastUpgradeCheck` mapping if compatibilityVersion unavailable
-- **Dynamic**: Directly uses the version specified in your project (e.g., "14.0", "15.2", "16.1")
 - **Future-proof**: Automatically supports new Xcode versions as they're released
 
 **macOS Runner (Dynamic Selection):**
@@ -362,9 +345,10 @@ The build system automatically detects project settings for maximum compatibilit
 **Example Detection Results:**
 ```
 Project settings → GitHub Actions result:
-compatibilityVersion "Xcode 14.0" → xcode-version: "14.0"
-compatibilityVersion "Xcode 15.2" → xcode-version: "15.2"
-compatibilityVersion "Xcode 16.1" → xcode-version: "16.1"
+compatibilityVersion "Xcode 14.0" → xcode-version: "14.1" (closest available)
+compatibilityVersion "Xcode 14.3" → xcode-version: "14.3.1" (exact match)
+compatibilityVersion "Xcode 15.0" → xcode-version: "15.0.1" (patch version)
+compatibilityVersion "Xcode 16.1" → xcode-version: "16.1" (exact match)
 
 MACOSX_DEPLOYMENT_TARGET 13.0 → macos-runner: "macos-13"
 MACOSX_DEPLOYMENT_TARGET 14.2 → macos-runner: "macos-14"  
