@@ -1,4 +1,4 @@
-name: Build and Release Applite
+name: Build and Release
 
 on:
   workflow_dispatch:
@@ -6,493 +6,177 @@ on:
       configuration:
         description: 'Build configuration'
         required: true
+        default: 'Debug'
         type: choice
         options:
-        - Debug
-           echo "📋 Package information:"
-        echo "- Ifrit dependency: Uses swift-tools-version:5.9 but supports Swift 6.0"
-        echo "- Project Swift version: 6.0" 
-        echo "- Strategy: Let xcodebuild resolve packages during build process"
-        echo "- This bypasses the explicit package resolution that causes tools version conflicts"
-        
-        echo "✅ Ready for build - packages will be resolved automatically during archive step"ease
-        default: 'Debug'
-      sign_release:
-        description: 'Sign the release with Apple Developer certificates'
+          - Debug
+          - Release
+      code_signing:
+        description: 'Enable code signing'
         required: true
-        type: boolean
         default: false
-      create_dmg:
-        description: 'Create DMG installer'
-        required: true
         type: boolean
-        default: true
-
-env:
-  XCODE_PROJECT: Applite.xcodeproj
-  SCHEME: Applite
-  PRODUCT_NAME: Applite
+      create_dmg:
+        description: 'Create DMG package'
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   detect-versions:
-    runs-on: macos-13
+    runs-on: macos-latest
     outputs:
-      xcode-version: ${{ steps.detect-xcode.outputs.xcode-version }}
-      macos-runner: ${{ steps.detect-macos.outputs.macos-runner }}
+      xcode-version: ${{ steps.detect.outputs.xcode-version }}
+      macos-version: ${{ steps.detect.outputs.macos-version }}
+      swift-version: ${{ steps.detect.outputs.swift-version }}
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Detect Xcode version from project
-      id: detect-xcode
+    - uses: actions/checkout@v4
+    
+    - name: Detect versions
+      id: detect
       run: |
-        # Extract compatibilityVersion from project.pbxproj (more reliable than LastUpgradeCheck)
-        COMPATIBILITY_VERSION=$(grep "compatibilityVersion" ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | sed 's/.*compatibilityVersion = "Xcode \([0-9]*\.[0-9]*\)".*/\1/')
-        echo "Project compatibilityVersion: Xcode $COMPATIBILITY_VERSION"
-        
-        # Also check LastUpgradeCheck as fallback
-        UPGRADE_CHECK=$(grep "LastUpgradeCheck" ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | sed 's/.*LastUpgradeCheck = \([0-9]*\);.*/\1/' 2>/dev/null || echo "")
-        
-        # Determine Xcode version dynamically
-        if [[ -n "$COMPATIBILITY_VERSION" ]]; then
-          # Use compatibilityVersion but map to available GitHub Actions versions
-          case "$COMPATIBILITY_VERSION" in
-            "14.0") XCODE_VERSION="14.1" ;;  # Map 14.0 to closest available 14.1
-            "14.1") XCODE_VERSION="14.1" ;;
-            "14.2") XCODE_VERSION="14.2" ;;
-            "14.3") XCODE_VERSION="14.3.1" ;;
-            "15.0") XCODE_VERSION="15.0.1" ;;
-            "15.1") XCODE_VERSION="15.1" ;;
-            "15.2") XCODE_VERSION="15.2" ;;
-            "15.3") XCODE_VERSION="15.3" ;;
-            "15.4") XCODE_VERSION="15.4" ;;
-            "16.0") XCODE_VERSION="16.0" ;;
-            "16.1") XCODE_VERSION="16.1" ;;
-            "16.2") XCODE_VERSION="16.2" ;;
-            "16.3") XCODE_VERSION="16.3" ;;
-            *) XCODE_VERSION="latest-stable" ;;  # Fallback for unknown versions
-          esac
-          echo "Mapped compatibilityVersion $COMPATIBILITY_VERSION to GitHub Actions version: $XCODE_VERSION"
-        elif [[ -n "$UPGRADE_CHECK" ]]; then
-          # Fallback to LastUpgradeCheck mapping
-          echo "Falling back to LastUpgradeCheck: $UPGRADE_CHECK"
-          case $UPGRADE_CHECK in
-            1630) XCODE_VERSION="16.3" ;;
-            1620) XCODE_VERSION="16.2" ;;
-            1610) XCODE_VERSION="16.1" ;;
-            1600) XCODE_VERSION="16.0" ;;
-            1540) XCODE_VERSION="15.4" ;;
-            1530) XCODE_VERSION="15.3" ;;
-            1520) XCODE_VERSION="15.2" ;;
-            1510) XCODE_VERSION="15.1" ;;
-            1500) XCODE_VERSION="15.0" ;;
-            1460) XCODE_VERSION="14.6" ;;
-            1450) XCODE_VERSION="14.5" ;;
-            *) XCODE_VERSION="latest-stable" ;;
-          esac
+        # Auto-detect optimal Xcode version for this project
+        if grep -q 'compatibilityVersion = "Xcode 14.0"' Applite.xcodeproj/project.pbxproj; then
+          XCODE_VERSION="14.1"
+        elif grep -q 'compatibilityVersion = "Xcode 15.0"' Applite.xcodeproj/project.pbxproj; then
+          XCODE_VERSION="15.4"
+        elif grep -q 'compatibilityVersion = "Xcode 16.0"' Applite.xcodeproj/project.pbxproj; then
+          XCODE_VERSION="16.1"
         else
-          echo "No version information found, using latest-stable"
           XCODE_VERSION="latest-stable"
         fi
         
-        echo "Final Xcode version: $XCODE_VERSION"
+        # Auto-detect macOS deployment target
+        MACOS_VERSION=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
+        
+        # Auto-detect Swift version
+        SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
+        
         echo "xcode-version=$XCODE_VERSION" >> $GITHUB_OUTPUT
-
-    - name: Detect macOS runner from deployment target
-      id: detect-macos
-      run: |
-        # Extract MACOSX_DEPLOYMENT_TARGET from project.pbxproj
-        DEPLOYMENT_TARGET=$(grep "MACOSX_DEPLOYMENT_TARGET" ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | sed 's/.*MACOSX_DEPLOYMENT_TARGET = \([0-9]*\)\.[0-9]*;.*/\1/')
-        echo "MACOSX_DEPLOYMENT_TARGET major version: $DEPLOYMENT_TARGET"
+        echo "macos-version=${MACOS_VERSION:-13.0}" >> $GITHUB_OUTPUT
+        echo "swift-version=${SWIFT_VERSION:-5.9}" >> $GITHUB_OUTPUT
         
-        # Dynamically map deployment target to macOS runner
-        # Use the detected major version directly in runner name
-        case $DEPLOYMENT_TARGET in
-          15) MACOS_RUNNER="macos-15" ;;
-          14) MACOS_RUNNER="macos-14" ;;
-          13) MACOS_RUNNER="macos-13" ;;
-          *) MACOS_RUNNER="macos-latest" ;;  # Default fallback for future versions or unknown
-        esac
-        
-        echo "Detected macOS runner: $MACOS_RUNNER (based on deployment target $DEPLOYMENT_TARGET)"
-        echo "macos-runner=$MACOS_RUNNER" >> $GITHUB_OUTPUT
+        echo "🔍 Detected versions: Xcode $XCODE_VERSION, macOS ${MACOS_VERSION:-13.0}, Swift ${SWIFT_VERSION:-5.9}"
 
   build:
+    runs-on: macos-latest
     needs: detect-versions
-    runs-on: ${{ needs.detect-versions.outputs.macos-runner }}
+    env:
+      XCODE_PROJECT: "Applite.xcodeproj"
+      SCHEME: "Applite"
     
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
+    - uses: actions/checkout@v4
+    
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: ${{ needs.detect-versions.outputs.xcode-version }}
-        
-    - name: Show build environment
-      run: |
-        echo "Xcode version: ${{ needs.detect-versions.outputs.xcode-version }}"
-        echo "macOS runner: ${{ needs.detect-versions.outputs.macos-runner }}"
-        echo "Configuration: ${{ github.event.inputs.configuration }}"
-        echo "Sign release: ${{ github.event.inputs.sign_release }}"
-        echo "Create DMG: ${{ github.event.inputs.create_dmg }}"
-        
-        echo "--- Build Tools ---"
-        xcodebuild -version
-        
-        echo "--- Swift and Project Info ---"
-        echo "Project: ${{ env.XCODE_PROJECT }}"
-        echo "Scheme: ${{ env.SCHEME }}"
-        echo "Product: ${{ env.PRODUCT_NAME }}"
-        
-        # Note: Skipping xcodebuild -list and Swift version detection to avoid 
-        # triggering package resolution which fails due to Ifrit tools version conflict.
-        # These will be resolved automatically during the build process.
-        echo "Swift version: Will be detected during build (avoiding package resolution conflict)"
-        
-    - name: Install Apple certificate (if signing)
-      if: github.event.inputs.sign_release == 'true'
-      env:
-        BUILD_CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE }}
-        P12_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-      run: |
-        # Validate required secrets
-        if [[ -z "$BUILD_CERTIFICATE_BASE64" ]]; then
-          echo "❌ Error: MACOS_CERTIFICATE secret is required for signing"
-          echo "Please see SIGNING_SETUP.md for instructions"
-          exit 1
-        fi
-        
-        if [[ -z "$P12_PASSWORD" ]]; then
-          echo "❌ Error: MACOS_CERTIFICATE_PWD secret is required for signing"
-          echo "Please see SIGNING_SETUP.md for instructions"
-          exit 1
-        fi
-        
-        if [[ -z "$KEYCHAIN_PASSWORD" ]]; then
-          echo "❌ Error: KEYCHAIN_PASSWORD secret is required for signing"
-          echo "Please see SIGNING_SETUP.md for instructions"
-          exit 1
-        fi
-        
-        # Create variables
-        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-
-        # Import certificate from secrets
-        echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
-
-        # Create temporary keychain
-        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-
-        # Import certificate to keychain
-        security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-        security list-keychain -d user -s $KEYCHAIN_PATH
-
-        # Show available signing identities
-        echo "Available signing identities:"
-        security find-identity -v -p codesigning
-        
-    - name: Clean build folder
-      run: |
-        xcodebuild clean \
-          -project ${{ env.XCODE_PROJECT }} \
-          -scheme ${{ env.SCHEME }} \
-          -configuration ${{ github.event.inputs.configuration }}
     
-    - name: Resolve Swift Package Dependencies
+    - name: Setup build environment  
       run: |
-        echo "🔄 Preparing Swift Package Manager for build..."
-        
-        # Clean any existing package resolution state
-        echo "Cleaning package resolution cache..."
-        rm -rf DerivedData
-        rm -rf ~/Library/Developer/Xcode/DerivedData/Applite-*
-        rm -rf ~/Library/Caches/org.swift.swiftpm
-        
-        # Instead of pre-resolving packages (which fails due to Swift tools version conflict),
-        # we'll let the build process handle package resolution automatically.
-        # This is actually more reliable for tools version conflicts.
-        
-        echo "📋 Package information:"
-        echo "- Ifrit dependency: Uses swift-tools-version:5.9 but supports Swift 6.0"
-        echo "- Project Swift version: 6.0" 
-        echo "- Strategy: Let xcodebuild resolve packages during build process"
-        
-        # Show project structure without triggering package resolution
-        echo "� Project scheme information:"
-        xcodebuild -list -project ${{ env.XCODE_PROJECT }} -json | head -20 || echo "Could not retrieve project info"
-        
-        echo "✅ Ready for build - packages will be resolved automatically during build"
+        echo "🚀 Setting up build environment"
+        echo "Configuration: ${{ github.event.inputs.configuration }}"
+        echo "Code signing: ${{ github.event.inputs.code_signing }}"
+        echo "DMG creation: ${{ github.event.inputs.create_dmg }}"
+        echo "Target macOS: ${{ needs.detect-versions.outputs.macos-version }}"
+        echo "Swift version: ${{ needs.detect-versions.outputs.swift-version }}"
+    
+    - name: Install Apple Certificate
+      if: ${{ github.event.inputs.code_signing == 'true' }}
+      uses: apple-actions/import-codesign-certs@v2
+      with:
+        p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+        p12-password: ${{ secrets.P12_PASSWORD }}
+    
+    - name: Install provisioning profile
+      if: ${{ github.event.inputs.code_signing == 'true' }}
+      uses: apple-actions/download-provisioning-profiles@v1
+      with:
+        bundle-id: com.milanvarady.Applite
+        issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+        api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+        api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+    
+    - name: Prepare for build
+      run: |
+        echo "🔄 Preparing for build with automatic package resolution..."
+        rm -rf DerivedData ~/Library/Developer/Xcode/DerivedData/Applite-* ~/Library/Caches/org.swift.swiftpm
+        echo "✅ Ready for build"
 
     - name: Build and archive application
       run: |
-        echo "🔨 Starting build process with automatic package resolution..."
+        echo "🔨 Building Applite..."
         
-        # Build with automatic package resolution - this bypasses the tools version conflict
-        # by letting xcodebuild handle the package resolution internally
-        if [[ "${{ github.event.inputs.sign_release }}" == "true" ]]; then
-          echo "🔐 Building with code signing enabled"
-          
-          # For signed builds - xcodebuild will resolve packages automatically
-          echo "Building archive with automatic package resolution..."
-          xcodebuild archive \
-            -project ${{ env.XCODE_PROJECT }} \
-            -scheme ${{ env.SCHEME }} \
-            -configuration ${{ github.event.inputs.configuration }} \
-            -derivedDataPath DerivedData \
-            -archivePath DerivedData/Build/Products/${{ env.PRODUCT_NAME }}.xcarchive \
-            -allowProvisioningUpdates
-            
+        # Set code signing arguments based on input
+        if [ "${{ github.event.inputs.code_signing }}" == "true" ]; then
+          CODE_SIGN_IDENTITY="Developer ID Application"
+          PROVISIONING_PROFILE_SPECIFIER="Applite Distribution"
+          echo "🔐 Code signing enabled"
         else
-          echo "🔓 Building without code signing"
-          
-          # For unsigned builds - xcodebuild will resolve packages automatically
-          echo "Building archive with automatic package resolution..."
-          xcodebuild archive \
-            -project ${{ env.XCODE_PROJECT }} \
-            -scheme ${{ env.SCHEME }} \
-            -configuration ${{ github.event.inputs.configuration }} \
-            -derivedDataPath DerivedData \
-            -archivePath DerivedData/Build/Products/${{ env.PRODUCT_NAME }}.xcarchive \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            "CODE_SIGN_IDENTITY[sdk=macosx*]"="-" \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM="" \
-            PROVISIONING_PROFILE_SPECIFIER="" \
-            -allowProvisioningUpdates
+          CODE_SIGN_IDENTITY=""
+          PROVISIONING_PROFILE_SPECIFIER=""
+          echo "🚫 Code signing disabled"
         fi
         
-        echo "✅ Build completed successfully with resolved packages"
-          
-    - name: Export application
-      run: |
-        if [[ "${{ github.event.inputs.sign_release }}" == "true" ]]; then
-          echo "🔐 Exporting signed application"
-          # Create export options for signed app
-          cat > ExportOptions.plist << EOF
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>method</key>
-            <string>developer-id</string>
-            <key>signingStyle</key>
-            <string>automatic</string>
-            <key>stripSwiftSymbols</key>
-            <true/>
-            <key>uploadBitcode</key>
-            <false/>
-            <key>uploadSymbols</key>
-            <false/>
-            <key>signingCertificate</key>
-            <string>Developer ID Application</string>
-        </dict>
-        </plist>
-        EOF
-        else
-          echo "🔓 Exporting unsigned application"
-          # Create export options for unsigned app
-          cat > ExportOptions.plist << EOF
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>method</key>
-            <string>mac-application</string>
-            <key>signingStyle</key>
-            <string>automatic</string>
-            <key>stripSwiftSymbols</key>
-            <true/>
-            <key>uploadBitcode</key>
-            <false/>
-            <key>uploadSymbols</key>
-            <false/>
-        </dict>
-        </plist>
-        EOF
-        fi
-        
-        # Export the archive
-        xcodebuild -exportArchive \
-          -archivePath DerivedData/Build/Products/${{ env.PRODUCT_NAME }}.xcarchive \
-          -exportPath DerivedData/Build/Products/Export \
-          -exportOptionsPlist ExportOptions.plist
-          
-    - name: Notarize application (if signing)
-      if: github.event.inputs.sign_release == 'true'
-      env:
-        NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
-        NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
-        NOTARIZATION_PWD: ${{ secrets.MACOS_NOTARIZATION_PWD }}
-      run: |
-        # Validate notarization secrets
-        if [[ -z "$NOTARIZATION_APPLE_ID" ]]; then
-          echo "❌ Error: MACOS_NOTARIZATION_APPLE_ID secret is required for notarization"
-          echo "Please see SIGNING_SETUP.md for instructions"
-          exit 1
-        fi
-        
-        if [[ -z "$NOTARIZATION_TEAM_ID" ]]; then
-          echo "❌ Error: MACOS_NOTARIZATION_TEAM_ID secret is required for notarization"
-          echo "Please see SIGNING_SETUP.md for instructions"
-          exit 1
-        fi
-        
-        if [[ -z "$NOTARIZATION_PWD" ]]; then
-          echo "❌ Error: MACOS_NOTARIZATION_PWD secret is required for notarization"
-          echo "Please see SIGNING_SETUP.md for instructions"
-          exit 1
-        fi
-        
-        echo "🍎 Starting notarization process..."
-        
-        # Create a zip file for notarization
-        cd "DerivedData/Build/Products/Export"
-        zip -r "${{ env.PRODUCT_NAME }}.zip" "${{ env.PRODUCT_NAME }}.app"
-        
-        # Submit for notarization
-        echo "📤 Submitting for notarization..."
-        xcrun notarytool submit "${{ env.PRODUCT_NAME }}.zip" \
-          --apple-id "$NOTARIZATION_APPLE_ID" \
-          --team-id "$NOTARIZATION_TEAM_ID" \
-          --password "$NOTARIZATION_PWD" \
-          --wait
-          
-        # Staple the notarization
-        echo "📎 Stapling notarization..."
-        xcrun stapler staple "${{ env.PRODUCT_NAME }}.app"
-        
-        # Verify notarization
-        echo "✅ Verifying notarization..."
-        xcrun stapler validate "${{ env.PRODUCT_NAME }}.app"
-        
-        echo "🎉 Notarization complete!"
-        
+        # Build the application
+        xcodebuild \
+          -project "${{ env.XCODE_PROJECT }}" \
+          -scheme "${{ env.SCHEME }}" \
+          -configuration "${{ github.event.inputs.configuration }}" \
+          -derivedDataPath DerivedData \
+          ${CODE_SIGN_IDENTITY:+CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY"} \
+          ${PROVISIONING_PROFILE_SPECIFIER:+PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_SPECIFIER"} \
+          build
+    
     - name: Create DMG
-      if: github.event.inputs.create_dmg == 'true'
+      if: ${{ github.event.inputs.create_dmg == 'true' }}
       run: |
-        echo "📦 Creating DMG installer..."
+        echo "📦 Creating DMG package..."
         
-        cd "DerivedData/Build/Products/Export"
+        # Find the built app
+        APP_PATH=$(find DerivedData -name "Applite.app" -type d | head -1)
         
-        # Create a temporary directory for DMG contents
-        mkdir -p dmg_temp
-        
-        # Copy the app to the temp directory
-        cp -R "${{ env.PRODUCT_NAME }}.app" dmg_temp/
-        
-        # Create Applications symlink
-        ln -s /Applications dmg_temp/Applications
-        
-        # Determine DMG name based on signing status
-        if [[ "${{ github.event.inputs.sign_release }}" == "true" ]]; then
-          DMG_NAME="${{ env.PRODUCT_NAME }}-signed.dmg"
-          echo "Creating signed DMG: $DMG_NAME"
-        else
-          DMG_NAME="${{ env.PRODUCT_NAME }}-unsigned.dmg"
-          echo "Creating unsigned DMG: $DMG_NAME"
+        if [ -z "$APP_PATH" ]; then
+          echo "❌ Could not find Applite.app"
+          exit 1
         fi
         
-        # Create the DMG
-        hdiutil create -volname "${{ env.PRODUCT_NAME }}" \
-          -srcfolder dmg_temp \
-          -ov \
-          -format UDZO \
-          "$DMG_NAME"
-          
-        # Sign the DMG if we're doing signed builds
-        if [[ "${{ github.event.inputs.sign_release }}" == "true" ]]; then
-          echo "🔐 Signing DMG..."
-          codesign --force --verify --verbose --sign "Developer ID Application" "$DMG_NAME"
-        fi
+        echo "Found app at: $APP_PATH"
         
-        # Move DMG to root directory
-        mv "$DMG_NAME" ../../../../
+        # Create DMG
+        mkdir -p dist
+        ln -s /Applications dist/Applications
+        cp -R "$APP_PATH" dist/
         
-        echo "✅ DMG created successfully: $DMG_NAME"
+        hdiutil create -volname "Applite" -srcfolder dist -ov -format UDZO "Applite-${{ github.event.inputs.configuration }}.dmg"
         
-    - name: Get version info
-      id: version
+        echo "✅ DMG created successfully"
+    
+    - name: Notarize app
+      if: ${{ github.event.inputs.code_signing == 'true' && github.event.inputs.create_dmg == 'true' }}
       run: |
-        VERSION=$(xcodebuild -showBuildSettings -project ${{ env.XCODE_PROJECT }} -scheme ${{ env.SCHEME }} -configuration ${{ github.event.inputs.configuration }} | grep MARKETING_VERSION | awk '{print $3}')
-        BUILD=$(xcodebuild -showBuildSettings -project ${{ env.XCODE_PROJECT }} -scheme ${{ env.SCHEME }} -configuration ${{ github.event.inputs.configuration }} | grep CURRENT_PROJECT_VERSION | awk '{print $3}')
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "build=$BUILD" >> $GITHUB_OUTPUT
-        echo "📋 Version: $VERSION, Build: $BUILD"
+        echo "🔒 Notarizing DMG..."
         
-    - name: Prepare artifacts
-      run: |
-        # Create artifacts directory
-        mkdir -p artifacts
-        
-        # Copy app bundle
-        cp -R "DerivedData/Build/Products/Export/${{ env.PRODUCT_NAME }}.app" artifacts/
-        
-        # Copy DMG if created
-        if [[ "${{ github.event.inputs.create_dmg }}" == "true" ]]; then
-          if [[ "${{ github.event.inputs.sign_release }}" == "true" ]]; then
-            cp "${{ env.PRODUCT_NAME }}-signed.dmg" artifacts/
-          else
-            cp "${{ env.PRODUCT_NAME }}-unsigned.dmg" artifacts/
-          fi
-        fi
-        
-        # Create build info file
-        cat > artifacts/BUILD_INFO.txt << EOF
-        Applite Build Information
-        ========================
-        Version: ${{ steps.version.outputs.version }}
-        Build: ${{ steps.version.outputs.build }}
-        Xcode Version: ${{ needs.detect-versions.outputs.xcode-version }}
-        macOS Runner: ${{ needs.detect-versions.outputs.macos-runner }}
-        Swift Version: $(xcodebuild -showBuildSettings -project ${{ env.XCODE_PROJECT }} -scheme ${{ env.SCHEME }} -configuration ${{ github.event.inputs.configuration }} | grep "SWIFT_VERSION" | head -1 | awk '{print $3}' || echo 'Not specified')
-        Configuration: ${{ github.event.inputs.configuration }}
-        Signed: ${{ github.event.inputs.sign_release }}
-        DMG Created: ${{ github.event.inputs.create_dmg }}
-        Build Date: $(date -u)
-        Workflow Run: ${{ github.run_number }}
-        Commit: ${{ github.sha }}
-        EOF
-        
+        xcrun notarytool submit "Applite-${{ github.event.inputs.configuration }}.dmg" \
+          --issuer ${{ secrets.APPSTORE_ISSUER_ID }} \
+          --key-id ${{ secrets.APPSTORE_KEY_ID }} \
+          --key ${{ secrets.APPSTORE_PRIVATE_KEY }} \
+          --wait
+    
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Applite-Build-${{ steps.version.outputs.version }}-${{ github.run_number }}${{ github.event.inputs.sign_release == 'true' && '-signed' || '-unsigned' }}
-        path: artifacts/
+        name: Applite-${{ github.event.inputs.configuration }}-${{ github.run_number }}
+        path: |
+          DerivedData/Build/Products/${{ github.event.inputs.configuration }}/Applite.app
+          *.dmg
         retention-days: 30
-        
-    - name: Create release summary
+    
+    - name: Build Summary
       run: |
-        echo "## 🎉 Build Complete!" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Build Information" >> $GITHUB_STEP_SUMMARY
-        echo "- **Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Build:** ${{ steps.version.outputs.build }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Xcode Version:** ${{ needs.detect-versions.outputs.xcode-version }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Signed:** ${{ github.event.inputs.sign_release == 'true' && '✅ Yes' || '❌ No' }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **DMG Created:** ${{ github.event.inputs.create_dmg == 'true' && '✅ Yes' || '❌ No' }}" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
-        echo "The following artifacts were created:" >> $GITHUB_STEP_SUMMARY
-        echo "- 📱 **Applite.app** - The application bundle" >> $GITHUB_STEP_SUMMARY
-        if [[ "${{ github.event.inputs.create_dmg }}" == "true" ]]; then
-          if [[ "${{ github.event.inputs.sign_release }}" == "true" ]]; then
-            echo "- 💽 **Applite-signed.dmg** - Signed DMG installer" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- 💽 **Applite-unsigned.dmg** - Unsigned DMG installer" >> $GITHUB_STEP_SUMMARY
-          fi
-        fi
-        echo "- 📄 **BUILD_INFO.txt** - Build information and metadata" >> $GITHUB_STEP_SUMMARY
-        
-    - name: Clean up keychain (if signing)
-      if: ${{ always() && github.event.inputs.sign_release == 'true' }}
-      run: |
-        echo "🧹 Cleaning up temporary keychain..."
-        security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
+        echo "🎉 Build completed successfully!"
+        echo "Configuration: ${{ github.event.inputs.configuration }}"
+        echo "Code signing: ${{ github.event.inputs.code_signing }}"
+        echo "DMG created: ${{ github.event.inputs.create_dmg }}"
+        echo "Artifacts uploaded to GitHub Actions"
