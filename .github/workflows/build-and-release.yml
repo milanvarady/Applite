@@ -161,19 +161,47 @@ jobs:
         # Handle Swift Package Manager tools version conflict with Ifrit
         echo "🔧 Handling Swift Package Manager compatibility..."
         
-        # Build the application with compatibility flags for mixed Swift versions
-        xcodebuild \
-          -project "${{ env.XCODE_PROJECT }}" \
-          -scheme "${{ env.SCHEME }}" \
-          -configuration "${{ github.event.inputs.configuration }}" \
-          -derivedDataPath DerivedData \
-          -skipPackagePluginValidation \
-          -skipMacroValidation \
-          ${CODE_SIGN_IDENTITY:+CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY"} \
-          ${PROVISIONING_PROFILE_SPECIFIER:+PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_SPECIFIER"} \
-          SWIFT_TREAT_WARNINGS_AS_ERRORS=NO \
-          SWIFT_VERSION=${DETECTED_SWIFT_VERSION} \
+        # Check Xcode version to determine which flags are available
+        XCODE_VERSION_OUTPUT=$(xcodebuild -version | head -1)
+        XCODE_MAJOR_VERSION=$(echo "$XCODE_VERSION_OUTPUT" | grep -o '[0-9]\+' | head -1)
+        echo "📋 Detected Xcode major version: $XCODE_MAJOR_VERSION"
+        
+        # Build command with version-specific flags
+        BUILD_ARGS=(
+          -project "${{ env.XCODE_PROJECT }}"
+          -scheme "${{ env.SCHEME }}"
+          -configuration "${{ github.event.inputs.configuration }}"
+          -derivedDataPath DerivedData
+          -skipPackagePluginValidation
+        )
+        
+        # Add macro validation skip for Xcode 15+ (where the flag is available)
+        if [ "$XCODE_MAJOR_VERSION" -ge 15 ]; then
+          echo "🔧 Adding -skipMacroValidation for Xcode $XCODE_MAJOR_VERSION"
+          BUILD_ARGS+=(-skipMacroValidation)
+        else
+          echo "🔧 Skipping -skipMacroValidation for Xcode $XCODE_MAJOR_VERSION (not supported)"
+        fi
+        
+        # Add code signing parameters if provided
+        if [ -n "$CODE_SIGN_IDENTITY" ]; then
+          BUILD_ARGS+=(CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY")
+        fi
+        
+        if [ -n "$PROVISIONING_PROFILE_SPECIFIER" ]; then
+          BUILD_ARGS+=(PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_SPECIFIER")
+        fi
+        
+        # Add additional build settings
+        BUILD_ARGS+=(
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=NO
+          SWIFT_VERSION=${DETECTED_SWIFT_VERSION}
           build
+        )
+        
+        # Execute the build with all arguments
+        echo "🔨 Executing: xcodebuild ${BUILD_ARGS[*]}"
+        xcodebuild "${BUILD_ARGS[@]}"
     
     - name: Create DMG
       if: ${{ github.event.inputs.create_dmg == 'true' }}
