@@ -139,6 +139,34 @@ jobs:
         echo "📋 Swift version from project: ${DETECTED_SWIFT_VERSION}"
         echo "✅ Ready for build with compatibility settings"
 
+    - name: Resolve Swift packages with compatibility
+      run: |
+        echo "🔄 Resolving Swift packages with tools version compatibility..."
+        
+        # First, try to resolve packages with the current Swift version
+        # This step handles tools version conflicts like Ifrit's swift-tools-version:5.9
+        xcodebuild -resolvePackageDependencies \
+          -project "${{ env.XCODE_PROJECT }}" \
+          -scheme "${{ env.SCHEME }}" \
+          -derivedDataPath DerivedData \
+          SWIFT_VERSION=${DETECTED_SWIFT_VERSION} || {
+            echo "⚠️ Package resolution failed with Swift ${DETECTED_SWIFT_VERSION}, trying compatibility mode..."
+            
+            # Clean and retry with compatibility settings
+            rm -rf DerivedData
+            
+            # Force package resolution with Swift 5.9 compatibility for tools
+            export SWIFT_PACKAGE_MANAGER_TOOLS_VERSION=5.9
+            
+            xcodebuild -resolvePackageDependencies \
+              -project "${{ env.XCODE_PROJECT }}" \
+              -scheme "${{ env.SCHEME }}" \
+              -derivedDataPath DerivedData \
+              SWIFT_VERSION=5.9
+        }
+        
+        echo "✅ Package dependencies resolved"
+
     - name: Build and archive application
       run: |
         echo "🔨 Building Applite..."
@@ -173,6 +201,7 @@ jobs:
           -configuration "${{ github.event.inputs.configuration }}"
           -derivedDataPath DerivedData
           -skipPackagePluginValidation
+          -disableAutomaticPackageResolution
         )
         
         # Add macro validation skip for Xcode 15+ (where the flag is available)
