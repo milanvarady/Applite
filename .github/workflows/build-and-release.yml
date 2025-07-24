@@ -1,5 +1,10 @@
 name: Build and Release
 
+# Build Environment Configuration
+env:
+  FORCED_XCODE_VERSION: ""         # Force specific Xcode version (empty = use VM's latest)
+  FORCED_SWIFT_VERSION: ""         # Force Swift version (empty = use project's version)
+
 on:
   workflow_dispatch:
     inputs:
@@ -24,61 +29,118 @@ on:
 
 jobs:
   detect-versions:
-    runs-on: macos-latest
+    runs-on: macos-14
     outputs:
       xcode-version: ${{ steps.detect.outputs.xcode-version }}
       macos-version: ${{ steps.detect.outputs.macos-version }}
       swift-version: ${{ steps.detect.outputs.swift-version }}
-      runner-os: ${{ steps.detect.outputs.runner-os }}
+      forced-xcode-version: ${{ steps.detect.outputs.forced-xcode-version }}
+      forced-swift-version: ${{ steps.detect.outputs.forced-swift-version }}
+      compatibility-status: ${{ steps.detect.outputs.compatibility-status }}
     steps:
     - uses: actions/checkout@v4
     
-    - name: Detect versions
+    - name: Detect versions and check compatibility
       id: detect
       run: |
-        # Auto-detect optimal Xcode version for this project
+        echo "🔍 Build Environment Configuration Analysis"
+        echo "=========================================="
+        
+        # Auto-detect project's preferred Xcode version
         if grep -q 'compatibilityVersion = "Xcode 14.0"' Applite.xcodeproj/project.pbxproj; then
-          XCODE_VERSION="15.2"  # Xcode 15.2+ supports Swift 6.0 and swift-tools-version:5.9
+          PROJECT_XCODE_VERSION="15.4"  # Need 15.4+ for proper Swift 6.0 support
         elif grep -q 'compatibilityVersion = "Xcode 15.0"' Applite.xcodeproj/project.pbxproj; then
-          XCODE_VERSION="15.2"
+          PROJECT_XCODE_VERSION="15.4"
         elif grep -q 'compatibilityVersion = "Xcode 16.0"' Applite.xcodeproj/project.pbxproj; then
-          XCODE_VERSION="16.1"
+          PROJECT_XCODE_VERSION="16.1"
         else
-          XCODE_VERSION="15.2"  # Default to 15.2 for Swift 6.0 and swift-tools-version:5.9 support
+          PROJECT_XCODE_VERSION="15.4"  # Default to 15.4 for full Swift 6.0 and swift-tools-version:5.9 support
         fi
         
-        # Auto-detect macOS deployment target
-        MACOS_VERSION=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
+        # Auto-detect project's macOS deployment target
+        PROJECT_MACOS_VERSION=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
         
-        # Auto-detect Swift version
-        SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
+        # Auto-detect project's Swift version
+        PROJECT_SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
         
-        # Map macOS deployment target to GitHub runner
-        case "${MACOS_VERSION:-13.0}" in
-          "13."*|"13.0"|"13.1"|"13.2"|"13.3"|"13.4"|"13.5"|"13.6")
-            RUNNER_OS="macos-13"
-            ;;
-          "14."*|"14.0"|"14.1"|"14.2"|"14.3"|"14.4"|"14.5")
-            RUNNER_OS="macos-14"
-            ;;
-          "15."*|"15.0"|"15.1"|"15.2")
-            RUNNER_OS="macos-15"
-            ;;
-          *)
-            RUNNER_OS="macos-latest"
-            ;;
-        esac
+        # Auto-detect current macOS runner version
+        CURRENT_MACOS_VERSION=$(sw_vers -productVersion | cut -d'.' -f1)
+        echo "🔧 Detected runner macOS version: $CURRENT_MACOS_VERSION"
         
-        echo "xcode-version=$XCODE_VERSION" >> $GITHUB_OUTPUT
-        echo "macos-version=${MACOS_VERSION:-13.0}" >> $GITHUB_OUTPUT
-        echo "swift-version=${SWIFT_VERSION:-5.9}" >> $GITHUB_OUTPUT
-        echo "runner-os=$RUNNER_OS" >> $GITHUB_OUTPUT
+        # Determine final versions (forced vs detected vs VM default)
+        FINAL_XCODE_VERSION="${{ env.FORCED_XCODE_VERSION }}"
+        FINAL_SWIFT_VERSION="${{ env.FORCED_SWIFT_VERSION }}"
         
-        echo "🔍 Detected versions: Xcode $XCODE_VERSION, macOS ${MACOS_VERSION:-13.0}, Swift ${SWIFT_VERSION:-5.9}"
-        echo "🖥️  Using runner: $RUNNER_OS"
+        # Use VM's latest Xcode if no forced version specified
+        if [ -z "$FINAL_XCODE_VERSION" ]; then
+          FINAL_XCODE_VERSION="latest"  # This tells setup-xcode to use VM's latest
+          echo "🔧 Using VM's latest Xcode version"
+        else
+          echo "🔧 Using forced Xcode version: $FINAL_XCODE_VERSION"
+        fi
+        
+        # Use project Swift version if no forced version
+        if [ -z "$FINAL_SWIFT_VERSION" ]; then
+          FINAL_SWIFT_VERSION="${PROJECT_SWIFT_VERSION:-5.9}"
+        fi
+        
+        echo "📋 Project Requirements:"
+        echo "  • Xcode compatibility: $PROJECT_XCODE_VERSION"
+        echo "  • macOS deployment target: ${PROJECT_MACOS_VERSION:-13.0}"
+        echo "  • Swift version: ${PROJECT_SWIFT_VERSION:-5.9}"
+        echo ""
+        echo "🔧 Build Environment (Forced):"
+        if [ "$FINAL_XCODE_VERSION" = "latest" ]; then
+          echo "  • Xcode version: VM's latest (auto-detected)"
+        else
+          echo "  • Xcode version: $FINAL_XCODE_VERSION (forced)"
+        fi
+        echo "  • macOS runner: macOS $CURRENT_MACOS_VERSION (auto-detected)"
+        echo "  • Swift version: $FINAL_SWIFT_VERSION"
+        echo ""
+        
+        # Compatibility checks
+        COMPATIBILITY_STATUS="✅ COMPATIBLE"
+        COMPATIBILITY_NOTES=""
+        
+        # Check Xcode compatibility (skip check if using VM's latest)
+        if [ "$FINAL_XCODE_VERSION" != "latest" ] && [ "$FINAL_XCODE_VERSION" != "$PROJECT_XCODE_VERSION" ]; then
+          COMPATIBILITY_NOTES="${COMPATIBILITY_NOTES}⚠️  Xcode override: using $FINAL_XCODE_VERSION instead of project's $PROJECT_XCODE_VERSION\n"
+        elif [ "$FINAL_XCODE_VERSION" = "latest" ]; then
+          COMPATIBILITY_NOTES="${COMPATIBILITY_NOTES}ℹ️  Using VM's latest Xcode (recommended for latest features)\n"
+        fi
+        
+        # Check Swift version compatibility
+        if [ "$FINAL_SWIFT_VERSION" != "${PROJECT_SWIFT_VERSION:-5.9}" ]; then
+          COMPATIBILITY_NOTES="${COMPATIBILITY_NOTES}⚠️  Swift override: using $FINAL_SWIFT_VERSION instead of project's ${PROJECT_SWIFT_VERSION:-5.9}\n"
+        fi
+        
+        # Check macOS runner vs deployment target compatibility
+        RUNNER_VERSION="$CURRENT_MACOS_VERSION"  # Use auto-detected version
+        DEPLOY_VERSION=$(echo "${PROJECT_MACOS_VERSION:-13.0}" | cut -d'.' -f1)
+        
+        if [ "$RUNNER_VERSION" -lt "$DEPLOY_VERSION" ]; then
+          COMPATIBILITY_STATUS="❌ INCOMPATIBLE"
+          COMPATIBILITY_NOTES="${COMPATIBILITY_NOTES}❌ Runner macOS $RUNNER_VERSION < deployment target ${PROJECT_MACOS_VERSION:-13.0}\n"
+        else
+          COMPATIBILITY_NOTES="${COMPATIBILITY_NOTES}✅ Runner macOS $RUNNER_VERSION >= deployment target ${PROJECT_MACOS_VERSION:-13.0}\n"
+        fi
+        
+        echo "🔍 Compatibility Analysis:"
+        echo "========================="
+        echo -e "$COMPATIBILITY_NOTES"
+        echo "Status: $COMPATIBILITY_STATUS"
+        
+        # Set outputs
+        echo "xcode-version=$FINAL_XCODE_VERSION" >> $GITHUB_OUTPUT
+        echo "macos-version=${PROJECT_MACOS_VERSION:-13.0}" >> $GITHUB_OUTPUT
+        echo "swift-version=$FINAL_SWIFT_VERSION" >> $GITHUB_OUTPUT
+        echo "forced-xcode-version=$FINAL_XCODE_VERSION" >> $GITHUB_OUTPUT
+        echo "forced-swift-version=$FINAL_SWIFT_VERSION" >> $GITHUB_OUTPUT
+        echo "compatibility-status=$COMPATIBILITY_STATUS" >> $GITHUB_OUTPUT
 
   build:
-    runs-on: ${{ needs.detect-versions.outputs.runner-os }}
+    runs-on: macos-14
     needs: detect-versions
     env:
       XCODE_PROJECT: "Applite.xcodeproj"
@@ -94,14 +156,36 @@ jobs:
     
     - name: Setup build environment  
       run: |
-        echo "🚀 Setting up build environment"
-        echo "Runner: ${{ needs.detect-versions.outputs.runner-os }}"
-        echo "Configuration: ${{ github.event.inputs.configuration }}"
-        echo "Code signing: ${{ github.event.inputs.code_signing }}"
-        echo "DMG creation: ${{ github.event.inputs.create_dmg }}"
-        echo "Target macOS: ${{ needs.detect-versions.outputs.macos-version }}"
-        echo "Swift version: ${{ needs.detect-versions.outputs.swift-version }}"
-        echo "Xcode version: ${{ needs.detect-versions.outputs.xcode-version }}"
+        echo "🚀 Build Environment Setup & Compatibility Check"
+        echo "==============================================="
+        echo ""
+        
+        # Auto-detect current runner macOS version
+        CURRENT_MACOS_VERSION=$(sw_vers -productVersion | cut -d'.' -f1)
+        
+        echo "📋 Project Configuration:"
+        echo "  • Configuration: ${{ github.event.inputs.configuration }}"
+        echo "  • Code signing: ${{ github.event.inputs.code_signing }}"
+        echo "  • DMG creation: ${{ github.event.inputs.create_dmg }}"
+        echo "  • Target macOS: ${{ needs.detect-versions.outputs.macos-version }}"
+        echo "  • Project Swift: ${{ needs.detect-versions.outputs.swift-version }}"
+        echo ""
+        echo "🔧 Build Environment (Auto-detected):"
+        echo "  • Runner: macOS $CURRENT_MACOS_VERSION"
+        echo "  • Xcode: ${{ needs.detect-versions.outputs.forced-xcode-version }}"
+        echo "  • Swift: ${{ needs.detect-versions.outputs.forced-swift-version }}"
+        echo ""
+        echo "🔍 Compatibility Status: ${{ needs.detect-versions.outputs.compatibility-status }}"
+        echo ""
+        
+        # Fail if incompatible
+        if [ "${{ needs.detect-versions.outputs.compatibility-status }}" = "❌ INCOMPATIBLE" ]; then
+          echo "❌ Build environment is incompatible with project requirements!"
+          echo "Please check the environment variables at the top of the workflow."
+          exit 1
+        else
+          echo "✅ Build environment is compatible - proceeding with build"
+        fi
     
     - name: Install Apple Certificate
       if: ${{ github.event.inputs.code_signing == 'true' }}
@@ -199,11 +283,11 @@ jobs:
           echo "🔧 Skipping -skipMacroValidation for Xcode $XCODE_MAJOR_VERSION (not supported)"
         fi
         
-        # Add code signing parameters if provided, otherwise disable code signing
+        # Add code signing parameters if provided, otherwise disable code signing and entitlements
         if [ -n "$CODE_SIGN_IDENTITY" ]; then
           BUILD_ARGS+=(CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY")
         else
-          BUILD_ARGS+=(CODE_SIGN_IDENTITY="")
+          BUILD_ARGS+=(CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="")
         fi
         
         if [ -n "$PROVISIONING_PROFILE_SPECIFIER" ]; then
