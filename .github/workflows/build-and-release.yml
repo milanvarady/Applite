@@ -1,10 +1,5 @@
 name: Build and Release
 
-# Build Environment Configuration
-env:
-  OVERRIDE_XCODE_VERSION: ""       # Override Xcode version (empty = use latest installed)
-  OVERRIDE_SWIFT_VERSION: ""       # Override Swift version (empty = use project's version)
-
 on:
   workflow_dispatch:
     inputs:
@@ -27,69 +22,15 @@ on:
         default: true
         type: boolean
 
+env:
+  XCODE_PROJECT: "Applite.xcodeproj"
+  SCHEME: "Applite"
+
 jobs:
   build:
     runs-on: macos-14
-    env:
-      XCODE_PROJECT: "Applite.xcodeproj"
-      SCHEME: "Applite"
-    
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Detect environment and setup build
-      run: |
-        echo "🔍 Build Environment Configuration Analysis"
-        echo "=========================================="
-        
-        # Auto-detect project settings
-        PROJECT_MACOS_VERSION=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
-        PROJECT_SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
-        CURRENT_MACOS_VERSION=$(sw_vers -productVersion | cut -d'.' -f1)
-        
-        # Determine final versions
-        FINAL_XCODE_VERSION="${{ env.OVERRIDE_XCODE_VERSION }}"
-        FINAL_SWIFT_VERSION="${{ env.OVERRIDE_SWIFT_VERSION }}"
-        
-        if [ -z "$FINAL_XCODE_VERSION" ]; then
-          FINAL_XCODE_VERSION="latest"
-          ACTUAL_XCODE_VERSION=$(xcodebuild -version | head -1 | awk '{print $2}')
-        else
-          ACTUAL_XCODE_VERSION="$FINAL_XCODE_VERSION"
-        fi
-        
-        if [ -z "$FINAL_SWIFT_VERSION" ]; then
-          FINAL_SWIFT_VERSION="${PROJECT_SWIFT_VERSION:-5.9}"
-        fi
-        
-        echo ""
-        echo "📋 Project Configuration:"
-        echo "  • Configuration: ${{ github.event.inputs.configuration }}"
-        echo "  • Code signing: ${{ github.event.inputs.code_signing }}"
-        echo "  • DMG creation: ${{ github.event.inputs.create_dmg }}"
-        echo "  • Target macOS: ${PROJECT_MACOS_VERSION:-13.0}"
-        echo "  • Project Swift: ${PROJECT_SWIFT_VERSION:-5.9}"
-        echo ""
-        echo "🔧 Build Environment:"
-        echo "  • Runner: macOS $CURRENT_MACOS_VERSION"
-        if [ "$FINAL_XCODE_VERSION" = "latest" ]; then
-          echo "  • Xcode: $ACTUAL_XCODE_VERSION (latest installed)"
-        else
-          echo "  • Xcode: $FINAL_XCODE_VERSION (override)"
-        fi
-        echo "  • Swift: $FINAL_SWIFT_VERSION"
-        echo ""
-        
-        # Export variables for subsequent steps
-        echo "FINAL_XCODE_VERSION=$FINAL_XCODE_VERSION" >> $GITHUB_ENV
-        echo "FINAL_SWIFT_VERSION=$FINAL_SWIFT_VERSION" >> $GITHUB_ENV
-        echo "PROJECT_MACOS_VERSION=${PROJECT_MACOS_VERSION:-13.0}" >> $GITHUB_ENV
-    
-    - name: Setup Xcode
-      if: ${{ env.OVERRIDE_XCODE_VERSION != '' }}
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: ${{ env.OVERRIDE_XCODE_VERSION }}
     
     - name: Install Apple Certificate
       if: ${{ github.event.inputs.code_signing == 'true' }}
@@ -107,50 +48,31 @@ jobs:
         api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
     
-    - name: Prepare for build
+    - name: Prepare build environment
       run: |
-        echo "🔄 Preparing for build with Swift Package Manager compatibility..."
+        echo "🔄 Preparing build environment..."
         
-        # Clean all package resolution caches
+        XCODE_VERSION=$(xcodebuild -version | head -1 | awk '{print $2}')
+        XCODE_BUILD=$(xcodebuild -version | tail -1 | awk '{print $3}')
+        SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
+        MACOS_TARGET=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
+        
+        echo "Build Environment:"
+        echo "  • Xcode: $XCODE_VERSION ($XCODE_BUILD)"
+        echo "  • Swift: ${SWIFT_VERSION:-5.9}"
+        echo "  • macOS Target: ${MACOS_TARGET:-13.0}"
+        echo "  • Configuration: ${{ github.event.inputs.configuration }}"
+        
+        echo "SWIFT_VERSION=${SWIFT_VERSION:-5.9}" >> $GITHUB_ENV
+        echo "MACOS_TARGET=${MACOS_TARGET:-13.0}" >> $GITHUB_ENV
+        
         rm -rf DerivedData ~/Library/Developer/Xcode/DerivedData/Applite-* ~/Library/Caches/org.swift.swiftpm
-        
-        # Extract Swift version from project configuration
-        DETECTED_SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
-        
-        # Handle Ifrit dependency tools version conflict
-        echo "🔧 Configuring for Ifrit dependency (swift-tools-version:5.9 vs Swift ${DETECTED_SWIFT_VERSION} project)"
-        
-        # Set environment for compatibility
-        export SWIFT_VERSION=${DETECTED_SWIFT_VERSION}
-        export XCODE_CONFIGURATION_BUILD_DIR=DerivedData/Build/Products/${{ github.event.inputs.configuration }}
-        
-        echo "📋 Swift version from project: ${DETECTED_SWIFT_VERSION}"
-        echo "✅ Ready for build with compatibility settings"
+        rm -f build_output.log *.dmg
 
-    - name: Resolve Swift packages
+    - name: Build application
       run: |
-        echo "🔄 Resolving Swift packages..."
+        echo "🔨 Building Applite (${{ github.event.inputs.configuration }})..."
         
-        # Clean any existing package resolution
-        rm -rf DerivedData ~/Library/Developer/Xcode/DerivedData/Applite-* ~/Library/Caches/org.swift.swiftpm
-        
-        # With Xcode 15.0.1+, package resolution should work seamlessly
-        xcodebuild -resolvePackageDependencies \
-          -project "${{ env.XCODE_PROJECT }}" \
-          -scheme "${{ env.SCHEME }}" \
-          -derivedDataPath DerivedData
-        
-        echo "✅ Package dependencies resolved successfully"
-
-    - name: Build and archive application
-      run: |
-        echo "🔨 Building Applite..."
-        
-        # Extract Swift version from project configuration
-        DETECTED_SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
-        echo "📋 Using Swift version from project: ${DETECTED_SWIFT_VERSION}"
-        
-        # Set code signing arguments based on input
         if [ "${{ github.event.inputs.code_signing }}" == "true" ]; then
           CODE_SIGN_IDENTITY="Developer ID Application"
           PROVISIONING_PROFILE_SPECIFIER="Applite Distribution"
@@ -161,15 +83,8 @@ jobs:
           echo "🚫 Code signing disabled"
         fi
         
-        # Handle Swift Package Manager tools version conflict with Ifrit
-        echo "🔧 Handling Swift Package Manager compatibility..."
+        XCODE_MAJOR_VERSION=$(xcodebuild -version | head -1 | grep -o '[0-9]\+' | head -1)
         
-        # Check Xcode version to determine which flags are available
-        XCODE_VERSION_OUTPUT=$(xcodebuild -version | head -1)
-        XCODE_MAJOR_VERSION=$(echo "$XCODE_VERSION_OUTPUT" | grep -o '[0-9]\+' | head -1)
-        echo "📋 Detected Xcode major version: $XCODE_MAJOR_VERSION"
-        
-        # Build command with version-specific flags
         BUILD_ARGS=(
           -project "${{ env.XCODE_PROJECT }}"
           -scheme "${{ env.SCHEME }}"
@@ -177,46 +92,43 @@ jobs:
           -derivedDataPath DerivedData
           -skipPackagePluginValidation
           -disableAutomaticPackageResolution
+          -quiet
+          -hideShellScriptEnvironment
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=NO
         )
         
-        # Add macro validation skip for Xcode 15+ (where the flag is available)
         if [ "$XCODE_MAJOR_VERSION" -ge 15 ]; then
-          echo "🔧 Adding -skipMacroValidation for Xcode $XCODE_MAJOR_VERSION"
           BUILD_ARGS+=(-skipMacroValidation)
-        else
-          echo "🔧 Skipping -skipMacroValidation for Xcode $XCODE_MAJOR_VERSION (not supported)"
         fi
         
-        # Add code signing parameters if provided, otherwise disable code signing and entitlements
         if [ -n "$CODE_SIGN_IDENTITY" ]; then
           BUILD_ARGS+=(CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY")
+          [ -n "$PROVISIONING_PROFILE_SPECIFIER" ] && BUILD_ARGS+=(PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_SPECIFIER")
         else
           BUILD_ARGS+=(CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="")
         fi
         
-        if [ -n "$PROVISIONING_PROFILE_SPECIFIER" ]; then
-          BUILD_ARGS+=(PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_SPECIFIER")
+        BUILD_ARGS+=(build)
+        
+        set +e
+        xcodebuild "${BUILD_ARGS[@]}" 2>&1 | tee build_output.log
+        BUILD_EXIT_CODE=${PIPESTATUS[0]}
+        set -e
+        
+        if [ $BUILD_EXIT_CODE -eq 0 ]; then
+          echo "✅ Build completed successfully!"
+        else
+          echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
+          echo "🔍 Last 50 lines of build output:"
+          tail -50 build_output.log
+          exit $BUILD_EXIT_CODE
         fi
-        
-        # Add additional build settings
-        BUILD_ARGS+=(
-          SWIFT_TREAT_WARNINGS_AS_ERRORS=NO
-          build
-        )
-        
-        # Note: Using project's original Swift version without any override
-        echo "📋 Building with project's original Swift version (no override)"
-        
-        # Execute the build with all arguments
-        echo "🔨 Executing: xcodebuild ${BUILD_ARGS[*]}"
-        xcodebuild "${BUILD_ARGS[@]}"
     
     - name: Create DMG
       if: ${{ github.event.inputs.create_dmg == 'true' }}
       run: |
         echo "📦 Creating DMG package..."
         
-        # Find the built app
         APP_PATH=$(find DerivedData -name "Applite.app" -type d | head -1)
         
         if [ -z "$APP_PATH" ]; then
@@ -224,29 +136,28 @@ jobs:
           exit 1
         fi
         
-        echo "Found app at: $APP_PATH"
-        
-        # Create DMG
         mkdir -p dist
         ln -s /Applications dist/Applications
         cp -R "$APP_PATH" dist/
         
-        hdiutil create -volname "Applite" -srcfolder dist -ov -format UDZO "Applite-${{ github.event.inputs.configuration }}.dmg"
+        DMG_NAME="Applite-${{ github.event.inputs.configuration }}.dmg"
+        hdiutil create -volname "Applite" -srcfolder dist -ov -format UDZO "$DMG_NAME"
         
-        echo "✅ DMG created successfully"
+        DMG_SIZE=$(ls -lh "$DMG_NAME" | awk '{print $5}')
+        echo "✅ DMG created: $DMG_NAME ($DMG_SIZE)"
     
-    - name: Notarize app
+    - name: Notarize DMG
       if: ${{ github.event.inputs.code_signing == 'true' && github.event.inputs.create_dmg == 'true' }}
       run: |
         echo "🔒 Notarizing DMG..."
-        
         xcrun notarytool submit "Applite-${{ github.event.inputs.configuration }}.dmg" \
           --issuer ${{ secrets.APPSTORE_ISSUER_ID }} \
           --key-id ${{ secrets.APPSTORE_KEY_ID }} \
           --key ${{ secrets.APPSTORE_PRIVATE_KEY }} \
           --wait
+        echo "✅ Notarization completed"
     
-    - name: Upload build artifacts
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: Applite-${{ github.event.inputs.configuration }}-${{ github.run_number }}
@@ -255,10 +166,27 @@ jobs:
           *.dmg
         retention-days: 30
     
-    - name: Build Summary
+    - name: Cleanup
+      if: always()
       run: |
-        echo "🎉 Build completed successfully!"
+        rm -rf DerivedData dist *.dmg build_output.log
+    
+    - name: Build Summary
+      if: always()
+      run: |
+        echo "📊 Build Summary"
+        echo "==============="
+        echo "Repository: ${{ github.repository }}"
         echo "Configuration: ${{ github.event.inputs.configuration }}"
-        echo "Code signing: ${{ github.event.inputs.code_signing }}"
-        echo "DMG created: ${{ github.event.inputs.create_dmg }}"
-        echo "Artifacts uploaded to GitHub Actions"
+        echo "Code Signing: ${{ github.event.inputs.code_signing }}"
+        echo "DMG Created: ${{ github.event.inputs.create_dmg }}"
+        echo "Status: ${{ job.status }}"
+        
+        if [ "${{ job.status }}" = "success" ]; then
+          echo ""
+          echo "✅ Build completed successfully!"
+          echo "📦 Download artifact: Applite-${{ github.event.inputs.configuration }}-${{ github.run_number }}"
+        elif [ "${{ job.status }}" = "failure" ]; then
+          echo ""
+          echo "❌ Build failed - check logs above for details"
+        fi
