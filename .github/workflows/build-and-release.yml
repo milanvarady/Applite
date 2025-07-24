@@ -143,29 +143,29 @@ jobs:
       run: |
         echo "🔄 Resolving Swift packages with tools version compatibility..."
         
-        # First, try to resolve packages with the current Swift version
-        # This step handles tools version conflicts like Ifrit's swift-tools-version:5.9
+        # Extract Swift version from project configuration in this step
+        DETECTED_SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
+        echo "📋 Detected Swift version: ${DETECTED_SWIFT_VERSION}"
+        
+        # For Xcode 14.x and the Ifrit tools version conflict, we need to use a specific approach
+        # The issue is that Ifrit package uses swift-tools-version:5.9 but the project uses Swift 6.0
+        
+        echo "🔧 Using Xcode 14 specific package resolution strategy..."
+        
+        # Clean any existing package resolution
+        rm -rf DerivedData
+        
+        # For Xcode 14, we need to resolve packages with Swift 5.9 due to tools version requirements
+        # but still build the project with the detected Swift version
+        echo "⚠️ Using Swift 5.9 for package resolution to handle Ifrit tools version conflict..."
+        
         xcodebuild -resolvePackageDependencies \
           -project "${{ env.XCODE_PROJECT }}" \
           -scheme "${{ env.SCHEME }}" \
           -derivedDataPath DerivedData \
-          SWIFT_VERSION=${DETECTED_SWIFT_VERSION} || {
-            echo "⚠️ Package resolution failed with Swift ${DETECTED_SWIFT_VERSION}, trying compatibility mode..."
-            
-            # Clean and retry with compatibility settings
-            rm -rf DerivedData
-            
-            # Force package resolution with Swift 5.9 compatibility for tools
-            export SWIFT_PACKAGE_MANAGER_TOOLS_VERSION=5.9
-            
-            xcodebuild -resolvePackageDependencies \
-              -project "${{ env.XCODE_PROJECT }}" \
-              -scheme "${{ env.SCHEME }}" \
-              -derivedDataPath DerivedData \
-              SWIFT_VERSION=5.9
-        }
+          SWIFT_VERSION=5.9
         
-        echo "✅ Package dependencies resolved"
+        echo "✅ Package dependencies resolved with Swift 5.9 compatibility"
 
     - name: Build and archive application
       run: |
@@ -227,6 +227,9 @@ jobs:
           SWIFT_VERSION=${DETECTED_SWIFT_VERSION}
           build
         )
+        
+        # Note: Packages were resolved with Swift 5.9 for compatibility, but we build with the project's Swift version
+        echo "📋 Building with project Swift version ${DETECTED_SWIFT_VERSION} (packages resolved with Swift 5.9)"
         
         # Execute the build with all arguments
         echo "🔨 Executing: xcodebuild ${BUILD_ARGS[*]}"
