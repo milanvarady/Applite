@@ -1,3 +1,14 @@
+#
+# build-and-release.yml
+# Applite
+#
+# Created by Milán Várady on 2025.07.24.
+# Created by Dr Bill Mcilhargey on 2025.07.24.
+#
+# GitHub Actions workflow for building and releasing macOS application
+# Supports Debug/Release configurations with optional code signing and DMG creation
+#
+
 name: Build and Release
 
 on:
@@ -19,12 +30,25 @@ on:
       create_dmg:
         description: 'Create DMG package'
         required: true
-        default: true
+        default: false
         type: boolean
 
 env:
+  # Project configuration
   XCODE_PROJECT: "Applite.xcodeproj"
-  SCHEME: "Applite"
+  DERIVED_DATA_PATH: "DerivedData"
+  
+  # Code signing configuration  
+  CODE_SIGN_IDENTITY: "Developer ID Application"
+  PROVISIONING_PROFILE_SPECIFIER: "Applite Distribution"
+  
+  # Default fallback values
+  SWIFT_VERSION_DEFAULT: "6.0"
+  MACOS_TARGET_DEFAULT: "13.0"
+  
+  # Dynamic artifact naming
+  ARTIFACT_NAME_RELEASE: "Applite"
+  ARTIFACT_NAME_DEBUG: "Applite-Debug"
 
 jobs:
   build:
@@ -43,51 +67,107 @@ jobs:
       if: ${{ github.event.inputs.code_signing == 'true' }}
       uses: apple-actions/download-provisioning-profiles@v1
       with:
-        bundle-id: com.milanvarady.Applite
+        bundle-id: ${{ env.BUNDLE_ID }}
         issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
         api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+    
+    - name: Setup environment variables
+      run: |
+        get_environment_info() {
+          MACOS_VERSION=$(sw_vers -productVersion)
+          MACOS_BUILD=$(sw_vers -buildVersion)
+          
+          XCODE_VERSION_OUTPUT=$(xcodebuild -version 2>/dev/null || echo "Xcode 16.0\nBuild version 16A242d")
+          XCODE_VERSION=$(echo "$XCODE_VERSION_OUTPUT" | head -1 | awk '{print $2}')
+          XCODE_BUILD=$(echo "$XCODE_VERSION_OUTPUT" | tail -1 | awk '{print $3}')
+          XCODE_MAJOR_VERSION=$(echo $XCODE_VERSION | cut -d. -f1)
+          XCODE_PATH=$(xcode-select -p)
+          
+          SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "${{ env.SWIFT_VERSION_DEFAULT }}")
+          MACOS_TARGET=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "${{ env.MACOS_TARGET_DEFAULT }}")
+          XCODE_COMPATIBILITY=$(grep -o 'compatibilityVersion = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f2 || echo "Xcode 14.0")
+          SCHEME=$(grep -o 'name = [^;]*;' ${{ env.XCODE_PROJECT }}/project.pbxproj | grep -v 'productName' | head -1 | cut -d' ' -f3 | tr -d ';' || echo "Applite")
+          BUNDLE_ID=$(grep -o 'PRODUCT_BUNDLE_IDENTIFIER = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "dev.aerolite.Applite")
+          
+          {
+            echo "MACOS_VERSION=$MACOS_VERSION"
+            echo "MACOS_BUILD=$MACOS_BUILD"
+            echo "XCODE_VERSION=$XCODE_VERSION"
+            echo "XCODE_BUILD=$XCODE_BUILD"
+            echo "XCODE_MAJOR_VERSION=$XCODE_MAJOR_VERSION"
+            echo "XCODE_PATH=$XCODE_PATH"
+            echo "SWIFT_VERSION=${SWIFT_VERSION:-${{ env.SWIFT_VERSION_DEFAULT }}}"
+            echo "MACOS_TARGET=${MACOS_TARGET:-${{ env.MACOS_TARGET_DEFAULT }}}"
+            echo "XCODE_COMPATIBILITY=${XCODE_COMPATIBILITY:-Xcode 14.0}"
+            echo "SCHEME=${SCHEME:-Applite}"
+            echo "BUNDLE_ID=${BUNDLE_ID:-dev.aerolite.Applite}"
+          } >> $GITHUB_ENV
+        }
+        
+        get_environment_info
     
     - name: Prepare build environment
       run: |
         echo "🔄 Preparing build environment..."
         
-        # System information
-        MACOS_VERSION=$(sw_vers -productVersion)
-        MACOS_BUILD=$(sw_vers -buildVersion)
+        # Create build info templates using direct variable substitution
+        {
+          echo "Build Environment:"
+          echo "================="
+          echo "System:"
+          echo "  • macOS: $MACOS_VERSION ($MACOS_BUILD)"
+          echo "  • Runner: macos-15"
+          echo "  • Xcode Installed: $XCODE_VERSION ($XCODE_BUILD)"
+          echo ""
+          echo "Project Configuration:"
+          echo "  • Xcode Project: ${{ env.XCODE_PROJECT }}"
+          echo "  • Scheme: $SCHEME"
+          echo "  • Xcode Targeted: $XCODE_COMPATIBILITY"
+          echo "  • Swift Version: $SWIFT_VERSION"
+          echo "  • macOS Targeted: $MACOS_TARGET"
+          echo "  • Bundle ID: $BUNDLE_ID"
+          echo "  • Derived Data Path: ${{ env.DERIVED_DATA_PATH }}"
+          echo ""
+          echo "Code Signing:"
+          echo "  • Code Signing: ${{ github.event.inputs.code_signing }}"
+          echo "  • Code Sign Identity: ${{ env.CODE_SIGN_IDENTITY }}"
+          echo "  • Provisioning Profile: ${{ env.PROVISIONING_PROFILE_SPECIFIER }}"
+          echo ""
+          echo "Build Options:"
+          echo "  • Build Config: ${{ github.event.inputs.configuration }}"
+          echo "  • Create DMG: ${{ github.event.inputs.create_dmg }}"
+        } > /tmp/build_info_console.txt
         
-        # Xcode information
-        XCODE_VERSION=$(xcodebuild -version | head -1 | awk '{print $2}')
-        XCODE_BUILD=$(xcodebuild -version | tail -1 | awk '{print $3}')
-        XCODE_MAJOR_VERSION=$(echo $XCODE_VERSION | cut -d. -f1)
-        XCODE_PATH=$(xcode-select -p)
+        {
+          echo "### System"
+          echo "- **macOS:** $MACOS_VERSION ($MACOS_BUILD)"
+          echo "- **Runner:** macos-15"
+          echo "- **Xcode Installed:** $XCODE_VERSION ($XCODE_BUILD)"
+          echo ""
+          echo "### Project Configuration"
+          echo "- **Xcode Project:** ${{ env.XCODE_PROJECT }}"
+          echo "- **Scheme:** $SCHEME"
+          echo "- **Xcode Targeted:** $XCODE_COMPATIBILITY"
+          echo "- **Swift Version:** $SWIFT_VERSION"
+          echo "- **macOS Targeted:** $MACOS_TARGET"
+          echo "- **Bundle ID:** $BUNDLE_ID"
+          echo "- **Derived Data Path:** ${{ env.DERIVED_DATA_PATH }}"
+          echo ""
+          echo "### Code Signing"
+          echo "- **Code Signing:** ${{ github.event.inputs.code_signing }}"
+          echo "- **Code Sign Identity:** ${{ env.CODE_SIGN_IDENTITY }}"
+          echo "- **Provisioning Profile:** ${{ env.PROVISIONING_PROFILE_SPECIFIER }}"
+          echo ""
+          echo "### Build Options"
+          echo "- **Build Config:** ${{ github.event.inputs.configuration }}"
+          echo "- **Create DMG:** ${{ github.event.inputs.create_dmg }}"
+        } > /tmp/build_info_markdown.txt
         
-        # Project configuration
-        SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
-        MACOS_TARGET=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
-        
-        echo "Build Environment:"
-        echo "================="
-        echo "System:"
-        echo "  • macOS: $MACOS_VERSION ($MACOS_BUILD)"
-        echo "  • Runner: macos-15"
+        cat /tmp/build_info_console.txt
         echo ""
-        echo "Xcode Installation:"
-        echo "  • Version: $XCODE_VERSION ($XCODE_BUILD)"
-        echo "  • Path: $XCODE_PATH"
-        echo "  • Swift Support: $([ "$XCODE_MAJOR_VERSION" -ge 16 ] && echo "6.0+" || echo "up to 5.0")"
-        echo ""
-        echo "Project Configuration:"
-        echo "  • Swift Version: ${SWIFT_VERSION:-6.0}"
-        echo "  • macOS Target: ${MACOS_TARGET:-13.0}"
-        echo "  • Build Config: ${{ github.event.inputs.configuration }}"
-        echo "  • Code Signing: ${{ github.event.inputs.code_signing }}"
-        echo "  • Create DMG: ${{ github.event.inputs.create_dmg }}"
         
-        echo "SWIFT_VERSION=${SWIFT_VERSION:-6.0}" >> $GITHUB_ENV
-        echo "MACOS_TARGET=${MACOS_TARGET:-13.0}" >> $GITHUB_ENV
-        
-        rm -rf DerivedData ~/Library/Developer/Xcode/DerivedData/Applite-* ~/Library/Caches/org.swift.swiftpm
+        rm -rf ${{ env.DERIVED_DATA_PATH }} ~/Library/Developer/Xcode/DerivedData/Applite-* ~/Library/Caches/org.swift.swiftpm
         rm -f build_output.log *.dmg
 
     - name: Resolve package dependencies
@@ -95,8 +175,8 @@ jobs:
         echo "🔄 Resolving Swift package dependencies..."
         xcodebuild -resolvePackageDependencies \
           -project "${{ env.XCODE_PROJECT }}" \
-          -scheme "${{ env.SCHEME }}" \
-          -derivedDataPath DerivedData \
+          -scheme "$SCHEME" \
+          -derivedDataPath ${{ env.DERIVED_DATA_PATH }} \
           -quiet
         echo "✅ Package dependencies resolved"
 
@@ -104,23 +184,11 @@ jobs:
       run: |
         echo "🔨 Building Applite (${{ github.event.inputs.configuration }})..."
         
-        if [ "${{ github.event.inputs.code_signing }}" == "true" ]; then
-          CODE_SIGN_IDENTITY="Developer ID Application"
-          PROVISIONING_PROFILE_SPECIFIER="Applite Distribution"
-          echo "🔐 Code signing enabled"
-        else
-          CODE_SIGN_IDENTITY=""
-          PROVISIONING_PROFILE_SPECIFIER=""
-          echo "🚫 Code signing disabled"
-        fi
-        
-        XCODE_MAJOR_VERSION=$(xcodebuild -version | head -1 | grep -o '[0-9]\+' | head -1)
-        
         BUILD_ARGS=(
           -project "${{ env.XCODE_PROJECT }}"
-          -scheme "${{ env.SCHEME }}"
+          -scheme "$SCHEME"
           -configuration "${{ github.event.inputs.configuration }}"
-          -derivedDataPath DerivedData
+          -derivedDataPath ${{ env.DERIVED_DATA_PATH }}
           -skipPackagePluginValidation
           -disableAutomaticPackageResolution
           -quiet
@@ -132,11 +200,13 @@ jobs:
           BUILD_ARGS+=(-skipMacroValidation)
         fi
         
-        if [ -n "$CODE_SIGN_IDENTITY" ]; then
-          BUILD_ARGS+=(CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY")
-          [ -n "$PROVISIONING_PROFILE_SPECIFIER" ] && BUILD_ARGS+=(PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_SPECIFIER")
+        if [ "${{ github.event.inputs.code_signing }}" = "true" ]; then
+          BUILD_ARGS+=(CODE_SIGN_IDENTITY="${{ env.CODE_SIGN_IDENTITY }}")
+          BUILD_ARGS+=(PROVISIONING_PROFILE_SPECIFIER="${{ env.PROVISIONING_PROFILE_SPECIFIER }}")
+          echo "🔐 Code signing enabled"
         else
           BUILD_ARGS+=(CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="")
+          echo "🚫 Code signing disabled"
         fi
         
         BUILD_ARGS+=(build)
@@ -160,7 +230,7 @@ jobs:
       run: |
         echo "📦 Creating DMG package..."
         
-        APP_PATH=$(find DerivedData -name "Applite.app" -type d | head -1)
+        APP_PATH=$(find ${{ env.DERIVED_DATA_PATH }} -name "Applite.app" -type d | head -1)
         
         if [ -z "$APP_PATH" ]; then
           echo "❌ Could not find Applite.app"
@@ -191,89 +261,56 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Applite-${{ github.event.inputs.configuration }}-${{ github.run_number }}
+        name: ${{ github.event.inputs.configuration == 'Release' && env.ARTIFACT_NAME_RELEASE || env.ARTIFACT_NAME_DEBUG }}
         path: |
-          DerivedData/Build/Products/${{ github.event.inputs.configuration }}/Applite.app
+          ${{ env.DERIVED_DATA_PATH }}/Build/Products/${{ github.event.inputs.configuration }}/Applite.app
           *.dmg
         retention-days: 30
     
     - name: Cleanup
       if: always()
       run: |
-        rm -rf DerivedData dist *.dmg build_output.log
+        rm -rf ${{ env.DERIVED_DATA_PATH }} dist *.dmg build_output.log
+        rm -f /tmp/build_info_*.txt /tmp/build_summary.txt
     
     - name: Build Summary
       if: always()
       run: |
-        # Gather environment information for summary
-        MACOS_VERSION=$(sw_vers -productVersion)
-        MACOS_BUILD=$(sw_vers -buildVersion)
-        XCODE_VERSION=$(xcodebuild -version | head -1 | awk '{print $2}')
-        XCODE_BUILD=$(xcodebuild -version | tail -1 | awk '{print $3}')
-        XCODE_MAJOR_VERSION=$(echo $XCODE_VERSION | cut -d. -f1)
-        XCODE_PATH=$(xcode-select -p)
-        SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
-        MACOS_TARGET=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
+        ARTIFACT_NAME="${{ github.event.inputs.configuration == 'Release' && env.ARTIFACT_NAME_RELEASE || env.ARTIFACT_NAME_DEBUG }}"
         
-        # Create summary content
+        # Console summary
         {
           echo "📊 Build Summary"
           echo "==============="
           echo ""
-          echo "Build Environment:"
-          echo "================="
-          echo "System:"
-          echo "  • macOS: $MACOS_VERSION ($MACOS_BUILD)"
-          echo "  • Runner: macos-15"
-          echo ""
-          echo "Xcode Installation:"
-          echo "  • Version: $XCODE_VERSION ($XCODE_BUILD)"
-          echo "  • Path: $XCODE_PATH"
-          echo "  • Swift Support: $([ "$XCODE_MAJOR_VERSION" -ge 16 ] && echo "6.0+" || echo "up to 5.0")"
-          echo ""
-          echo "Project Configuration:"
-          echo "  • Swift Version: ${SWIFT_VERSION:-6.0}"
-          echo "  • macOS Target: ${MACOS_TARGET:-13.0}"
-          echo "  • Build Config: ${{ github.event.inputs.configuration }}"
-          echo "  • Code Signing: ${{ github.event.inputs.code_signing }}"
-          echo "  • Create DMG: ${{ github.event.inputs.create_dmg }}"
+          cat /tmp/build_info_console.txt
           echo ""
           echo "Repository: ${{ github.repository }}"
           echo "Status: ${{ job.status }}"
           echo ""
           
-          if [ "${{ job.status }}" = "success" ]; then
-            echo "✅ Build completed successfully!"
-            echo ""
-            echo "📦 Download artifact: Applite-${{ github.event.inputs.configuration }}-${{ github.run_number }}"
-          elif [ "${{ job.status }}" = "failure" ]; then
-            echo "❌ Build failed - check logs above for details"
-          elif [ "${{ job.status }}" = "cancelled" ]; then
-            echo "⏹️ Build cancelled"
-          fi
+          case "${{ job.status }}" in
+            "success")
+              echo "✅ Build completed successfully!"
+              echo ""
+              echo "📦 Download artifact: $ARTIFACT_NAME"
+              ;;
+            "failure")
+              echo "❌ Build failed - check logs above for details"
+              ;;
+            "cancelled")
+              echo "⏹️ Build cancelled"
+              ;;
+          esac
         } | tee -a /tmp/build_summary.txt
         
-        # Convert to GitHub Summary format and append
+        # GitHub Summary markdown
         {
           echo "# 📊 Build Summary"
           echo ""
           echo "## Build Environment"
           echo ""
-          echo "### System"
-          echo "- **macOS:** $MACOS_VERSION ($MACOS_BUILD)"
-          echo "- **Runner:** macos-15"
-          echo ""
-          echo "### Xcode Installation"
-          echo "- **Version:** $XCODE_VERSION ($XCODE_BUILD)"
-          echo "- **Path:** \`$XCODE_PATH\`"
-          echo "- **Swift Support:** $([ "$XCODE_MAJOR_VERSION" -ge 16 ] && echo "6.0+" || echo "up to 5.0")"
-          echo ""
-          echo "### Project Configuration"
-          echo "- **Swift Version:** ${SWIFT_VERSION:-6.0}"
-          echo "- **macOS Target:** ${MACOS_TARGET:-13.0}"
-          echo "- **Build Config:** ${{ github.event.inputs.configuration }}"
-          echo "- **Code Signing:** ${{ github.event.inputs.code_signing }}"
-          echo "- **Create DMG:** ${{ github.event.inputs.create_dmg }}"
+          cat /tmp/build_info_markdown.txt
           echo ""
           echo "## Build Results"
           echo ""
@@ -281,22 +318,30 @@ jobs:
           echo "**Status:** ${{ job.status }}"
           echo ""
           
-          if [ "${{ job.status }}" = "success" ]; then
-            echo "✅ **Build completed successfully!**"
-            echo ""
-            echo "📦 **Download artifact:** \`Applite-${{ github.event.inputs.configuration }}-${{ github.run_number }}\`"
-          elif [ "${{ job.status }}" = "failure" ]; then
-            echo "❌ **Build failed** - check logs above for details"
-          elif [ "${{ job.status }}" = "cancelled" ]; then
-            echo "⏹️ **Build cancelled**"
-          fi
+          case "${{ job.status }}" in
+            "success")
+              echo "✅ **Build completed successfully!**"
+              echo ""
+              echo "📦 **[Download artifact: $ARTIFACT_NAME](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})**"
+              ;;
+            "failure")
+              echo "❌ **Build failed** - check logs above for details"
+              ;;
+            "cancelled")
+              echo "⏹️ **Build cancelled**"
+              ;;
+          esac
         } >> $GITHUB_STEP_SUMMARY
         
-        # Add annotations
-        if [ "${{ job.status }}" = "success" ]; then
-          echo "::notice title=Build Success::Build completed successfully! Artifact: Applite-${{ github.event.inputs.configuration }}-${{ github.run_number }}"
-        elif [ "${{ job.status }}" = "failure" ]; then
-          echo "::error title=Build Failed::Build failed with configuration ${{ github.event.inputs.configuration }}. Check the build logs for details."
-        elif [ "${{ job.status }}" = "cancelled" ]; then
-          echo "::warning title=Build Cancelled::Build was cancelled during execution."
-        fi
+        # Annotations
+        case "${{ job.status }}" in
+          "success")
+            echo "::notice title=Build Success::Build completed successfully! Artifact: $ARTIFACT_NAME"
+            ;;
+          "failure")
+            echo "::error title=Build Failed::Build failed with configuration ${{ github.event.inputs.configuration }}. Check the build logs for details."
+            ;;
+          "cancelled")
+            echo "::warning title=Build Cancelled::Build was cancelled during execution."
+            ;;
+        esac
