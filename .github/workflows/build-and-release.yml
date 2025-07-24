@@ -86,9 +86,10 @@ jobs:
         echo "PROJECT_MACOS_VERSION=${PROJECT_MACOS_VERSION:-13.0}" >> $GITHUB_ENV
     
     - name: Setup Xcode
+      if: ${{ env.OVERRIDE_XCODE_VERSION != '' }}
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: ${{ env.FINAL_XCODE_VERSION }}
+        xcode-version: ${{ env.OVERRIDE_XCODE_VERSION }}
     
     - name: Install Apple Certificate
       if: ${{ github.event.inputs.code_signing == 'true' }}
