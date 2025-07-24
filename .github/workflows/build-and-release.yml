@@ -28,7 +28,7 @@ env:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
     
@@ -52,18 +52,39 @@ jobs:
       run: |
         echo "🔄 Preparing build environment..."
         
+        # System information
+        MACOS_VERSION=$(sw_vers -productVersion)
+        MACOS_BUILD=$(sw_vers -buildVersion)
+        
+        # Xcode information
         XCODE_VERSION=$(xcodebuild -version | head -1 | awk '{print $2}')
         XCODE_BUILD=$(xcodebuild -version | tail -1 | awk '{print $3}')
+        XCODE_MAJOR_VERSION=$(echo $XCODE_VERSION | cut -d. -f1)
+        XCODE_PATH=$(xcode-select -p)
+        
+        # Project configuration
         SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
         MACOS_TARGET=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
         
         echo "Build Environment:"
-        echo "  • Xcode: $XCODE_VERSION ($XCODE_BUILD)"
-        echo "  • Swift: ${SWIFT_VERSION:-5.9}"
+        echo "================="
+        echo "System:"
+        echo "  • macOS: $MACOS_VERSION ($MACOS_BUILD)"
+        echo "  • Runner: macos-15"
+        echo ""
+        echo "Xcode Installation:"
+        echo "  • Version: $XCODE_VERSION ($XCODE_BUILD)"
+        echo "  • Path: $XCODE_PATH"
+        echo "  • Swift Support: $([ "$XCODE_MAJOR_VERSION" -ge 16 ] && echo "6.0+" || echo "up to 5.0")"
+        echo ""
+        echo "Project Configuration:"
+        echo "  • Swift Version: ${SWIFT_VERSION:-6.0}"
         echo "  • macOS Target: ${MACOS_TARGET:-13.0}"
-        echo "  • Configuration: ${{ github.event.inputs.configuration }}"
+        echo "  • Build Config: ${{ github.event.inputs.configuration }}"
+        echo "  • Code Signing: ${{ github.event.inputs.code_signing }}"
+        echo "  • Create DMG: ${{ github.event.inputs.create_dmg }}"
         
-        echo "SWIFT_VERSION=${SWIFT_VERSION:-5.9}" >> $GITHUB_ENV
+        echo "SWIFT_VERSION=${SWIFT_VERSION:-6.0}" >> $GITHUB_ENV
         echo "MACOS_TARGET=${MACOS_TARGET:-13.0}" >> $GITHUB_ENV
         
         rm -rf DerivedData ~/Library/Developer/Xcode/DerivedData/Applite-* ~/Library/Caches/org.swift.swiftpm
@@ -184,19 +205,98 @@ jobs:
     - name: Build Summary
       if: always()
       run: |
-        echo "📊 Build Summary"
-        echo "==============="
-        echo "Repository: ${{ github.repository }}"
-        echo "Configuration: ${{ github.event.inputs.configuration }}"
-        echo "Code Signing: ${{ github.event.inputs.code_signing }}"
-        echo "DMG Created: ${{ github.event.inputs.create_dmg }}"
-        echo "Status: ${{ job.status }}"
+        # Gather environment information for summary
+        MACOS_VERSION=$(sw_vers -productVersion)
+        MACOS_BUILD=$(sw_vers -buildVersion)
+        XCODE_VERSION=$(xcodebuild -version | head -1 | awk '{print $2}')
+        XCODE_BUILD=$(xcodebuild -version | tail -1 | awk '{print $3}')
+        XCODE_MAJOR_VERSION=$(echo $XCODE_VERSION | cut -d. -f1)
+        XCODE_PATH=$(xcode-select -p)
+        SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
+        MACOS_TARGET=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
         
+        # Create summary content
+        {
+          echo "📊 Build Summary"
+          echo "==============="
+          echo ""
+          echo "Build Environment:"
+          echo "================="
+          echo "System:"
+          echo "  • macOS: $MACOS_VERSION ($MACOS_BUILD)"
+          echo "  • Runner: macos-15"
+          echo ""
+          echo "Xcode Installation:"
+          echo "  • Version: $XCODE_VERSION ($XCODE_BUILD)"
+          echo "  • Path: $XCODE_PATH"
+          echo "  • Swift Support: $([ "$XCODE_MAJOR_VERSION" -ge 16 ] && echo "6.0+" || echo "up to 5.0")"
+          echo ""
+          echo "Project Configuration:"
+          echo "  • Swift Version: ${SWIFT_VERSION:-6.0}"
+          echo "  • macOS Target: ${MACOS_TARGET:-13.0}"
+          echo "  • Build Config: ${{ github.event.inputs.configuration }}"
+          echo "  • Code Signing: ${{ github.event.inputs.code_signing }}"
+          echo "  • Create DMG: ${{ github.event.inputs.create_dmg }}"
+          echo ""
+          echo "Repository: ${{ github.repository }}"
+          echo "Status: ${{ job.status }}"
+          echo ""
+          
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ Build completed successfully!"
+            echo ""
+            echo "📦 Download artifact: Applite-${{ github.event.inputs.configuration }}-${{ github.run_number }}"
+          elif [ "${{ job.status }}" = "failure" ]; then
+            echo "❌ Build failed - check logs above for details"
+          elif [ "${{ job.status }}" = "cancelled" ]; then
+            echo "⏹️ Build cancelled"
+          fi
+        } | tee -a /tmp/build_summary.txt
+        
+        # Convert to GitHub Summary format and append
+        {
+          echo "# 📊 Build Summary"
+          echo ""
+          echo "## Build Environment"
+          echo ""
+          echo "### System"
+          echo "- **macOS:** $MACOS_VERSION ($MACOS_BUILD)"
+          echo "- **Runner:** macos-15"
+          echo ""
+          echo "### Xcode Installation"
+          echo "- **Version:** $XCODE_VERSION ($XCODE_BUILD)"
+          echo "- **Path:** \`$XCODE_PATH\`"
+          echo "- **Swift Support:** $([ "$XCODE_MAJOR_VERSION" -ge 16 ] && echo "6.0+" || echo "up to 5.0")"
+          echo ""
+          echo "### Project Configuration"
+          echo "- **Swift Version:** ${SWIFT_VERSION:-6.0}"
+          echo "- **macOS Target:** ${MACOS_TARGET:-13.0}"
+          echo "- **Build Config:** ${{ github.event.inputs.configuration }}"
+          echo "- **Code Signing:** ${{ github.event.inputs.code_signing }}"
+          echo "- **Create DMG:** ${{ github.event.inputs.create_dmg }}"
+          echo ""
+          echo "## Build Results"
+          echo ""
+          echo "**Repository:** ${{ github.repository }}"
+          echo "**Status:** ${{ job.status }}"
+          echo ""
+          
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ **Build completed successfully!**"
+            echo ""
+            echo "📦 **Download artifact:** \`Applite-${{ github.event.inputs.configuration }}-${{ github.run_number }}\`"
+          elif [ "${{ job.status }}" = "failure" ]; then
+            echo "❌ **Build failed** - check logs above for details"
+          elif [ "${{ job.status }}" = "cancelled" ]; then
+            echo "⏹️ **Build cancelled**"
+          fi
+        } >> $GITHUB_STEP_SUMMARY
+        
+        # Add annotations
         if [ "${{ job.status }}" = "success" ]; then
-          echo ""
-          echo "✅ Build completed successfully!"
-          echo "📦 Download artifact: Applite-${{ github.event.inputs.configuration }}-${{ github.run_number }}"
+          echo "::notice title=Build Success::Build completed successfully! Artifact: Applite-${{ github.event.inputs.configuration }}-${{ github.run_number }}"
         elif [ "${{ job.status }}" = "failure" ]; then
-          echo ""
-          echo "❌ Build failed - check logs above for details"
+          echo "::error title=Build Failed::Build failed with configuration ${{ github.event.inputs.configuration }}. Check the build logs for details."
+        elif [ "${{ job.status }}" = "cancelled" ]; then
+          echo "::warning title=Build Cancelled::Build was cancelled during execution."
         fi
