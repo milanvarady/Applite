@@ -11,9 +11,10 @@ This comprehensive guide explains how to build, test, and develop Applite using 
 3. [Quick Start - Local Development](#quick-start---local-development)
 4. [GitHub Actions Automated Builds](#github-actions-automated-builds)
 5. [Local Manual Builds](#local-manual-builds)
-6. [Code Signing Setup](#code-signing-setup)
-7. [Troubleshooting](#troubleshooting)
-8. [Advanced Configuration](#advanced-configuration)
+6. [Running Unsigned Apps (Gatekeeper)](#running-unsigned-apps-gatekeeper)
+7. [Code Signing Setup](#code-signing-setup)
+8. [Troubleshooting](#troubleshooting)
+9. [Advanced Configuration](#advanced-configuration)
 
 ## Build Methods Overview
 
@@ -59,11 +60,12 @@ This comprehensive guide explains how to build, test, and develop Applite using 
 
 **Pros:**
 - ✅ **Consistent, reproducible builds**
-- 🔄 **Automatic Xcode/macOS version detection**
-- 📦 **Built-in artifact management and DMG creation**
-- 🔐 **Integrated code signing and notarization**
+- 🔄 **Automatic environment detection** (Xcode version, macOS runner, Swift version)
+- 📦 **Built-in universal binary support** (Intel + Apple Silicon)
+- 🔐 **Optional code signing and notarization**
 - 🌍 **Accessible to all team members**
 - 📊 **Build history and logs**
+- 📱 **DMG creation with configurable retention**
 
 **Cons:**
 - ⏱️ **Slower feedback cycle** (queue + build time)
@@ -304,57 +306,68 @@ open Applite.xcodeproj
 
 ### Using the Automated Build System
 
-#### Development Builds
+#### Development Builds (Unsigned)
 1. Go to **Actions** tab in GitHub
-2. Select **Build and Release Applite**
+2. Select **Build and Release**
 3. Click **Run workflow**
 4. Configuration:
-   - **Configuration**: **Debug** (default, best for testing)
-   - **Sign the release**: ❌ Unchecked (faster, no signing needed)
-   - **Create DMG installer**: ✅ Checked (easy to test)
+   - **Build configuration**: **Debug** (default, best for testing)
+   - **Enable code signing**: ❌ **Unchecked** (faster, no signing needed)
 5. Click **Run workflow**
 6. Download artifacts when complete
 
-#### Release Builds
+> **⚠️ Important**: Unsigned builds require [Gatekeeper bypass](#running-unsigned-apps-gatekeeper) to run on macOS
+
+#### Release Builds (Signed)
 1. Ensure code signing is set up (see [Code Signing Setup](#code-signing-setup))
-2. Go to **Actions** tab → **Build and Release Applite**
+2. Go to **Actions** tab → **Build and Release**
 3. Click **Run workflow**
 4. Configuration:
-   - **Configuration**: **Release** (optimized for distribution)
-   - **Sign the release**: ✅ **Checked** (required for distribution)
-   - **Create DMG installer**: ✅ Checked
+   - **Build configuration**: **Release** (optimized for distribution)
+   - **Enable code signing**: ✅ **Checked** (required for distribution)
 5. Monitor build progress
-6. Download signed artifacts
+6. Download signed and notarized artifacts
 
 ### 🔍 Automatic Detection Features
 
 The build system automatically detects project settings for maximum compatibility:
 
 **Xcode Version (Enhanced Detection):**
-- **Primary**: Reads `compatibilityVersion` from `Applite.xcodeproj/project.pbxproj` (currently "Xcode 14.0")
-- **Smart Mapping**: Maps project versions to available GitHub Actions versions (e.g., 14.0 → 14.1)
-- **Fallback**: Uses `LastUpgradeCheck` mapping if compatibilityVersion unavailable
+- **Primary**: Reads `compatibilityVersion` from `Applite.xcodeproj/project.pbxproj`
+- **Fallback**: Uses `LastUpgradeCheck` if compatibilityVersion unavailable
+- **Smart Mapping**: Maps project versions to available GitHub Actions versions
 - **Future-proof**: Automatically supports new Xcode versions as they're released
 
 **macOS Runner (Dynamic Selection):**
-- Detects `MACOSX_DEPLOYMENT_TARGET` from your project (currently 13.0)
-- Dynamically selects runner: `macos-13`, `macos-14`, `macos-15`
-- **Smart mapping**: Uses the major version number directly
-- **Future-proof**: Uses `macos-latest` for unknown/future versions
+- Uses fixed `macos-15` runner for consistent, modern environment
+- Ensures compatibility with latest Xcode versions and universal binary builds
+
+**Universal Binary Support:**
+- **Automatic**: All builds include both Intel (x86_64) and Apple Silicon (arm64) architectures
+- **Compatible**: Works on all modern Mac computers
+- **Optimized**: Single binary with native performance on both platforms
+
+**Code Signing Detection:**
+- **Project-aware**: Detects existing code signing configuration from Xcode project
+- **Flexible**: Supports both workflow-level and project-level signing settings
+- **Smart fallback**: Disables signing cleanly when not configured
+
+**Build Configuration:**
+- **Scheme Detection**: Automatically finds main app scheme from project
+- **Bundle ID**: Extracts from project settings for accurate builds
+- **Swift Version**: Detects project Swift version requirements
+- **macOS Target**: Reads deployment target for compatibility
 
 **Example Detection Results:**
 ```
-Project settings → GitHub Actions result:
-compatibilityVersion "Xcode 14.0" → xcode-version: "14.1" (closest available)
-compatibilityVersion "Xcode 14.3" → xcode-version: "14.3.1" (exact match)
-compatibilityVersion "Xcode 15.0" → xcode-version: "15.0.1" (patch version)
-compatibilityVersion "Xcode 16.1" → xcode-version: "16.1" (exact match)
-
-MACOSX_DEPLOYMENT_TARGET 13.0 → macos-runner: "macos-13"
-MACOSX_DEPLOYMENT_TARGET 14.2 → macos-runner: "macos-14"  
-MACOSX_DEPLOYMENT_TARGET 15.1 → macos-runner: "macos-15"
-MACOSX_DEPLOYMENT_TARGET 16.0 → macos-runner: "macos-latest" (future-proof)
-MACOSX_DEPLOYMENT_TARGET 10.15 → macos-runner: "macos-latest" (fallback)
+Project Analysis Results:
+• Scheme: Applite (auto-detected)
+• Bundle ID: dev.aerolite.Applite
+• Swift Version: 6.0
+• macOS Target: 13.1
+• Xcode Compatibility: 14.0 → Uses Xcode 14.x on macos-15
+• Architecture: Universal (Intel + Apple Silicon)
+• Code Signing: Auto-detected from project or workflow settings
 ```
 
 This ensures your builds always use the appropriate environment without manual configuration.
@@ -505,11 +518,128 @@ rm -rf ~/Library/Developer/Xcode/DerivedData/Applite-*
 
 #### GitHub Actions Artifacts
 ```
-Applite-Build-{version}-{run_number}-{configuration}-{signed|unsigned}/
-├── Applite.app/                               # Application bundle
-├── Applite-{signed|unsigned}.dmg              # DMG installer (if enabled)
+Applite-Debug/                                 # Debug build artifact
+├── Applite-Debug.dmg                          # Debug DMG installer
+└── BUILD_INFO.txt                             # Build metadata
+
+Applite/                                       # Release build artifact  
+├── Applite-Release.dmg                        # Release DMG installer (signed & notarized)
 └── BUILD_INFO.txt                             # Build metadata
 ```
+
+**Artifact Retention:**
+- **Debug builds**: 7 days (for development testing)
+- **Release builds**: 14 days (for distribution)
+
+## Running Unsigned Apps (Gatekeeper)
+
+### Why This Matters
+
+When you build Applite without code signing (Debug builds, development builds, or local builds), macOS Gatekeeper will prevent the app from running by default. This is a security feature that protects users from running potentially harmful software.
+
+**You'll see one of these messages:**
+- *"Applite.app" cannot be opened because the developer cannot be verified.*
+- *"Applite.app" is damaged and can't be opened. You should move it to the Trash.*
+- *"Applite.app" cannot be opened because it is from an unidentified developer.*
+
+### Method 1: Allow Specific App (Recommended)
+
+This is the safest method as it only affects the specific Applite.app you want to run:
+
+#### Step 1: Try to Open the App
+1. Double-click `Applite.app` or `Applite.dmg`
+2. You'll see a security warning dialog
+3. Click **Cancel** (don't move to Trash)
+
+#### Step 2: Override in System Settings
+1. Open **System Settings** (or **System Preferences** on older macOS)
+2. Go to **Privacy & Security**
+3. Scroll down to the **Security** section
+4. You'll see a message like: *"Applite.app" was blocked from use because it is not from an identified developer*
+5. Click **Open Anyway** button next to this message
+6. Enter your administrator password when prompted
+7. Click **Open** in the confirmation dialog
+
+#### Alternative: Right-Click Method
+1. Right-click (or Control+click) on `Applite.app`
+2. Select **Open** from the context menu
+3. You'll see a dialog with an **Open** button
+4. Click **Open** to bypass Gatekeeper for this specific app
+
+### Method 2: Temporary Gatekeeper Disable (Advanced Users)
+
+> **⚠️ Security Warning**: This disables Gatekeeper system-wide and makes your Mac less secure. Only use temporarily and re-enable when done.
+
+#### Disable Gatekeeper
+```bash
+# Disable Gatekeeper (requires admin password)
+sudo spctl --master-disable
+
+# Verify it's disabled
+spctl --status
+# Should show: "assessments disabled"
+```
+
+#### Re-enable Gatekeeper (Important!)
+```bash
+# Re-enable Gatekeeper for security
+sudo spctl --master-enable
+
+# Verify it's enabled
+spctl --status
+# Should show: "assessments enabled"
+```
+
+### Method 3: Developer Workflow
+
+For developers working on Applite regularly:
+
+#### Option A: Remove Quarantine Attribute
+```bash
+# Remove quarantine attribute from the app
+sudo xattr -rd com.apple.quarantine /path/to/Applite.app
+
+# For DMG files
+sudo xattr -rd com.apple.quarantine /path/to/Applite.dmg
+```
+
+#### Option B: Allow Apps from Anywhere (macOS Settings)
+1. Open **System Settings** → **Privacy & Security**
+2. Under **Allow apps downloaded from:**
+3. Select **App Store and identified developers**
+4. If you see **Anywhere** option, you can select it (may require Terminal command first)
+
+#### Enable "Anywhere" Option (if hidden)
+```bash
+# Enable the "Anywhere" option in System Preferences
+sudo spctl --master-disable
+
+# This will add "Anywhere" to System Settings
+# You can then go to System Settings and re-enable with "Anywhere" selected
+```
+
+### Why Code Signing Matters
+
+**For End Users:**
+- **Signed apps** run without warnings
+- **Notarized apps** are additionally verified by Apple
+- **App Store apps** have the highest trust level
+
+**For Developers:**
+- Unsigned builds are fine for development
+- Release builds should always be signed
+- Distribution requires signing + notarization
+
+### Best Practices
+
+1. **Development**: Use unsigned builds + Method 1 (safest)
+2. **Testing**: Use Method 1 for each new build version
+3. **Distribution**: Always use signed + notarized builds
+4. **Never**: Leave Gatekeeper completely disabled
+
+> **💡 Tip**: If you frequently test development builds, create a dedicated "Testing" folder and use the quarantine removal method on that folder.
+
+## Code Signing Setup
 
 ### Prerequisites
 
@@ -539,9 +669,35 @@ Once approved, you'll need:
   - Format: `1234567890` (10 characters)
   - Also visible at: https://developer.apple.com/account/#!/membership/
 
-### Step 2: Create Certificates
+### Step 2: GitHub Secrets Configuration
 
-#### 2.1 Generate Certificate Signing Request (CSR)
+The GitHub Actions workflow requires these secrets to be configured in your repository:
+
+#### Required Secrets
+Go to **Settings** → **Secrets and variables** → **Actions** in your GitHub repository and add:
+
+1. **`BUILD_CERTIFICATE_BASE64`**
+   - Your Developer ID Application certificate in base64 format
+   - See [Certificate Setup](#step-3-create-certificates) below
+
+2. **`P12_PASSWORD`**
+   - Password for your .p12 certificate file
+
+3. **`APPSTORE_ISSUER_ID`**
+   - Your App Store Connect Issuer ID
+   - Found in App Store Connect → Users and Access → Keys
+
+4. **`APPSTORE_KEY_ID`**
+   - Your App Store Connect Key ID
+   - Found in App Store Connect → Users and Access → Keys
+
+5. **`APPSTORE_PRIVATE_KEY`**
+   - Your App Store Connect private key content (.p8 file)
+   - The actual key content, not the file path
+
+### Step 3: Create Certificates
+
+#### 3.1 Generate Certificate Signing Request (CSR)
 
 On a macOS computer:
 
@@ -549,117 +705,108 @@ On a macOS computer:
 2. In the menu: **Keychain Access > Certificate Assistant > Request a Certificate From a Certificate Authority**
 3. Fill in the form:
    - **User Email Address**: Your Apple ID email
-   - **Common Name**: Your name or company name
-   - **CA Email Address**: Leave blank
    - **Request is**: Select "Saved to disk"
 4. Click **Continue** and save the `.certSigningRequest` file
 
-#### 2.2 Create Developer ID Application Certificate
+#### 3.2 Create Developer ID Application Certificate
 
-1. Go to https://developer.apple.com/account/resources/certificates/list
+1. Visit https://developer.apple.com/account/resources/certificates
 2. Click the **+** button to create a new certificate
-3. Under **Software**, select **Developer ID Application**
+3. Select **Developer ID Application** (for distribution outside App Store)
 4. Click **Continue**
 5. Upload your `.certSigningRequest` file
-6. Click **Continue**
-7. Download the certificate (`.cer` file)
-8. Double-click the downloaded `.cer` file to install it in Keychain Access
+6. Click **Continue** and **Download** the certificate
+7. Double-click the downloaded certificate to install it in Keychain Access
 
-### Step 3: Export Certificate
+#### 3.3 Export Certificate for GitHub Actions
 
-#### 3.1 Export as .p12 File
+1. Open **Keychain Access**
+2. Find your "Developer ID Application" certificate
+3. Right-click → **Export**
+4. Choose **.p12** format
+5. Set a strong password (this becomes `P12_PASSWORD`)
+6. Save the .p12 file
 
-1. In **Keychain Access**, select the **login** keychain
-2. In the **Category** section, select **My Certificates**
-3. Find your **Developer ID Application** certificate
-4. **Right-click** on the certificate and select **Export**
-5. Choose **Personal Information Exchange (.p12)** format
-6. Save the file with a memorable name (e.g., `AppliteDeveloperID.p12`)
-7. Set a **strong password** when prompted
-8. **Important**: Remember this password - you'll need it for GitHub secrets
-
-#### 3.2 Convert to Base64
-
-In Terminal, convert your .p12 file to Base64:
+#### 3.4 Convert to Base64
 
 ```bash
+# Convert .p12 to base64 for GitHub secret
 base64 -i /path/to/your/certificate.p12 | pbcopy
+# This copies the base64 string to clipboard
+# Paste this as BUILD_CERTIFICATE_BASE64 secret
 ```
 
-This copies the Base64-encoded certificate to your clipboard.
+### Step 4: App Store Connect API Key
 
-### Step 4: Notarization Setup
+#### 4.1 Create API Key
+1. Visit https://appstoreconnect.apple.com/access/api
+2. Click **+** to create a new key
+3. Enter a name (e.g., "GitHub Actions Notarization")
+4. Select **Developer** role
+5. Click **Generate**
+6. **Download the .p8 file immediately** (you can't download it again)
 
-#### 4.1 Create App-Specific Password
+#### 4.2 Get Required Values
+1. **Issuer ID**: Copy from the top of the API Keys page
+2. **Key ID**: Copy from the key you just created
+3. **Private Key**: Open the .p8 file in a text editor and copy the entire content
 
-1. Go to https://appleid.apple.com/account/manage
-2. Sign in with your Apple ID
-3. In the **Security** section, click **Generate Password** under **App-Specific Passwords**
-4. Enter a label like "GitHub Applite Notarization"
-5. Click **Create**
-6. **Important**: Copy and save the generated password immediately - you can't view it again
+### Step 5: Verify Setup
 
-#### 4.2 Verify Your Setup
+#### 5.1 Test Unsigned Build First
+1. Run GitHub Actions workflow with **Enable code signing** = `false`
+2. Verify the build completes successfully
+3. Download and test the unsigned app (see [Gatekeeper section](#running-unsigned-apps-gatekeeper))
 
-Test your notarization credentials in Terminal:
+#### 5.2 Test Signed Build
+1. Ensure all secrets are configured
+2. Run GitHub Actions workflow with **Enable code signing** = `true`
+3. Monitor the build logs for any signing errors
+4. Download and verify the signed DMG runs without Gatekeeper warnings
 
-```bash
-xcrun notarytool store-credentials "AC_PASSWORD" \
-  --apple-id "your-apple-id@example.com" \
-  --team-id "YOUR_TEAM_ID" \
-  --password "your-app-specific-password"
+### Troubleshooting Code Signing
+
+#### Common Issues
+
+**"No signing certificate found"**
+- Verify `BUILD_CERTIFICATE_BASE64` is correctly encoded
+- Check that certificate is installed in GitHub Actions runner
+- Ensure certificate is not expired
+
+**"No profiles for bundle identifier"**
+- This is normal for Developer ID distribution
+- The workflow handles this automatically
+
+**"Notarization failed"**
+- Verify all App Store Connect secrets are correct
+- Check that the API key has Developer role
+- Ensure the key hasn't been revoked
+
+#### Debug Steps
+
+1. **Check secret configuration**:
+   ```bash
+   # In workflow, secrets should show as "Set" not "Not Set"
+   # Check the build environment output
+   ```
+
+2. **Verify certificate locally**:
+   ```bash
+   # Check available certificates
+   security find-identity -v -p codesigning
+   ```
+
+3. **Test notarization manually**:
+   ```bash
+   # Test with your local setup
+   xcrun notarytool store-credentials "AC_PASSWORD" \
+     --apple-id "your-apple-id" \
+     --team-id "your-team-id" \
+     --password "app-specific-password"
+   ```
 ```
 
-### Step 5: Configure GitHub Secrets
-
-#### 5.1 Access Repository Secrets
-
-1. Go to your GitHub repository
-2. Click **Settings** tab
-3. In the left sidebar, click **Secrets and variables > Actions**
-4. Click **New repository secret**
-
-#### 5.2 Add Required Secrets
-
-Create these **6 secrets** exactly as named:
-
-##### `MACOS_CERTIFICATE`
-- **Value**: The Base64-encoded .p12 certificate from Step 3.2
-- **Description**: Base64 encoded .p12 certificate file
-
-##### `MACOS_CERTIFICATE_PWD`
-- **Value**: The password you set when exporting the .p12 file
-- **Description**: Password for the .p12 certificate
-
-##### `KEYCHAIN_PASSWORD`
-- **Value**: Any secure password (you choose this)
-- **Description**: Password for temporary keychain during build
-- **Example**: `TempKeychain2024!`
-
-##### `MACOS_NOTARIZATION_APPLE_ID`
-- **Value**: Your Apple ID email address
-- **Description**: Apple ID for notarization
-
-##### `MACOS_NOTARIZATION_TEAM_ID`
-- **Value**: Your 10-character Team ID
-- **Description**: Apple Developer Team ID
-
-##### `MACOS_NOTARIZATION_PWD`
-- **Value**: The app-specific password from Step 4.1
-- **Description**: App-specific password for notarization
-
-#### 5.3 Verify Secrets
-
-After adding all secrets, you should see:
-
-```
-MACOS_CERTIFICATE                 ••••••••••••••••••••
-MACOS_CERTIFICATE_PWD            ••••••••••••••••••••
-KEYCHAIN_PASSWORD                ••••••••••••••••••••
-MACOS_NOTARIZATION_APPLE_ID      ••••••••••••••••••••
-MACOS_NOTARIZATION_TEAM_ID       ••••••••••••••••••••
-MACOS_NOTARIZATION_PWD           ••••••••••••••••••••
-```
+## Troubleshooting
 
 ### Step 6: Run Signed Builds
 
@@ -901,27 +1048,75 @@ xcodebuild -project Applite.xcodeproj -scheme Applite -configuration Debug
 xcodebuild -project Applite.xcodeproj -scheme Applite -configuration Release
 ```
 
-### Getting Help
-- 📖 **Build issues**: Check [Troubleshooting](#troubleshooting) section
-- 🔐 **Code signing**: See [Code Signing Setup](#code-signing-setup)
-- 🌥️ **Codespaces**: GitHub Codespaces documentation
-- 🐛 **Bugs**: Create issue in repository
-- 💬 **Questions**: Discussions tab or community channels
+## Quick Reference
 
-> **Next Steps**: Choose your development environment and start building! For first-time contributors, we recommend starting with GitHub Codespaces to get familiar with the codebase.
+### Development Workflow Cheat Sheet
+
+**📝 Making Changes**
+```bash
+# Codespaces (recommended for non-Mac users)
+1. Create Codespace from main branch
+2. Edit code in VS Code
+3. Commit and push changes
+4. Use GitHub Actions to build and test
+
+# Local macOS (recommended for Mac users)  
+1. git clone https://github.com/computeronix/Applite.git
+2. open Applite.xcodeproj
+3. Build and run with ⌘R
+4. Test changes locally before pushing
+```
+
+**🔨 Building Applite**
+```bash
+# Unsigned builds (for development)
+GitHub Actions → Build and Release → Enable code signing: NO
+
+# Signed builds (for distribution)  
+GitHub Actions → Build and Release → Enable code signing: YES
+```
+
+**🔓 Running Unsigned Apps**
+```bash
+# Quick method: Right-click → Open → Open
+# System Settings method: Privacy & Security → Open Anyway
+# Remove quarantine: sudo xattr -rd com.apple.quarantine Applite.app
+```
+
+**📋 Required GitHub Secrets (for signing)**
+- `BUILD_CERTIFICATE_BASE64` - Your .p12 certificate in base64
+- `P12_PASSWORD` - Certificate password
+- `APPSTORE_ISSUER_ID` - App Store Connect Issuer ID
+- `APPSTORE_KEY_ID` - App Store Connect Key ID  
+- `APPSTORE_PRIVATE_KEY` - App Store Connect private key content
+
+### Common Commands
+
+**Local Development:**
+```bash
+# Open project
 open Applite.xcodeproj
 
 # Command line build
 xcodebuild -project Applite.xcodeproj -scheme Applite -configuration Debug
 
 # GitHub Actions
-# Go to Actions tab → Build and Release Applite → Run workflow
+# Go to Actions tab → Build and Release → Run workflow
 ```
+
+### Getting Help
+- 📖 **Build issues**: Check [Troubleshooting](#troubleshooting) section
+- 🔐 **Code signing**: See [Code Signing Setup](#code-signing-setup)  
+- 🌥️ **Codespaces**: GitHub Codespaces documentation
+- 🐛 **Bugs**: Create issue in repository
+- 💬 **Questions**: Discussions tab or community channels
+
+> **Next Steps**: Choose your development environment and start building! For first-time contributors, we recommend starting with GitHub Codespaces to get familiar with the codebase.
 
 ---
 
 **Contributing Guide Version**: v4.0  
 **Default Configuration**: Debug (optimized for development)  
-**Auto-Detection**: Xcode 16.3, macOS 13+ runners  
-**Last Updated**: July 2025  
-**Next Steps**: Make your changes, test locally, then use GitHub Actions for final validation!
+**Auto-Detection**: Xcode version from project, macos-15 runner  
+**Universal Binaries**: Intel + Apple Silicon support built-in  
+**Last Updated**: July 2025

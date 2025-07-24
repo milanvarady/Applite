@@ -50,7 +50,7 @@ env:
   RETENTION_DAYS_RELEASE: 14
 
 jobs:
-  build:
+  build-and-release:
     runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
