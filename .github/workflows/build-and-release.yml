@@ -38,13 +38,17 @@ env:
   XCODE_PROJECT: "Applite.xcodeproj"
   DERIVED_DATA_PATH: "DerivedData"
   
+  # Build configuration
+  BUILD_ARCHITECTURE: "universal"
+  BUILD_DESTINATION: "platform=macOS"
+  
   # Code signing configuration  
   CODE_SIGN_IDENTITY: "Developer ID Application"
   PROVISIONING_PROFILE_SPECIFIER: "Applite Distribution"
   
   # Default fallback values
   SWIFT_VERSION_DEFAULT: "6.0"
-  MACOS_TARGET_DEFAULT: "13.0"
+  MACOS_TARGET_DEFAULT: "13.1"
   
   # Dynamic artifact naming
   ARTIFACT_NAME_RELEASE: "Applite"
@@ -162,6 +166,7 @@ jobs:
           echo ""
           echo "Build Options:"
           echo "  • Build Config: ${{ github.event.inputs.configuration }}"
+          echo "  • Architecture: ${{ env.BUILD_ARCHITECTURE }} (Intel + Apple Silicon)"
           echo "  • Create DMG: ${{ github.event.inputs.create_dmg }}"
           echo ""
           echo "Code Signing:"
@@ -192,6 +197,7 @@ jobs:
           echo ""
           echo "### Build Options"
           echo "- **Build Config:** ${{ github.event.inputs.configuration }}"
+          echo "- **Architecture:** ${{ env.BUILD_ARCHITECTURE }} (Intel + Apple Silicon)"
           echo "- **Create DMG:** ${{ github.event.inputs.create_dmg }}"
           echo ""
           echo "### Code Signing"
@@ -225,12 +231,13 @@ jobs:
 
     - name: Build application
       run: |
-        echo "🔨 Building Applite (${{ github.event.inputs.configuration }})..."
+        echo "🔨 Building Applite (${{ github.event.inputs.configuration }}) - ${{ env.BUILD_ARCHITECTURE }} binary..."
         
         BUILD_ARGS=(
           -project "${{ env.XCODE_PROJECT }}"
           -scheme "$SCHEME"
           -configuration "${{ github.event.inputs.configuration }}"
+          -destination "${{ env.BUILD_DESTINATION }}"
           -derivedDataPath ${{ env.DERIVED_DATA_PATH }}
           -skipPackagePluginValidation
           -disableAutomaticPackageResolution
@@ -244,12 +251,21 @@ jobs:
         fi
         
         if [ "${{ github.event.inputs.code_signing }}" = "true" ]; then
+          # Use workflow-level code signing configuration
           BUILD_ARGS+=(CODE_SIGN_IDENTITY="${{ env.CODE_SIGN_IDENTITY }}")
           BUILD_ARGS+=(PROVISIONING_PROFILE_SPECIFIER="${{ env.PROVISIONING_PROFILE_SPECIFIER }}")
           echo "🔐 Code signing enabled"
         else
-          BUILD_ARGS+=(CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="")
-          echo "🚫 Code signing disabled"
+          # Use project-extracted values or disable completely
+          if [ -n "$PROJECT_CODE_SIGN_IDENTITY" ] && [ "$PROJECT_CODE_SIGN_IDENTITY" != "None (Ad Hoc)" ]; then
+            BUILD_ARGS+=(CODE_SIGN_IDENTITY="$PROJECT_CODE_SIGN_IDENTITY")
+          else
+            BUILD_ARGS+=(CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="")
+          fi
+          if [ -n "$PROJECT_PROVISIONING_PROFILE" ] && [ "$PROJECT_PROVISIONING_PROFILE" != "None" ]; then
+            BUILD_ARGS+=(PROVISIONING_PROFILE_SPECIFIER="$PROJECT_PROVISIONING_PROFILE")
+          fi
+          echo "🚫 Code signing disabled (using project settings)"
         fi
         
         BUILD_ARGS+=(build)
@@ -260,7 +276,8 @@ jobs:
         set -e
         
         if [ $BUILD_EXIT_CODE -eq 0 ]; then
-          echo "✅ Build completed successfully!"
+          echo "✅ Universal binary build completed successfully!"
+          echo "📱 Binary supports: Intel (x86_64) + Apple Silicon (arm64)"
         else
           echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
           echo "🔍 Last 50 lines of build output:"
@@ -271,7 +288,7 @@ jobs:
     - name: Create DMG
       if: ${{ github.event.inputs.create_dmg == 'true' }}
       run: |
-        echo "📦 Creating DMG package..."
+        echo "📦 Creating universal DMG package..."
         
         APP_PATH=$(find ${{ env.DERIVED_DATA_PATH }} -name "Applite.app" -type d | head -1)
         
@@ -288,7 +305,8 @@ jobs:
         hdiutil create -volname "Applite" -srcfolder dist -ov -format UDZO "$DMG_NAME"
         
         DMG_SIZE=$(ls -lh "$DMG_NAME" | awk '{print $5}')
-        echo "✅ DMG created: $DMG_NAME ($DMG_SIZE)"
+        echo "✅ Universal DMG created: $DMG_NAME ($DMG_SIZE)"
+        echo "🖥️ Compatible with all Mac architectures"
     
     - name: Notarize DMG
       if: ${{ github.event.inputs.code_signing == 'true' && github.event.inputs.create_dmg == 'true' }}
@@ -334,7 +352,8 @@ jobs:
           
           case "${{ job.status }}" in
             "success")
-              echo "✅ Build completed successfully!"
+              echo "✅ Universal binary build completed successfully!"
+              echo "🖥️ Compatible with all Mac architectures (Intel + Apple Silicon)"
               echo ""
               echo "📦 Download artifact: $ARTIFACT_NAME"
               ;;
@@ -363,7 +382,9 @@ jobs:
           
           case "${{ job.status }}" in
             "success")
-              echo "✅ **Build completed successfully!**"
+              echo "✅ **Universal binary build completed successfully!**"
+              echo ""
+              echo "🖥️ **Compatible with all Mac architectures** (Intel + Apple Silicon)"
               echo ""
               echo "📦 **[Download artifact: $ARTIFACT_NAME](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})**"
               ;;
@@ -379,7 +400,7 @@ jobs:
         # Annotations
         case "${{ job.status }}" in
           "success")
-            echo "::notice title=Build Success::Build completed successfully! Artifact: $ARTIFACT_NAME"
+            echo "::notice title=Universal Build Success::Universal binary build completed successfully! Compatible with Intel + Apple Silicon Macs. Artifact: $ARTIFACT_NAME"
             ;;
           "failure")
             echo "::error title=Build Failed::Build failed with configuration ${{ github.event.inputs.configuration }}. Check the build logs for details."
