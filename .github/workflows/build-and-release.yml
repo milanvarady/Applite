@@ -19,7 +19,7 @@ on:
       create_dmg:
         description: 'Create DMG package'
         required: true
-        default: false
+        default: true
         type: boolean
 
 jobs:
@@ -38,13 +38,13 @@ jobs:
       run: |
         # Auto-detect optimal Xcode version for this project
         if grep -q 'compatibilityVersion = "Xcode 14.0"' Applite.xcodeproj/project.pbxproj; then
-          XCODE_VERSION="15.0.1"  # Minimum Xcode version that supports swift-tools-version:5.9
+          XCODE_VERSION="15.4"  # Need 15.4+ for Swift 6.0 support
         elif grep -q 'compatibilityVersion = "Xcode 15.0"' Applite.xcodeproj/project.pbxproj; then
           XCODE_VERSION="15.4"
         elif grep -q 'compatibilityVersion = "Xcode 16.0"' Applite.xcodeproj/project.pbxproj; then
           XCODE_VERSION="16.1"
         else
-          XCODE_VERSION="15.0.1"  # Default to 15.0.1 - minimum for swift-tools-version:5.9 support
+          XCODE_VERSION="15.4"  # Default to 15.4 for Swift 6.0 and swift-tools-version:5.9 support
         fi
         
         # Auto-detect macOS deployment target
@@ -199,9 +199,11 @@ jobs:
           echo "🔧 Skipping -skipMacroValidation for Xcode $XCODE_MAJOR_VERSION (not supported)"
         fi
         
-        # Add code signing parameters if provided
+        # Add code signing parameters if provided, otherwise disable code signing
         if [ -n "$CODE_SIGN_IDENTITY" ]; then
           BUILD_ARGS+=(CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY")
+        else
+          BUILD_ARGS+=(CODE_SIGN_IDENTITY="")
         fi
         
         if [ -n "$PROVISIONING_PROFILE_SPECIFIER" ]; then
