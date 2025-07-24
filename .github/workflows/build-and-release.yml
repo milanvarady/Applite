@@ -92,7 +92,7 @@ jobs:
         XCODE_COMPATIBILITY=$(grep -o 'compatibilityVersion = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f2 || echo "Xcode 14.0")
         
         # Extract scheme from target name (more reliable than random name fields)
-        SCHEME=$(grep -A1 'PBXNativeTarget' ${{ env.XCODE_PROJECT }}/project.pbxproj | grep 'name = ' | head -1 | cut -d' ' -f3 | tr -d ';' || echo "Applite")
+        SCHEME=$(grep -A15 'Begin PBXNativeTarget section' ${{ env.XCODE_PROJECT }}/project.pbxproj | grep 'name = ' | head -1 | cut -d' ' -f3 | tr -d ';' || echo "Applite")
         
         BUNDLE_ID=$(grep -o 'PRODUCT_BUNDLE_IDENTIFIER = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "dev.aerolite.Applite")
         
@@ -128,8 +128,13 @@ jobs:
           echo "XCODE_COMPATIBILITY=${XCODE_COMPATIBILITY:-Xcode 14.0}"
           echo "SCHEME=${SCHEME:-Applite}"
           echo "BUNDLE_ID=${BUNDLE_ID:-dev.aerolite.Applite}"
-          echo "PROJECT_CODE_SIGN_IDENTITY=$PROJECT_CODE_SIGN_IDENTITY"
-          echo "PROJECT_PROVISIONING_PROFILE=$PROJECT_PROVISIONING_PROFILE"
+          # Only export actual code signing values, not display strings
+          if [ "$CODE_SIGN_IDENTITY_RAW" != "-" ] && [ -n "$CODE_SIGN_IDENTITY_RAW" ]; then
+            echo "PROJECT_CODE_SIGN_IDENTITY=$CODE_SIGN_IDENTITY_RAW"
+          fi
+          if [ -n "$PROVISIONING_PROFILE_RAW" ]; then
+            echo "PROJECT_PROVISIONING_PROFILE=$PROVISIONING_PROFILE_RAW"
+          fi
         } >> $GITHUB_ENV
         
         # Check secret availability for display purposes
