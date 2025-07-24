@@ -9,7 +9,13 @@ on:
         type: choice
         options:
         - Debug
-        - Release
+           echo "📋 Package information:"
+        echo "- Ifrit dependency: Uses swift-tools-version:5.9 but supports Swift 6.0"
+        echo "- Project Swift version: 6.0" 
+        echo "- Strategy: Let xcodebuild resolve packages during build process"
+        echo "- This bypasses the explicit package resolution that causes tools version conflicts"
+        
+        echo "✅ Ready for build - packages will be resolved automatically during archive step"ease
         default: 'Debug'
       sign_release:
         description: 'Sign the release with Apple Developer certificates'
@@ -132,14 +138,18 @@ jobs:
         echo "Sign release: ${{ github.event.inputs.sign_release }}"
         echo "Create DMG: ${{ github.event.inputs.create_dmg }}"
         
-        # Get Swift version from project settings
-        SWIFT_VERSION=$(xcodebuild -showBuildSettings -project ${{ env.XCODE_PROJECT }} -scheme ${{ env.SCHEME }} -configuration ${{ github.event.inputs.configuration }} | grep "SWIFT_VERSION" | head -1 | awk '{print $3}')
-        echo "Swift version: ${SWIFT_VERSION:-'Not specified'}"
-        
         echo "--- Build Tools ---"
         xcodebuild -version
-        echo "--- Project Info ---"
-        xcodebuild -list -project ${{ env.XCODE_PROJECT }}
+        
+        echo "--- Swift and Project Info ---"
+        echo "Project: ${{ env.XCODE_PROJECT }}"
+        echo "Scheme: ${{ env.SCHEME }}"
+        echo "Product: ${{ env.PRODUCT_NAME }}"
+        
+        # Note: Skipping xcodebuild -list and Swift version detection to avoid 
+        # triggering package resolution which fails due to Ifrit tools version conflict.
+        # These will be resolved automatically during the build process.
+        echo "Swift version: Will be detected during build (avoiding package resolution conflict)"
         
     - name: Install Apple certificate (if signing)
       if: github.event.inputs.sign_release == 'true'
@@ -196,7 +206,7 @@ jobs:
     
     - name: Resolve Swift Package Dependencies
       run: |
-        echo "🔄 Resolving Swift Package Manager dependencies..."
+        echo "🔄 Preparing Swift Package Manager for build..."
         
         # Clean any existing package resolution state
         echo "Cleaning package resolution cache..."
@@ -204,78 +214,46 @@ jobs:
         rm -rf ~/Library/Developer/Xcode/DerivedData/Applite-*
         rm -rf ~/Library/Caches/org.swift.swiftpm
         
-        # First attempt: Try to resolve packages normally
-        echo "Attempting initial package resolution..."
-        if xcodebuild -resolvePackageDependencies \
-          -project ${{ env.XCODE_PROJECT }} \
-          -scheme ${{ env.SCHEME }}; then
-          echo "✅ Package dependencies resolved successfully on first attempt"
-        else
-          echo "⚠️  Initial package resolution failed. Trying advanced resolution strategies..."
-          
-          # Strategy 1: Force clean and retry with verbose output
-          echo "🔄 Strategy 1: Deep clean and verbose resolution..."
-          xcodebuild clean \
-            -project ${{ env.XCODE_PROJECT }} \
-            -scheme ${{ env.SCHEME }}
-          
-          if xcodebuild -resolvePackageDependencies \
-            -project ${{ env.XCODE_PROJECT }} \
-            -scheme ${{ env.SCHEME }} \
-            -verbose; then
-            echo "✅ Package dependencies resolved with Strategy 1"
-          else
-            echo "⚠️  Strategy 1 failed. Trying Strategy 2..."
-            
-            # Strategy 2: Use explicit configuration and try to force update
-            echo "🔄 Strategy 2: Configuration-specific resolution..."
-            xcodebuild -resolvePackageDependencies \
-              -project ${{ env.XCODE_PROJECT }} \
-              -scheme ${{ env.SCHEME }} \
-              -configuration ${{ github.event.inputs.configuration }} || true
-            
-            # Strategy 3: Build without explicit resolution (let xcodebuild handle it)
-            echo "🔄 Strategy 3: Let build process handle package resolution..."
-            echo "Will proceed with build - xcodebuild will resolve packages automatically"
-          fi
-        fi
+        # Instead of pre-resolving packages (which fails due to Swift tools version conflict),
+        # we'll let the build process handle package resolution automatically.
+        # This is actually more reliable for tools version conflicts.
         
-        # Show final status
-        echo "📋 Package resolution summary:"
-        xcodebuild -list -project ${{ env.XCODE_PROJECT }} || echo "Could not list project details"
+        echo "📋 Package information:"
+        echo "- Ifrit dependency: Uses swift-tools-version:5.9 but supports Swift 6.0"
+        echo "- Project Swift version: 6.0" 
+        echo "- Strategy: Let xcodebuild resolve packages during build process"
+        
+        # Show project structure without triggering package resolution
+        echo "� Project scheme information:"
+        xcodebuild -list -project ${{ env.XCODE_PROJECT }} -json | head -20 || echo "Could not retrieve project info"
+        
+        echo "✅ Ready for build - packages will be resolved automatically during build"
 
     - name: Build and archive application
       run: |
-        echo "🔨 Starting build process..."
+        echo "🔨 Starting build process with automatic package resolution..."
         
-        # Build with automatic package resolution
+        # Build with automatic package resolution - this bypasses the tools version conflict
+        # by letting xcodebuild handle the package resolution internally
         if [[ "${{ github.event.inputs.sign_release }}" == "true" ]]; then
           echo "🔐 Building with code signing enabled"
           
-          # For signed builds, let xcodebuild handle package resolution during build
-          if ! xcodebuild archive \
+          # For signed builds - xcodebuild will resolve packages automatically
+          echo "Building archive with automatic package resolution..."
+          xcodebuild archive \
             -project ${{ env.XCODE_PROJECT }} \
             -scheme ${{ env.SCHEME }} \
             -configuration ${{ github.event.inputs.configuration }} \
             -derivedDataPath DerivedData \
-            -archivePath DerivedData/Build/Products/${{ env.PRODUCT_NAME }}.xcarchive; then
+            -archivePath DerivedData/Build/Products/${{ env.PRODUCT_NAME }}.xcarchive \
+            -allowProvisioningUpdates
             
-            echo "⚠️  Build failed. Attempting with clean build and package resolution..."
-            rm -rf DerivedData
-            
-            xcodebuild archive \
-              -project ${{ env.XCODE_PROJECT }} \
-              -scheme ${{ env.SCHEME }} \
-              -configuration ${{ github.event.inputs.configuration }} \
-              -derivedDataPath DerivedData \
-              -archivePath DerivedData/Build/Products/${{ env.PRODUCT_NAME }}.xcarchive \
-              -skipPackageResolution NO
-          fi
         else
           echo "🔓 Building without code signing"
           
-          # For unsigned builds, let xcodebuild handle package resolution during build
-          if ! xcodebuild archive \
+          # For unsigned builds - xcodebuild will resolve packages automatically
+          echo "Building archive with automatic package resolution..."
+          xcodebuild archive \
             -project ${{ env.XCODE_PROJECT }} \
             -scheme ${{ env.SCHEME }} \
             -configuration ${{ github.event.inputs.configuration }} \
@@ -287,29 +265,11 @@ jobs:
             "CODE_SIGN_IDENTITY[sdk=macosx*]"="-" \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="" \
-            PROVISIONING_PROFILE_SPECIFIER=""; then
-            
-            echo "⚠️  Build failed. Attempting with clean build and package resolution..."
-            rm -rf DerivedData
-            
-            xcodebuild archive \
-              -project ${{ env.XCODE_PROJECT }} \
-              -scheme ${{ env.SCHEME }} \
-              -configuration ${{ github.event.inputs.configuration }} \
-              -derivedDataPath DerivedData \
-              -archivePath DerivedData/Build/Products/${{ env.PRODUCT_NAME }}.xcarchive \
-              CODE_SIGN_IDENTITY="" \
-              CODE_SIGNING_REQUIRED=NO \
-              CODE_SIGNING_ALLOWED=NO \
-              "CODE_SIGN_IDENTITY[sdk=macosx*]"="-" \
-              CODE_SIGN_STYLE=Manual \
-              DEVELOPMENT_TEAM="" \
-              PROVISIONING_PROFILE_SPECIFIER="" \
-              -skipPackageResolution NO
-          fi
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            -allowProvisioningUpdates
         fi
         
-        echo "✅ Build completed successfully"
+        echo "✅ Build completed successfully with resolved packages"
           
     - name: Export application
       run: |
