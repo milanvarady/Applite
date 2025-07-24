@@ -139,41 +139,18 @@ jobs:
         echo "📋 Swift version from project: ${DETECTED_SWIFT_VERSION}"
         echo "✅ Ready for build with compatibility settings"
 
-    - name: Resolve Swift packages with compatibility
+    - name: Resolve Swift packages
       run: |
-        echo "🔄 Resolving Swift packages with tools version compatibility..."
-        
-        # Extract Swift version from project configuration in this step
-        DETECTED_SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
-        echo "📋 Detected Swift version: ${DETECTED_SWIFT_VERSION}"
-        
-        # Xcode 15.0.1+ has proper support for swift-tools-version:5.9 which Ifrit requires
-        # This should resolve the tools version compatibility issue
-        
-        echo "🔧 Using Xcode 15.0.1+ with native swift-tools-version:5.9 support..."
+        echo "🔄 Resolving Swift packages..."
         
         # Clean any existing package resolution
         rm -rf DerivedData ~/Library/Developer/Xcode/DerivedData/Applite-* ~/Library/Caches/org.swift.swiftpm
         
-        # With Xcode 15+, try without explicit Swift version first (let Xcode handle it)
-        echo "🔄 Attempting package resolution with default Swift version..."
-        if xcodebuild -resolvePackageDependencies \
+        # With Xcode 15.0.1+, package resolution should work seamlessly
+        xcodebuild -resolvePackageDependencies \
           -project "${{ env.XCODE_PROJECT }}" \
           -scheme "${{ env.SCHEME }}" \
-          -derivedDataPath DerivedData; then
-          echo "✅ Package resolution successful with default Swift version"
-        else
-          echo "⚠️ Default failed, trying with Swift 5.9 explicitly..."
-          rm -rf DerivedData
-          
-          xcodebuild -resolvePackageDependencies \
-            -project "${{ env.XCODE_PROJECT }}" \
-            -scheme "${{ env.SCHEME }}" \
-            -derivedDataPath DerivedData \
-            SWIFT_VERSION=5.9
-          
-          echo "✅ Package resolution successful with Swift 5.9"
-        fi
+          -derivedDataPath DerivedData
         
         echo "✅ Package dependencies resolved successfully"
 
