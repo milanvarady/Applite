@@ -69,6 +69,16 @@ jobs:
         rm -rf DerivedData ~/Library/Developer/Xcode/DerivedData/Applite-* ~/Library/Caches/org.swift.swiftpm
         rm -f build_output.log *.dmg
 
+    - name: Resolve package dependencies
+      run: |
+        echo "🔄 Resolving Swift package dependencies..."
+        xcodebuild -resolvePackageDependencies \
+          -project "${{ env.XCODE_PROJECT }}" \
+          -scheme "${{ env.SCHEME }}" \
+          -derivedDataPath DerivedData \
+          -quiet
+        echo "✅ Package dependencies resolved"
+
     - name: Build application
       run: |
         echo "🔨 Building Applite (${{ github.event.inputs.configuration }})..."
