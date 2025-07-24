@@ -1,0 +1,434 @@
+#
+# build-and-release.yml
+# Applite
+#
+# Created by Milán Várady on 2025.07.24.
+# Created by Dr Bill Mcilhargey on 2025.07.24.
+#
+# GitHub Actions workflow for building and releasing macOS application
+# Supports Debug/Release configurations with optional code signing and DMG creation
+#
+
+name: Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: 'Build configuration'
+        required: true
+        default: 'Debug'
+        type: choice
+        options:
+          - Debug
+          - Release
+      code_signing:
+        description: 'Enable code signing'
+        required: true
+        default: false
+        type: boolean
+
+env:
+  # Project configuration
+  XCODE_PROJECT: "Applite.xcodeproj"
+  DERIVED_DATA_PATH: "DerivedData"
+  
+  # Build configuration
+  BUILD_ARCHITECTURE: "universal"
+  BUILD_DESTINATION: "platform=macOS"
+  
+  # Code signing configuration  
+  CODE_SIGN_IDENTITY: "Developer ID Application"
+  PROVISIONING_PROFILE_SPECIFIER: "Applite Distribution"
+  
+  # Default fallback values
+  SWIFT_VERSION_DEFAULT: "6.0"
+  MACOS_TARGET_DEFAULT: "13.1"
+  
+  # Artifact retention
+  RETENTION_DAYS_DEBUG: 7
+  RETENTION_DAYS_RELEASE: 14
+
+jobs:
+  build-and-release:
+    runs-on: macos-15
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Apple Certificate
+      if: ${{ github.event.inputs.code_signing == 'true' }}
+      uses: apple-actions/import-codesign-certs@v2
+      with:
+        p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+        p12-password: ${{ secrets.P12_PASSWORD }}
+    
+    - name: Install provisioning profile
+      if: ${{ github.event.inputs.code_signing == 'true' }}
+      uses: apple-actions/download-provisioning-profiles@v1
+      with:
+        bundle-id: ${{ env.BUNDLE_ID }}
+        issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+        api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+        api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+    
+    - name: Prepare build environment
+      run: |
+        echo "🔄 Preparing build environment..."
+        
+        # Setup environment variables
+        MACOS_VERSION=$(sw_vers -productVersion)
+        MACOS_BUILD=$(sw_vers -buildVersion)
+        
+        XCODE_VERSION_OUTPUT=$(xcodebuild -version 2>/dev/null || echo "Xcode 16.0\nBuild version 16A242d")
+        XCODE_VERSION=$(echo "$XCODE_VERSION_OUTPUT" | head -1 | awk '{print $2}')
+        XCODE_BUILD=$(echo "$XCODE_VERSION_OUTPUT" | tail -1 | awk '{print $3}')
+        XCODE_MAJOR_VERSION=$(echo $XCODE_VERSION | cut -d. -f1)
+        XCODE_PATH=$(xcode-select -p)
+        
+        # Extract project configuration
+        SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "${{ env.SWIFT_VERSION_DEFAULT }}")
+        MACOS_TARGET=$(grep -o 'MACOSX_DEPLOYMENT_TARGET = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "${{ env.MACOS_TARGET_DEFAULT }}")
+        XCODE_COMPATIBILITY=$(grep -o 'compatibilityVersion = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f2 || echo "Xcode 14.0")
+        
+        # Extract scheme from target name (more reliable than random name fields)
+        SCHEME=$(grep -A15 'Begin PBXNativeTarget section' ${{ env.XCODE_PROJECT }}/project.pbxproj | grep 'name = ' | head -1 | cut -d' ' -f3 | tr -d ';' || echo "Applite")
+        
+        BUNDLE_ID=$(grep -o 'PRODUCT_BUNDLE_IDENTIFIER = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "dev.aerolite.Applite")
+        
+        # Extract code signing configuration (prioritize platform-specific settings)
+        # First try macOS-specific setting, then fall back to generic setting
+        CODE_SIGN_IDENTITY_MACOS=$(grep -o 'CODE_SIGN_IDENTITY\[sdk=macosx\*\]" = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f4 || echo "")
+        CODE_SIGN_IDENTITY_GENERIC=$(grep -o 'CODE_SIGN_IDENTITY = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f2 || echo "")
+        
+        # Debug output
+        echo "🔍 Code Signing Detection:"
+        echo "  • macOS-specific: '$CODE_SIGN_IDENTITY_MACOS'"
+        echo "  • Generic: '$CODE_SIGN_IDENTITY_GENERIC'"
+        
+        # Use macOS-specific if available, otherwise use generic
+        if [ -n "$CODE_SIGN_IDENTITY_MACOS" ] && [ "$CODE_SIGN_IDENTITY_MACOS" != "-" ]; then
+          CODE_SIGN_IDENTITY_RAW="$CODE_SIGN_IDENTITY_MACOS"
+          echo "  • Using macOS-specific: '$CODE_SIGN_IDENTITY_RAW'"
+        else
+          CODE_SIGN_IDENTITY_RAW="$CODE_SIGN_IDENTITY_GENERIC"
+          echo "  • Using generic: '$CODE_SIGN_IDENTITY_RAW'"
+        fi
+        
+        # Handle special cases for code sign identity display
+        if [ "$CODE_SIGN_IDENTITY_RAW" = "-" ] || [ -z "$CODE_SIGN_IDENTITY_RAW" ]; then
+          PROJECT_CODE_SIGN_IDENTITY_DISPLAY="None (Ad Hoc)"
+        else
+          PROJECT_CODE_SIGN_IDENTITY_DISPLAY="$CODE_SIGN_IDENTITY_RAW"
+        fi
+        
+        # Extract provisioning profile
+        PROVISIONING_PROFILE_RAW=$(grep -o 'PROVISIONING_PROFILE_SPECIFIER = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "")
+        
+        if [ -z "$PROVISIONING_PROFILE_RAW" ]; then
+          PROJECT_PROVISIONING_PROFILE="None"
+        else
+          PROJECT_PROVISIONING_PROFILE="$PROVISIONING_PROFILE_RAW"
+        fi
+        
+        # Export to GitHub environment
+        {
+          echo "MACOS_VERSION=$MACOS_VERSION"
+          echo "MACOS_BUILD=$MACOS_BUILD"
+          echo "XCODE_VERSION=$XCODE_VERSION"
+          echo "XCODE_BUILD=$XCODE_BUILD"
+          echo "XCODE_MAJOR_VERSION=$XCODE_MAJOR_VERSION"
+          echo "XCODE_PATH=$XCODE_PATH"
+          echo "SWIFT_VERSION=${SWIFT_VERSION:-${{ env.SWIFT_VERSION_DEFAULT }}}"
+          echo "MACOS_TARGET=${MACOS_TARGET:-${{ env.MACOS_TARGET_DEFAULT }}}"
+          echo "XCODE_COMPATIBILITY=${XCODE_COMPATIBILITY:-Xcode 14.0}"
+          echo "SCHEME=${SCHEME:-Applite}"
+          echo "BUNDLE_ID=${BUNDLE_ID:-dev.aerolite.Applite}"
+          # Only export actual code signing values, not display strings
+          if [ "$CODE_SIGN_IDENTITY_RAW" != "-" ] && [ -n "$CODE_SIGN_IDENTITY_RAW" ]; then
+            echo "PROJECT_CODE_SIGN_IDENTITY=$CODE_SIGN_IDENTITY_RAW"
+          fi
+          if [ -n "$PROVISIONING_PROFILE_RAW" ]; then
+            echo "PROJECT_PROVISIONING_PROFILE=$PROVISIONING_PROFILE_RAW"
+          fi
+        } >> $GITHUB_ENV
+        
+        # Check secret availability for display purposes
+        SECRET_BUILD_CERT="${{ secrets.BUILD_CERTIFICATE_BASE64 != '' && 'Set' || 'Not Set' }}"
+        SECRET_P12_PASSWORD="${{ secrets.P12_PASSWORD != '' && 'Set' || 'Not Set' }}"
+        SECRET_APPSTORE_ISSUER="${{ secrets.APPSTORE_ISSUER_ID != '' && 'Set' || 'Not Set' }}"
+        SECRET_APPSTORE_KEY_ID="${{ secrets.APPSTORE_KEY_ID != '' && 'Set' || 'Not Set' }}"
+        SECRET_APPSTORE_PRIVATE_KEY="${{ secrets.APPSTORE_PRIVATE_KEY != '' && 'Set' || 'Not Set' }}"
+        
+        # Create build info templates using direct variable substitution
+        {
+          echo "Build Environment:"
+          echo "================="
+          echo "Project Configuration:"
+          echo "  • Scheme: $SCHEME"
+          echo "  • Xcode Project: ${{ env.XCODE_PROJECT }}"
+          echo "  • Xcode Targeted: $XCODE_COMPATIBILITY"
+          echo "  • Swift Version: $SWIFT_VERSION"
+          echo "  • macOS Targeted: $MACOS_TARGET"
+          echo ""
+          echo "System:"
+          echo "  • macOS: $MACOS_VERSION ($MACOS_BUILD)"
+          echo "  • Runner: macos-15"
+          echo "  • Xcode Installed: $XCODE_VERSION ($XCODE_BUILD)"
+          echo ""
+          echo "Build Options:"
+          echo "  • Build Config: ${{ github.event.inputs.configuration }}"
+          echo "  • Architecture: ${{ env.BUILD_ARCHITECTURE }} (Intel + Apple Silicon)"
+          echo "  • App Bundle: $SCHEME.app"
+          echo "  • DMG Package: $SCHEME-${{ github.event.inputs.configuration }}.dmg"
+          echo "  • Retention Days: ${{ github.event.inputs.configuration == 'Release' && env.RETENTION_DAYS_RELEASE || env.RETENTION_DAYS_DEBUG }} days"
+          echo ""
+          echo "Code Signing:"
+          echo "  • Code Signing: ${{ github.event.inputs.code_signing }}"
+          echo "  • Bundle ID: $BUNDLE_ID"
+          echo "  • Code Sign Identity: $PROJECT_CODE_SIGN_IDENTITY_DISPLAY"
+          echo "  • Provisioning Profile: $PROJECT_PROVISIONING_PROFILE"
+          echo "  • Build Certificate: $SECRET_BUILD_CERT"
+          echo "  • P12 Password: $SECRET_P12_PASSWORD"
+          echo "  • App Store Issuer ID: $SECRET_APPSTORE_ISSUER"
+          echo "  • App Store Key ID: $SECRET_APPSTORE_KEY_ID"
+          echo "  • App Store Private Key: $SECRET_APPSTORE_PRIVATE_KEY"
+          echo ""
+        } > /tmp/build_info_console.txt
+        
+        {
+          echo "### Project Configuration"
+          echo "- **Scheme:** $SCHEME"
+          echo "- **Xcode Project:** ${{ env.XCODE_PROJECT }}"
+          echo "- **Xcode Targeted:** $XCODE_COMPATIBILITY"
+          echo "- **Swift Version:** $SWIFT_VERSION"
+          echo "- **macOS Targeted:** $MACOS_TARGET"
+          echo ""
+          echo "### System"
+          echo "- **macOS:** $MACOS_VERSION ($MACOS_BUILD)"
+          echo "- **Runner:** macos-15"
+          echo "- **Xcode Installed:** $XCODE_VERSION ($XCODE_BUILD)"
+          echo ""
+          echo "### Build Options"
+          echo "- **Build Config:** ${{ github.event.inputs.configuration }}"
+          echo "- **Architecture:** ${{ env.BUILD_ARCHITECTURE }} (Intel + Apple Silicon)"
+          echo "- **App Bundle:** $SCHEME.app"
+          echo "- **DMG Package:** $SCHEME-${{ github.event.inputs.configuration }}.dmg"
+          echo "- **Retention Days:** ${{ github.event.inputs.configuration == 'Release' && env.RETENTION_DAYS_RELEASE || env.RETENTION_DAYS_DEBUG }} days"
+          echo ""
+          echo "### Code Signing"
+          echo "- **Code Signing:** ${{ github.event.inputs.code_signing }}"
+          echo "- **Bundle ID:** $BUNDLE_ID"
+          echo "- **Code Sign Identity:** $PROJECT_CODE_SIGN_IDENTITY_DISPLAY"
+          echo "- **Provisioning Profile:** $PROJECT_PROVISIONING_PROFILE"
+          echo "- **Build Certificate:** $SECRET_BUILD_CERT"
+          echo "- **P12 Password:** $SECRET_P12_PASSWORD"
+          echo "- **App Store Issuer ID:** $SECRET_APPSTORE_ISSUER"
+          echo "- **App Store Key ID:** $SECRET_APPSTORE_KEY_ID"
+          echo "- **App Store Private Key:** $SECRET_APPSTORE_PRIVATE_KEY"
+          echo ""
+        } > /tmp/build_info_markdown.txt
+        
+        cat /tmp/build_info_console.txt
+        echo ""
+        
+        rm -rf ${{ env.DERIVED_DATA_PATH }} ~/Library/Developer/Xcode/DerivedData/Applite-* ~/Library/Caches/org.swift.swiftpm
+        rm -f build_output.log *.dmg
+
+    - name: Resolve package dependencies
+      run: |
+        echo "🔄 Resolving Swift package dependencies..."
+        xcodebuild -resolvePackageDependencies \
+          -project "${{ env.XCODE_PROJECT }}" \
+          -scheme "$SCHEME" \
+          -derivedDataPath ${{ env.DERIVED_DATA_PATH }} \
+          -quiet
+        echo "✅ Package dependencies resolved"
+
+    - name: Build application
+      run: |
+        echo "🔨 Building Applite (${{ github.event.inputs.configuration }}) - ${{ env.BUILD_ARCHITECTURE }} binary..."
+        
+        BUILD_ARGS=(
+          -project "${{ env.XCODE_PROJECT }}"
+          -scheme "$SCHEME"
+          -configuration "${{ github.event.inputs.configuration }}"
+          -destination "${{ env.BUILD_DESTINATION }}"
+          -derivedDataPath ${{ env.DERIVED_DATA_PATH }}
+          -skipPackagePluginValidation
+          -disableAutomaticPackageResolution
+          -quiet
+          -hideShellScriptEnvironment
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=NO
+        )
+        
+        if [ "$XCODE_MAJOR_VERSION" -ge 15 ]; then
+          BUILD_ARGS+=(-skipMacroValidation)
+        fi
+        
+        if [ "${{ github.event.inputs.code_signing }}" = "true" ]; then
+          # Use workflow-level code signing configuration
+          BUILD_ARGS+=(CODE_SIGN_IDENTITY="${{ env.CODE_SIGN_IDENTITY }}")
+          BUILD_ARGS+=(PROVISIONING_PROFILE_SPECIFIER="${{ env.PROVISIONING_PROFILE_SPECIFIER }}")
+          echo "🔐 Code signing enabled"
+        else
+          # Use project-extracted values or disable completely
+          if [ -n "$CODE_SIGN_IDENTITY_RAW" ] && [ "$CODE_SIGN_IDENTITY_RAW" != "-" ]; then
+            BUILD_ARGS+=(CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY_RAW")
+            echo "🔐 Using project code sign identity: $CODE_SIGN_IDENTITY_RAW"
+          else
+            BUILD_ARGS+=(CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="")
+            echo "🚫 Code signing completely disabled"
+          fi
+          if [ -n "$PROJECT_PROVISIONING_PROFILE" ] && [ "$PROJECT_PROVISIONING_PROFILE" != "None" ]; then
+            BUILD_ARGS+=(PROVISIONING_PROFILE_SPECIFIER="$PROJECT_PROVISIONING_PROFILE")
+          fi
+        fi
+        
+        BUILD_ARGS+=(build)
+        
+        set +e
+        xcodebuild "${BUILD_ARGS[@]}" 2>&1 | tee build_output.log
+        BUILD_EXIT_CODE=${PIPESTATUS[0]}
+        set -e
+        
+        if [ $BUILD_EXIT_CODE -eq 0 ]; then
+          echo "✅ Universal binary build completed successfully!"
+          echo "📱 Binary supports: Intel (x86_64) + Apple Silicon (arm64)"
+          
+          # Copy built app to root for clean artifact structure
+          APP_PATH=$(find ${{ env.DERIVED_DATA_PATH }} -name "$SCHEME.app" -type d | head -1)
+          if [ -n "$APP_PATH" ]; then
+            cp -R "$APP_PATH" .
+            echo "📁 Copied $SCHEME.app to root directory for artifact"
+          else
+            echo "⚠️ Warning: Could not find built app for artifact preparation"
+          fi
+        else
+          echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
+          echo "🔍 Last 50 lines of build output:"
+          tail -50 build_output.log
+          exit $BUILD_EXIT_CODE
+        fi
+    
+    - name: Create DMG
+      run: |
+        echo "📦 Creating universal DMG package..."
+        
+        if [ ! -d "$SCHEME.app" ]; then
+          echo "❌ Could not find $SCHEME.app in root directory"
+          exit 1
+        fi
+        
+        mkdir -p dist
+        cp -R "$SCHEME.app" dist/
+        
+        DMG_NAME="$SCHEME-${{ github.event.inputs.configuration }}.dmg"
+        hdiutil create -volname "$SCHEME" -srcfolder dist -ov -format UDZO "$DMG_NAME"
+        
+        DMG_SIZE=$(ls -lh "$DMG_NAME" | awk '{print $5}')
+        echo "✅ Universal DMG created: $DMG_NAME ($DMG_SIZE)"
+        echo "🖥️ Compatible with all Mac architectures"
+    
+    - name: Notarize DMG
+      if: ${{ github.event.inputs.code_signing == 'true' }}
+      run: |
+        echo "🔒 Notarizing DMG..."
+        xcrun notarytool submit "$SCHEME-${{ github.event.inputs.configuration }}.dmg" \
+          --issuer ${{ secrets.APPSTORE_ISSUER_ID }} \
+          --key-id ${{ secrets.APPSTORE_KEY_ID }} \
+          --key ${{ secrets.APPSTORE_PRIVATE_KEY }} \
+          --wait
+        echo "✅ Notarization completed"
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.inputs.configuration == 'Release' && env.SCHEME || format('{0}-Debug', env.SCHEME) }}
+        path: |
+          *.dmg
+        retention-days: ${{ github.event.inputs.configuration == 'Release' && env.RETENTION_DAYS_RELEASE || env.RETENTION_DAYS_DEBUG }}
+    
+    - name: Cleanup
+      if: always()
+      run: |
+        rm -rf ${{ env.DERIVED_DATA_PATH }} dist *.dmg *.app build_output.log
+        # Keep build info files for summary step
+    
+    - name: Build Summary
+      if: always()
+      run: |
+        ARTIFACT_NAME="${{ github.event.inputs.configuration == 'Release' && env.SCHEME || format('{0}-Debug', env.SCHEME) }}"
+        
+        # Console summary
+        {
+          echo "📊 Build Summary"
+          echo "==============="
+          echo ""
+          cat /tmp/build_info_console.txt 2>/dev/null || echo "Build info not available"
+          echo ""
+          echo "Repository: ${{ github.repository }}"
+          echo "Status: ${{ job.status }}"
+          echo ""
+          
+          case "${{ job.status }}" in
+            "success")
+              echo "✅ Universal binary build completed successfully!"
+              echo "🖥️ Compatible with all Mac architectures (Intel + Apple Silicon)"
+              echo ""
+              echo "📦 Download artifact: $ARTIFACT_NAME"
+              ;;
+            "failure")
+              echo "❌ Build failed - check logs above for details"
+              ;;
+            "cancelled")
+              echo "⏹️ Build cancelled"
+              ;;
+          esac
+        } | tee -a /tmp/build_summary.txt
+        
+        # GitHub Summary markdown
+        {
+          echo "# 📊 Build Summary"
+          echo ""
+          echo "## Build Environment"
+          echo ""
+          cat /tmp/build_info_markdown.txt 2>/dev/null || echo "Build environment info not available"
+          echo ""
+          echo "## Build Results"
+          echo ""
+          echo "**Repository:** ${{ github.repository }}"
+          echo "**Status:** ${{ job.status }}"
+          echo ""
+          
+          case "${{ job.status }}" in
+            "success")
+              echo "✅ **Universal binary build completed successfully!**"
+              echo ""
+              echo "🖥️ **Compatible with all Mac architectures** (Intel + Apple Silicon)"
+              echo ""
+              echo "📦 **[Download artifact: $ARTIFACT_NAME](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})**"
+              ;;
+            "failure")
+              echo "❌ **Build failed** - check logs above for details"
+              ;;
+            "cancelled")
+              echo "⏹️ **Build cancelled**"
+              ;;
+          esac
+        } >> $GITHUB_STEP_SUMMARY
+        
+        # Annotations
+        case "${{ job.status }}" in
+          "success")
+            echo "::notice title=Universal Build Success::Universal binary build completed successfully! Compatible with Intel + Apple Silicon Macs. Artifact: $ARTIFACT_NAME"
+            ;;
+          "failure")
+            echo "::error title=Build Failed::Build failed with configuration ${{ github.event.inputs.configuration }}. Check the build logs for details."
+            ;;
+          "cancelled")
+            echo "::warning title=Build Cancelled::Build was cancelled during execution."
+            ;;
+        esac
+        
+        # Final cleanup of build info files
+        rm -f /tmp/build_info_*.txt /tmp/build_summary.txt
