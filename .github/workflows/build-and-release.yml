@@ -27,11 +27,6 @@ on:
         required: true
         default: false
         type: boolean
-      create_dmg:
-        description: 'Create DMG package'
-        required: true
-        default: false
-        type: boolean
 
 env:
   # Project configuration
@@ -169,7 +164,6 @@ jobs:
           echo "  • Architecture: ${{ env.BUILD_ARCHITECTURE }} (Intel + Apple Silicon)"
           echo "  • App Bundle: $SCHEME.app"
           echo "  • DMG Package: $SCHEME-${{ github.event.inputs.configuration }}.dmg"
-          echo "  • Create DMG: ${{ github.event.inputs.create_dmg }}"
           echo "  • Retention Days: ${{ github.event.inputs.configuration == 'Release' && env.RETENTION_DAYS_RELEASE || env.RETENTION_DAYS_DEBUG }} days"
           echo ""
           echo "Code Signing:"
@@ -203,7 +197,6 @@ jobs:
           echo "- **Architecture:** ${{ env.BUILD_ARCHITECTURE }} (Intel + Apple Silicon)"
           echo "- **App Bundle:** $SCHEME.app"
           echo "- **DMG Package:** $SCHEME-${{ github.event.inputs.configuration }}.dmg"
-          echo "- **Create DMG:** ${{ github.event.inputs.create_dmg }}"
           echo "- **Retention Days:** ${{ github.event.inputs.configuration == 'Release' && env.RETENTION_DAYS_RELEASE || env.RETENTION_DAYS_DEBUG }} days"
           echo ""
           echo "### Code Signing"
@@ -301,7 +294,6 @@ jobs:
         fi
     
     - name: Create DMG
-      if: ${{ github.event.inputs.create_dmg == 'true' }}
       run: |
         echo "📦 Creating universal DMG package..."
         
@@ -322,7 +314,7 @@ jobs:
         echo "🖥️ Compatible with all Mac architectures"
     
     - name: Notarize DMG
-      if: ${{ github.event.inputs.code_signing == 'true' && github.event.inputs.create_dmg == 'true' }}
+      if: ${{ github.event.inputs.code_signing == 'true' }}
       run: |
         echo "🔒 Notarizing DMG..."
         xcrun notarytool submit "$SCHEME-${{ github.event.inputs.configuration }}.dmg" \
