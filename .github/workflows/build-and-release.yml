@@ -100,18 +100,25 @@ jobs:
         CODE_SIGN_IDENTITY_MACOS=$(grep -o 'CODE_SIGN_IDENTITY\[sdk=macosx\*\]" = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f4 || echo "")
         CODE_SIGN_IDENTITY_GENERIC=$(grep -o 'CODE_SIGN_IDENTITY = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f2 || echo "")
         
+        # Debug output
+        echo "🔍 Code Signing Detection:"
+        echo "  • macOS-specific: '$CODE_SIGN_IDENTITY_MACOS'"
+        echo "  • Generic: '$CODE_SIGN_IDENTITY_GENERIC'"
+        
         # Use macOS-specific if available, otherwise use generic
         if [ -n "$CODE_SIGN_IDENTITY_MACOS" ] && [ "$CODE_SIGN_IDENTITY_MACOS" != "-" ]; then
           CODE_SIGN_IDENTITY_RAW="$CODE_SIGN_IDENTITY_MACOS"
+          echo "  • Using macOS-specific: '$CODE_SIGN_IDENTITY_RAW'"
         else
           CODE_SIGN_IDENTITY_RAW="$CODE_SIGN_IDENTITY_GENERIC"
+          echo "  • Using generic: '$CODE_SIGN_IDENTITY_RAW'"
         fi
         
-        # Handle special cases for code sign identity
+        # Handle special cases for code sign identity display
         if [ "$CODE_SIGN_IDENTITY_RAW" = "-" ] || [ -z "$CODE_SIGN_IDENTITY_RAW" ]; then
-          PROJECT_CODE_SIGN_IDENTITY="None (Ad Hoc)"
+          PROJECT_CODE_SIGN_IDENTITY_DISPLAY="None (Ad Hoc)"
         else
-          PROJECT_CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY_RAW"
+          PROJECT_CODE_SIGN_IDENTITY_DISPLAY="$CODE_SIGN_IDENTITY_RAW"
         fi
         
         # Extract provisioning profile
@@ -178,7 +185,7 @@ jobs:
           echo "Code Signing:"
           echo "  • Code Signing: ${{ github.event.inputs.code_signing }}"
           echo "  • Bundle ID: $BUNDLE_ID"
-          echo "  • Code Sign Identity: $PROJECT_CODE_SIGN_IDENTITY"
+          echo "  • Code Sign Identity: $PROJECT_CODE_SIGN_IDENTITY_DISPLAY"
           echo "  • Provisioning Profile: $PROJECT_PROVISIONING_PROFILE"
           echo "  • Build Certificate: $SECRET_BUILD_CERT"
           echo "  • P12 Password: $SECRET_P12_PASSWORD"
@@ -211,7 +218,7 @@ jobs:
           echo "### Code Signing"
           echo "- **Code Signing:** ${{ github.event.inputs.code_signing }}"
           echo "- **Bundle ID:** $BUNDLE_ID"
-          echo "- **Code Sign Identity:** $PROJECT_CODE_SIGN_IDENTITY"
+          echo "- **Code Sign Identity:** $PROJECT_CODE_SIGN_IDENTITY_DISPLAY"
           echo "- **Provisioning Profile:** $PROJECT_PROVISIONING_PROFILE"
           echo "- **Build Certificate:** $SECRET_BUILD_CERT"
           echo "- **P12 Password:** $SECRET_P12_PASSWORD"
