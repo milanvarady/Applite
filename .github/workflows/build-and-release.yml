@@ -29,6 +29,7 @@ jobs:
       xcode-version: ${{ steps.detect.outputs.xcode-version }}
       macos-version: ${{ steps.detect.outputs.macos-version }}
       swift-version: ${{ steps.detect.outputs.swift-version }}
+      runner-os: ${{ steps.detect.outputs.runner-os }}
     steps:
     - uses: actions/checkout@v4
     
@@ -52,14 +53,32 @@ jobs:
         # Auto-detect Swift version
         SWIFT_VERSION=$(grep -o 'SWIFT_VERSION = [^;]*' Applite.xcodeproj/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';')
         
+        # Map macOS deployment target to GitHub runner
+        case "${MACOS_VERSION:-13.0}" in
+          "13."*|"13.0"|"13.1"|"13.2"|"13.3"|"13.4"|"13.5"|"13.6")
+            RUNNER_OS="macos-13"
+            ;;
+          "14."*|"14.0"|"14.1"|"14.2"|"14.3"|"14.4"|"14.5")
+            RUNNER_OS="macos-14"
+            ;;
+          "15."*|"15.0"|"15.1"|"15.2")
+            RUNNER_OS="macos-15"
+            ;;
+          *)
+            RUNNER_OS="macos-latest"
+            ;;
+        esac
+        
         echo "xcode-version=$XCODE_VERSION" >> $GITHUB_OUTPUT
         echo "macos-version=${MACOS_VERSION:-13.0}" >> $GITHUB_OUTPUT
         echo "swift-version=${SWIFT_VERSION:-5.9}" >> $GITHUB_OUTPUT
+        echo "runner-os=$RUNNER_OS" >> $GITHUB_OUTPUT
         
         echo "🔍 Detected versions: Xcode $XCODE_VERSION, macOS ${MACOS_VERSION:-13.0}, Swift ${SWIFT_VERSION:-5.9}"
+        echo "🖥️  Using runner: $RUNNER_OS"
 
   build:
-    runs-on: macos-latest
+    runs-on: ${{ needs.detect-versions.outputs.runner-os }}
     needs: detect-versions
     env:
       XCODE_PROJECT: "Applite.xcodeproj"
@@ -76,11 +95,13 @@ jobs:
     - name: Setup build environment  
       run: |
         echo "🚀 Setting up build environment"
+        echo "Runner: ${{ needs.detect-versions.outputs.runner-os }}"
         echo "Configuration: ${{ github.event.inputs.configuration }}"
         echo "Code signing: ${{ github.event.inputs.code_signing }}"
         echo "DMG creation: ${{ github.event.inputs.create_dmg }}"
         echo "Target macOS: ${{ needs.detect-versions.outputs.macos-version }}"
         echo "Swift version: ${{ needs.detect-versions.outputs.swift-version }}"
+        echo "Xcode version: ${{ needs.detect-versions.outputs.xcode-version }}"
     
     - name: Install Apple Certificate
       if: ${{ github.event.inputs.code_signing == 'true' }}
