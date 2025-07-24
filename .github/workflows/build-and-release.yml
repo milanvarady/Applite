@@ -96,7 +96,16 @@ jobs:
         BUNDLE_ID=$(grep -o 'PRODUCT_BUNDLE_IDENTIFIER = [^;]*' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d' ' -f3 | tr -d ';' || echo "dev.aerolite.Applite")
         
         # Extract code signing configuration (prioritize platform-specific settings)
-        CODE_SIGN_IDENTITY_RAW=$(grep -o 'CODE_SIGN_IDENTITY\[sdk=macosx\*\]" = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f4 || grep -o 'CODE_SIGN_IDENTITY = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f2 || echo "")
+        # First try macOS-specific setting, then fall back to generic setting
+        CODE_SIGN_IDENTITY_MACOS=$(grep -o 'CODE_SIGN_IDENTITY\[sdk=macosx\*\]" = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f4 || echo "")
+        CODE_SIGN_IDENTITY_GENERIC=$(grep -o 'CODE_SIGN_IDENTITY = "[^"]*"' ${{ env.XCODE_PROJECT }}/project.pbxproj | head -1 | cut -d'"' -f2 || echo "")
+        
+        # Use macOS-specific if available, otherwise use generic
+        if [ -n "$CODE_SIGN_IDENTITY_MACOS" ] && [ "$CODE_SIGN_IDENTITY_MACOS" != "-" ]; then
+          CODE_SIGN_IDENTITY_RAW="$CODE_SIGN_IDENTITY_MACOS"
+        else
+          CODE_SIGN_IDENTITY_RAW="$CODE_SIGN_IDENTITY_GENERIC"
+        fi
         
         # Handle special cases for code sign identity
         if [ "$CODE_SIGN_IDENTITY_RAW" = "-" ] || [ -z "$CODE_SIGN_IDENTITY_RAW" ]; then
@@ -256,15 +265,16 @@ jobs:
           echo "🔐 Code signing enabled"
         else
           # Use project-extracted values or disable completely
-          if [ -n "$PROJECT_CODE_SIGN_IDENTITY" ] && [ "$PROJECT_CODE_SIGN_IDENTITY" != "None (Ad Hoc)" ]; then
-            BUILD_ARGS+=(CODE_SIGN_IDENTITY="$PROJECT_CODE_SIGN_IDENTITY")
+          if [ -n "$CODE_SIGN_IDENTITY_RAW" ] && [ "$CODE_SIGN_IDENTITY_RAW" != "-" ]; then
+            BUILD_ARGS+=(CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY_RAW")
+            echo "🔐 Using project code sign identity: $CODE_SIGN_IDENTITY_RAW"
           else
             BUILD_ARGS+=(CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="")
+            echo "🚫 Code signing completely disabled"
           fi
           if [ -n "$PROJECT_PROVISIONING_PROFILE" ] && [ "$PROJECT_PROVISIONING_PROFILE" != "None" ]; then
             BUILD_ARGS+=(PROVISIONING_PROFILE_SPECIFIER="$PROJECT_PROVISIONING_PROFILE")
           fi
-          echo "🚫 Code signing disabled (using project settings)"
         fi
         
         BUILD_ARGS+=(build)
@@ -303,7 +313,6 @@ jobs:
         fi
         
         mkdir -p dist
-        ln -s /Applications dist/Applications
         cp -R "$SCHEME.app" dist/
         
         DMG_NAME="$SCHEME-${{ github.event.inputs.configuration }}.dmg"
@@ -329,7 +338,6 @@ jobs:
       with:
         name: ${{ github.event.inputs.configuration == 'Release' && env.SCHEME || format('{0}-Debug', env.SCHEME) }}
         path: |
-          ${{ env.DERIVED_DATA_PATH }}/Build/Products/${{ github.event.inputs.configuration }}/*.app
           *.dmg
         retention-days: ${{ github.event.inputs.configuration == 'Release' && env.RETENTION_DAYS_RELEASE || env.RETENTION_DAYS_DEBUG }}
     
