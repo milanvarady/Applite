@@ -50,9 +50,9 @@ env:
   SWIFT_VERSION_DEFAULT: "6.0"
   MACOS_TARGET_DEFAULT: "13.1"
   
-  # Dynamic artifact naming
-  ARTIFACT_NAME_RELEASE: "Applite"
-  ARTIFACT_NAME_DEBUG: "Applite-Debug"
+  # Artifact retention
+  RETENTION_DAYS_DEBUG: 7
+  RETENTION_DAYS_RELEASE: 14
 
 jobs:
   build:
@@ -167,7 +167,10 @@ jobs:
           echo "Build Options:"
           echo "  • Build Config: ${{ github.event.inputs.configuration }}"
           echo "  • Architecture: ${{ env.BUILD_ARCHITECTURE }} (Intel + Apple Silicon)"
+          echo "  • App Bundle: $SCHEME.app"
+          echo "  • DMG Package: $SCHEME-${{ github.event.inputs.configuration }}.dmg"
           echo "  • Create DMG: ${{ github.event.inputs.create_dmg }}"
+          echo "  • Retention Days: ${{ github.event.inputs.configuration == 'Release' && env.RETENTION_DAYS_RELEASE || env.RETENTION_DAYS_DEBUG }} days"
           echo ""
           echo "Code Signing:"
           echo "  • Code Signing: ${{ github.event.inputs.code_signing }}"
@@ -198,7 +201,10 @@ jobs:
           echo "### Build Options"
           echo "- **Build Config:** ${{ github.event.inputs.configuration }}"
           echo "- **Architecture:** ${{ env.BUILD_ARCHITECTURE }} (Intel + Apple Silicon)"
+          echo "- **App Bundle:** $SCHEME.app"
+          echo "- **DMG Package:** $SCHEME-${{ github.event.inputs.configuration }}.dmg"
           echo "- **Create DMG:** ${{ github.event.inputs.create_dmg }}"
+          echo "- **Retention Days:** ${{ github.event.inputs.configuration == 'Release' && env.RETENTION_DAYS_RELEASE || env.RETENTION_DAYS_DEBUG }} days"
           echo ""
           echo "### Code Signing"
           echo "- **Code Signing:** ${{ github.event.inputs.code_signing }}"
@@ -278,6 +284,15 @@ jobs:
         if [ $BUILD_EXIT_CODE -eq 0 ]; then
           echo "✅ Universal binary build completed successfully!"
           echo "📱 Binary supports: Intel (x86_64) + Apple Silicon (arm64)"
+          
+          # Copy built app to root for clean artifact structure
+          APP_PATH=$(find ${{ env.DERIVED_DATA_PATH }} -name "$SCHEME.app" -type d | head -1)
+          if [ -n "$APP_PATH" ]; then
+            cp -R "$APP_PATH" .
+            echo "📁 Copied $SCHEME.app to root directory for artifact"
+          else
+            echo "⚠️ Warning: Could not find built app for artifact preparation"
+          fi
         else
           echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
           echo "🔍 Last 50 lines of build output:"
@@ -290,19 +305,17 @@ jobs:
       run: |
         echo "📦 Creating universal DMG package..."
         
-        APP_PATH=$(find ${{ env.DERIVED_DATA_PATH }} -name "Applite.app" -type d | head -1)
-        
-        if [ -z "$APP_PATH" ]; then
-          echo "❌ Could not find Applite.app"
+        if [ ! -d "$SCHEME.app" ]; then
+          echo "❌ Could not find $SCHEME.app in root directory"
           exit 1
         fi
         
         mkdir -p dist
         ln -s /Applications dist/Applications
-        cp -R "$APP_PATH" dist/
+        cp -R "$SCHEME.app" dist/
         
-        DMG_NAME="Applite-${{ github.event.inputs.configuration }}.dmg"
-        hdiutil create -volname "Applite" -srcfolder dist -ov -format UDZO "$DMG_NAME"
+        DMG_NAME="$SCHEME-${{ github.event.inputs.configuration }}.dmg"
+        hdiutil create -volname "$SCHEME" -srcfolder dist -ov -format UDZO "$DMG_NAME"
         
         DMG_SIZE=$(ls -lh "$DMG_NAME" | awk '{print $5}')
         echo "✅ Universal DMG created: $DMG_NAME ($DMG_SIZE)"
@@ -312,7 +325,7 @@ jobs:
       if: ${{ github.event.inputs.code_signing == 'true' && github.event.inputs.create_dmg == 'true' }}
       run: |
         echo "🔒 Notarizing DMG..."
-        xcrun notarytool submit "Applite-${{ github.event.inputs.configuration }}.dmg" \
+        xcrun notarytool submit "$SCHEME-${{ github.event.inputs.configuration }}.dmg" \
           --issuer ${{ secrets.APPSTORE_ISSUER_ID }} \
           --key-id ${{ secrets.APPSTORE_KEY_ID }} \
           --key ${{ secrets.APPSTORE_PRIVATE_KEY }} \
@@ -322,29 +335,29 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.inputs.configuration == 'Release' && env.ARTIFACT_NAME_RELEASE || env.ARTIFACT_NAME_DEBUG }}
+        name: ${{ github.event.inputs.configuration == 'Release' && env.SCHEME || format('{0}-Debug', env.SCHEME) }}
         path: |
-          ${{ env.DERIVED_DATA_PATH }}/Build/Products/${{ github.event.inputs.configuration }}/Applite.app
+          ${{ env.DERIVED_DATA_PATH }}/Build/Products/${{ github.event.inputs.configuration }}/*.app
           *.dmg
-        retention-days: 30
+        retention-days: ${{ github.event.inputs.configuration == 'Release' && env.RETENTION_DAYS_RELEASE || env.RETENTION_DAYS_DEBUG }}
     
     - name: Cleanup
       if: always()
       run: |
-        rm -rf ${{ env.DERIVED_DATA_PATH }} dist *.dmg build_output.log
-        rm -f /tmp/build_info_*.txt /tmp/build_summary.txt
+        rm -rf ${{ env.DERIVED_DATA_PATH }} dist *.dmg *.app build_output.log
+        # Keep build info files for summary step
     
     - name: Build Summary
       if: always()
       run: |
-        ARTIFACT_NAME="${{ github.event.inputs.configuration == 'Release' && env.ARTIFACT_NAME_RELEASE || env.ARTIFACT_NAME_DEBUG }}"
+        ARTIFACT_NAME="${{ github.event.inputs.configuration == 'Release' && env.SCHEME || format('{0}-Debug', env.SCHEME) }}"
         
         # Console summary
         {
           echo "📊 Build Summary"
           echo "==============="
           echo ""
-          cat /tmp/build_info_console.txt
+          cat /tmp/build_info_console.txt 2>/dev/null || echo "Build info not available"
           echo ""
           echo "Repository: ${{ github.repository }}"
           echo "Status: ${{ job.status }}"
@@ -372,7 +385,7 @@ jobs:
           echo ""
           echo "## Build Environment"
           echo ""
-          cat /tmp/build_info_markdown.txt
+          cat /tmp/build_info_markdown.txt 2>/dev/null || echo "Build environment info not available"
           echo ""
           echo "## Build Results"
           echo ""
@@ -409,3 +422,6 @@ jobs:
             echo "::warning title=Build Cancelled::Build was cancelled during execution."
             ;;
         esac
+        
+        # Final cleanup of build info files
+        rm -f /tmp/build_info_*.txt /tmp/build_summary.txt
