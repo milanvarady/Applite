@@ -121,6 +121,12 @@
             "value" : "%@は、どのアプリケーションにも一致しません\nHomebrewで入手出来ないかスペルが間違っています"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” isimli uygulama bulunamadı, homebrew kataloğunda bulunamadı veya yanlış yazıldı"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -154,6 +160,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "[Homebrew](https://brew.sh)は、サードパーティアプリケーションのインストールを簡単にする無料のオープンソースパッケージ管理ツールです。Appliteは内部でHomebrewを使用してアプリケーションをダウンロードして管理します"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "[Homebrew](https://brew.sh) ücretsiz ve açık kaynak bir paket yöneticisidir, Applite ise üçüncü parti homebrew arayüzüdür, indirme, güncelleme ve yönetme işlemlerini arayüz üzerinden yapabilirsiniz."
           }
         },
         "zh-Hans" : {
@@ -197,6 +209,12 @@
             "value" : "**このアプリは非推奨です**\n**理由:** %1$@\n**日付:** %2$@"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Bu uygulamanın kullanılması önerilmemektedir** **Gerekçe:** %1$@ **Tarih:**%2$@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -238,6 +256,12 @@
             "value" : "**このアプリは無効です**\n**理由:** %1$@\n**日付:** %2$@"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Bu uygulama devre dışıdır** **Gerekçe:**%1$@ **Tarih:**%2$@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -271,6 +295,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "**ヒント：** Brewfile からアプリをインポートすることもできます。ただし、casks のみがインストールされ、formulae や taps などの他の項目はスキップされます。"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**İpucu:** uygulamalarınızı Brewfile üzerinden içe aktarabilirsiniz, Ancak yalnızca cask türündeki uygulamalar yüklenecek; formula ve tap gibi diğer öğeler atlanacaktır."
           }
         },
         "zh-Hans" : {
@@ -308,6 +338,12 @@
             "value" : "**警告**: HomebrewキャッシュはそれぞれのHomebrewで共有されます\nキャッシュを削除すると全てのインストールキャッシュが削除されます"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Uyarı** Homebrew önbelleği Homebrew indirmeleri arasında paylaşılmaktadır. Önbelleği silerseniz tüm kurulumlar için önbellek silinir"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -318,6 +354,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "**警告**：Homebrew 緩存是在多個 Homebrew 安裝之間共享的。刪除緩存將會刪除所有安裝的緩存！"
+          }
+        }
+      }
+    },
+    "**Warning**: This will run the Homebrew uninstaller and remove Homebrew from all known locations and all packages installed. Administrator privileges may be required." : {
+      "comment" : "Uninstall Homebrew warning",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Uyarı**: Homebrew kaldırırsanız bulunan tüm homebrew kurulumları ve tüm kurulan paketleri silecektir, Yönetici (root) Erişimi gerekebilir."
           }
         }
       }
@@ -341,6 +388,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "/path/to/brew"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew/klasörü/yolu"
           }
         },
         "zh-Hans" : {
@@ -378,6 +431,12 @@
             "value" : "/path/to/dir"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/klasör/yolu"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -411,6 +470,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@はすでにインストールされています\nApplite に追加する場合は\nVアイコンをクリックし強制インストールを押します"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ zaten yüklü. Eğer bunu Applite’a eklemek istiyorsanız, daha fazla seçenek (ok simgesi) düğmesine tıklayın ve Zorla Yükle seçeneğine basın.\n"
           }
         },
         "zh-Hans" : {
@@ -448,6 +513,12 @@
             "value" : "%@は正常にインストールされました"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Başarıyla kuruldu!"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -481,6 +552,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@の再インストールに成功しました"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Başarıyla yeniden kuruldu"
           }
         },
         "zh-Hans" : {
@@ -518,6 +595,12 @@
             "value" : "%@は正常にアンインストールされました"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Başarıyla silindi"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -551,6 +634,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@は正常に更新されました"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Başarıyla güncellendi"
           }
         },
         "zh-Hans" : {
@@ -588,6 +677,12 @@
             "value" : "3日ごと"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 günde bir"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -621,6 +716,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Brew のインストールが検出されました："
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu dizinde Brew kurulumu tespit edildi:"
           }
         },
         "zh-Hans" : {
@@ -658,6 +759,12 @@
             "value" : "新しいHomebrewのインストール先は `~/Library/Application Support/Applite`にインストールされます"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "yeni Homebrew kurulumu `~/Library/Application Support/Applite` dizinine kurulacak"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -691,6 +798,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アルファベット順"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A’dan Z’ye"
           }
         },
         "zh-Hans" : {
@@ -728,6 +841,12 @@
             "value" : "アクション"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eylemler"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -761,6 +880,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アクティブなタスク"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görevler"
           }
         },
         "zh-Hans" : {
@@ -798,6 +923,12 @@
             "value" : "再インストール後、現在インストールされている全てのアプリは Appliteからリンク解除されます\nこれらは削除されませんが、Applite経由で更新又はアンインストールする事は出来ません"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden yükledikten sonra, mevcut uygulamalar Applite ile bağlantısını kaybeder. Silinmezler ama Applite üzerinden güncellenemez veya kaldırılamazlar."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -831,6 +962,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "現在インストールされている全てのアプリケーションは Appliteからリンク解除されます"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anda tüm kurulu uygulamalar Applite bağlantısını kaybeder"
           }
         },
         "zh-Hans" : {
@@ -868,6 +1005,12 @@
             "value" : "アップデート中はアプリの他の機能が全て無効になります"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncelleme sırasında diğer tüm uygulama işlevleri devre dışı kalacaktır!"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -901,6 +1044,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "全ての準備完了"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hepsi Hazır"
           }
         },
         "zh-Hans" : {
@@ -938,6 +1087,12 @@
             "value" : "アプリケーションカタログ"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama Kataloğu"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -971,6 +1126,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "使用上の注意"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu Uygulamayla ilgili dikkat edilmesi gerekenler var"
           }
         },
         "zh-Hans" : {
@@ -1008,6 +1169,12 @@
             "value" : "アプリは非推奨です"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uygulama önerilmemekte"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1041,6 +1208,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アプリは無効です"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama devre dışı"
           }
         },
         "zh-Hans" : {
@@ -1078,6 +1251,12 @@
             "value" : "アプリ起動時"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama Başlat"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1111,6 +1290,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アプリ移行"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uygulama taşıma"
           }
         },
         "zh-Hans" : {
@@ -1148,6 +1333,12 @@
             "value" : "アプリケーションディレクトリ"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uygulama dizini"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1181,6 +1372,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "外観"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görünüş"
           }
         },
         "zh-Hans" : {
@@ -1218,6 +1415,12 @@
             "value" : "Apple Silicon Mac"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple® silikon mac"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1248,6 +1451,12 @@
           }
         },
         "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite"
+          }
+        },
+        "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Applite"
@@ -1288,6 +1497,12 @@
             "value" : "Applite は %@ を開けませんでした"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite açılamadı %@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1321,6 +1536,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appliteはシステムネットワークプロキシを使用しますが、使用できるプロトコルは1つだけです\n(HTTP、HTTPS、SOCKS5)お好みの方法を選択して下さい"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite, sistemin ağ vekil sunucusunu kullanır ancak yalnızca bir protokol (HTTP, HTTPS veya SOCKS5) seçilebilir. Lütfen tercih ettiğiniz yöntemi seçin."
           }
         },
         "zh-Hans" : {
@@ -1358,6 +1579,12 @@
             "value" : "Applite のインストール"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite Kurulumu"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1391,6 +1618,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "インストールされているアプリケーションの数"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama kurulu"
           }
         },
         "zh-Hans" : {
@@ -1428,6 +1661,12 @@
             "value" : "ダウンロードの少ないアプリケーションは非表示になります。このフィルターを無効にする事を検討して下さい"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az indirilenler gizli — filtreyi kapatabilirsiniz.\n"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1461,6 +1700,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrewを%@installしてもよろしいですか?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew’u %@yüklemek istediğinize emin misiniz?"
           }
         },
         "zh-Hans" : {
@@ -1498,6 +1743,12 @@
             "value" : "%@の強制インストールをしてよろしいですか？ これにより現在のインストール先が置き換えられます"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ zaten yüklü. Zorla yüklemek istediğinize emin misiniz? Mevcut kurulumun üzerine yazılacaktır."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1531,6 +1782,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appliteを完全にアンインストールしてもよろしいですか?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite’ı kalıcı olarak silmek istediğinizden emin misiniz?"
           }
         },
         "zh-Hans" : {
@@ -1568,6 +1825,12 @@
             "value" : "アップデートを自動的にチェックする"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otomatik olarak güncellemeyi denetle"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1603,6 +1866,12 @@
             "value" : "アップデートを自動的にダウンロードする"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "otomatik olarak güncellemeleri indir"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1636,6 +1905,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最適な一致"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en iyi eşleşme"
           }
         },
         "zh-Hans" : {
@@ -1708,6 +1983,12 @@
             "value" : "Brewの実行可能パス"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew çalıştırılabilir dizini"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1741,6 +2022,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Brew インストールが検出されました"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew kurulumu tespit edildi"
           }
         },
         "zh-Hans" : {
@@ -1778,6 +2065,12 @@
             "value" : "Brew パスが無効です"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew dizini geçersiz"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1813,6 +2106,12 @@
             "value" : "Brewのパスが見つかりません"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bozuk Brew dizini"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1846,6 +2145,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ブラウズ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Göz at"
           }
         },
         "zh-Hans" : {
@@ -1884,6 +2189,12 @@
             "value" : "厳選された素晴らしいアプリのリストをご覧下さい"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Browse through a handpicked list of awesome apps."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1918,6 +2229,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ブラウザ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarayıcılar"
           }
         },
         "zh-Hans" : {
@@ -1955,6 +2272,12 @@
             "value" : "Apple Gatekeeper のチェックをバイパスします。未登録の開発者からのアプリの場合に役立ちます。**自己責任で使用してください！**"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama kayıtlı olmayan bir geliştiricidense, Gatekeeper kontrolünü atlayarak çalıştırır. Sorumluluk size aittir!"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1988,6 +2311,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "キャンセル"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vazgeç"
           }
         },
         "zh-Hans" : {
@@ -2025,6 +2354,12 @@
             "value" : "Cask 情報"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask bilgisi"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2058,6 +2393,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "カテゴリー"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Katagoriler"
           }
         },
         "zh-Hans" : {
@@ -2095,6 +2436,12 @@
             "value" : "アップデートをチェック..."
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncellemeleri denetle"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2128,6 +2475,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "テーマ："
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renk şeması"
           }
         },
         "zh-Hans" : {
@@ -2166,6 +2519,12 @@
             "value" : "コミュニケーション"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İletişim"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2199,6 +2558,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "続く"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devam et"
           }
         },
         "zh-Hans" : {
@@ -2236,6 +2601,12 @@
             "value" : "検出されたインストールを続けて使用するか、以下の他のオプションを選択してください。"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bulunan kuruluma devam edin veya başka bir seçenek belirtin"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2269,6 +2640,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アプリケーションをダウンロード出来ません。インターネット接続が無いかホストにアクセス出来ません"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama yüklenemedi. internet bağlantısı yok yada sunucu kullanım dışı"
           }
         },
         "zh-Hans" : {
@@ -2306,6 +2683,12 @@
             "value" : "カタログを読み込めませんでした"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uygulama kataloğu yüklenemedi"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2339,6 +2722,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "カテゴリを読み込めませんでした"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "katogoriler yüklenemedi"
           }
         },
         "zh-Hans" : {
@@ -2375,6 +2764,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "作成ツール"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yaratıcı Araçlar"
           }
         },
         "zh-Hans" : {
@@ -2418,6 +2813,12 @@
             "value" : "現在のアプリのバージョン : %1$@ (%2$@)"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bu uygulamanın sürümü: %1$@ (%2$@)"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2451,6 +2852,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrewの現在のパスが無効です"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "şu an seçilen brew dizini geçersiz"
           }
         },
         "zh-Hans" : {
@@ -2488,6 +2895,12 @@
             "value" : "カスタム"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2523,6 +2936,12 @@
             "value" : "Brewのカスタムパス"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel brew dizini"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2556,6 +2975,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "カスタムインストールディレクトリ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "özel kurulum dizini"
           }
         },
         "zh-Hans" : {
@@ -2594,6 +3019,12 @@
             "value" : "ダーク"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karanlık"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2627,6 +3058,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrewのキャッシュを削除する"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew önbelleğini sil"
           }
         },
         "zh-Hans" : {
@@ -2663,6 +3100,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "開発ツール"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geliştirici ayarları"
           }
         },
         "zh-Hans" : {
@@ -2736,6 +3179,12 @@
             "value" : "アプリを探す"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keşfet"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2771,6 +3220,12 @@
             "value" : "強制ダウンロード"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yinede indir"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2804,6 +3259,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アプリを `/Applications` ではなくカスタムディレクトリにダウンロード"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamaları ‘/Applications’ yerine özel bir dizine indir."
           }
         },
         "zh-Hans" : {
@@ -2842,6 +3303,12 @@
             "value" : "アプリを簡単にダウンロード"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kolayca uygulama indir"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2875,6 +3342,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ワンクリックでサードパーティのアプリをダウンロード出来ます\nアプリケーションフォルダーにドラッグする必要はありません"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tek bir tık ile 3. parti uygulamalar indirin. “Uygulamalar klasörüne taşımadan”"
           }
         },
         "zh-Hans" : {
@@ -2912,6 +3385,12 @@
             "value" : "有効"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2945,6 +3424,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「Greedy アップグレード」を有効にすると、組み込みの更新メカニズムを持ち、独自の更新を処理するアプリも含め、すべての古いアプリが一覧表示されます。"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aşırı güncelleme etkinleştirildiğinde, otomatik güncellenen uygulamalar da dahil tüm eski uygulamalar listelenir."
           }
         },
         "zh-Hans" : {
@@ -2982,6 +3467,12 @@
             "value" : "エラー"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hata"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3015,6 +3506,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "エクスポート"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dışarı aktar"
           }
         },
         "zh-Hans" : {
@@ -3052,6 +3549,12 @@
             "value" : "Applite で現在インストールされているすべてのアプリをファイルにエクスポートします。"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite tarafından şu anda yüklü olan tüm uygulamaları bir dosyaya aktar."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3085,6 +3588,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "現在インストールされているすべてのアプリをファイルにエクスポートします。そのファイルを別のデバイスにインポートして、すべてのアプリをインストールできます。新しい Mac をセットアップする際に便利です。"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anda yüklü olan tüm uygulamalarınızı bir dosyaya aktarın. Bu dosyayı başka bir cihaza aktararak tüm uygulamaları kolayca yükleyebilirsiniz. Yeni bir Mac kurarken oldukça kullanışlıdır."
           }
         },
         "zh-Hans" : {
@@ -3122,6 +3631,12 @@
             "value" : "アプリをファイルにエクスポート"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamaları dosya olarak dışa aktar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3155,6 +3670,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "エクスポートに失敗しました"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dışarı aktarılamadı"
           }
         },
         "zh-Hans" : {
@@ -3192,6 +3713,12 @@
             "value" : "cask 情報の収集に失敗しました"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask bilgileri toplanamadı"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3225,6 +3752,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "インポートに失敗しました"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İçe aktarılamadı"
           }
         },
         "zh-Hans" : {
@@ -3262,6 +3795,12 @@
             "value" : "%@ のインストールに失敗しました"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kurulamadı"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3295,6 +3834,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "更新の更新に失敗しました"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncellemeler yinelenemedi"
           }
         },
         "zh-Hans" : {
@@ -3332,6 +3877,12 @@
             "value" : "%@の再インストールに失敗しました"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Tekrar kurulamadı"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3365,6 +3916,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アンインストールに失敗しました"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silinemedi"
           }
         },
         "zh-Hans" : {
@@ -3402,6 +3959,12 @@
             "value" : "%@ のアンインストールに失敗しました"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ silinemedi"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3435,6 +3998,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@を更新出来ませんでした"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ güncellenemedi"
           }
         },
         "zh-Hans" : {
@@ -3472,6 +4041,12 @@
             "value" : "カタログの取得頻度："
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uygulama kataloğunu yeniler her: "
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3505,6 +4080,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "強制インストール"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zorla kur"
           }
         },
         "zh-Hans" : {
@@ -3542,6 +4123,12 @@
             "value" : "一般"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3575,6 +4162,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "情報を取得"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilgi al"
           }
         },
         "zh-Hans" : {
@@ -3647,6 +4240,12 @@
             "value" : "Greedy アップグレード"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aşırı güncelleme"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3680,6 +4279,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ダウンロード数が少ないアプリを非表示にする"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "az indirilen uygulamaları gizle"
           }
         },
         "zh-Hans" : {
@@ -3717,6 +4322,12 @@
             "value" : "無効なアプリを非表示にする"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devre dışı uygulamaları gizle"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3747,6 +4358,12 @@
           }
         },
         "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew"
+          }
+        },
+        "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew"
@@ -3787,6 +4404,12 @@
             "value" : "Homebrew インストール"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew kurulumu"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3820,6 +4443,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew バージョン"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew sürümü"
           }
         },
         "zh-Hans" : {
@@ -3857,6 +4486,12 @@
             "value" : "ホームページ"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana sayfa"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3890,6 +4525,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "既に Brew をインストール済み"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew zaten kurulu"
           }
         },
         "zh-Hans" : {
@@ -3928,6 +4569,12 @@
             "value" : "IDEs"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IDE’lar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3961,6 +4608,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "インポート"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İçe aktar"
           }
         },
         "zh-Hans" : {
@@ -3998,6 +4651,12 @@
             "value" : "アプリをインポート"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamaları içe aktar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4031,6 +4690,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "インポートされたファイルに有効なアプリが含まれていません"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İçe aktarılan dosyada geçerli bir uygulama bulunamadı"
           }
         },
         "zh-Hans" : {
@@ -4068,6 +4733,12 @@
             "value" : "進行中..."
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekleyiniz…"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4101,6 +4772,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap からの Cask を含める"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap’lerden gelen Cask’ları dahil et"
           }
         },
         "zh-Hans" : {
@@ -4138,6 +4815,12 @@
             "value" : "情報"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilgi"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4171,6 +4854,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "別のHomebrewをインストールする"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayrı bir Homebrew kurulumu yap"
           }
         },
         "zh-Hans" : {
@@ -4208,6 +4897,12 @@
             "value" : "Applite 用に別の brew をインストール"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite için ayrı bir homebrew kurulumu yap"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4241,6 +4936,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "インストールに失敗しました"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurulum tamamlanamadı"
           }
         },
         "zh-Hans" : {
@@ -4278,6 +4979,12 @@
             "value" : "インストール済み"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kuruldu"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4311,6 +5018,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "インストール"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kuruluyor"
           }
         },
         "zh-Hans" : {
@@ -4348,6 +5061,12 @@
             "value" : "依存関係のインストール"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağımlılıklar kuruluyor"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4378,6 +5097,12 @@
           }
         },
         "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intel Mac"
+          }
+        },
+        "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Intel Mac"
@@ -4419,6 +5144,12 @@
             "value" : "ライト"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4453,6 +5184,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "メンテナンス"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem bakımı"
           }
         },
         "zh-Hans" : {
@@ -4491,6 +5228,12 @@
             "value" : "アプリを管理"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamaları yönet"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4524,6 +5267,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrewの管理"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew’i yönet"
           }
         },
         "zh-Hans" : {
@@ -4562,6 +5311,12 @@
             "value" : "メディア"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medya"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4596,6 +5351,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "メニューバー"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menü bar"
           }
         },
         "zh-Hans" : {
@@ -4633,6 +5394,12 @@
             "value" : "ミラー"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayna"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4668,6 +5435,12 @@
             "value" : "ミラー"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aynalar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4701,6 +5474,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "毎月"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayda bir"
           }
         },
         "zh-Hans" : {
@@ -4739,6 +5518,12 @@
             "value" : "最もダウンロードされたCask(デフォルト)"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en çok indirilen (varsayılan)"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4772,6 +5557,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アクティブなタスクはありません"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktif bir görev yok"
           }
         },
         "zh-Hans" : {
@@ -4809,6 +5600,12 @@
             "value" : "ホームページが見つかりませんでした"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana sayfa bulunamadı"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4844,6 +5641,12 @@
             "value" : "No Quarantine"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karantina yok"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4877,6 +5680,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "利用可能なアップデートはありません"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm uygulamalar güncel"
           }
         },
         "zh-Hans" : {
@@ -4915,6 +5724,12 @@
             "value" : "備考"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4948,6 +5763,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "通知"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirim"
           }
         },
         "zh-Hans" : {
@@ -4986,6 +5807,12 @@
             "value" : "オフィスツール"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ofis araçları"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5019,6 +5846,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamam"
           }
         },
         "zh-Hans" : {
@@ -5056,6 +5889,12 @@
             "value" : "開く"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aç"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5089,6 +5928,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "その他のオプション"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diğer bayraklar"
           }
         },
         "zh-Hans" : {
@@ -5127,6 +5972,12 @@
             "value" : "パスワードマネージャー"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şifre yöneticileri"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5162,6 +6013,12 @@
             "value" : "優先プロキシプロトコル"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tercih edilen vekil ağ sunucusu (proxy) protokolü"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5195,6 +6052,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "プリセット"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önayarlar"
           }
         },
         "zh-Hans" : {
@@ -5233,6 +6096,12 @@
             "value" : "生産性"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üretkenlik"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5266,6 +6135,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "プロパティ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nitelik"
           }
         },
         "zh-Hans" : {
@@ -5303,6 +6178,12 @@
             "value" : "Homebrewの実行パスを指定して下さい"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brew çalıştırılabilir dosyasının yolunu belirtin\n"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5336,6 +6217,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "プロキシ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vekil ağ sunucusu (proxy)"
           }
         },
         "zh-Hans" : {
@@ -5373,6 +6260,12 @@
             "value" : "終了"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamadan çık"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5406,6 +6299,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "更新"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yenile"
           }
         },
         "zh-Hans" : {
@@ -5443,6 +6342,12 @@
             "value" : "再インストール"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar kur"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5478,6 +6383,12 @@
             "value" : "再インストールに失敗しました"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar kurulum başarılamadı"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5511,6 +6422,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrewを再インストールする"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew’i tekrar kur"
           }
         },
         "zh-Hans" : {
@@ -5549,6 +6466,12 @@
             "value" : "再インストール"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar kuruluyor"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5582,6 +6505,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "再起動"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar Aç"
           }
         },
         "zh-Hans" : {
@@ -5619,6 +6548,12 @@
             "value" : "変更を反映するには Applite を再起動してください。"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değişikliklerin uygulanması için Applite’ı yeniden başlatın"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5652,6 +6587,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "もう一度やり直して下さい"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar dene"
           }
         },
         "zh-Hans" : {
@@ -5689,6 +6630,12 @@
             "value" : "インストールを再試行する"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar kur"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5724,6 +6671,12 @@
             "value" : "もう一度読み込んで下さい"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar yükle"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5756,6 +6709,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "検索並び替えオプション"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arama sıralama seçenekleri"
           }
         },
         "zh-Hans" : {
@@ -5793,6 +6752,12 @@
             "value" : "全て表示"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hepsini gör"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5826,6 +6791,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "フォルダーを選択"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klasör seç"
           }
         },
         "zh-Hans" : {
@@ -5863,6 +6834,12 @@
             "value" : "Brewのパスが無効です"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçili brew dizini geçersiz!"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5896,6 +6873,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "シェルの出力"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell çıkışı"
           }
         },
         "zh-Hans" : {
@@ -5933,6 +6916,12 @@
             "value" : "並べ替え"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şuna göre sırala: "
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5965,6 +6954,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "スポンサー"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destekçi (sponsor)"
           }
         },
         "zh-Hans" : {
@@ -6000,6 +6995,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appliteの使用を開始する"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite’ı kullanmaya başla"
           }
         },
         "zh-Hans" : {
@@ -6038,6 +7039,12 @@
             "value" : "システム"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem tercihi"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6071,6 +7078,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap’lar"
           }
         },
         "zh-Hans" : {
@@ -6108,6 +7121,12 @@
             "value" : "完了したタスク"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görev tamamlandı"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6141,6 +7160,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "タスクエラー"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görev hata verdi"
           }
         },
         "zh-Hans" : {
@@ -6179,6 +7204,12 @@
             "value" : "ターミナル"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminaller (uçbirim’ler)"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6212,6 +7243,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "このアプリ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu uygulama"
           }
         },
         "zh-Hans" : {
@@ -6249,6 +7286,12 @@
             "value" : "このアプリはサードパーティのタップからです：\n`%@`"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu uygulama 3. parti tap: ‘%@’"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6282,6 +7325,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "このアプリケーションは[Homebrew](https://brew.sh/)パッケージ マネージャー(略してBrew)を使用してアプリケーションをダウンロードします\nHomebrewは便利な開発ツールやデスクトップアプリケーションをダウンロード出来る無料のオープンソースコマンドラインユーティリティです"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu uygulama, uygulamaları indirmek için [Homebrew](https://brew.sh/) (kısaca “brew”) paket yöneticisini kullanır."
           }
         },
         "zh-Hans" : {
@@ -6319,6 +7368,12 @@
             "value" : "このアプリケーションは、無料でオープンソースの [Homebrew](https://brew.sh/) パッケージマネージャーを使用してアプリケーションをダウンロードおよび管理します。Applite は brew がインストールされていないことを検出したため、`~/Library/Application Support/Applite` に Applite 専用の新しい brew インストールを作成します。"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu uygulama açık kaymak [Homebrew](https://brew.sh/) paket yöneticisini uygulama kurmak için kullanmakmaktadır. Applite brew kurulumunun olmadığını tespit etti, yeni brew kurulumu ‘~/Library/Application Support/Applite.` üzerine kurulacaktır"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6352,6 +7407,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "これにより、AppliteのHomebrewのインストール先が\n`~/Library/Application Support/Applite/homebrew` に(再)インストールされます"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(Tekrar) Kurulum applite’ın homebrew kurulumu `~/Library/Application Support/Applite/homebrew` dizininde olacaktır"
           }
         },
         "zh-Hans" : {
@@ -6389,6 +7450,12 @@
             "value" : "これによりAppliteに関連付けられた全てのファイルとキャッシュがアンインストールされます"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu işlem, Applite ile ilişkili tüm dosyaları ve önbelleği kaldıracaktır."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6422,6 +7489,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "トラブルシューティング"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorun çözümü"
           }
         },
         "zh-Hans" : {
@@ -6459,6 +7532,12 @@
             "value" : "少数のダウンロードフィルターを無効にする"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az indirilenleri filtreleme seçeneğini kapat"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6492,6 +7571,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アンインストール"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurulumu Sil"
           }
         },
         "zh-Hans" : {
@@ -6529,6 +7614,12 @@
             "value" : "アンインストールとデータ削除"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurulumu sil ve verileri sil"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6562,6 +7653,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appliteをアンインストール"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite’ı sil"
           }
         },
         "zh-Hans" : {
@@ -6599,6 +7696,12 @@
             "value" : "Applite関連ファイル及びキャッシュをアンインストール"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite’ı ve verilerini sil"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6634,6 +7737,12 @@
             "value" : "Appliteをアンインストール..."
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite’ı sil…"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6644,6 +7753,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "卸載Applite…"
+          }
+        }
+      }
+    },
+    "Uninstall Homebrew" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew’i sil"
           }
         }
       }
@@ -6668,6 +7787,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アンインストール"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siliniyor…"
           }
         },
         "zh-Hans" : {
@@ -6705,6 +7830,12 @@
             "value" : "更新"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncelle"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6738,6 +7869,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "全て更新"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hepsini güncelle"
           }
         },
         "zh-Hans" : {
@@ -6776,6 +7913,12 @@
             "value" : "アプリの更新やアンインストールをします。削除したアプリのファイルは残りません"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamalarınızı güncelleyin ve kaldırın. Silinen uygulamalardan artık dosya kalmayacak."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6809,6 +7952,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アップデートに失敗しました"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncelleme başarısız"
           }
         },
         "zh-Hans" : {
@@ -6846,6 +7995,12 @@
             "value" : "Homebrewを更新する"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew’i güncelle"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6879,6 +8034,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アップデート"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncellemeler"
           }
         },
         "zh-Hans" : {
@@ -6917,6 +8078,12 @@
             "value" : "アップデート"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncelleniyor"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6950,6 +8117,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "カスタムインストールディレクトリを使用する"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel kurulum dizini"
           }
         },
         "zh-Hans" : {
@@ -6987,6 +8160,12 @@
             "value" : "別の brew パスを使用"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "farklı brew dizini kullan"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7020,6 +8199,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "システムプロキシを使用する"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem vekil ağ sunucusunu (proxy) kullan"
           }
         },
         "zh-Hans" : {
@@ -7058,6 +8243,12 @@
             "value" : "ユーティリティ"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üretkenlik"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7091,6 +8282,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "値"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değer"
           }
         },
         "zh-Hans" : {
@@ -7129,6 +8326,12 @@
             "value" : "仮想化"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sanal makineler"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7162,6 +8365,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "警告"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uyarı"
           }
         },
         "zh-Hans" : {
@@ -7199,6 +8408,12 @@
             "value" : "Webサイト"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Website"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7234,6 +8449,12 @@
             "value" : "毎週"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haftada bir"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7267,6 +8488,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appliteへようこそ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applite’a hoş geldiniz"
           }
         },
         "zh-Hans" : {
@@ -7339,6 +8566,12 @@
             "value" : "はい"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evet"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7374,6 +8607,12 @@
             "value" : "Xcodeコマンドラインツールをインストールするように求められます。このアプリの動作に必要な為、インストールを選択して下さい。インストールには数分かかります。進捗状況はインストールウィンドウ上で確認できます。"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xcode Komut Satırı Araçları’nı yüklemeniz istenecek, lütfen “Install” butonuna tıklayın. Bu araçlar, uygulamanın çalışması için gereklidir. Kurulum birkaç dakika sürebilir; ilerlemeyi kurulum penceresinden takip edebilirsiniz."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7407,6 +8646,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Xcodeコマンドラインツールをインストールするように求められます。このアプリの動作に必要な為、インストールを選択して下さい"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xcode Komut Satırı Araçları’nı yüklemeniz istenecek. Bu uygulamanın çalışabilmesi için lütfen “Install” seçeneğini tıklayın.\n"
           }
         },
         "zh-Hans" : {
