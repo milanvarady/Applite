@@ -3,6 +3,7 @@
 //  Applite
 //
 //  Created by Milán Várady on 2024.12.26.
+ //MODIFIED by Subham mahesh EVERY MODIFICATION MADE BY SUBHAM MAHESH LICENSE UNDER THE MIT
 //
 
 import SwiftUI
@@ -27,6 +28,9 @@ extension ContentView {
 
             Label("App Migration", systemImage: "square.and.arrow.up.on.square")
                 .tag(SidebarItem.appMigration)
+            
+            Label("Package Manager", systemImage: "cube.box.fill")
+                .tag(SidebarItem.packageManager)
 
             Section("Categories") {
                 ForEach(caskManager.categories) { category in

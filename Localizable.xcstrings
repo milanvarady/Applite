@@ -322,6 +322,9 @@
         }
       }
     },
+    "**Warning**: This will run the Homebrew uninstaller and remove Homebrew from all known locations and all packages installed. Administrator privileges may be required." : {
+      "comment" : "Uninstall Homebrew warning"
+    },
     "/path/to/brew" : {
       "comment" : "Example brew path",
       "localizations" : {
@@ -566,6 +569,12 @@
           }
         }
       }
+    },
+    "%lld" : {
+
+    },
+    "%lld dependencies" : {
+
     },
     "3 days" : {
       "comment" : "App catalog frequency option",
@@ -1617,6 +1626,41 @@
         }
       }
     },
+    "Available" : {
+      "comment" : "Available badge",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disponible"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elérhető"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "利用可能"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可用"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可用"
+          }
+        }
+      }
+    },
     "Best match" : {
       "comment" : "Sorting option",
       "localizations" : {
@@ -2108,6 +2152,9 @@
           }
         }
       }
+    },
+    "Close" : {
+      "comment" : "Close button"
     },
     "Color Scheme:" : {
       "comment" : "Color scheme setting title",
@@ -2960,6 +3007,9 @@
           }
         }
       }
+    },
+    "Enter a package name to search the Homebrew catalog" : {
+      "comment" : "Search empty state description"
     },
     "Error" : {
       "comment" : "Cask action failed (e.g. installation failed)",
@@ -4152,6 +4202,47 @@
         }
       }
     },
+    "Install Failed" : {
+      "comment" : "Install failed status",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installation échouée"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telepítés sikertelen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール失敗"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装失败"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安裝失敗"
+          }
+        }
+      }
+    },
+    "Install package" : {
+
+    },
+    "Install packages using the Search tab" : {
+      "comment" : "Install packages instruction"
+    },
     "Install Separate Brew" : {
       "comment" : "Brew Management button",
       "localizations" : {
@@ -4258,7 +4349,7 @@
       }
     },
     "Installed" : {
-      "comment" : "Brew dependency installed badge text",
+      "comment" : "Brew dependency installed badge text\nInstalled badge\nInstalled status\nInstalled tab",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4293,7 +4384,7 @@
       }
     },
     "Installing" : {
-      "comment" : "Install progress text",
+      "comment" : "Install progress text\nInstalling status",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4358,6 +4449,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "安裝依賴項"
+          }
+        }
+      }
+    },
+    "Installing..." : {
+      "comment" : "Installing status",
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installation..."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telepítés..."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール中..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在安装..."
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在安裝..."
           }
         }
       }
@@ -4432,6 +4559,15 @@
           }
         }
       }
+    },
+    "Loading details..." : {
+      "comment" : "Loading details"
+    },
+    "Loading packages..." : {
+      "comment" : "Loading packages"
+    },
+    "Loading..." : {
+      "comment" : "Loading indicator"
     },
     "Maintenance" : {
       "comment" : "App category",
@@ -4788,6 +4924,41 @@
         }
       }
     },
+    "No description available" : {
+      "comment" : "No description placeholder",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune description disponible"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nincs elérhető leírás"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "説明がありません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有可用描述"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有可用描述"
+          }
+        }
+      }
+    },
     "No homepage found" : {
       "comment" : "No homepage found alert",
       "localizations" : {
@@ -4822,6 +4993,12 @@
           }
         }
       }
+    },
+    "No packages found" : {
+      "comment" : "No search results"
+    },
+    "No packages installed" : {
+      "comment" : "No packages message"
     },
     "No Quarantine" : {
       "comment" : "Brew no quarantine flag toggle title",
@@ -5070,6 +5247,42 @@
         }
       }
     },
+    "Operation timed out" : {
+      "comment" : "Timeout error message",
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'opération a expiré"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A művelet időtúllépés miatt megszakadt"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作がタイムアウトしました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作超时"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作逾時"
+          }
+        }
+      }
+    },
     "Other Flags" : {
       "comment" : "Brew settings command line flags section title",
       "localizations" : {
@@ -5104,6 +5317,12 @@
           }
         }
       }
+    },
+    "Package information" : {
+
+    },
+    "Package Manager" : {
+      "comment" : "Package manager title"
     },
     "Password Managers" : {
       "comment" : "App category",
@@ -5388,7 +5607,7 @@
       }
     },
     "Refresh" : {
-      "comment" : "Update refresh button",
+      "comment" : "Refresh button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5705,6 +5924,7 @@
     },
     "Retry load" : {
       "comment" : "Load failed alert button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5737,6 +5957,18 @@
           }
         }
       }
+    },
+    "Search" : {
+      "comment" : "Search tab"
+    },
+    "Search for packages" : {
+      "comment" : "Search empty state title"
+    },
+    "Search Packages" : {
+      "comment" : "Search packages button"
+    },
+    "Search packages..." : {
+      "comment" : "Search placeholder"
     },
     "Search Sorting Options" : {
       "localizations" : {
@@ -5771,6 +6003,9 @@
           }
         }
       }
+    },
+    "Searching..." : {
+      "comment" : "Search in progress"
     },
     "See All" : {
       "comment" : "See all apps in category button",
@@ -6438,6 +6673,9 @@
         }
       }
     },
+    "Try a different search term" : {
+      "comment" : "Search suggestion"
+    },
     "Turn off few downloads filter" : {
       "comment" : "Filter disable button",
       "localizations" : {
@@ -6648,6 +6886,82 @@
         }
       }
     },
+    "Uninstall Failed" : {
+      "comment" : "Uninstall failed status",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désinstallation échouée"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eltávolítás sikertelen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アンインストール失敗"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载失败"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解除安裝失敗"
+          }
+        }
+      }
+    },
+    "Uninstall Homebrew" : {
+
+    },
+    "Uninstall package" : {
+
+    },
+    "Uninstalled" : {
+      "comment" : "Uninstalled status",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désinstallé"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eltávolítva"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アンインストール済み"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已卸载"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已解除安裝"
+          }
+        }
+      }
+    },
     "Uninstalling" : {
       "comment" : "Progress text",
       "extractionState" : "manual",
@@ -6680,6 +6994,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在卸載"
+          }
+        }
+      }
+    },
+    "Uninstalling..." : {
+      "comment" : "Uninstalling status",
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désinstallation..."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eltávolítás..."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アンインストール中..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在卸载..."
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在解除安裝..."
           }
         }
       }
@@ -7072,6 +7422,9 @@
         }
       }
     },
+    "v%@" : {
+
+    },
     "Value" : {
       "comment" : "Cask info window property value",
       "localizations" : {
@@ -7106,6 +7459,9 @@
           }
         }
       }
+    },
+    "Version: %@" : {
+
     },
     "Virtualization" : {
       "comment" : "App category",
@@ -7418,7 +7774,7 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "系統將提示您安裝 Xcode 命令列工具。 請選擇“安裝”，因為此應用程式需要它才能運行。"
+            "value" : "系統將提示您安裝 Xcode 命令列工具。 請選擇\"安裝\"，因為此應用程式需要它才能運行。"
           }
         }
       }
