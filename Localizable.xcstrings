@@ -4926,6 +4926,7 @@
     },
     "No description available" : {
       "comment" : "No description placeholder",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

@@ -127,8 +127,8 @@ final class BrewPackageManager: PackageManagerProtocol {
         }
         
         do {
-            let output = try await Shell.runBrewCommand(["search", query])
-            return parseSearchResults(output, query: query)
+            let output = try await Shell.runBrewCommand(["search", "--desc", query])
+            return parseSearchResultsWithDescriptions(output, query: query)
         } catch {
             Self.logger.error("Failed to search packages: \(error.localizedDescription)")
             throw PackageManagerError.commandExecutionFailed(error.localizedDescription)
@@ -216,6 +216,36 @@ final class BrewPackageManager: PackageManagerProtocol {
             return GenericPackage(
                 id: packageName,
                 name: packageName,
+                manager: .homebrew,
+                isInstalled: false
+            )
+        }
+    }
+    
+    private func parseSearchResultsWithDescriptions(_ output: String, query: String) -> [Package] {
+        let lines = output.components(separatedBy: .newlines)
+            .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+            .filter { !$0.hasPrefix("==>") } // Remove section headers
+            .filter { !$0.contains("Warning:") } // Remove warnings
+            .filter { $0.contains(":") } // Only lines with descriptions
+        
+        return lines.compactMap { line in
+            let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+            guard !trimmedLine.isEmpty else { return nil }
+            
+            // Format: "packagename: description"
+            let components = trimmedLine.components(separatedBy: ": ")
+            guard components.count >= 2 else { return nil }
+            
+            let packageName = components[0].trimmingCharacters(in: .whitespaces)
+            let description = components.dropFirst().joined(separator: ": ").trimmingCharacters(in: .whitespaces)
+            
+            guard !packageName.isEmpty && !description.isEmpty else { return nil }
+            
+            return GenericPackage(
+                id: packageName,
+                name: packageName,
+                description: description,
                 manager: .homebrew,
                 isInstalled: false
             )

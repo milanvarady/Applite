@@ -334,7 +334,10 @@ struct PackageManagerView: View {
                 .filter { !$0.isEmpty && !$0.hasPrefix("==>") }
                 .prefix(50)
                 .map { packageName in
-                    PackageInfo(name: packageName, isInstalled: installedSet.contains(packageName))
+                    let isInstalled = installedSet.contains(packageName)
+                    // If package is installed, find its version from installedPackages
+                    let version = isInstalled ? installedPackages.first(where: { $0.name == packageName })?.version : nil
+                    return PackageInfo(name: packageName, version: version, isInstalled: isInstalled)
                 }
             
             searchResults = Array(packages)
@@ -445,19 +448,6 @@ struct PackageRowView: View {
                     Spacer()
                 }
                 
-                // Package Description
-                if let description = package.description, !description.isEmpty {
-                    Text(description)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(3)
-                        .fixedSize(horizontal: false, vertical: true)
-                } else {
-                    Text(String(localized: "No description available", comment: "No description placeholder"))
-                        .font(.subheadline)
-                        .foregroundColor(.secondary.opacity(0.7))
-                        .italic()
-                }
                 
                 // Dependencies info (if available)
                 if !package.dependencies.isEmpty {

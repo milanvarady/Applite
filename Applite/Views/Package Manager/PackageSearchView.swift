@@ -154,11 +154,14 @@ struct SearchResultRow: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            // Package manager icon
-            Image(systemName: package.manager.iconName)
-                .font(.title2)
-                .foregroundColor(.accentColor)
-                .frame(width: 24)
+            // Package manager icon - clickable to show details
+            Button(action: { showingDetail = true }) {
+                Image(systemName: package.manager.iconName)
+                    .font(.title2)
+                    .foregroundColor(.accentColor)
+                    .frame(width: 24)
+            }
+            .buttonStyle(.plain)
             
             // Package info
             VStack(alignment: .leading, spacing: 4) {

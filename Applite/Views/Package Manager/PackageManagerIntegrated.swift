@@ -646,13 +646,17 @@ struct SearchTab: View {
 struct PackageRowView: View {
     let package: GenericPackage
     @ObservedObject var coordinator: SimplePackageManagerCoordinator
+    @State private var showingDetail = false
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: package.manager.iconName)
-                .font(.title2)
-                .foregroundColor(.accentColor)
-                .frame(width: 24)
+            Button(action: { showingDetail = true }) {
+                Image(systemName: package.manager.iconName)
+                    .font(.title2)
+                    .foregroundColor(.accentColor)
+                    .frame(width: 24)
+            }
+            .buttonStyle(.plain)
             
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
@@ -697,6 +701,9 @@ struct PackageRowView: View {
             PackageActionView(package: package, coordinator: coordinator)
         }
         .padding(.vertical, 4)
+        .sheet(isPresented: $showingDetail) {
+            SimplePackageDetailView(package: package)
+        }
     }
 }
 
@@ -758,6 +765,194 @@ struct PackageActionView: View {
         Task {
             await coordinator.updatePackage(package)
         }
+    }
+}
+
+struct SimplePackageDetailView: View {
+    let package: GenericPackage
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Header
+                    HStack(spacing: 16) {
+                        Image(systemName: package.manager.iconName)
+                            .font(.system(size: 48))
+                            .foregroundColor(.accentColor)
+                            .frame(width: 64, height: 64)
+                            .background(Color.accentColor.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(package.name)
+                                .font(.title)
+                                .fontWeight(.bold)
+                            
+                            HStack(spacing: 12) {
+                                if let version = package.version {
+                                    Text("v\(version)")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.blue.opacity(0.2))
+                                        .foregroundColor(.blue)
+                                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                                }
+                                
+                                if package.isInstalled {
+                                    Text("Installed")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.green.opacity(0.2))
+                                        .foregroundColor(.green)
+                                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                                } else {
+                                    Text("Not Installed")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.gray.opacity(0.2))
+                                        .foregroundColor(.gray)
+                                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                                }
+                                
+                                Text(package.manager.displayName)
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.secondary.opacity(0.2))
+                                    .foregroundColor(.secondary)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                            }
+                        }
+                        
+                        Spacer()
+                    }
+                    
+                    // Description
+                    if let description = package.description {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Description")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            Text(description)
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    } else {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Description")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            Text("No description available.")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                                .italic()
+                        }
+                    }
+                    
+                    // Package Details
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Details")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        VStack(spacing: 8) {
+                            HStack {
+                                Text("Package ID")
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(package.id)
+                                    .fontWeight(.medium)
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(Color.secondary.opacity(0.05))
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                            
+                            HStack {
+                                Text("Manager")
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(package.manager.displayName)
+                                    .fontWeight(.medium)
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(Color.secondary.opacity(0.05))
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                            
+                            if let version = package.version {
+                                HStack {
+                                    Text("Version")
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                    Text(version)
+                                        .fontWeight(.medium)
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 8)
+                                .background(Color.secondary.opacity(0.05))
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                            }
+                        }
+                    }
+                    
+                    // Homepage Link
+                    if let homepage = package.homepage, let url = URL(string: homepage) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Links")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            Button(action: { NSWorkspace.shared.open(url) }) {
+                                HStack {
+                                    Image(systemName: "house")
+                                        .foregroundColor(.blue)
+                                    
+                                    Text("Homepage")
+                                        .foregroundColor(.primary)
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "arrow.up.right")
+                                        .foregroundColor(.secondary)
+                                        .font(.caption)
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 8)
+                                .background(Color.secondary.opacity(0.05))
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                .padding()
+            }
+            .navigationTitle(package.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .frame(width: 500, height: 600)
     }
 }
 
