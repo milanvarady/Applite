@@ -38,6 +38,7 @@ struct BrewManagementView: View {
                 .frame(width: width)
                 .padding(12)
             }
+            .navigationTitle("Manage Homebrew")
             .frame(maxWidth: .infinity)
         }
     }

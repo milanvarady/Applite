@@ -21,6 +21,7 @@ struct ActiveTasksView: View {
 
             Spacer()
         }
+        .navigationTitle("Active Tasks")
         .padding()
     }
 }

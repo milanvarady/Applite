@@ -7,7 +7,7 @@
 
 import Foundation
 import OSLog
-import SwiftUICore
+import SwiftUI
 
 /// Responsible for constructing cask models from raw data
 actor CaskModelBuilder {

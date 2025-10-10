@@ -62,6 +62,7 @@
 		41524B99295E352200D0046A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41524B98295E352200D0046A /* SettingsView.swift */; };
 		415563A22A98BB2500AE2F2E /* ErrorWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */; };
 		415563A42A98C54300AE2F2E /* AppdirSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */; };
+		415AA3FA2E997A650065EF7C /* View+Modify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415AA3F92E997A650065EF7C /* View+Modify.swift */; };
 		4166EE7028F5D4C900CE305A /* Commands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4166EE6F28F5D4C900CE305A /* Commands.swift */; };
 		4166EE7D28F73B2300CE305A /* BrewAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */; };
 		4178CF922A8689AF0037F270 /* ExportCasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4178CF912A8689AF0037F270 /* ExportCasks.swift */; };
@@ -217,6 +218,7 @@
 		41524B98295E352200D0046A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorWindowView.swift; sourceTree = "<group>"; };
 		415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppdirSelectorView.swift; sourceTree = "<group>"; };
+		415AA3F92E997A650065EF7C /* View+Modify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Modify.swift"; sourceTree = "<group>"; };
 		4166EE6F28F5D4C900CE305A /* Commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commands.swift; sourceTree = "<group>"; };
 		4166EE7C28F73B2300CE305A /* BrewAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewAnalytics.swift; sourceTree = "<group>"; };
 		4178CF912A8689AF0037F270 /* ExportCasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCasks.swift; sourceTree = "<group>"; };
@@ -407,6 +409,7 @@
 				411EDDD62A9F58180051E07B /* URL+QuotedPath.swift */,
 				4101EB4D2DCE670400BE0670 /* URL+ChecksumInBase64.swift */,
 				4192568E2D22DC9E00D9EF10 /* FontExtension.swift */,
+				415AA3F92E997A650065EF7C /* View+Modify.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -914,6 +917,7 @@
 				419256AF2D25F68700D9EF10 /* AppDelegate.swift in Sources */,
 				419256472D1E0B0900D9EF10 /* BrewPathSelectorView+GetPathDescription.swift in Sources */,
 				413F87282D33DEAD00D4BE10 /* ContentView+SearchFunctions.swift in Sources */,
+				415AA3FA2E997A650065EF7C /* View+Modify.swift in Sources */,
 				41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */,
 				419256622D1E15EA00D9EF10 /* UpdateView+UpdateUnavailable.swift in Sources */,
 				41857B752912D94A004A1894 /* CategoryView.swift in Sources */,

@@ -27,6 +27,7 @@ struct CategoryView: View {
             AppGridView(casks: category.casks, appRole: .installAndManage)
                 .id(category.id)
         }
+        .navigationTitle(category.name)
     }
 }
 

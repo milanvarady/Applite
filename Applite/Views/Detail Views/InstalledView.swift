@@ -18,7 +18,14 @@ struct InstalledView: View {
         VStack {
             AppGridView(casks: caskCollection.casksMatchingSearch, appRole: .installed)
         }
-        .searchable(text: $searchText, placement: .toolbar)
+        .navigationTitle("Installed")
+        .modify { view in
+            if #available(macOS 26.0, *) {
+                view.searchable(text: $searchText, placement: .toolbarPrincipal)
+            } else {
+                view.searchable(text: $searchText, placement: .toolbar)
+            }
+        }
         .task(id: searchText, debounceTime: .seconds(0.2)) {
             await caskCollection.search(query: searchText)
         }

@@ -9,30 +9,49 @@ import SwiftUI
 import ButtonKit
 
 extension UpdateView {
-    var toolbarItems: some ToolbarContent {
-        ToolbarItemGroup {
-            HStack {
-                GreedyUpgradeToggle()
-                    .toggleStyle(.checkbox)
+    struct ToolbarItems: ToolbarContent {
+        @EnvironmentObject var caskManager: CaskManager
+        @ObservedObject var loadAlert: AlertManager
+        
+        var body: some ToolbarContent {
+            if #available(macOS 26.0, *) {
+                ToolbarItem {
+                    GreedyUpgradeToggle()
+                        .padding(.horizontal)
+                        .toggleStyle(.checkbox)
+                }
 
-                Spacer()
-                    .frame(width: 16)
+                ToolbarSpacer()
 
-                refreshButton
+                ToolbarItem {
+                    refreshButton
+                }
+            } else {
+                ToolbarItemGroup {
+                    HStack {
+                        GreedyUpgradeToggle()
+                            .toggleStyle(.checkbox)
 
-                Spacer()
-                    .frame(width: 8)
+                        Spacer()
+                            .frame(width: 16)
+
+                        refreshButton
+
+                        Spacer()
+                            .frame(width: 8)
+                    }
+                    .labelStyle(.titleAndIcon)
+                }
             }
-            .labelStyle(.titleAndIcon)
         }
-    }
 
-    private var refreshButton: some View {
-        AsyncButton("Refresh", systemImage: "arrow.clockwise") {
-            try await caskManager.refreshOutdated()
-        }
-        .onButtonError { error in
-            loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
+        private var refreshButton: some View {
+            AsyncButton("Refresh", systemImage: "arrow.clockwise") {
+                try await caskManager.refreshOutdated()
+            }
+            .onButtonError { error in
+                loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
+            }
         }
     }
 }

@@ -39,12 +39,19 @@ struct UpdateView: View {
                     }
             }
         }
-        .searchable(text: $searchText, placement: .toolbar)
+        .navigationTitle("Update")
+        .modify { view in
+            if #available(macOS 26.0, *) {
+                view.searchable(text: $searchText, placement: .toolbarPrincipal)
+            } else {
+                view.searchable(text: $searchText, placement: .toolbar)
+            }
+        }
         .task(id: searchText, debounceTime: .seconds(0.2)) {
             await caskCollection.search(query: searchText)
         }
         .toolbar {
-            toolbarItems
+            ToolbarItems(loadAlert: loadAlert)
         }
         .alertManager(loadAlert)
     }

@@ -29,6 +29,7 @@ struct AppMigrationView: View {
                 
                 Spacer()
             }
+            .navigationTitle("App Migration")
             .frame(maxWidth: width)
             .padding()
         }

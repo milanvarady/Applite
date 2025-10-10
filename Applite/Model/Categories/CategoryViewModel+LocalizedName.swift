@@ -5,7 +5,7 @@
 //  Created by Milán Várady on 2025.05.09.
 //
 
-import SwiftUICore
+import SwiftUI
 
 extension CategoryViewModel {
     var localizedName: LocalizedStringKey {

@@ -322,6 +322,9 @@
         }
       }
     },
+    "**Warning**: This will run the Homebrew uninstaller and remove Homebrew from all known locations and all packages installed. Administrator privileges may be required." : {
+      "comment" : "Uninstall Homebrew warning"
+    },
     "/path/to/brew" : {
       "comment" : "Example brew path",
       "localizations" : {
@@ -6648,6 +6651,9 @@
         }
       }
     },
+    "Uninstall Homebrew" : {
+
+    },
     "Uninstalling" : {
       "comment" : "Progress text",
       "extractionState" : "manual",
@@ -7424,5 +7430,5 @@
       }
     }
   },
-  "version" : "1.0"
+  "version" : "1.1"
 }
