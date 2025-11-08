@@ -16,10 +16,11 @@ User-friendly GUI macOS application for Homebrew Casks
 3. [Screenshots](#screenshots)
 4. [Download](#download)
 5. [Contact](#contact)
-6. [Contributing](#contributing)
-7. [Packages Used](#packages-used)
-8. [License](#license)
-9. [Alternatives](#alternatives)
+6. [Roadmap](#roadmap)
+7. [Contributing](#contributing)
+8. [Packages Used](#packages-used)
+9. [License](#license)
+10. [Alternatives](#alternatives)
 
 ## Key Features
 
@@ -58,6 +59,12 @@ Minimum OS version: **macOS 13+**
 If you have any questions, feel free to e-mail me: [milan@aerolite.dev](mailto:milan@aerolite.dev)
 
 Or join the [Official Discord Server](https://discord.gg/MpDMH9cPbK).
+
+## Roadmap
+
+I don't have much time for development, but I release updates periodically.
+
+View the [roadmap](https://github.com/users/milanvarady/projects/1).
 
 ## Contributing
 
