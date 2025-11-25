@@ -270,6 +270,7 @@
         "casks": [
             "cloudflare-warp",
             "cyberghost-vpn",
+            "mullvad-vpn",
             "nordvpn",
             "openvpn-connect",
             "protonvpn",
