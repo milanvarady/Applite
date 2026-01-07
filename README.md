@@ -1,7 +1,7 @@
-![GitHub](https://img.shields.io/github/license/milanvarady/Applite)
-![GitHub release (with filter)](https://img.shields.io/github/v/release/milanvarady/Applite)
-![GitHub all releases](https://img.shields.io/github/downloads/milanvarady/Applite/total)
-![GitHub contributors](https://img.shields.io/github/contributors/milanvarady/Applite)
+[![License](https://img.shields.io/github/license/milanvarady/Applite)](LICENSE.txt)
+[![Latest release](https://img.shields.io/github/v/release/milanvarady/Applite)](https://github.com/milanvarady/Applite/releases/latest)
+[![All releases](https://img.shields.io/github/downloads/milanvarady/Applite/total)](https://github.com/milanvarady/Applite/releases)
+[![Contributors](https://img.shields.io/github/contributors/milanvarady/Applite)](https://github.com/milanvarady/Applite/graphs/contributors)
 ![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/milanvarady/Applite/latest)
 
 
