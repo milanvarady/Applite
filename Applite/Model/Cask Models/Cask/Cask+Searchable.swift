@@ -6,14 +6,13 @@
 //
 
 import Foundation
-import Ifrit
 
-extension Cask: Searchable {
-    nonisolated var weightedSearchProperties: [FuseProp] {
+extension Cask: FuzzySearchable {
+    nonisolated var searchProperties: [FuzzySearchProperty] {
         return [
-            FuseProp(self.info.name, weight: 1),
-            FuseProp(self.info.token, weight: 1),
-            FuseProp(self.info.description, weight: 0.3)
+            FuzzySearchProperty(self.info.name, weight: 1),
+            FuzzySearchProperty(self.info.token, weight: 1),
+            FuzzySearchProperty(self.info.description, weight: 0.3)
         ]
     }
 }

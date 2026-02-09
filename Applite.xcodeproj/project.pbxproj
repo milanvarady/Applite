@@ -27,6 +27,13 @@
 		4104D7432A8FC52C00F84F9B /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4104D7422A8FC52C00F84F9B /* Preferences.swift */; };
 		41062C952A3794EA00FD48EA /* BrewPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C942A3794EA00FD48EA /* BrewPaths.swift */; };
 		41062C972A3A20F900FD48EA /* UninstallSelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C962A3A20F900FD48EA /* UninstallSelf.swift */; };
+		AA00000AAAAA00000000000A /* ShimmerModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001AAAA000000000001 /* ShimmerModifier.swift */; };
+		AA00000BAAAA00000000000B /* DebouncedTaskModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002AAAA000000000002 /* DebouncedTaskModifier.swift */; };
+		AA00000CAAAA00000000000C /* CircularProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000003AAAA000000000003 /* CircularProgressView.swift */; };
+		AA00000DAAAA00000000000D /* AsyncButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000004AAAA000000000004 /* AsyncButton.swift */; };
+		AA00000EAAAA00000000000E /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000005AAAA000000000005 /* ImageLoader.swift */; };
+		AA00000FAAAA00000000000F /* CachedAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000006AAAA000000000006 /* CachedAsyncImage.swift */; };
+		AA000010AAAA000000000010 /* FuzzySearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000007AAAA000000000007 /* FuzzySearch.swift */; };
 		41062C992A3A263F00FD48EA /* UninstallSelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C982A3A263F00FD48EA /* UninstallSelfView.swift */; };
 		41062C9B2A3E4AFA00FD48EA /* Bundle+Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41062C9A2A3E4AFA00FD48EA /* Bundle+Version.swift */; };
 		411EDDD72A9F58180051E07B /* URL+QuotedPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411EDDD62A9F58180051E07B /* URL+QuotedPath.swift */; };
@@ -38,17 +45,17 @@
 		4126353E2A77C6EF00155034 /* Array+Chunked.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4126353D2A77C6EF00155034 /* Array+Chunked.swift */; };
 		412635442A77FB1600155034 /* BrewInstallationProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412635432A77FB1600155034 /* BrewInstallationProgress.swift */; };
 		413E60B72BBAE5E000978F6A /* NetworkProxyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E60B62BBAE5E000978F6A /* NetworkProxyManager.swift */; };
-		413E60C02BBF0E5C00978F6A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 413E60BF2BBF0E5C00978F6A /* Kingfisher */; };
+
 		413E60C22BBFF98A00978F6A /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E60C12BBFF98A00978F6A /* AppIconView.swift */; };
 		413F77A52972B2E70053349A /* DependencyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F77A42972B2E70053349A /* DependencyManager.swift */; };
-		413F87242D32D2B100D4BE10 /* IfritStatic in Frameworks */ = {isa = PBXBuildFile; productRef = 413F87232D32D2B100D4BE10 /* IfritStatic */; };
+
 		413F87262D33048800D4BE10 /* InfoPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F87252D33048800D4BE10 /* InfoPopup.swift */; };
 		413F87282D33DEAD00D4BE10 /* ContentView+SearchFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F87272D33DEAD00D4BE10 /* ContentView+SearchFunctions.swift */; };
 		413F872C2D33E19800D4BE10 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F872B2D33E19800D4BE10 /* HomeView.swift */; };
 		413F872E2D33E1CA00D4BE10 /* HomeView+NoSearchResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F872D2D33E1CA00D4BE10 /* HomeView+NoSearchResults.swift */; };
 		413F87302D33E29A00D4BE10 /* HomeView+SortingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F872F2D33E29A00D4BE10 /* HomeView+SortingOptions.swift */; };
 		413F87322D33E30400D4BE10 /* SortingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F87312D33E30400D4BE10 /* SortingOptions.swift */; };
-		413F87352D34109000D4BE10 /* ButtonKit in Frameworks */ = {isa = PBXBuildFile; productRef = 413F87342D34109000D4BE10 /* ButtonKit */; };
+
 		414074F528DF53E80073EB22 /* AppliteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F428DF53E80073EB22 /* AppliteApp.swift */; };
 		414074F728DF53E80073EB22 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F628DF53E80073EB22 /* ContentView.swift */; };
 		414074F928DF53EB0073EB22 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 414074F828DF53EB0073EB22 /* Assets.xcassets */; };
@@ -72,8 +79,8 @@
 		41857B752912D94A004A1894 /* CategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41857B742912D94A004A1894 /* CategoryView.swift */; };
 		418989AD2A33A5C4004AC23B /* BrewManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418989AC2A33A5C4004AC23B /* BrewManagementView.swift */; };
 		418989AF2A33B65A004AC23B /* SmallProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418989AE2A33B65A004AC23B /* SmallProgressView.swift */; };
-		4189CE392937CD41009C836D /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 4189CE382937CD41009C836D /* Shimmer */; };
-		418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */ = {isa = PBXBuildFile; productRef = 418E9EF32AACD9C000046A58 /* CircularProgress */; };
+
+
 		418F331C28EB3D540023D76F /* AppGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F331B28EB3D540023D76F /* AppGridView.swift */; };
 		418F332428EC8BA10023D76F /* Cask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F332328EC8BA10023D76F /* Cask.swift */; };
 		418F332628EC921D0023D76F /* CaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F332528EC921D0023D76F /* CaskManager.swift */; };
@@ -131,7 +138,7 @@
 		419256AB2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256AA2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift */; };
 		419256AD2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256AC2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift */; };
 		419256AF2D25F68700D9EF10 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256AE2D25F68700D9EF10 /* AppDelegate.swift */; };
-		419256B22D26033400D9EF10 /* DebouncedOnChange in Frameworks */ = {isa = PBXBuildFile; productRef = 419256B12D26033400D9EF10 /* DebouncedOnChange */; };
+
 		419256B42D26B8A200D9EF10 /* CaskAdditionalInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B32D26B8A200D9EF10 /* CaskAdditionalInfo.swift */; };
 		419256B62D26BBBD00D9EF10 /* AppView+GetInfoButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B52D26BBBD00D9EF10 /* AppView+GetInfoButton.swift */; };
 		419256B92D26C02E00D9EF10 /* CaskInfoWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B82D26C02E00D9EF10 /* CaskInfoWindowView.swift */; };
@@ -221,6 +228,13 @@
 		415135692D32C48A0025DB70 /* Cask+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cask+Comparable.swift"; sourceTree = "<group>"; };
 		41524B98295E352200D0046A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		415563A12A98BB2500AE2F2E /* ErrorWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorWindowView.swift; sourceTree = "<group>"; };
+		AA000001AAAA000000000001 /* ShimmerModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimmerModifier.swift; sourceTree = "<group>"; };
+		AA000002AAAA000000000002 /* DebouncedTaskModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebouncedTaskModifier.swift; sourceTree = "<group>"; };
+		AA000003AAAA000000000003 /* CircularProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressView.swift; sourceTree = "<group>"; };
+		AA000004AAAA000000000004 /* AsyncButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncButton.swift; sourceTree = "<group>"; };
+		AA000005AAAA000000000005 /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
+		AA000006AAAA000000000006 /* CachedAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedAsyncImage.swift; sourceTree = "<group>"; };
+		AA000007AAAA000000000007 /* FuzzySearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzySearch.swift; sourceTree = "<group>"; };
 		415563A32A98C54300AE2F2E /* AppdirSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppdirSelectorView.swift; sourceTree = "<group>"; };
 		415AA3F92E997A650065EF7C /* View+Modify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Modify.swift"; sourceTree = "<group>"; };
 		4166EE6F28F5D4C900CE305A /* Commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commands.swift; sourceTree = "<group>"; };
@@ -313,13 +327,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				413F87352D34109000D4BE10 /* ButtonKit in Frameworks */,
 				41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */,
-				419256B22D26033400D9EF10 /* DebouncedOnChange in Frameworks */,
-				4189CE392937CD41009C836D /* Shimmer in Frameworks */,
-				413F87242D32D2B100D4BE10 /* IfritStatic in Frameworks */,
-				418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */,
-				413E60C02BBF0E5C00978F6A /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -427,6 +435,10 @@
 				419256902D23F93E00D9EF10 /* Card.swift */,
 				4120AB662A755B0700F68EFE /* Sparkle Updater */,
 				413F87252D33048800D4BE10 /* InfoPopup.swift */,
+				AA000001AAAA000000000001 /* ShimmerModifier.swift */,
+				AA000002AAAA000000000002 /* DebouncedTaskModifier.swift */,
+				AA000003AAAA000000000003 /* CircularProgressView.swift */,
+				AA000004AAAA000000000004 /* AsyncButton.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -570,6 +582,23 @@
 			name = Packages;
 			sourceTree = "<group>";
 		};
+		AA000008AAAA000000000008 /* ImageLoader */ = {
+			isa = PBXGroup;
+			children = (
+				AA000005AAAA000000000005 /* ImageLoader.swift */,
+				AA000006AAAA000000000006 /* CachedAsyncImage.swift */,
+			);
+			path = ImageLoader;
+			sourceTree = "<group>";
+		};
+		AA000009AAAA000000000009 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				AA000007AAAA000000000007 /* FuzzySearch.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
 		4191393129269FD600F1D75D /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
@@ -581,6 +610,8 @@
 				4101EB532DCE7F7F00BE0670 /* Mirror */,
 				419256652D1E18A500D9EF10 /* Alert Manager */,
 				419256102D1DDB9700D9EF10 /* Other */,
+				AA000008AAAA000000000008 /* ImageLoader */,
+				AA000009AAAA000000000009 /* Search */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -818,13 +849,7 @@
 			);
 			name = Applite;
 			packageProductDependencies = (
-				4189CE382937CD41009C836D /* Shimmer */,
 				41C8FA282A7A598B000BB9A2 /* Sparkle */,
-				418E9EF32AACD9C000046A58 /* CircularProgress */,
-				413E60BF2BBF0E5C00978F6A /* Kingfisher */,
-				419256B12D26033400D9EF10 /* DebouncedOnChange */,
-				413F87232D32D2B100D4BE10 /* IfritStatic */,
-				413F87342D34109000D4BE10 /* ButtonKit */,
 			);
 			productName = Applite;
 			productReference = 414074F128DF53E80073EB22 /* Applite.app */;
@@ -859,13 +884,7 @@
 			);
 			mainGroup = 414074E828DF53E80073EB22;
 			packageReferences = (
-				4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
 				41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */,
-				418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */,
-				413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */,
-				413F87222D32D2B100D4BE10 /* XCRemoteSwiftPackageReference "Ifrit" */,
-				413F87332D34109000D4BE10 /* XCRemoteSwiftPackageReference "ButtonKit" */,
 			);
 			productRefGroup = 414074F228DF53E80073EB22 /* Products */;
 			projectDirPath = "";
@@ -897,6 +916,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA00000AAAAA00000000000A /* ShimmerModifier.swift in Sources */,
+				AA00000BAAAA00000000000B /* DebouncedTaskModifier.swift in Sources */,
+				AA00000CAAAA00000000000C /* CircularProgressView.swift in Sources */,
+				AA00000DAAAA00000000000D /* AsyncButton.swift in Sources */,
+				AA00000EAAAA00000000000E /* ImageLoader.swift in Sources */,
+				AA00000FAAAA00000000000F /* CachedAsyncImage.swift in Sources */,
+				AA000010AAAA000000000010 /* FuzzySearch.swift in Sources */,
 				5CDD639E54F54A68FEC0B100 /* ICloudSyncManager.swift in Sources */,
 				95F476538772FD39D3F5E464 /* AppHistoryView.swift in Sources */,
 				413F87322D33E30400D4BE10 /* SortingOptions.swift in Sources */,
@@ -1248,54 +1274,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/onevcat/Kingfisher";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 8.1.0;
-			};
-		};
-		413F87222D32D2B100D4BE10 /* XCRemoteSwiftPackageReference "Ifrit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ukushu/Ifrit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.0.0;
-			};
-		};
-		413F87332D34109000D4BE10 /* XCRemoteSwiftPackageReference "ButtonKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Dean151/ButtonKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.6.1;
-			};
-		};
-		4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/markiv/SwiftUI-Shimmer";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
-		418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ArnavMotwani/CircularProgressSwiftUI";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.2.1;
-			};
-		};
-		419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Tunous/DebouncedOnChange";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
-			};
-		};
 		41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -1307,36 +1285,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		413E60BF2BBF0E5C00978F6A /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
-		};
-		413F87232D32D2B100D4BE10 /* IfritStatic */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 413F87222D32D2B100D4BE10 /* XCRemoteSwiftPackageReference "Ifrit" */;
-			productName = IfritStatic;
-		};
-		413F87342D34109000D4BE10 /* ButtonKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 413F87332D34109000D4BE10 /* XCRemoteSwiftPackageReference "ButtonKit" */;
-			productName = ButtonKit;
-		};
-		4189CE382937CD41009C836D /* Shimmer */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
-			productName = Shimmer;
-		};
-		418E9EF32AACD9C000046A58 /* CircularProgress */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */;
-			productName = CircularProgress;
-		};
-		419256B12D26033400D9EF10 /* DebouncedOnChange */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */;
-			productName = DebouncedOnChange;
-		};
 		41C8FA282A7A598B000BB9A2 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */;

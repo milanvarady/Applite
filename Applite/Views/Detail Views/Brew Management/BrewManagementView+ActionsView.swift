@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import ButtonKit
 
 extension BrewManagementView {
     struct ActionsView: View {
@@ -128,13 +127,13 @@ extension BrewManagementView {
             } label: {
                 Label("Update Homebrew", systemImage: "arrow.uturn.down.circle")
             }
-            .controlSize(.large)
-            .disabled(modifyingBrew)
-            .padding(.trailing, 3)
             .onButtonError { error in
                 logger.error("Brew update failed. Error: \(error.localizedDescription)")
                 updateFailed = true
             }
+            .controlSize(.large)
+            .disabled(modifyingBrew)
+            .padding(.trailing, 3)
             .alert("Update failed", isPresented: $updateFailed, actions: {})
         }
 

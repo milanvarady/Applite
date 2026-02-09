@@ -74,17 +74,16 @@ extension ContentView {
         @AppStorage(Preferences.iCloudSyncEnabled.rawValue) var iCloudSyncEnabled: Bool = false
 
         private var notInstalledCount: Int {
-            iCloudSyncManager.previouslyInstalledCaskIds.filter { id in
+            guard iCloudSyncEnabled else { return 0 }
+            return iCloudSyncManager.previouslyInstalledCaskIds.filter { id in
                 caskManager.casks[id]?.isInstalled != true
             }.count
         }
 
         var body: some View {
-            if iCloudSyncEnabled && notInstalledCount > 0 {
-                Label("App History", systemImage: "clock.arrow.circlepath")
-                    .badge(notInstalledCount)
-                    .tag(SidebarItem.appHistory)
-            }
+            Label("App History", systemImage: "clock.arrow.circlepath")
+                .badge(notInstalledCount)
+                .tag(SidebarItem.appHistory)
         }
     }
 }

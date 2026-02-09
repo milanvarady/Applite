@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Shimmer
 
 extension DiscoverSectionView {
     /// Two placeholder app views on top of each other for the discover app row

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import ButtonKit
 import OSLog
 
 extension AppMigrationView {
@@ -30,10 +29,10 @@ extension AppMigrationView {
                     } label: {
                         Label("Export Apps to File", systemImage: "square.and.arrow.up")
                     }
-                    .controlSize(.large)
                     .onButtonError { error in
                         alert.show(error: error, title: "Failed to export")
                     }
+                    .controlSize(.large)
 
                     if exportSuccessful {
                         Image(systemName: "square.and.arrow.down.badge.checkmark")

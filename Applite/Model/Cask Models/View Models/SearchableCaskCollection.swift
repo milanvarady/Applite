@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Ifrit
 
 @MainActor
 class SearchableCaskCollection: ObservableObject {
@@ -42,13 +41,12 @@ class SearchableCaskCollection: ObservableObject {
             return
         }
 
-        let fuse = Fuse()
-        let searchResults = await fuse.search(query, in: self.casks, by: \Cask.weightedSearchProperties)
+        let searchResults = await FuzzySearch.search(query, in: self.casks, by: \Cask.searchProperties)
 
         var matchedCasks: [Cask] = []
 
         for result in searchResults {
-            guard result.diffScore <= diffScroreThreshold else {
+            guard result.score <= diffScroreThreshold else {
                 break
             }
 

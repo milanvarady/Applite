@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import Kingfisher
-import Shimmer
 
 enum AppIconState {
     case showingAppIcon
@@ -24,27 +22,26 @@ struct AppIconView: View {
 
     var body: some View {
         if state != .failed {
-            KFImage.url(state == .showingAppIcon ? iconURL : faviconURL, cacheKey: cacheKey)
-                .resizable()
-                .placeholder {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(.gray)
-                        .shimmering()
+            CachedAsyncImage(
+                url: state == .showingAppIcon ? iconURL : faviconURL,
+                cacheKey: cacheKey
+            ) {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(.gray)
+                    .shimmering()
+            }
+            .onFailure {
+                switch state {
+                case .showingAppIcon:
+                    state = .showingFavicon
+                case .showingFavicon:
+                    state = .failed
+                default:
+                    state = .failed
                 }
-                .setProcessor(RoundCornerImageProcessor(cornerRadius: 8)) // Round corners
-                .fade(duration: 0.25)
-                .onFailure { error in
-                    // Change state
-                    switch state {
-                    case .showingAppIcon:
-                        state = .showingFavicon
-                    case .showingFavicon:
-                        state = .failed
-                    default:
-                        state = .failed
-                    }
-                }
-                .frame(width: 54, height: 54)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .frame(width: 54, height: 54)
         } else {
             // App icon missing
             ZStack {

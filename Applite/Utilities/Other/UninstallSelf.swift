@@ -7,7 +7,6 @@
 
 import Foundation
 import OSLog
-import Kingfisher
 
 /// This function will uninstall Applite and all it's related files
 func uninstallSelf(deleteBrewCache: Bool, uninstallHomebrew: Bool = false) async throws {
@@ -15,13 +14,9 @@ func uninstallSelf(deleteBrewCache: Bool, uninstallHomebrew: Bool = false) async
     
     logger.notice("Applite uninstallation stated. deleteBrewCache: \(deleteBrewCache), uninstallHomebrew: \(uninstallHomebrew)")
 
-    logger.notice("Clearing Kingfisher image cache")
-
-    let cache = ImageCache.default
-    cache.clearMemoryCache()
-    cache.clearDiskCache {
-        logger.notice("Kingfisher disk image cache cleared")
-    }
+    logger.notice("Clearing image cache")
+    await ImageLoader.shared.clearCache()
+    logger.notice("Image cache cleared")
 
     logger.notice("Deleting library files")
 

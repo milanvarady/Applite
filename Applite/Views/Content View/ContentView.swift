@@ -7,7 +7,6 @@
 
 import SwiftUI
 import OSLog
-import ButtonKit
 
 struct ContentView: View {
     @EnvironmentObject var caskManager: CaskManager

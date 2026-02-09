@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import DebouncedOnChange
 
 /// Shows installed apps, where the user can open and uninstall them
 struct InstalledView: View {
