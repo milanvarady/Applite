@@ -88,6 +88,9 @@ extension CaskManager {
             // Update state
             cask.isInstalled = true
             self.installedCasks.addCask(cask)
+
+            // Sync to iCloud history
+            self.iCloudSyncManager?.addCask(cask.id)
         }
     }
 

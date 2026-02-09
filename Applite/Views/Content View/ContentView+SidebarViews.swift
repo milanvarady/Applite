@@ -25,6 +25,11 @@ extension ContentView {
                 .badge(caskManager.activeTasks.count)
                 .tag(SidebarItem.activeTasks)
 
+            AppHistorySidebarItem(
+                iCloudSyncManager: iCloudSyncManager,
+                caskManager: caskManager
+            )
+
             Label("App Migration", systemImage: "square.and.arrow.up.on.square")
                 .tag(SidebarItem.appMigration)
 
@@ -59,6 +64,27 @@ extension ContentView {
         var body: some View {
             Label("Updates", systemImage: "arrow.clockwise.circle.fill")
                 .badge(caskCollection.casks.count)
+        }
+    }
+
+    // Extracted so badge reacts to changes in iCloudSyncManager and caskManager
+    struct AppHistorySidebarItem: View {
+        @ObservedObject var iCloudSyncManager: ICloudSyncManager
+        @ObservedObject var caskManager: CaskManager
+        @AppStorage(Preferences.iCloudSyncEnabled.rawValue) var iCloudSyncEnabled: Bool = false
+
+        private var notInstalledCount: Int {
+            iCloudSyncManager.previouslyInstalledCaskIds.filter { id in
+                caskManager.casks[id]?.isInstalled != true
+            }.count
+        }
+
+        var body: some View {
+            if iCloudSyncEnabled && notInstalledCount > 0 {
+                Label("App History", systemImage: "clock.arrow.circlepath")
+                    .badge(notInstalledCount)
+                    .tag(SidebarItem.appHistory)
+            }
         }
     }
 }

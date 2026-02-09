@@ -26,6 +26,9 @@ final class CaskManager: ObservableObject {
     /// The data coordinator that orchestrates data loading
     lazy var dataCoordinator = CaskDataCoordinator()
 
+    /// iCloud sync manager, set by AppliteApp after init
+    weak var iCloudSyncManager: ICloudSyncManager?
+
     // Searchble cask collections
     let allCasks = SearchableCaskCollection()
     let installedCasks = SearchableCaskCollection()

@@ -12,6 +12,7 @@ enum SidebarItem: Equatable, Hashable {
     case updates
     case installed
     case activeTasks
+    case appHistory
     case appMigration
     case brew
     case appCategory(category: CategoryViewModel)

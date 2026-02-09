@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5CDD639E54F54A68FEC0B100 /* ICloudSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A09CD81CE6DEB059908E50 /* ICloudSyncManager.swift */; };
+		95F476538772FD39D3F5E464 /* AppHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEB7F231C539AFA252E37854 /* AppHistoryView.swift */; };
 		4101EB332DCE022B00BE0670 /* CaskNetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4101EB322DCE022B00BE0670 /* CaskNetworkService.swift */; };
 		4101EB352DCE033C00BE0670 /* CaskCacheService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4101EB342DCE033C00BE0670 /* CaskCacheService.swift */; };
 		4101EB372DCE03F700BE0670 /* InstalledCaskService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4101EB362DCE03F700BE0670 /* InstalledCaskService.swift */; };
@@ -164,6 +166,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E1A09CD81CE6DEB059908E50 /* ICloudSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudSyncManager.swift; sourceTree = "<group>"; };
+		BEB7F231C539AFA252E37854 /* AppHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppHistoryView.swift; sourceTree = "<group>"; };
 		4101EB322DCE022B00BE0670 /* CaskNetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskNetworkService.swift; sourceTree = "<group>"; };
 		4101EB342DCE033C00BE0670 /* CaskCacheService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskCacheService.swift; sourceTree = "<group>"; };
 		4101EB362DCE03F700BE0670 /* InstalledCaskService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledCaskService.swift; sourceTree = "<group>"; };
@@ -569,6 +573,7 @@
 		4191393129269FD600F1D75D /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				E1A09CD81CE6DEB059908E50 /* ICloudSyncManager.swift */,
 				412635422A77FB0000155034 /* Brew Installation */,
 				4126353F2A77C71F00155034 /* Shell */,
 				41B731352A878993008BF6B9 /* App Migration */,
@@ -773,6 +778,7 @@
 		4196C8F728F9CB5200EADDDA /* Detail Views */ = {
 			isa = PBXGroup;
 			children = (
+				BEB7F231C539AFA252E37854 /* AppHistoryView.swift */,
 				413F872A2D33E18800D4BE10 /* Home */,
 				419256502D1E0CE000D9EF10 /* Discover */,
 				4192565C2D1E153D00D9EF10 /* Update */,
@@ -891,6 +897,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5CDD639E54F54A68FEC0B100 /* ICloudSyncManager.swift in Sources */,
+				95F476538772FD39D3F5E464 /* AppHistoryView.swift in Sources */,
 				413F87322D33E30400D4BE10 /* SortingOptions.swift in Sources */,
 				4196C90028F9E1F400EADDDA /* InstalledView.swift in Sources */,
 				4101EB552DCE7FA000BE0670 /* MirrorEnvironment.swift in Sources */,

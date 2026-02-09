@@ -32,7 +32,10 @@ extension ContentView {
             
         case .activeTasks:
             ActiveTasksView()
-            
+
+        case .appHistory:
+            AppHistoryView()
+
         case .appMigration:
             AppMigrationView()
             

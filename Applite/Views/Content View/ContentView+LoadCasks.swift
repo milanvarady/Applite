@@ -29,6 +29,10 @@ extension ContentView {
         do {
             try await caskManager.loadData()
             brokenInstall = false
+
+            // Sync currently installed cask IDs to iCloud
+            let installedIds = Set(caskManager.installedCasks.casks.map(\.id))
+            iCloudSyncManager.addCasks(installedIds)
         } catch {
             loadAlert.show(title: "Couldn't load app catalog", message: error.localizedDescription)
             logger.error("Initial cask load failure. Reason: \(error.localizedDescription)")

@@ -37,6 +37,9 @@ enum Preferences: String {
     case mirrorCoreGitRemote
     case mirrorBottleDomain
 
+    // iCloud
+    case iCloudSyncEnabled
+
     // Sorting options
     case searchSortOption
     case hideUnpopularApps

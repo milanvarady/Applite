@@ -9,13 +9,17 @@ import SwiftUI
 
 extension SettingsView {
     struct GeneralSettingsView: View {
+        @EnvironmentObject var iCloudSyncManager: ICloudSyncManager
+
         @AppStorage(Preferences.colorSchemePreference.rawValue) var colorSchemePreference: ColorSchemePreference = .system
         @AppStorage(Preferences.catalogUpdateFrequency.rawValue) var catalogUpdateFrequency: CatalogUpdateFrequency = .everyAppLaunch
         @AppStorage(Preferences.notificationSuccess.rawValue) var notificationOnSuccess: Bool = false
         @AppStorage(Preferences.notificationFailure.rawValue) var notificationOnFailure: Bool = true
+        @AppStorage(Preferences.iCloudSyncEnabled.rawValue) var iCloudSyncEnabled: Bool = false
 
         /// Needed for a workaround for changing the color scheme
         @State var fixingColor = false
+        @State var showClearConfirmation = false
 
         var body: some View {
             VStack(alignment: .leading) {
@@ -49,6 +53,29 @@ extension SettingsView {
 
                 Toggle("Task completions", isOn: $notificationOnSuccess)
                 Toggle("Task errors", isOn: $notificationOnFailure)
+
+                Divider()
+                    .padding(.vertical)
+
+                Text("iCloud", comment: "iCloud settings title")
+                    .bold()
+
+                Toggle("Sync App History to iCloud", isOn: $iCloudSyncEnabled)
+
+                HStack {
+                    Button("Clear All App History") {
+                        showClearConfirmation = true
+                    }
+                    .disabled(!iCloudSyncEnabled)
+                    .alert("Clear App History", isPresented: $showClearConfirmation) {
+                        Button("Clear", role: .destructive) {
+                            iCloudSyncManager.clearAll()
+                        }
+                        Button("Cancel", role: .cancel) { }
+                    } message: {
+                        Text("This will remove your app history from all devices. Are you sure?")
+                    }
+                }
             }
             .padding()
             .onChange(of: colorSchemePreference) {
