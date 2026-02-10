@@ -150,6 +150,7 @@
 		41D8DF932F3A5EA900FB3E72 /* AppPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF922F3A5EA900FB3E72 /* AppPaths.swift */; };
 		41D8DF952F3A6D3000FB3E72 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */; };
 		41D8DF972F3B42F200FB3E72 /* CaskRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF962F3B42F200FB3E72 /* CaskRecord.swift */; };
+		41D8DF9D2F3BA73100FB3E72 /* CaskDatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF9C2F3BA73100FB3E72 /* CaskDatabaseService.swift */; };
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
 		BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BD7546562A868DA30083996B /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
@@ -307,6 +308,7 @@
 		41D8DF922F3A5EA900FB3E72 /* AppPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPaths.swift; sourceTree = "<group>"; };
 		41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
 		41D8DF962F3B42F200FB3E72 /* CaskRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskRecord.swift; sourceTree = "<group>"; };
+		41D8DF9C2F3BA73100FB3E72 /* CaskDatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskDatabaseService.swift; sourceTree = "<group>"; };
 		41DF006329EAA094004EB7AE /* SendNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendNotification.swift; sourceTree = "<group>"; };
 		BD7546562A868DA30083996B /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -809,6 +811,7 @@
 			children = (
 				41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */,
 				41D8DF962F3B42F200FB3E72 /* CaskRecord.swift */,
+				41D8DF9C2F3BA73100FB3E72 /* CaskDatabaseService.swift */,
 			);
 			path = Database;
 			sourceTree = "<group>";
@@ -1008,6 +1011,7 @@
 				41062C952A3794EA00FD48EA /* BrewPaths.swift in Sources */,
 				4192565B2D1E0ECF00D9EF10 /* DiscoverSectionView+Placeholder.swift in Sources */,
 				41483CCD29101C9900BB10C2 /* Category.swift in Sources */,
+				41D8DF9D2F3BA73100FB3E72 /* CaskDatabaseService.swift in Sources */,
 				419256B62D26BBBD00D9EF10 /* AppView+GetInfoButton.swift in Sources */,
 				4101EB372DCE03F700BE0670 /* InstalledCaskService.swift in Sources */,
 				4101EB3B2DCE07CD00BE0670 /* CaskDataCoordinator.swift in Sources */,
@@ -1197,7 +1201,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.aerolite.Applite;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1231,7 +1235,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.aerolite.Applite;
 				PRODUCT_NAME = "$(TARGET_NAME)";
