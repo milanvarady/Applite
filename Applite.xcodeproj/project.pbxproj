@@ -146,6 +146,9 @@
 		41CE28C02D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CE28BF2D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift */; };
 		41CE28C22D2DA0690018483F /* SetupView+BrewPathDetectedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CE28C12D2DA0690018483F /* SetupView+BrewPathDetectedView.swift */; };
 		41CE28C42D30687F0018483F /* brew-tap-cask-info.rb in Resources */ = {isa = PBXBuildFile; fileRef = 41CE28C32D30687F0018483F /* brew-tap-cask-info.rb */; };
+		41D325452F3A297900E3FE1E /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 41D325442F3A297900E3FE1E /* GRDB */; };
+		41D8DF932F3A5EA900FB3E72 /* AppPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF922F3A5EA900FB3E72 /* AppPaths.swift */; };
+		41D8DF952F3A6D3000FB3E72 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */; };
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
 		BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BD7546562A868DA30083996B /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
@@ -300,6 +303,8 @@
 		41CE28BF2D2C8B740018483F /* SetupView+AppliteBrewInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+AppliteBrewInfoView.swift"; sourceTree = "<group>"; };
 		41CE28C12D2DA0690018483F /* SetupView+BrewPathDetectedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+BrewPathDetectedView.swift"; sourceTree = "<group>"; };
 		41CE28C32D30687F0018483F /* brew-tap-cask-info.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = "brew-tap-cask-info.rb"; sourceTree = "<group>"; };
+		41D8DF922F3A5EA900FB3E72 /* AppPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPaths.swift; sourceTree = "<group>"; };
+		41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
 		41DF006329EAA094004EB7AE /* SendNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendNotification.swift; sourceTree = "<group>"; };
 		BD7546562A868DA30083996B /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -312,6 +317,7 @@
 				413F87352D34109000D4BE10 /* ButtonKit in Frameworks */,
 				41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */,
 				419256B22D26033400D9EF10 /* DebouncedOnChange in Frameworks */,
+				41D325452F3A297900E3FE1E /* GRDB in Frameworks */,
 				4189CE392937CD41009C836D /* Shimmer in Frameworks */,
 				413F87242D32D2B100D4BE10 /* IfritStatic in Frameworks */,
 				418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */,
@@ -479,6 +485,7 @@
 				414074F428DF53E80073EB22 /* AppliteApp.swift */,
 				419256AE2D25F68700D9EF10 /* AppDelegate.swift */,
 				4140750328DF5ED00073EB22 /* Views */,
+				41D8DF8F2F3A574D00FB3E72 /* Database */,
 				418F332228EC8B120023D76F /* Model */,
 				4191393129269FD600F1D75D /* Utilities */,
 				412635402A77F99F00155034 /* Extensions */,
@@ -586,6 +593,7 @@
 				41062C942A3794EA00FD48EA /* BrewPaths.swift */,
 				41DF006329EAA094004EB7AE /* SendNotification.swift */,
 				41062C962A3A20F900FD48EA /* UninstallSelf.swift */,
+				41D8DF922F3A5EA900FB3E72 /* AppPaths.swift */,
 			);
 			path = Other;
 			sourceTree = "<group>";
@@ -794,6 +802,14 @@
 			path = "App Migration";
 			sourceTree = "<group>";
 		};
+		41D8DF8F2F3A574D00FB3E72 /* Database */ = {
+			isa = PBXGroup;
+			children = (
+				41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */,
+			);
+			path = Database;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -819,6 +835,7 @@
 				419256B12D26033400D9EF10 /* DebouncedOnChange */,
 				413F87232D32D2B100D4BE10 /* IfritStatic */,
 				413F87342D34109000D4BE10 /* ButtonKit */,
+				41D325442F3A297900E3FE1E /* GRDB */,
 			);
 			productName = Applite;
 			productReference = 414074F128DF53E80073EB22 /* Applite.app */;
@@ -860,6 +877,7 @@
 				419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */,
 				413F87222D32D2B100D4BE10 /* XCRemoteSwiftPackageReference "Ifrit" */,
 				413F87332D34109000D4BE10 /* XCRemoteSwiftPackageReference "ButtonKit" */,
+				41D325432F3A297900E3FE1E /* XCRemoteSwiftPackageReference "GRDB" */,
 			);
 			productRefGroup = 414074F228DF53E80073EB22 /* Products */;
 			projectDirPath = "";
@@ -975,6 +993,7 @@
 				418989AD2A33A5C4004AC23B /* BrewManagementView.swift in Sources */,
 				4151356A2D32C48A0025DB70 /* Cask+Comparable.swift in Sources */,
 				419256A12D25ACC300D9EF10 /* CategoryViewModel.swift in Sources */,
+				41D8DF952F3A6D3000FB3E72 /* AppDatabase.swift in Sources */,
 				419256832D22055200D9EF10 /* CaskInfo.swift in Sources */,
 				4192560D2D1CA02C00D9EF10 /* ShellError.swift in Sources */,
 				4192566B2D1F286B00D9EF10 /* CaskManager+BrewFunctions.swift in Sources */,
@@ -1002,6 +1021,7 @@
 				4192562E2D1DF22500D9EF10 /* SetupView+AllSet.swift in Sources */,
 				4192568C2D22D7FC00D9EF10 /* AppMigrationView.swift in Sources */,
 				413E60B72BBAE5E000978F6A /* NetworkProxyManager.swift in Sources */,
+				41D8DF932F3A5EA900FB3E72 /* AppPaths.swift in Sources */,
 				4120AB682A755B5A00F68EFE /* CheckForUpdatesView.swift in Sources */,
 				415135662D32C4570025DB70 /* Cask+Equtable.swift in Sources */,
 				415135682D32C4720025DB70 /* Cask+Hashable.swift in Sources */,
@@ -1296,6 +1316,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		41D325432F3A297900E3FE1E /* XCRemoteSwiftPackageReference "GRDB" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.9.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1333,6 +1361,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
+		};
+		41D325442F3A297900E3FE1E /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 41D325432F3A297900E3FE1E /* XCRemoteSwiftPackageReference "GRDB" */;
+			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

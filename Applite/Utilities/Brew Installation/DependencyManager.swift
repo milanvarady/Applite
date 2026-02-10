@@ -57,7 +57,7 @@ struct DependencyManager {
         }
         
         // Skip Homebrew installation if keepCurrentInstall is set to true
-        let brewPathValid = await BrewPaths.isBrewPathValid(at: BrewPaths.appBrewExetutable)
+        let brewPathValid = await BrewPaths.isBrewPathValid(at: BrewPaths.applicationSupportBrewExetutable)
 
         guard !brewPathValid else {
             Self.logger.notice("Brew is already installed, skipping installation")
@@ -81,23 +81,21 @@ struct DependencyManager {
         var isDirectory: ObjCBool = true
 
         // Delete Homebrew directory (~/Library/Application Support/Applite/homebrew) if exists so we have a clean install
-        if FileManager.default.fileExists(atPath: BrewPaths.appBrewDirectory.path, isDirectory: &isDirectory) {
+        if FileManager.default.fileExists(atPath: BrewPaths.applicationSupportHomebrew.path, isDirectory: &isDirectory) {
             Self.logger.info("Homebrew directory already exists, attempting to delete it")
-            try FileManager.default.removeItem(at: BrewPaths.appBrewDirectory)
+            try FileManager.default.removeItem(at: BrewPaths.applicationSupportHomebrew)
         }
 
         // Create Homebrew directory
-        if !FileManager.default.fileExists(atPath: BrewPaths.appBrewDirectory.path, isDirectory: &isDirectory) {
-            Self.logger.info("Attempting to create Homebrew directory")
-            try FileManager.default.createDirectory(at: BrewPaths.appBrewDirectory, withIntermediateDirectories: true)
-        }
+        Self.logger.info("Attempting to create Homebrew directory")
+        try FileManager.default.createDirectory(at: BrewPaths.applicationSupportHomebrew, withIntermediateDirectories: true)
         
         // Fetch Homebrew tarball
         Self.logger.info("Fetching tarball and unpacking")
-        try await Shell.runAsync("curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C \(BrewPaths.appBrewDirectory.quotedPath())")
+        try await Shell.runAsync("curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C \(BrewPaths.applicationSupportHomebrew.quotedPath())")
 
         // Verify Homebrew installation
-        guard await BrewPaths.isBrewPathValid(at: BrewPaths.appBrewExetutable) else {
+        guard await BrewPaths.isBrewPathValid(at: BrewPaths.applicationSupportHomebrew) else {
             throw DependencyError.invalidBrewInstallation
         }
 
