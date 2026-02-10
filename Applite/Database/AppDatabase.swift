@@ -7,15 +7,33 @@
 
 import Foundation
 import GRDB
+import OSLog
 
+/// Manages the SQLite database for cask storage
 struct AppDatabase {
     static let schemaVersion = 1
+    
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: AppDatabase.self)
+    )
+    
+    /// The shared database pool for the application
+    static let shared: DatabasePool = {
+        do {
+            let pool = try openDatabase()
+            logger.info("Database opened successfully")
+            return pool
+        } catch {
+            fatalError("Failed to open database: \(error)")
+        }
+    }()
 
     static func migrator() -> DatabaseMigrator {
         var migrator = DatabaseMigrator()
 
         #if DEBUG
-        // TODO: remove before release
+        // Erase database on schema change during development
         migrator.eraseDatabaseOnSchemaChange = true
         #endif
 
@@ -79,38 +97,26 @@ struct AppDatabase {
                 on: "casks",
                 columns: ["downloadsIn365days"]
             )
-            
-            // Categories table
-            try db.create(table: "categories") { t in
-                t.primaryKey("id", .text) // e.g., "Browsers"
-                t.column("sfSymbol", .text).notNull()
-                t.column("displayOrder", .integer).notNull()
-            }
-
-            // Many-to-many relationship: categories ↔ casks
-            try db.create(table: "category_casks") { t in
-                t.column("categoryId", .text)
-                    .notNull()
-                    .references("categories", onDelete: .cascade)
-                t.column("caskToken", .text)
-                    .notNull()
-                    .references("casks", onDelete: .cascade)
-
-                t.primaryKey(["categoryId", "caskToken"])
-            }
         }
 
         return migrator
     }
 
-    static func openDatabase(at path: String) throws -> DatabaseQueue {
+    /// Opens the database with DatabasePool for concurrent access
+    private static func openDatabase() throws -> DatabasePool {
         var configuration = Configuration()
         configuration.foreignKeysEnabled = true
-        
-        let dbQueue = try DatabaseQueue(path: path, configuration: configuration)
 
-        try migrator().migrate(dbQueue)
+        // Optimize for read-heavy workload
+        configuration.prepareDatabase { db in
+            // Enable memory-mapped I/O for better read performance
+            try db.execute(sql: "PRAGMA mmap_size = 268435456") // 256 MB
+        }
 
-        return dbQueue
+        let dbPool = try DatabasePool(path: AppPaths.database.path, configuration: configuration)
+
+        try migrator().migrate(dbPool)
+
+        return dbPool
     }
 }
