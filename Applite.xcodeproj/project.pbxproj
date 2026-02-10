@@ -149,6 +149,8 @@
 		41D325452F3A297900E3FE1E /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 41D325442F3A297900E3FE1E /* GRDB */; };
 		41D8DF932F3A5EA900FB3E72 /* AppPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF922F3A5EA900FB3E72 /* AppPaths.swift */; };
 		41D8DF952F3A6D3000FB3E72 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */; };
+		41D8DF972F3B42F200FB3E72 /* CaskRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF962F3B42F200FB3E72 /* CaskRecord.swift */; };
+		41D8DF992F3B45CB00FB3E72 /* CategoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF982F3B45CB00FB3E72 /* CategoryRecord.swift */; };
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
 		BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BD7546562A868DA30083996B /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
@@ -305,6 +307,8 @@
 		41CE28C32D30687F0018483F /* brew-tap-cask-info.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = "brew-tap-cask-info.rb"; sourceTree = "<group>"; };
 		41D8DF922F3A5EA900FB3E72 /* AppPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPaths.swift; sourceTree = "<group>"; };
 		41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
+		41D8DF962F3B42F200FB3E72 /* CaskRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskRecord.swift; sourceTree = "<group>"; };
+		41D8DF982F3B45CB00FB3E72 /* CategoryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryRecord.swift; sourceTree = "<group>"; };
 		41DF006329EAA094004EB7AE /* SendNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendNotification.swift; sourceTree = "<group>"; };
 		BD7546562A868DA30083996B /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -806,6 +810,8 @@
 			isa = PBXGroup;
 			children = (
 				41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */,
+				41D8DF962F3B42F200FB3E72 /* CaskRecord.swift */,
+				41D8DF982F3B45CB00FB3E72 /* CategoryRecord.swift */,
 			);
 			path = Database;
 			sourceTree = "<group>";
@@ -1017,6 +1023,7 @@
 				419256552D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift in Sources */,
 				41062C972A3A20F900FD48EA /* UninstallSelf.swift in Sources */,
 				418F332628EC921D0023D76F /* CaskManager.swift in Sources */,
+				41D8DF992F3B45CB00FB3E72 /* CategoryRecord.swift in Sources */,
 				4178CF922A8689AF0037F270 /* ExportCasks.swift in Sources */,
 				4192562E2D1DF22500D9EF10 /* SetupView+AllSet.swift in Sources */,
 				4192568C2D22D7FC00D9EF10 /* AppMigrationView.swift in Sources */,
@@ -1032,6 +1039,7 @@
 				419256912D23F93E00D9EF10 /* Card.swift in Sources */,
 				4101EB482DCE667400BE0670 /* String+PaddedWithQuotes.swift in Sources */,
 				419256252D1DF17F00D9EF10 /* SetupView+Welcome.swift in Sources */,
+				41D8DF972F3B42F200FB3E72 /* CaskRecord.swift in Sources */,
 				419256082D1C734600D9EF10 /* Shell.swift in Sources */,
 				419256AD2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift in Sources */,
 				4192563E2D1DF3E900D9EF10 /* ContentView+DetailView.swift in Sources */,
