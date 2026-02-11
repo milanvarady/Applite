@@ -151,6 +151,7 @@
 		41D8DF952F3A6D3000FB3E72 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */; };
 		41D8DF972F3B42F200FB3E72 /* CaskRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF962F3B42F200FB3E72 /* CaskRecord.swift */; };
 		41D8DF9D2F3BA73100FB3E72 /* CaskDatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8DF9C2F3BA73100FB3E72 /* CaskDatabaseService.swift */; };
+		41D8E0402F3C8A6A00FB3E72 /* CaskViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8E03F2F3C8A6A00FB3E72 /* CaskViewModel.swift */; };
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
 		BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BD7546562A868DA30083996B /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
@@ -309,6 +310,7 @@
 		41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
 		41D8DF962F3B42F200FB3E72 /* CaskRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskRecord.swift; sourceTree = "<group>"; };
 		41D8DF9C2F3BA73100FB3E72 /* CaskDatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskDatabaseService.swift; sourceTree = "<group>"; };
+		41D8E03F2F3C8A6A00FB3E72 /* CaskViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskViewModel.swift; sourceTree = "<group>"; };
 		41DF006329EAA094004EB7AE /* SendNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendNotification.swift; sourceTree = "<group>"; };
 		BD7546562A868DA30083996B /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -812,6 +814,7 @@
 				41D8DF942F3A6D3000FB3E72 /* AppDatabase.swift */,
 				41D8DF962F3B42F200FB3E72 /* CaskRecord.swift */,
 				41D8DF9C2F3BA73100FB3E72 /* CaskDatabaseService.swift */,
+				41D8E03F2F3C8A6A00FB3E72 /* CaskViewModel.swift */,
 			);
 			path = Database;
 			sourceTree = "<group>";
@@ -1019,6 +1022,7 @@
 				418F331C28EB3D540023D76F /* AppGridView.swift in Sources */,
 				419256332D1DF2E000D9EF10 /* SettingsView+BrewSettingsView.swift in Sources */,
 				4122B4792D3574A6002E9D6E /* CaskWarning.swift in Sources */,
+				41D8E0402F3C8A6A00FB3E72 /* CaskViewModel.swift in Sources */,
 				419256962D2430C500D9EF10 /* CaskManager+LoadData.swift in Sources */,
 				4101EB4C2DCE66D100BE0670 /* Array+SafeSubscript.swift in Sources */,
 				419256552D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift in Sources */,
