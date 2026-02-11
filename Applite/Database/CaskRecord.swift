@@ -53,11 +53,6 @@ struct CaskRecord: Equatable {
 
     /// Number of downloads in last 365 days
     var downloadsIn365days: Int
-
-    // MARK: - Cache Metadata
-
-    /// When this record was last updated from the API
-    let lastUpdated: Date
 }
 
 // MARK: - GRDB Protocols
@@ -110,7 +105,6 @@ extension CaskRecord {
         self.homepageURL = dto.homepage
         self.pkgInstaller = dto.url.hasSuffix("pkg")
         self.downloadsIn365days = downloadsIn365days
-        self.lastUpdated = Date()
 
         // Determine warning type
         if dto.disabled {

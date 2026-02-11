@@ -11,23 +11,39 @@ import OSLog
 /// View model that combines static cask data from the database with runtime state
 @Observable
 @MainActor
-final class CaskViewModel: Sendable {
-    /// Static cask information from database
-    private let record: CaskRecord
+final class CaskViewModel {
+    /// Immutable identity token, used for nonisolated protocol conformances
+    nonisolated let _token: String
+    /// Immutable identity full token, used for nonisolated protocol conformances
+    nonisolated let _fullToken: String
+
+    /// Cask information from database
+    private(set) var record: CaskRecord
 
     // MARK: - Runtime State (not persisted)
 
     /// Whether the cask is currently installed
     var isInstalled: Bool = false
 
+    /// Whether the cask has an update available
+    var isOutdated: Bool = false
+
     /// Progress state when installing, updating, or uninstalling
     var progressState: CaskProgressState = .idle
 
     // MARK: - Initialization
 
-    init(record: CaskRecord, isInstalled: Bool = false) {
+    init(record: CaskRecord, isInstalled: Bool = false, isOutdated: Bool = false) {
+        self._token = record.token
+        self._fullToken = record.fullToken
         self.record = record
         self.isInstalled = isInstalled
+        self.isOutdated = isOutdated
+    }
+
+    /// Updates the underlying record (e.g. after a database sync)
+    func updateRecord(_ newRecord: CaskRecord) {
+        self.record = newRecord
     }
 
     // MARK: - Computed Properties (forwarding from record)
@@ -98,8 +114,7 @@ final class CaskViewModel: Sendable {
             warningType: nil,
             warningDate: nil,
             warningReason: nil,
-            downloadsIn365days: 100,
-            lastUpdated: Date()
+            downloadsIn365days: 100
         ),
         isInstalled: false
     )
@@ -110,7 +125,7 @@ final class CaskViewModel: Sendable {
 // MARK: - Identifiable
 extension CaskViewModel: Identifiable {
     nonisolated var id: String {
-        record.fullToken
+        _fullToken
     }
 }
 
@@ -131,6 +146,6 @@ extension CaskViewModel: Equatable {
 // MARK: - Comparable
 extension CaskViewModel: Comparable {
     nonisolated static func < (lhs: CaskViewModel, rhs: CaskViewModel) -> Bool {
-        lhs.record.name < rhs.record.name
+        lhs._token < rhs._token
     }
 }

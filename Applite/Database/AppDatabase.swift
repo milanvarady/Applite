@@ -78,10 +78,6 @@ struct AppDatabase {
                 t.column("downloadsIn365days", .integer)
                     .notNull()
                     .defaults(to: 0)
-
-                // When this record was last updated from API
-                t.column("lastUpdated", .datetime)
-                    .notNull()
             }
 
             // Index for filtering by tap
@@ -97,6 +93,21 @@ struct AppDatabase {
                 on: "casks",
                 columns: ["downloadsIn365days"]
             )
+
+            // FTS5 virtual table for full-text search, synced with casks table
+            try db.create(virtualTable: "cask_fts", using: FTS5()) { t in
+                t.synchronize(withTable: "casks")
+                t.tokenizer = .unicode61()
+                t.column("token")
+                t.column("name")
+                t.column("descriptionText")
+            }
+
+            // Metadata key/value table for app-level state (e.g. lastSyncDate)
+            try db.create(table: "metadata") { t in
+                t.primaryKey("key", .text)
+                t.column("value", .text)
+            }
         }
 
         return migrator
