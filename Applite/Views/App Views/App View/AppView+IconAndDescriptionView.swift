@@ -11,7 +11,8 @@ extension AppView {
     struct IconAndDescriptionView: View {
         @ObservedObject var cask: Cask
         @AppStorage("showToken") var showToken: Bool = false
-
+        @Environment(\.openURL) private var openURL
+        
         var body: some View {
             HStack {
                 if let iconURL = URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.info.token)/AppIcon.png"),
@@ -41,6 +42,15 @@ extension AppView {
                 Spacer()
             }
             .contentShape(Rectangle())
+            .simultaneousGesture(
+                TapGesture()
+                    .modifiers(.command)
+                    .onEnded {
+                        if let url = cask.info.homepageURL {
+                            openURL(url)
+                        }
+                    }
+            )
         }
     }
 }
