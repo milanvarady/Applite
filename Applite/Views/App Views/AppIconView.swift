@@ -31,7 +31,6 @@ struct AppIconView: View {
                         .fill(.gray)
                         .shimmering()
                 }
-                .setProcessor(RoundCornerImageProcessor(cornerRadius: 8)) // Round corners
                 .fade(duration: 0.25)
                 .onFailure { error in
                     // Change state
@@ -44,6 +43,7 @@ struct AppIconView: View {
                         state = .failed
                     }
                 }
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .frame(width: 54, height: 54)
         } else {
             // App icon missing
