@@ -1,25 +1,141 @@
 {
-  "fill" : "automatic",
+  "fill-specializations" : [
+    {
+      "value" : "automatic"
+    },
+    {
+      "appearance" : "dark",
+      "value" : "automatic"
+    }
+  ],
   "groups" : [
     {
       "layers" : [
         {
+          "fill" : {
+            "linear-gradient" : [
+              "display-p3:0.16858,0.02745,0.93311,1.00000",
+              "display-p3:0.84717,0.29419,0.56494,1.00000"
+            ],
+            "orientation" : {
+              "start" : {
+                "x" : 0.13821614583333333,
+                "y" : 0.8641710069444445
+              },
+              "stop" : {
+                "x" : 0.7655381944444445,
+                "y" : 0.2290581597222222
+              }
+            }
+          },
           "hidden" : false,
-          "image-name" : "apple-touch-icon.png",
-          "name" : "apple-touch-icon",
+          "image-name" : "apple-touch-icon-hollow.svg",
+          "name" : "apple-touch-icon-hollow",
           "position" : {
-            "scale" : 3.9,
+            "scale" : 2,
             "translation-in-points" : [
-              15,
-              -9
+              200,
+              -200
             ]
           }
         }
       ],
       "shadow" : {
-        "kind" : "neutral",
-        "opacity" : 0.5
+        "kind" : "layer-color",
+        "opacity" : 1
       },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "blend-mode" : "normal",
+      "blur-material" : null,
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "fill" : {
+            "automatic-gradient" : "display-p3:0.20411,0.35116,1.00000,1.00000",
+            "orientation" : {
+              "start" : {
+                "x" : 0.5,
+                "y" : 0
+              },
+              "stop" : {
+                "x" : 0.5,
+                "y" : 0.7
+              }
+            }
+          },
+          "glass" : true,
+          "hidden" : false,
+          "image-name" : "apple-touch-icon-solid-180.svg",
+          "name" : "apple-touch-icon-solid-180",
+          "position" : {
+            "scale" : 2,
+            "translation-in-points" : [
+              -200,
+              200
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "automatic-gradient" : "display-p3:0.20411,0.35116,1.00000,1.00000",
+            "orientation" : {
+              "start" : {
+                "x" : 0.5,
+                "y" : 0
+              },
+              "stop" : {
+                "x" : 0.5,
+                "y" : 0.7
+              }
+            }
+          },
+          "image-name" : "apple-touch-icon-solid-90.svg",
+          "name" : "apple-touch-icon-solid-90",
+          "position" : {
+            "scale" : 2,
+            "translation-in-points" : [
+              200,
+              200
+            ]
+          }
+        },
+        {
+          "blend-mode" : "normal",
+          "fill" : {
+            "automatic-gradient" : "display-p3:0.20411,0.35116,1.00000,1.00000",
+            "orientation" : {
+              "start" : {
+                "x" : 0.5,
+                "y" : 0
+              },
+              "stop" : {
+                "x" : 0.5,
+                "y" : 0.7
+              }
+            }
+          },
+          "image-name" : "apple-touch-icon-solid-270.svg",
+          "name" : "apple-touch-icon-solid-270",
+          "position" : {
+            "scale" : 2,
+            "translation-in-points" : [
+              -200,
+              -200
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.6
+      },
+      "specular" : true,
       "translucency" : {
         "enabled" : true,
         "value" : 0.5

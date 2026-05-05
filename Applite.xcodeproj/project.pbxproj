@@ -147,7 +147,7 @@
 		41CE28C22D2DA0690018483F /* SetupView+BrewPathDetectedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CE28C12D2DA0690018483F /* SetupView+BrewPathDetectedView.swift */; };
 		41CE28C42D30687F0018483F /* brew-tap-cask-info.rb in Resources */ = {isa = PBXBuildFile; fileRef = 41CE28C32D30687F0018483F /* brew-tap-cask-info.rb */; };
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
-		B251D9352FA76D7F005A88F4 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = B251D9342FA76D7F005A88F4 /* AppIcon.icon */; };
+		B2F29D992FA97D340038394F /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = B2F29D982FA97D340038394F /* AppIcon.icon */; };
 		BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BD7546562A868DA30083996B /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
@@ -302,7 +302,7 @@
 		41CE28C12D2DA0690018483F /* SetupView+BrewPathDetectedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+BrewPathDetectedView.swift"; sourceTree = "<group>"; };
 		41CE28C32D30687F0018483F /* brew-tap-cask-info.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = "brew-tap-cask-info.rb"; sourceTree = "<group>"; };
 		41DF006329EAA094004EB7AE /* SendNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendNotification.swift; sourceTree = "<group>"; };
-		B251D9342FA76D7F005A88F4 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		B2F29D982FA97D340038394F /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		BD7546562A868DA30083996B /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -488,9 +488,9 @@
 				414074FA28DF53EB0073EB22 /* Preview Content */,
 				419506A729696A5300FE5802 /* Applite-Info.plist */,
 				414074F828DF53EB0073EB22 /* Assets.xcassets */,
+				B2F29D982FA97D340038394F /* AppIcon.icon */,
 				414074FD28DF53EB0073EB22 /* Applite.entitlements */,
 				4196C90128FAF57A00EADDDA /* AppliteDebug.entitlements */,
-				B251D9342FA76D7F005A88F4 /* AppIcon.icon */,
 			);
 			path = Applite;
 			sourceTree = "<group>";
@@ -881,7 +881,7 @@
 				414074FC28DF53EB0073EB22 /* Preview Assets.xcassets in Resources */,
 				41857B732911A2F2004A1894 /* categories.json in Resources */,
 				BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */,
-				B251D9352FA76D7F005A88F4 /* AppIcon.icon in Resources */,
+				B2F29D992FA97D340038394F /* AppIcon.icon in Resources */,
 				41CE28C42D30687F0018483F /* brew-tap-cask-info.rb in Resources */,
 				414074F928DF53EB0073EB22 /* Assets.xcassets in Resources */,
 				419256062D1C546D00D9EF10 /* askpass.js in Resources */,
