@@ -88,6 +88,7 @@ Applite is licensed under the [MIT](https://choosealicense.com/licenses/mit/) Li
 
 ## Alternatives
 
+- [WailBrew](https://github.com/wickenico/WailBrew) (active)
 - [Cork](https://github.com/buresdv/Cork) (paid)
 - [Brewer X](https://panini.house/brewer/) (paid)
 - [BrewMate](https://github.com/romankurnovskii/BrewMate) (electron based)
