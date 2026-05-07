@@ -14,12 +14,7 @@ extension ContentView {
         switch selection {
         case .home:
             if !brokenInstall {
-                HomeView(
-                    navigationSelection: $selection,
-                    searchText: $searchInput,
-                    showSearchResults: $showSearchResults,
-                    searchResults: searchResults
-                )
+                HomeView(navigationSelection: $selection)
             } else {
                 brokenInstallView
             }
@@ -36,8 +31,13 @@ extension ContentView {
         case .appMigration:
             AppMigrationView()
 
-        case .appCategory(let category):
-            CategoryView(category: category)
+        case .appCategory(let id):
+            // Look up the freshest CategoryLoadResult by id so we re-render with
+            // resolved casks once stage 1 finishes (the selection enum captured the
+            // placeholder version at click time).
+            if let category = caskManager.categories.first(where: { $0.id == id }) {
+                CategoryView(category: category)
+            }
 
         case .tap(let tap):
             TapView(tap: tap)

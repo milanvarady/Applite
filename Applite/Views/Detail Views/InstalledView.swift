@@ -26,7 +26,11 @@ struct InstalledView: View {
 
     var body: some View {
         VStack {
-            AppGridView(casks: filteredCasks, appRole: .installed)
+            if !searchText.isEmpty && filteredCasks.isEmpty {
+                ContentUnavailableView.search(text: searchText)
+            } else {
+                AppGridView(casks: filteredCasks, appRole: .installed)
+            }
         }
         .navigationTitle("Installed")
         .modify { view in

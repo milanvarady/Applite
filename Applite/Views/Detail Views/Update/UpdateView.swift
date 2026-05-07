@@ -34,10 +34,13 @@ struct UpdateView: View {
     var body: some View {
         VStack {
             if casks.isEmpty {
-                updateUnavailable
-                    .padding(.vertical)
-
-                Spacer()
+                ContentUnavailableView(
+                    "No Updates Available",
+                    systemImage: "checkmark.circle",
+                    description: Text("All your apps are up to date.", comment: "Update view no updates available description")
+                )
+            } else if filteredCasks.isEmpty {
+                ContentUnavailableView.search(text: searchText)
             } else {
                 // App grid
                 AppGridView(casks: filteredCasks, appRole: .update)

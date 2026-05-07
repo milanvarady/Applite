@@ -22,8 +22,24 @@ final class CaskManager {
     let registry: CaskViewModelRegistry
     var brewService: BrewService
 
-    var categories: [CategoryLoadResult] = []
+    /// Categories shown in the sidebar and Discover view.
+    /// Initialized synchronously from the bundled `categories.json` with empty `casks`
+    /// arrays so the UI renders structure from launch; replaced with resolved view models
+    /// after `loadCatalogData()` finishes. `CategoryLoadResult` equality is id-based, so
+    /// this assignment is invisible to `selection` and to SwiftUI's identity tracking —
+    /// the cask cards inside each section just flip from shimmer placeholders to real data.
+    var categories: [CategoryLoadResult]
+
     var taps: [TapLoadResult] = []
+
+    /// True until `loadCatalogData()` returns. While true, every category has empty `casks`
+    /// (placeholder shimmer state). Distinct from `isResolvingInstalledState`, which
+    /// covers the slower brew CLI stage.
+    var isCatalogLoaded: Bool = false
+
+    /// True while brew CLI is being queried for installed/outdated state.
+    /// Catalog (categories/taps) is independent and lights up before this flips false.
+    var isResolvingInstalledState: Bool = false
 
     static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -47,6 +63,20 @@ final class CaskManager {
         self.registry = reg
         self.dataLoader = dataLoader ?? CaskDataLoader(registry: reg)
         self.brewService = brewService ?? BrewService()
+        self.categories = Self.loadInitialCategories()
+    }
+
+    /// Reads the bundled `categories.json` and returns placeholder `CategoryLoadResult`s
+    /// (no resolved casks). Lets the sidebar and Discover section structure render
+    /// before stage 1 completes. Returns `[]` on parse failure — the catalog load will
+    /// repopulate it later.
+    private static func loadInitialCategories() -> [CategoryLoadResult] {
+        guard let url = Bundle.main.url(forResource: "categories", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let defs = try? JSONDecoder().decode([Category].self, from: data) else {
+            return []
+        }
+        return defs.map { CategoryLoadResult(id: $0.id, sfSymbol: $0.sfSymbol, casks: []) }
     }
 
     // MARK: - Brew Operation Forwarding
@@ -81,7 +111,7 @@ final class CaskManager {
 
     // MARK: - Search Forwarding
 
-    func search(query: String) throws -> [CaskViewModel] {
-        try dataLoader.search(query: query)
+    func search(query: String) async throws -> [CaskViewModel] {
+        try await dataLoader.search(query: query)
     }
 }

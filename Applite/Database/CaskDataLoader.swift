@@ -10,22 +10,18 @@ import OSLog
 
 // MARK: - Result Types
 
-/// Complete result of loading all cask data at launch
-struct CaskLoadResult {
-    let installedViewModels: [CaskViewModel]
-    let outdatedViewModels: [CaskViewModel]
-    let categories: [CategoryLoadResult]
-    let taps: [TapLoadResult]
-}
-
-/// A category with its resolved view models
+/// A category with its resolved view models.
+///
+/// `==` includes `casks` so SwiftUI re-renders when the placeholder state
+/// (empty casks at launch) is replaced with the full result after stage 1.
+/// `hash(into:)` uses `id` only — hash buckets don't need fine-grained content.
 struct CategoryLoadResult: Identifiable, Equatable, Hashable {
     let id: String
     let sfSymbol: String
     let casks: [CaskViewModel]
 
     static func == (lhs: CategoryLoadResult, rhs: CategoryLoadResult) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id && lhs.casks == rhs.casks
     }
 
     func hash(into hasher: inout Hasher) {
@@ -33,7 +29,10 @@ struct CategoryLoadResult: Identifiable, Equatable, Hashable {
     }
 }
 
-/// A third-party tap with its resolved view models
+/// A third-party tap with its resolved view models.
+///
+/// Same equality contract as `CategoryLoadResult`: include `casks` for SwiftUI updates,
+/// hash by `id` only.
 struct TapLoadResult: Identifiable, Equatable, Hashable {
     let id: String
     let casks: [CaskViewModel]
@@ -48,7 +47,7 @@ struct TapLoadResult: Identifiable, Equatable, Hashable {
     }
 
     static func == (lhs: TapLoadResult, rhs: TapLoadResult) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id && lhs.casks == rhs.casks
     }
 
     func hash(into hasher: inout Hasher) {
@@ -82,78 +81,70 @@ final class CaskDataLoader {
 
     // MARK: - Main Loading Flow
 
-    /// Loads all cask data: syncs if needed, then builds view models for installed/category/tap casks
-    func loadAllData() async throws -> CaskLoadResult {
-        logger.info("Starting data load")
+    /// Loads catalog data (categories + taps) from the database.
+    /// Does NOT shell out to the brew CLI — that's `refreshInstalled`/`refreshOutdated`.
+    /// On a warm DB this completes in tens of milliseconds; on a cold DB it triggers an API sync first.
+    func loadCatalogData() async throws -> (categories: [CategoryLoadResult], taps: [TapLoadResult]) {
+        logger.info("Starting catalog load")
 
         // 1. Sync database from API if stale
         try await syncIfNeeded()
 
-        // 2. Fetch installed/outdated tokens and categories concurrently
-        async let installedTokens = installedService.getInstalledCasks()
-        async let outdatedTokens = installedService.getOutdatedCasks()
-        async let categories = loadCategories()
+        // 2. Load category definitions from bundled JSON
+        let categoryDefs = try loadCategories()
 
-        let (installed, outdated, cats) = try await (installedTokens, outdatedTokens, categories)
+        // 3. Batch fetch records for all tokens referenced by categories
+        let categoryTokens = categoryDefs.flatMap(\.casks)
+        let categoryRecords = try dbService.fetchCasks(forTokens: categoryTokens)
+        let recordsByToken = Dictionary(categoryRecords.map { ($0.token, $0) }, uniquingKeysWith: { first, _ in first })
+        let recordsByFullToken = Dictionary(categoryRecords.map { ($0.fullToken, $0) }, uniquingKeysWith: { first, _ in first })
 
-        // 3. Collect all tokens we need view models for
-        let allNeededTokens = Array(installed.union(outdated))
-            + cats.flatMap(\.casks)
+        // 4. Build view models via registry (get-or-create for identity)
+        _ = registry.viewModels(for: categoryRecords)
 
-        // 4. Batch fetch records from DB
-        let records = try dbService.fetchCasks(forTokens: allNeededTokens)
-        let recordsByToken = Dictionary(records.map { ($0.token, $0) }, uniquingKeysWith: { first, _ in first })
-        let recordsByFullToken = Dictionary(records.map { ($0.fullToken, $0) }, uniquingKeysWith: { first, _ in first })
-
-        // 5. Build view models via registry (get-or-create for identity)
-        _ = registry.viewModels(for: records)
-
-        // 6. Mark installed/outdated state
-        registry.markInstalled(tokens: installed)
-        registry.markOutdated(tokens: outdated)
-
-        // 7. Build category results
-        let categoryResults: [CategoryLoadResult] = cats.compactMap { category in
-            let categoryRecords = category.casks.compactMap { token -> CaskRecord? in
+        // 5. Build category results
+        let categoryResults: [CategoryLoadResult] = categoryDefs.compactMap { category in
+            let records = category.casks.compactMap { token -> CaskRecord? in
                 recordsByToken[token] ?? recordsByFullToken[token]
             }
-            guard !categoryRecords.isEmpty else { return nil }
-            let vms = registry.viewModels(for: categoryRecords)
+            guard !records.isEmpty else { return nil }
+            let vms = registry.viewModels(for: records)
             return CategoryLoadResult(id: category.id, sfSymbol: category.sfSymbol, casks: vms)
         }
 
-        // 8. Build tap results
+        // 6. Build tap results from DB
         let tapResults = try buildTapResults()
 
-        logger.info("Data load completed: \(installed.count) installed, \(outdated.count) outdated, \(categoryResults.count) categories, \(tapResults.count) taps")
+        logger.info("Catalog load completed: \(categoryResults.count) categories, \(tapResults.count) taps")
 
-        return CaskLoadResult(
-            installedViewModels: registry.installedViewModels,
-            outdatedViewModels: registry.outdatedViewModels,
-            categories: categoryResults,
-            taps: tapResults
-        )
+        return (categories: categoryResults, taps: tapResults)
     }
 
     // MARK: - Search
 
     /// Searches casks using FTS5 and returns view models (reuses existing instances)
-    func search(query: String, limit: Int = 50) throws -> [CaskViewModel] {
-        let records = try dbService.search(query: query, limit: limit)
+    func search(query: String, limit: Int = 50) async throws -> [CaskViewModel] {
+        let records = try await dbService.search(query: query, limit: limit)
         return registry.viewModels(for: records)
     }
 
     // MARK: - Refresh
 
-    /// Re-queries brew CLI for installed casks and updates the registry
+    /// Re-queries brew CLI for installed casks, ensures view models exist for each,
+    /// and marks them installed in the registry.
     func refreshInstalled() async throws {
         let tokens = try await installedService.getInstalledCasks()
+        let records = try dbService.fetchCasks(forTokens: Array(tokens))
+        _ = registry.viewModels(for: records)
         registry.markInstalled(tokens: tokens)
     }
 
-    /// Re-queries brew CLI for outdated casks and updates the registry
+    /// Re-queries brew CLI for outdated casks, ensures view models exist for each,
+    /// and marks them outdated in the registry.
     func refreshOutdated() async throws {
         let tokens = try await installedService.getOutdatedCasks()
+        let records = try dbService.fetchCasks(forTokens: Array(tokens))
+        _ = registry.viewModels(for: records)
         registry.markOutdated(tokens: tokens)
     }
 

@@ -91,14 +91,14 @@ struct CaskDatabaseService {
     // MARK: - FTS5 Search
 
     /// Searches casks using FTS5 full-text search with prefix matching and BM25 ranking
-    func search(query: String, limit: Int = 50) throws -> [CaskRecord] {
+    func search(query: String, limit: Int = 50) async throws -> [CaskRecord] {
         let sanitized = sanitizeFTSQuery(query)
         guard !sanitized.isEmpty else { return [] }
 
         // Append * for prefix matching (e.g., "fire" matches "firefox")
         let ftsQuery = "\(sanitized)*"
 
-        return try dbPool.read { db in
+        return try await dbPool.read { db in
             let sql = """
                 SELECT casks.*
                 FROM casks

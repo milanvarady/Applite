@@ -6,10 +6,13 @@
 //
 
 import SwiftUI
+import Shimmer
 
 /// Detail view used in the category section
 struct CategoryView: View {
     let category: CategoryLoadResult
+
+    private let placeholderColumns = [GridItem(.adaptive(minimum: 320))]
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -23,11 +26,27 @@ struct CategoryView: View {
             }
             .padding()
 
-            // Apps
-            AppGridView(casks: category.casks, appRole: .installAndManage)
-                .id(category.id)
+            if category.casks.isEmpty {
+                placeholderGrid
+            } else {
+                AppGridView(casks: category.casks, appRole: .installAndManage)
+                    .id(category.id)
+            }
         }
         .navigationTitle(category.name)
+    }
+
+    private var placeholderGrid: some View {
+        ScrollView {
+            LazyVGrid(columns: placeholderColumns, spacing: 20) {
+                ForEach(0..<8, id: \.self) { _ in
+                    PlaceholderAppView()
+                        .shimmering()
+                }
+            }
+            .padding()
+        }
+        .allowsHitTesting(false)
     }
 }
 

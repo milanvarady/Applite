@@ -24,13 +24,6 @@ struct ContentView: View {
 
     /// App search query
     @State var searchInput = ""
-    @State var showSearchResults = false
-    @State var searchResults: [CaskViewModel] = []
-
-    // Sorting options
-    @AppStorage(Preferences.searchSortOption.rawValue) var sortBy = SortingOptions.mostDownloaded
-    @AppStorage(Preferences.hideUnpopularApps.rawValue) var hideUnpopularApps = false
-    @AppStorage(Preferences.hideDisabledApps.rawValue) var hideDisabledApps = false
 
     let logger = Logger()
 
@@ -39,7 +32,11 @@ struct ContentView: View {
             sidebarViews
                 .disabled(modifyingBrew)
         } detail: {
-            detailView
+            if searchInput.isEmpty {
+                detailView
+            } else {
+                SearchView(query: $searchInput)
+            }
         }
         // Load all cask releated data
         .task {
@@ -47,38 +44,11 @@ struct ContentView: View {
         }
         // MARK: - Search
         .searchable(text: $searchInput, placement: .sidebar)
-        // Submit search
-        .onSubmit(of: .search) {
-            searchAndSort()
-
-            if !searchInput.isEmpty {
-                showSearchResults = true
-
-                if selection != .home {
-                    selection = .home
-                }
-            }
-        }
-        // Clear search
+        // Limit search characters
         .onChange(of: searchInput) {
-            // Limit search characters
-            searchInput = String(searchInput.prefix(30))
-
-            if searchInput.isEmpty {
-                showSearchResults = false
-                searchResults = []
+            if searchInput.count > 30 {
+                searchInput = String(searchInput.prefix(30))
             }
-        }
-        // Apply sorting options
-        .onChange(of: sortBy) {
-            sortCasks(ignoreBestMatch: false)
-        }
-        // Apply filter options
-        .onChange(of: hideUnpopularApps) {
-            reapplyFilters()
-        }
-        .onChange(of: hideDisabledApps) {
-            reapplyFilters()
         }
         // Load failure alert
         .alert(loadAlert.title, isPresented: $loadAlert.isPresented) {
