@@ -56,7 +56,7 @@ extension SettingsView {
                     .bold()
 
                 BrewPathSelectorView(isSelectedPathValid: $isSelectedBrewPathValid)
-                    .onChange(of: brewPathOption) { newValue in
+                    .onChange(of: brewPathOption) { _, newValue in
                         relaunchNeeded = previousBrewOption != newValue
                     }
 
@@ -72,7 +72,7 @@ extension SettingsView {
                     .bold()
                 
                 Toggle("Include Casks from Taps", isOn: $includeCasksFromTaps)
-                    .onChange(of: includeCasksFromTaps) { _ in
+                    .onChange(of: includeCasksFromTaps) {
                         relaunchNeeded = true
                     }
             }

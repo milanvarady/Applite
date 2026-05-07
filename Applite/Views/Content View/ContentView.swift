@@ -60,7 +60,7 @@ struct ContentView: View {
             }
         }
         // Clear search
-        .onChange(of: searchInput) { newValue in
+        .onChange(of: searchInput) {
             // Limit search characters
             searchInput = String(searchInput.prefix(30))
 
@@ -70,14 +70,14 @@ struct ContentView: View {
             }
         }
         // Apply sorting options
-        .onChange(of: sortBy) { _ in
+        .onChange(of: sortBy) {
             sortCasks(ignoreBestMatch: false)
         }
         // Apply filter options
-        .onChange(of: hideUnpopularApps) { _ in
+        .onChange(of: hideUnpopularApps) {
             reapplyFilters()
         }
-        .onChange(of: hideDisabledApps) { _ in
+        .onChange(of: hideDisabledApps) {
             reapplyFilters()
         }
         // Load failure alert

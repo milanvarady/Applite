@@ -35,7 +35,7 @@ struct BrewPathSelectorView: View {
         .task {
             isSelectedPathValid = await BrewPaths.isSelectedBrewPathValid()
         }
-        .onChange(of: brewPathOption) { _ in
+        .onChange(of: brewPathOption) {
             Task { @MainActor in
                 isSelectedPathValid = await BrewPaths.isSelectedBrewPathValid()
             }

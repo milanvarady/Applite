@@ -32,7 +32,7 @@ struct UninstallSelfView: View {
             )
             
             Toggle("Uninstall Homebrew", isOn: $uninstallHomebrew)
-                .onChange(of: uninstallHomebrew) { newValue in
+                .onChange(of: uninstallHomebrew) { _, newValue in
                     if newValue {
                         deleteBrewCache = true
                     }
