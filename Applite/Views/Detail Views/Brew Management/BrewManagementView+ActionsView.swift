@@ -132,7 +132,7 @@ extension BrewManagementView {
             .disabled(modifyingBrew)
             .padding(.trailing, 3)
             .onButtonStateError { error in
-                logger.error("Brew update failed. Error: \(error.localizedDescription)")
+                logger.error("Brew update failed. Error: \(error.error.localizedDescription)")
                 updateFailed = true
             }
             .alert("Update failed", isPresented: $updateFailed, actions: {})

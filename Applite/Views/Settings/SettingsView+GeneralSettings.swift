@@ -51,11 +51,11 @@ extension SettingsView {
                 Toggle("Task errors", isOn: $notificationOnFailure)
             }
             .padding()
-            .onChange(of: colorSchemePreference) {
+            .onChange(of: colorSchemePreference) { _, colorScheme in
                 // Don't remove this!
                 // This is here because changing the .preferredColorScheme view modifier is bugged
                 // When it's set back to nil, parts of the UI don't default back to the system color scheme
-                if $0 == .system && !fixingColor {
+                if colorScheme == .system && !fixingColor {
                     // Set fixingColor to true, so we don't recursively call this function
                     self.fixingColor = true
 

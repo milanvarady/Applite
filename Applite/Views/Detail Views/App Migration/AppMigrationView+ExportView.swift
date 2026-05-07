@@ -32,7 +32,7 @@ extension AppMigrationView {
                     }
                     .controlSize(.large)
                     .onButtonStateError { error in
-                        alert.show(error: error, title: "Failed to export")
+                        alert.show(error: error.error, title: "Failed to export")
                     }
 
                     if exportSuccessful {
