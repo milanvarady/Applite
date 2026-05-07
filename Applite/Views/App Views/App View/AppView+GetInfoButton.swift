@@ -26,7 +26,7 @@ extension AppView {
             } label: {
                 Label("Get Info", systemImage: "info.circle")
             }
-            .onButtonError { error in
+            .onButtonStateError { error in
                 alert.show(error: error, title: "Failed to gather cask info")
                 logger.error("Failed to gather additional cask info: \(error.localizedDescription)")
             }

@@ -31,7 +31,7 @@ extension AppMigrationView {
                         Label("Export Apps to File", systemImage: "square.and.arrow.up")
                     }
                     .controlSize(.large)
-                    .onButtonError { error in
+                    .onButtonStateError { error in
                         alert.show(error: error, title: "Failed to export")
                     }
 

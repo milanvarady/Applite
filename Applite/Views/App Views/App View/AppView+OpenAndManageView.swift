@@ -29,7 +29,7 @@ extension AppView {
             .font(.system(size: 14))
             .buttonStyle(.bordered)
             .clipShape(Capsule())
-            .onButtonError { error in
+            .onButtonStateError { error in
                 showAppNotFoundAlert = true
             }
             .asyncButtonStyle(.none)

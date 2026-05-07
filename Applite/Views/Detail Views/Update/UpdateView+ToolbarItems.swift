@@ -49,8 +49,8 @@ extension UpdateView {
             AsyncButton("Refresh", systemImage: "arrow.clockwise") {
                 try await caskManager.refreshOutdated()
             }
-            .onButtonError { error in
-                loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
+            .onButtonStateError { error in
+                loadAlert.show(title: "Failed to refresh updates", message: error.error.localizedDescription)
             }
         }
     }
