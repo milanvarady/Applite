@@ -9,29 +9,40 @@ import SwiftUI
 
 /// Update section
 struct UpdateView: View {
-    @ObservedObject var caskCollection: SearchableCaskCollection
+    var casks: [CaskViewModel]
 
-    @EnvironmentObject var caskManager: CaskManager
+    @Environment(CaskManager.self) var caskManager
 
     @State var searchText = ""
     @State var isUpdatingAll = false
     @State var updateAllButtonRotation = 0.0
-    
+
     @State var showingGreedyUpdateConfirm = false
-    @StateObject var loadAlert = AlertManager()
+    @State var loadAlert = AlertManager()
+
+    /// Filtered casks based on local search text
+    var filteredCasks: [CaskViewModel] {
+        if searchText.isEmpty {
+            return casks
+        }
+        let query = searchText.lowercased()
+        return casks.filter {
+            $0.name.lowercased().contains(query) || $0.token.lowercased().contains(query)
+        }
+    }
 
     var body: some View {
         VStack {
-            if caskCollection.casks.isEmpty {
+            if casks.isEmpty {
                 updateUnavailable
                     .padding(.vertical)
 
                 Spacer()
             } else {
                 // App grid
-                AppGridView(casks: caskCollection.casksMatchingSearch, appRole: .update)
+                AppGridView(casks: filteredCasks, appRole: .update)
                     .overlay(alignment: .bottom) {
-                        if caskCollection.casksMatchingSearch.count > 1 {
+                        if filteredCasks.count > 1 {
                             updateAllButton
                                 .shadow(radius: 8)
                                 .padding(.vertical)
@@ -47,22 +58,16 @@ struct UpdateView: View {
                 view.searchable(text: $searchText, placement: .toolbar)
             }
         }
-        .task(id: searchText, debounceTime: .seconds(0.2)) {
-            await caskCollection.search(query: searchText)
-        }
         .toolbar {
-            ToolbarItems(loadAlert: loadAlert)
+            ToolbarItems(loadAlert: $loadAlert)
         }
-        .alertManager(loadAlert)
+        .alertManager($loadAlert)
     }
 }
 
 struct UpdateView_Previews: PreviewProvider {
     static var previews: some View {
-        UpdateView(
-            caskCollection: .init(casks: Array(repeating: .dummy, count: 8))
-        )
-        .frame(width: 500, height: 400)
-        .environmentObject(CaskManager())
+        UpdateView(casks: Array(repeating: .dummy, count: 8))
+            .frame(width: 500, height: 400)
     }
 }

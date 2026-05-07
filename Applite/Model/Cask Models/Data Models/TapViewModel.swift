@@ -9,7 +9,6 @@ import Foundation
 
 struct TapViewModel: Identifiable, Equatable, Hashable {
     let tapId: TapId
-    let caskCollection: SearchableCaskCollection
 
     var title: String {
         // If tap name short enough or if it's ambigous (it only says tap) we show the full name

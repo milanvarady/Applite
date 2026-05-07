@@ -18,30 +18,30 @@ extension ContentView {
                     navigationSelection: $selection,
                     searchText: $searchInput,
                     showSearchResults: $showSearchResults,
-                    caskCollection: caskManager.allCasks
+                    searchResults: searchResults
                 )
             } else {
                 brokenInstallView
             }
-            
+
         case .updates:
-            UpdateView(caskCollection: caskManager.outdatedCasks)
+            UpdateView(casks: caskManager.outdatedViewModels)
 
         case .installed:
-            InstalledView(caskCollection: caskManager.installedCasks)
-            
+            InstalledView(casks: caskManager.installedViewModels)
+
         case .activeTasks:
             ActiveTasksView()
-            
+
         case .appMigration:
             AppMigrationView()
-            
+
         case .appCategory(let category):
             CategoryView(category: category)
 
         case .tap(let tap):
             TapView(tap: tap)
-            
+
         case .brew:
             BrewManagementView(modifyingBrew: $modifyingBrew)
         }

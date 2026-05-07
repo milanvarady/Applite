@@ -14,7 +14,7 @@ extension AppMigrationView {
         @State var showFileExporter = false
         @State var exportFile: ExportFile = .init()
         @State var exportSuccessful = false
-        @StateObject var alert = AlertManager()
+        @State var alert = AlertManager()
 
         private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigrationView.ExportView")
 
@@ -47,7 +47,7 @@ extension AppMigrationView {
 
                 Spacer()
             }
-            .alertManager(alert)
+            .alertManager($alert)
             .fileExporter(isPresented: $showFileExporter, document: exportFile,  contentType: .plainText, defaultFilename: "applite_export") { result in
                 switch result {
                 case .success(let url):

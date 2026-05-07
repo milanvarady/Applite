@@ -79,6 +79,11 @@ final class CaskViewModelRegistry {
             .sorted()
     }
 
+    /// All view models currently performing an operation (install, update, uninstall)
+    var busyViewModels: [CaskViewModel] {
+        viewModelsByToken.values.filter { $0.progressState != .idle }
+    }
+
     // MARK: - Memory Management
 
     /// Removes view models that are no longer needed, keeping installed, outdated, and in-progress VMs.

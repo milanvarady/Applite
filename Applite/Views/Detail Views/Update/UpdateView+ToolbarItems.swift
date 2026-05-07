@@ -10,8 +10,8 @@ import ButtonKit
 
 extension UpdateView {
     struct ToolbarItems: ToolbarContent {
-        @EnvironmentObject var caskManager: CaskManager
-        @ObservedObject var loadAlert: AlertManager
+        @Environment(CaskManager.self) var caskManager
+        @Binding var loadAlert: AlertManager
         
         var body: some ToolbarContent {
             if #available(macOS 26.0, *) {

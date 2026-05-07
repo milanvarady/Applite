@@ -10,21 +10,22 @@ import OSLog
 import ButtonKit
 
 struct ContentView: View {
-    @EnvironmentObject var caskManager: CaskManager
-    
+    @Environment(CaskManager.self) var caskManager
+
     /// Currently selected tab in the sidebar
     @State var selection: SidebarItem = .home
 
-    @StateObject var loadAlert = AlertManager()
+    @State var loadAlert = AlertManager()
 
     @State var brokenInstall = false
-    
+
     /// If true the sidebar is disabled
     @State var modifyingBrew = false
 
     /// App search query
     @State var searchInput = ""
     @State var showSearchResults = false
+    @State var searchResults: [CaskViewModel] = []
 
     // Sorting options
     @AppStorage(Preferences.searchSortOption.rawValue) var sortBy = SortingOptions.mostDownloaded
@@ -48,15 +49,13 @@ struct ContentView: View {
         .searchable(text: $searchInput, placement: .sidebar)
         // Submit search
         .onSubmit(of: .search) {
-            Task {
-                await searchAndSort()
+            searchAndSort()
 
-                if !searchInput.isEmpty {
-                    showSearchResults = true
+            if !searchInput.isEmpty {
+                showSearchResults = true
 
-                    if selection != .home {
-                        selection = .home
-                    }
+                if selection != .home {
+                    selection = .home
                 }
             }
         }
@@ -67,27 +66,19 @@ struct ContentView: View {
 
             if searchInput.isEmpty {
                 showSearchResults = false
+                searchResults = []
             }
         }
         // Apply sorting options
-        .task(id: sortBy) {
-            // Refilter if sorting options change
-            await sortCasks(ignoreBestMatch: false)
+        .onChange(of: sortBy) { _ in
+            sortCasks(ignoreBestMatch: false)
         }
-        // Apply filter option
-        .task(id: hideUnpopularApps) {
-            if hideUnpopularApps {
-                await filterUnpopular()
-            } else {
-                await caskManager.allCasks.search(query: searchInput)
-            }
+        // Apply filter options
+        .onChange(of: hideUnpopularApps) { _ in
+            reapplyFilters()
         }
-        .task(id: hideDisabledApps) {
-            if hideDisabledApps {
-                await filterDisabled()
-            } else {
-                await caskManager.allCasks.search(query: searchInput)
-            }
+        .onChange(of: hideDisabledApps) { _ in
+            reapplyFilters()
         }
         // Load failure alert
         .alert(loadAlert.title, isPresented: $loadAlert.isPresented) {

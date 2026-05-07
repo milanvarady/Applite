@@ -14,6 +14,6 @@ enum SidebarItem: Equatable, Hashable {
     case activeTasks
     case appMigration
     case brew
-    case appCategory(category: CategoryViewModel)
-    case tap(tap: TapViewModel)
+    case appCategory(category: CategoryLoadResult)
+    case tap(tap: TapLoadResult)
 }

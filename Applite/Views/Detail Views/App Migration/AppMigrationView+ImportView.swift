@@ -10,11 +10,11 @@ import OSLog
 
 extension AppMigrationView {
     struct ImportView: View {
-        @EnvironmentObject var caskManager: CaskManager
+        @Environment(CaskManager.self) var caskManager
 
         @State var showFileImporter = false
         @State var importSuccessful = false
-        @StateObject var alert = AlertManager()
+        @State var alert = AlertManager()
 
         private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigrationView.ExportView")
 
@@ -46,7 +46,7 @@ extension AppMigrationView {
 
                 Spacer()
             }
-            .alertManager(alert)
+            .alertManager($alert)
             .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.plainText, .data]) { result in
                 switch result {
                 case .success(let url):
@@ -67,7 +67,7 @@ extension AppMigrationView {
             }
 
             let casksToInstall = caskIds.compactMap {
-                caskManager.casks[$0]
+                caskManager.registry.existingViewModel(forToken: $0)
             }
 
             guard !casksToInstall.isEmpty else {

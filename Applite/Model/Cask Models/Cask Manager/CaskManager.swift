@@ -12,58 +12,76 @@ import SwiftUI
 typealias CaskId = String
 typealias TapId = String
 typealias BrewAnalyticsDictionary = [CaskId: Int]
-typealias BrewTask = (cask: Cask, task: Task<Void, Never>)
 
-/// Holds all cask data and provides methods to take actions on them (e.g. install, update)
+/// Thin coordinator that owns the data loader, registry, and brew service.
+/// Views access it via `@Environment(CaskManager.self)`.
+@Observable
 @MainActor
-final class CaskManager: ObservableObject {
-    /// Cask view models
-    @Published var casks: [CaskId: Cask] = [:]
-    /// All currently running brew tasks
-    @Published var activeTasks: [BrewTask] = []
-    @Published var alert = AlertManager()
+final class CaskManager {
+    let dataLoader: CaskDataLoader
+    let registry: CaskViewModelRegistry
+    var brewService: BrewService
 
-    /// The data coordinator that orchestrates data loading
-    lazy var dataCoordinator = CaskDataCoordinator()
-
-    // Searchble cask collections
-    let allCasks = SearchableCaskCollection()
-    let installedCasks = SearchableCaskCollection()
-    let outdatedCasks = SearchableCaskCollection()
-    var taps: [TapViewModel] = []
-
-    // Precompiled cask category dicts
-    var categories: [CategoryViewModel] = []
+    var categories: [CategoryLoadResult] = []
+    var taps: [TapLoadResult] = []
 
     static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: CaskManager.self)
     )
 
-    init() {
-        // Load categories at init so the view can display them
-        do {
-            let categories = try loadCategoryJSON()
-            let categoryViewModels = categories.map {
-                CategoryViewModel(name: $0.id, sfSymbol: $0.sfSymbol, casks: [], casksCoupled: [])
-            }
+    // MARK: - Convenience Forwarding
 
-            self.categories = categoryViewModels
-        } catch {
-            self.alert.show(title: "Couldn't load categories")
-            Self.logger.error("Failed to load categories: \(error.localizedDescription)")
-        }
+    var installedViewModels: [CaskViewModel] { registry.installedViewModels }
+    var outdatedViewModels: [CaskViewModel] { registry.outdatedViewModels }
+    var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
+
+    // MARK: - Init
+
+    init(
+        dataLoader: CaskDataLoader? = nil,
+        registry: CaskViewModelRegistry? = nil,
+        brewService: BrewService? = nil
+    ) {
+        let reg = registry ?? CaskViewModelRegistry()
+        self.registry = reg
+        self.dataLoader = dataLoader ?? CaskDataLoader(registry: reg)
+        self.brewService = brewService ?? BrewService()
     }
 
-    func loadCategoryJSON() throws -> [Category] {
-        let decoder = JSONDecoder()
-        guard let url = Bundle.main.url(forResource: "categories", withExtension: "json") else {
-            throw CaskLoadError.failedToLoadCategoryJSON
-        }
+    // MARK: - Brew Operation Forwarding
 
-        let data = try Data(contentsOf: url)
-        let categories = try decoder.decode([Category].self, from: data)
+    func install(_ cask: CaskViewModel, force: Bool = false) {
+        brewService.install(cask, force: force)
+    }
 
-        return categories
+    func uninstall(_ cask: CaskViewModel, zap: Bool = false) {
+        brewService.uninstall(cask, zap: zap)
+    }
+
+    func update(_ cask: CaskViewModel) {
+        brewService.update(cask)
+    }
+
+    func reinstall(_ cask: CaskViewModel) {
+        brewService.reinstall(cask)
+    }
+
+    func installAll(_ casks: [CaskViewModel]) {
+        brewService.installAll(casks)
+    }
+
+    func updateAll(_ casks: [CaskViewModel]) {
+        brewService.updateAll(casks)
+    }
+
+    func getAdditionalInfoForCask(_ cask: CaskViewModel) async throws -> CaskAdditionalInfo {
+        try await brewService.getAdditionalInfoForCask(cask)
+    }
+
+    // MARK: - Search Forwarding
+
+    func search(query: String) throws -> [CaskViewModel] {
+        try dataLoader.search(query: query)
     }
 }

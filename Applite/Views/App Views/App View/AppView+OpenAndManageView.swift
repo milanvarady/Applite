@@ -11,10 +11,10 @@ import ButtonKit
 extension AppView {
     /// Button used in the Download section, launches, uninstalls or reinstalls the app
     struct OpenAndManageView: View {
-        @ObservedObject var cask: Cask
+        var cask: CaskViewModel
         let deleteButton: Bool
 
-        @EnvironmentObject var caskManager: CaskManager
+        @Environment(CaskManager.self) var caskManager
 
         @State var showAppNotFoundAlert = false
         @State var showPopover = false
@@ -33,7 +33,7 @@ extension AppView {
                 showAppNotFoundAlert = true
             }
             .asyncButtonStyle(.none)
-            .alert("Applite couldn't open \(cask.info.name)", isPresented: $showAppNotFoundAlert) {}
+            .alert("Applite couldn't open \(cask.name)", isPresented: $showAppNotFoundAlert) {}
 
             if deleteButton {
                 UninstallButton(cask: cask)
@@ -50,7 +50,7 @@ extension AppView {
             .popover(isPresented: $showPopover) {
                 VStack(alignment: .leading, spacing: 6) {
                     GetInfoButton(cask: cask)
-                    
+
                     // Reinstall button
                     Button {
                         caskManager.reinstall(cask)

@@ -8,39 +8,55 @@
 import SwiftUI
 
 extension ContentView {
-    func searchAndSort() async {
-        await caskManager.allCasks.search(query: searchInput, diffScroreThreshold: 0.3, limitResults: 25)
-        if hideUnpopularApps { await filterUnpopular() }
-        if hideDisabledApps { await filterDisabled() }
-        await sortCasks(ignoreBestMatch: true)
+    func searchAndSort() {
+        guard !searchInput.isEmpty else {
+            searchResults = []
+            return
+        }
+
+        do {
+            searchResults = try caskManager.search(query: searchInput)
+        } catch {
+            logger.error("Search failed: \(error.localizedDescription)")
+            searchResults = []
+        }
+
+        applyFilters()
+        sortCasks(ignoreBestMatch: true)
     }
 
-    func filterUnpopular(threshold: Int = 500) async {
-        caskManager.allCasks.filterSearch { casks in
-            casks.filter { $0.downloadsIn365days > threshold }
+    func reapplyFilters() {
+        // Re-run search to get fresh results, then filter
+        if !searchInput.isEmpty {
+            do {
+                searchResults = try caskManager.search(query: searchInput)
+            } catch {
+                logger.error("Search failed: \(error.localizedDescription)")
+            }
+        }
+        applyFilters()
+    }
+
+    private func applyFilters() {
+        if hideUnpopularApps {
+            searchResults = searchResults.filter { $0.downloadsIn365days > 500 }
+        }
+        if hideDisabledApps {
+            searchResults = searchResults.filter { !($0.warning?.isDisabled ?? false) }
         }
     }
 
-    func filterDisabled() async {
-        caskManager.allCasks.filterSearch { casks in
-            casks.filter { !($0.info.warning?.isDisabled ?? false) }
-        }
-    }
-
-    func sortCasks(ignoreBestMatch: Bool) async {
+    func sortCasks(ignoreBestMatch: Bool) {
         switch sortBy {
         case .bestMatch:
             if !ignoreBestMatch {
-                await caskManager.allCasks.search(query: searchInput)
+                // Re-run search to get FTS5 ranking order
+                searchAndSort()
             }
         case .aToZ:
-            caskManager.allCasks.filterSearch { casks in
-                casks.sorted { $0.info.name < $1.info.name }
-            }
+            searchResults.sort { $0.name < $1.name }
         case .mostDownloaded:
-            caskManager.allCasks.filterSearch { casks in
-                casks.sorted { $0.downloadsIn365days > $1.downloadsIn365days }
-            }
+            searchResults.sort { $0.downloadsIn365days > $1.downloadsIn365days }
         }
     }
 }

@@ -9,7 +9,7 @@ import SwiftUI
 
 /// Detail view used in the category section
 struct CategoryView: View {
-    let category: CategoryViewModel
+    let category: CategoryLoadResult
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -18,11 +18,11 @@ struct CategoryView: View {
                 Text(category.localizedName)
                     .font(.appliteMediumTitle)
                     .padding(.bottom, -20)
-                
+
                 Divider()
             }
             .padding()
-            
+
             // Apps
             AppGridView(casks: category.casks, appRole: .installAndManage)
                 .id(category.id)
@@ -33,11 +33,10 @@ struct CategoryView: View {
 
 #Preview {
     CategoryView(category:
-        .init(
-            name: "Test",
+        CategoryLoadResult(
+            id: "Test",
             sfSymbol: "star",
-            casks: Array(repeating: .dummy, count: 8),
-            casksCoupled: [Array(repeating: .dummy, count: 8)]
+            casks: Array(repeating: .dummy, count: 8)
         )
     )
 }

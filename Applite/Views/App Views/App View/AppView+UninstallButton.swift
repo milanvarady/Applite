@@ -9,8 +9,8 @@ import SwiftUI
 
 extension AppView {
     struct UninstallButton: View {
-        @ObservedObject var cask: Cask
-        @EnvironmentObject var caskManager: CaskManager
+        var cask: CaskViewModel
+        @Environment(CaskManager.self) var caskManager
 
         @State var showingError = false
 

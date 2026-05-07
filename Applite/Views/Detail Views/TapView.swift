@@ -8,7 +8,20 @@
 import SwiftUI
 
 struct TapView: View {
-    let tap: TapViewModel
+    let tap: TapLoadResult
+
+    @State var searchText = ""
+
+    /// Filtered casks based on local search text
+    var filteredCasks: [CaskViewModel] {
+        if searchText.isEmpty {
+            return tap.casks
+        }
+        let query = searchText.lowercased()
+        return tap.casks.filter {
+            $0.name.lowercased().contains(query) || $0.token.lowercased().contains(query)
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -23,33 +36,21 @@ struct TapView: View {
             .padding()
 
             // Apps
-            TapAppGridView(caskCollection: tap.caskCollection)
+            AppGridView(casks: filteredCasks, appRole: .installAndManage)
         }
         .navigationTitle(tap.title)
-    }
-
-    private struct TapAppGridView: View {
-        @ObservedObject var caskCollection: SearchableCaskCollection
-        @State var searchText = ""
-
-        var body: some View {
-            AppGridView(casks: caskCollection.casksMatchingSearch, appRole: .installAndManage)
-                .modify { view in
-                    if #available(macOS 26.0, *) {
-                        view.searchable(text: $searchText, placement: .toolbarPrincipal)
-                    } else {
-                        view.searchable(text: $searchText, placement: .toolbar)
-                    }
-                }
-                .task(id: searchText, debounceTime: .seconds(0.2)) {
-                    await caskCollection.search(query: searchText)
-                }
+        .modify { view in
+            if #available(macOS 26.0, *) {
+                view.searchable(text: $searchText, placement: .toolbarPrincipal)
+            } else {
+                view.searchable(text: $searchText, placement: .toolbar)
+            }
         }
     }
 }
 
 #Preview {
     TapView(
-        tap: .init(tapId: "test", caskCollection: .init(casks: []))
+        tap: TapLoadResult(id: "test/tap", casks: [])
     )
 }

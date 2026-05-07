@@ -2325,6 +2325,7 @@
     },
     "Couldn't load categories" : {
       "comment" : "Alert message",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

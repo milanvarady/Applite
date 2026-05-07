@@ -19,16 +19,41 @@ struct CaskLoadResult {
 }
 
 /// A category with its resolved view models
-struct CategoryLoadResult: Identifiable {
+struct CategoryLoadResult: Identifiable, Equatable, Hashable {
     let id: String
     let sfSymbol: String
     let casks: [CaskViewModel]
+
+    static func == (lhs: CategoryLoadResult, rhs: CategoryLoadResult) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
 /// A third-party tap with its resolved view models
-struct TapLoadResult: Identifiable {
+struct TapLoadResult: Identifiable, Equatable, Hashable {
     let id: String
     let casks: [CaskViewModel]
+
+    var title: String {
+        let tapComponent = id.components(separatedBy: "/").last ?? ""
+        if id.count < 16 || tapComponent.lowercased() == "tap" {
+            return id
+        } else {
+            return tapComponent
+        }
+    }
+
+    static func == (lhs: TapLoadResult, rhs: TapLoadResult) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
 // MARK: - CaskDataLoader

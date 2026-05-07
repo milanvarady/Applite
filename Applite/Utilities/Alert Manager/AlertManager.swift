@@ -10,12 +10,13 @@ import SwiftUI
 
 /// A helper class for easier alert management
 @MainActor
-final class AlertManager: ObservableObject {
-    @Published var isPresented: Bool = false
-    @Published var title: LocalizedStringKey = ""
-    @Published var message: String = ""
-    @Published var primaryButtonTitle: String = "OK"
-    @Published var primaryAction: (() -> Void)?
+@Observable
+final class AlertManager {
+    var isPresented: Bool = false
+    var title: LocalizedStringKey = ""
+    var message: String = ""
+    var primaryButtonTitle: String = "OK"
+    var primaryAction: (() -> Void)?
 
     /// Presents alert
     func show(

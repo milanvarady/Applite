@@ -20,9 +20,9 @@ extension SetupView {
 
         // Alerts
         @State var showCommandLineToolsInstallAlert = false
-        @StateObject var installAlert = AlertManager()
+        @State var installAlert = AlertManager()
 
-        @StateObject var installationProgress = BrewInstallationProgress()
+        @State var installationProgress = BrewInstallationProgress()
 
         var body: some View {
             VStack {

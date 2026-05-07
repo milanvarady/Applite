@@ -123,6 +123,8 @@ struct AppDatabase {
             // Enable memory-mapped I/O for better read performance
             try db.execute(sql: "PRAGMA mmap_size = 268435456") // 256 MB
         }
+        
+        try AppPaths.createApplicationSupportIfNeeded()
 
         let dbPool = try DatabasePool(path: AppPaths.database.path, configuration: configuration)
 

@@ -1,22 +1,38 @@
 //
-//  Cask+BrewFunctions.swift
+//  BrewService.swift
 //  Applite
 //
-//  Created by Milán Várady on 2024.12.27.
+//  Created by Milán Várady on 2026. 02. 11..
 //
 
 import Foundation
 import SwiftUI
+import OSLog
 
-extension CaskManager {
+struct ActiveBrewTask: Identifiable {
+    let id = UUID()
+    let viewModel: CaskViewModel
+    let task: Task<Void, Never>
+}
+
+/// Handles all brew CLI operations (install, uninstall, update, reinstall) on CaskViewModels.
+@Observable
+@MainActor
+final class BrewService {
+    var activeTasks: [ActiveBrewTask] = []
+    var alert = AlertManager()
+
+    static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: BrewService.self)
+    )
+
+    // MARK: - Public Operations
+
     /// Installs the cask
-    ///
-    /// - Parameters:
-    ///   - caskManager: ``CaskData`` object passed in by the view
-    ///   - force: If `true` install will be run with the `--force` flag
-    func install(_ cask: Cask, force: Bool = false) {
-        runTask(for: cask) {
-            Self.logger.info("Cask \"\(cask.id)\" installation started")
+    func install(_ vm: CaskViewModel, force: Bool = false) {
+        runTask(for: vm) {
+            Self.logger.info("Cask \"\(vm.token)\" installation started")
 
             // Appdir argument
             let appdirOn = UserDefaults.standard.bool(forKey: Preferences.appdirOn.rawValue)
@@ -24,7 +40,7 @@ extension CaskManager {
             let appdirArgument = "--appdir=\"\(appdirPath ?? "/Applications")\""
 
             // Install command
-            var arguments = [cask.id]
+            var arguments = [vm.token]
             if force { arguments.append("--force") }
             if appdirOn { arguments.append(appdirArgument) }
 
@@ -34,7 +50,7 @@ extension CaskManager {
             let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) install --cask \(arguments.joined(separator: " "))"
 
             // Setup progress
-            cask.progressState = .busy(withTask: "")
+            vm.progressState = .busy(withTask: "")
 
             /// Holds the complete output of the install process
             var completeOutput = ""
@@ -45,7 +61,7 @@ extension CaskManager {
                     completeOutput += line + "\n"
 
                     let newProgress = self.parseBrewInstall(output: line)
-                    cask.progressState = newProgress
+                    vm.progressState = newProgress
                 }
             } catch {
                 var alertMessage = error.localizedDescription
@@ -55,7 +71,7 @@ extension CaskManager {
                     // Already installed
                 case _ where completeOutput.contains("It seems there is already an App"):
                     alertMessage = String(
-                        localized: "\(cask.info.name) is already installed. If you want to add it to Applite click more options (chevron icon) and press Force Install.",
+                        localized: "\(vm.name) is already installed. If you want to add it to Applite click more options (chevron icon) and press Force Install.",
                         comment: "App already installed alert message (parameter: app name)"
                     )
                     // Network error
@@ -69,10 +85,10 @@ extension CaskManager {
                 }
 
                 await self.showFailure(
-                    for: cask,
+                    for: vm,
                     error: error,
                     output: completeOutput,
-                    alertTitle: String(localized: "Failed to install \(cask.info.name)", comment: "Install failure alert title"),
+                    alertTitle: String(localized: "Failed to install \(vm.name)", comment: "Install failure alert title"),
                     alertMessage: alertMessage
                 )
 
@@ -80,28 +96,24 @@ extension CaskManager {
             }
 
             await self.showSuccess(
-                for: cask,
-                logMessage: "Successfully installed cask \(cask.id)",
-                notificationTitle: String(localized: "\(cask.info.name) successfully installed!", comment: "Successful app install notification")
+                for: vm,
+                logMessage: "Successfully installed cask \(vm.token)",
+                notificationTitle: String(localized: "\(vm.name) successfully installed!", comment: "Successful app install notification")
             )
 
             // Update state
-            cask.isInstalled = true
-            self.installedCasks.addCask(cask)
+            vm.isInstalled = true
         }
     }
 
     /// Uninstalls the cask
-    /// - Parameters:
-    ///     - caskManager: ``CaskData`` object
-    ///     - zap: If true the app will be uninstalled completely using the brew --zap flag
-    func uninstall(_ cask: Cask, zap: Bool = false) {
-        runTask(for: cask) {
-            cask.progressState = .busy(withTask: String(localized: "Uninstalling", comment: "Uninstall progress text"))
+    func uninstall(_ vm: CaskViewModel, zap: Bool = false) {
+        runTask(for: vm) {
+            vm.progressState = .busy(withTask: String(localized: "Uninstalling", comment: "Uninstall progress text"))
 
-            var arguments: [String] = ["uninstall", "--cask", cask.info.fullToken]
+            var arguments: [String] = ["uninstall", "--cask", vm.fullToken]
 
-            // Add -- zap argument
+            // Add --zap argument
             if zap {
                 arguments.append("--zap")
                 arguments.append("--force")
@@ -113,102 +125,102 @@ extension CaskManager {
                 output = try await Shell.runBrewCommand(arguments)
             } catch {
                 await self.showFailure(
-                    for: cask,
+                    for: vm,
                     error: error,
                     output: output,
-                    alertTitle: String(localized: "Failed to uninstall \(cask.info.name)", comment: "Failed app install alert title"),
+                    alertTitle: String(localized: "Failed to uninstall \(vm.name)", comment: "Failed app install alert title"),
                     alertMessage: error.localizedDescription
                 )
                 return
             }
 
             await self.showSuccess(
-                for: cask,
-                logMessage: "Successfully uninstalled \(cask.info.fullToken)",
-                notificationTitle: String(localized: "\(cask.info.name) successfully uninstalled", comment: "Successful app uninstall notification")
+                for: vm,
+                logMessage: "Successfully uninstalled \(vm.fullToken)",
+                notificationTitle: String(localized: "\(vm.name) successfully uninstalled", comment: "Successful app uninstall notification")
             )
 
             // Update state
-            cask.isInstalled = false
-            self.installedCasks.remove(cask)
+            vm.isInstalled = false
         }
     }
 
     /// Updates the cask
-    func update(_ cask: Cask) {
-        runTask(for: cask) {
-            cask.progressState = .busy(withTask: String(localized: "Updating", comment: "Update progress text"))
+    func update(_ vm: CaskViewModel) {
+        runTask(for: vm) {
+            vm.progressState = .busy(withTask: String(localized: "Updating", comment: "Update progress text"))
 
             var output: String = ""
 
             do {
-                output = try await Shell.runBrewCommand(["upgrade", "--cask", cask.info.fullToken])
+                output = try await Shell.runBrewCommand(["upgrade", "--cask", vm.fullToken])
             } catch {
                 await self.showFailure(
-                    for: cask,
+                    for: vm,
                     error: error,
                     output: output,
-                    alertTitle: String(localized: "Failed to update \(cask.info.name)", comment: "Failed app update alert title"),
+                    alertTitle: String(localized: "Failed to update \(vm.name)", comment: "Failed app update alert title"),
                     alertMessage: error.localizedDescription
                 )
                 return
             }
 
             await self.showSuccess(
-                for: cask,
-                logMessage: "Successfully updated \(cask.id)",
-                notificationTitle: String(localized: "\(cask.info.name) successfully updated", comment: "Successful app update notification")
+                for: vm,
+                logMessage: "Successfully updated \(vm.token)",
+                notificationTitle: String(localized: "\(vm.name) successfully updated", comment: "Successful app update notification")
             )
 
             // Update state
-            self.outdatedCasks.remove(cask)
+            vm.isOutdated = false
         }
     }
 
     /// Reinstalls the cask
-    func reinstall(_ cask: Cask) {
-        runTask(for: cask) {
-            cask.progressState = .busy(withTask: String(localized: "Reinstalling", comment: "Reinstall progress text"))
+    func reinstall(_ vm: CaskViewModel) {
+        runTask(for: vm) {
+            vm.progressState = .busy(withTask: String(localized: "Reinstalling", comment: "Reinstall progress text"))
 
             var output: String = ""
 
             do {
-                output = try await Shell.runBrewCommand(["reinstall", "--cask", cask.info.fullToken])
+                output = try await Shell.runBrewCommand(["reinstall", "--cask", vm.fullToken])
             } catch {
                 await self.showFailure(
-                    for: cask,
+                    for: vm,
                     error: error,
                     output: output,
-                    alertTitle: String(localized: "Failed to reinstall \(cask.info.name)", comment: "Failed reinstall alert title"),
+                    alertTitle: String(localized: "Failed to reinstall \(vm.name)", comment: "Failed reinstall alert title"),
                     alertMessage: error.localizedDescription
                 )
                 return
             }
 
             await self.showSuccess(
-                for: cask,
-                logMessage: "Successfully reinstalled \(cask.info.fullToken)",
-                notificationTitle: String(localized: "\(cask.info.name) successfully reinstalled", comment: "Successful reinstall notification")
+                for: vm,
+                logMessage: "Successfully reinstalled \(vm.fullToken)",
+                notificationTitle: String(localized: "\(vm.name) successfully reinstalled", comment: "Successful reinstall notification")
             )
         }
     }
 
-    /// Installs multiple
-    func installAll(_ casks: [Cask]) {
-        for cask in casks {
-            self.install(cask)
+    /// Installs multiple casks
+    func installAll(_ vms: [CaskViewModel]) {
+        for vm in vms {
+            self.install(vm)
         }
     }
 
     /// Updates multiple casks
-    func updateAll(_ casks: [Cask]) {
-        for cask in casks {
-            self.update(cask)
+    func updateAll(_ vms: [CaskViewModel]) {
+        for vm in vms {
+            self.update(vm)
         }
     }
 
-    func getAdditionalInfoForCask(_ cask: Cask) async throws -> CaskAdditionalInfo {
-        let json = try await Shell.runBrewCommand(["info", "--json=v2", "--cask", cask.info.fullToken])
+    /// Gets additional info for a cask from brew CLI
+    func getAdditionalInfoForCask(_ vm: CaskViewModel) async throws -> CaskAdditionalInfo {
+        let json = try await Shell.runBrewCommand(["info", "--json=v2", "--cask", vm.fullToken])
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
         let decoder = JSONDecoder()
@@ -217,27 +229,27 @@ extension CaskManager {
         let responseObject = try decoder.decode(CaskAdditionalInfoResponse.self, from: json.data(using: .utf8)!)
 
         guard let additionalInfo = responseObject.casks.first else {
-            Self.logger.error("Couldn't find cask \(cask.info.fullToken)")
+            Self.logger.error("Couldn't find cask \(vm.fullToken)")
             throw CaskLoadError.failedToLoadAdditionalInfo
         }
 
         return additionalInfo
     }
 
-    // MARK: - Helper functions
+    // MARK: - Helper Functions
 
     /// Starts a brew task and appends it to active tasks
-    private func runTask(for cask: Cask, _ operation: @escaping () async -> Void) {
+    private func runTask(for vm: CaskViewModel, _ operation: @escaping () async -> Void) {
         let task = Task {
             defer {
                 self.activeTasks.removeAll {
-                    $0.cask == cask
+                    $0.viewModel == vm
                 }
             }
 
-            // Make sure if brew path is valid
+            // Make sure brew path is valid
             guard await BrewPaths.isSelectedBrewPathValid() else {
-                Self.logger.error("Couln't start brew operation because brew path is invalid")
+                Self.logger.error("Couldn't start brew operation because brew path is invalid")
                 alert.show(title: "Brew path is invalid", message: DependencyManager.brokenPathOrIstallMessage)
                 return
             }
@@ -245,7 +257,7 @@ extension CaskManager {
             await operation()
         }
 
-        self.activeTasks.append((cask: cask, task: task))
+        self.activeTasks.append(ActiveBrewTask(viewModel: vm, task: task))
     }
 
     /// Parses the shell output when installing a cask
@@ -270,12 +282,8 @@ extension CaskManager {
     }
 
     /// Register successful task
-    ///
-    /// - Logs success
-    /// - Sends notification
-    /// - Sets progress state to success for 2 seconds
     private func showSuccess(
-        for cask: Cask,
+        for vm: CaskViewModel,
         logMessage: String,
         notificationTitle: String,
         notificationMessage: String = ""
@@ -283,20 +291,16 @@ extension CaskManager {
         Self.logger.info("\(logMessage)")
 
         // Show success for 2 seconds
-        cask.progressState = .success
+        vm.progressState = .success
         try? await Task.sleep(for: .seconds(2))
-        cask.progressState = .idle
+        vm.progressState = .idle
 
         await sendNotification(title: notificationTitle, body: notificationMessage, reason: .success)
     }
 
     /// Register failed task
-    ///
-    /// - Logs error
-    /// - Shows alert and notification
-    /// - Sets progress state to failed
     private func showFailure(
-        for cask: Cask,
+        for vm: CaskViewModel,
         error: Error,
         output: String,
         alertTitle: String,
@@ -314,7 +318,7 @@ extension CaskManager {
         let notificationTitle = notificationTitle ?? alertTitle
 
         // Set progress state to failed
-        cask.progressState = .failed(output: output)
+        vm.progressState = .failed(output: output)
 
         await sendNotification(title: notificationTitle, body: notificationMessage, reason: .failure)
     }

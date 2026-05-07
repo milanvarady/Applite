@@ -11,15 +11,15 @@ struct HomeView: View {
     @Binding var navigationSelection: SidebarItem
     @Binding var searchText: String
     @Binding var showSearchResults: Bool
-    @ObservedObject var caskCollection: SearchableCaskCollection
+    var searchResults: [CaskViewModel]
 
     var body: some View {
         VStack {
             if showSearchResults {
-                if caskCollection.casksMatchingSearch.isEmpty {
+                if searchResults.isEmpty {
                     NoSearchResults(searchText: $searchText)
                 } else {
-                    AppGridView(casks: caskCollection.casksMatchingSearch, appRole: .installAndManage)
+                    AppGridView(casks: searchResults, appRole: .installAndManage)
                 }
             } else {
                 DiscoverView(navigationSelection: $navigationSelection)
