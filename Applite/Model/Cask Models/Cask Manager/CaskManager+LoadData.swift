@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 extension CaskManager {
     /// Loads cask data in two stages:
@@ -18,11 +19,14 @@ extension CaskManager {
     func loadData() async throws {
         Self.logger.info("Starting data load process")
 
-        // Stage 1: Catalog
+        // Stage 1: Catalog. Animate the placeholder→full transition so cask cards
+        // cross-fade into place rather than swapping instantly mid-shimmer-cycle.
         let catalog = try await dataLoader.loadCatalogData()
-        self.categories = catalog.categories
-        self.taps = catalog.taps
-        self.isCatalogLoaded = true
+        withAnimation(.easeInOut(duration: 0.25)) {
+            self.categories = catalog.categories
+            self.taps = catalog.taps
+            self.isCatalogLoaded = true
+        }
 
         // Stage 2: Brew CLI state
         self.isResolvingInstalledState = true

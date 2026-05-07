@@ -28,9 +28,11 @@ struct CategoryView: View {
 
             if category.casks.isEmpty {
                 placeholderGrid
+                    .transition(.opacity)
             } else {
                 AppGridView(casks: category.casks, appRole: .installAndManage)
                     .id(category.id)
+                    .transition(.opacity)
             }
         }
         .navigationTitle(category.name)

@@ -95,7 +95,6 @@
 		419256522D1E0D0500D9EF10 /* DiscoverSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256512D1E0D0500D9EF10 /* DiscoverSectionView.swift */; };
 		419256552D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256542D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift */; };
 		419256572D1E0E5F00D9EF10 /* DiscoverSectionView+AppRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256562D1E0E5F00D9EF10 /* DiscoverSectionView+AppRow.swift */; };
-		419256592D1E0EA000D9EF10 /* DiscoverSectionView+OffsetKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256582D1E0EA000D9EF10 /* DiscoverSectionView+OffsetKey.swift */; };
 		4192565B2D1E0ECF00D9EF10 /* DiscoverSectionView+Placeholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192565A2D1E0ECF00D9EF10 /* DiscoverSectionView+Placeholder.swift */; };
 		4192565E2D1E155400D9EF10 /* UpdateView+UpdateAllButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192565D2D1E155400D9EF10 /* UpdateView+UpdateAllButton.swift */; };
 		419256642D1E164600D9EF10 /* UpdateView+ToolbarItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256632D1E164600D9EF10 /* UpdateView+ToolbarItems.swift */; };
@@ -241,7 +240,6 @@
 		419256512D1E0D0500D9EF10 /* DiscoverSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverSectionView.swift; sourceTree = "<group>"; };
 		419256542D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiscoverSectionView+CategoryHeader.swift"; sourceTree = "<group>"; };
 		419256562D1E0E5F00D9EF10 /* DiscoverSectionView+AppRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiscoverSectionView+AppRow.swift"; sourceTree = "<group>"; };
-		419256582D1E0EA000D9EF10 /* DiscoverSectionView+OffsetKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiscoverSectionView+OffsetKey.swift"; sourceTree = "<group>"; };
 		4192565A2D1E0ECF00D9EF10 /* DiscoverSectionView+Placeholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiscoverSectionView+Placeholder.swift"; sourceTree = "<group>"; };
 		4192565D2D1E155400D9EF10 /* UpdateView+UpdateAllButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UpdateView+UpdateAllButton.swift"; sourceTree = "<group>"; };
 		419256632D1E164600D9EF10 /* UpdateView+ToolbarItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UpdateView+ToolbarItems.swift"; sourceTree = "<group>"; };
@@ -641,7 +639,6 @@
 				419256512D1E0D0500D9EF10 /* DiscoverSectionView.swift */,
 				419256542D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift */,
 				419256562D1E0E5F00D9EF10 /* DiscoverSectionView+AppRow.swift */,
-				419256582D1E0EA000D9EF10 /* DiscoverSectionView+OffsetKey.swift */,
 				4192565A2D1E0ECF00D9EF10 /* DiscoverSectionView+Placeholder.swift */,
 			);
 			path = "Discover Section";
@@ -902,7 +899,6 @@
 				419256352D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift in Sources */,
 				4192563C2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift in Sources */,
 				4192560F2D1CC09500D9EF10 /* DependencyError.swift in Sources */,
-				419256592D1E0EA000D9EF10 /* DiscoverSectionView+OffsetKey.swift in Sources */,
 				4192565E2D1E155400D9EF10 /* UpdateView+UpdateAllButton.swift in Sources */,
 				4192568A2D22D67400D9EF10 /* SidebarItem.swift in Sources */,
 				419256572D1E0E5F00D9EF10 /* DiscoverSectionView+AppRow.swift in Sources */,
