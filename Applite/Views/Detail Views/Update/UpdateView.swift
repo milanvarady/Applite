@@ -65,6 +65,12 @@ struct UpdateView: View {
             ToolbarItems(loadAlert: $loadAlert)
         }
         .alertManager($loadAlert)
+        .onChange(of: caskManager.outdatedViewModels.isEmpty) { _, becameEmpty in
+            if becameEmpty {
+                isUpdatingAll = false
+                updateAllButtonRotation = 0
+            }
+        }
     }
 }
 

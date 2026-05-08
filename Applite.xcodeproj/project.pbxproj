@@ -35,7 +35,6 @@
 		413E60C22BBFF98A00978F6A /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E60C12BBFF98A00978F6A /* AppIconView.swift */; };
 		413F77A52972B2E70053349A /* DependencyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F77A42972B2E70053349A /* DependencyManager.swift */; };
 		413F87262D33048800D4BE10 /* InfoPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F87252D33048800D4BE10 /* InfoPopup.swift */; };
-		413F872C2D33E19800D4BE10 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F872B2D33E19800D4BE10 /* HomeView.swift */; };
 		413F87322D33E30400D4BE10 /* SortingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413F87312D33E30400D4BE10 /* SortingOptions.swift */; };
 		413F87352D34109000D4BE10 /* ButtonKit in Frameworks */ = {isa = PBXBuildFile; productRef = 413F87342D34109000D4BE10 /* ButtonKit */; };
 		414074F528DF53E80073EB22 /* AppliteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414074F428DF53E80073EB22 /* AppliteApp.swift */; };
@@ -112,7 +111,6 @@
 		419256AB2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256AA2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift */; };
 		419256AD2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256AC2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift */; };
 		419256AF2D25F68700D9EF10 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256AE2D25F68700D9EF10 /* AppDelegate.swift */; };
-		419256B22D26033400D9EF10 /* DebouncedOnChange in Frameworks */ = {isa = PBXBuildFile; productRef = 419256B12D26033400D9EF10 /* DebouncedOnChange */; };
 		419256B42D26B8A200D9EF10 /* CaskAdditionalInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B32D26B8A200D9EF10 /* CaskAdditionalInfo.swift */; };
 		419256B62D26BBBD00D9EF10 /* AppView+GetInfoButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B52D26BBBD00D9EF10 /* AppView+GetInfoButton.swift */; };
 		419256B92D26C02E00D9EF10 /* CaskInfoWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256B82D26C02E00D9EF10 /* CaskInfoWindowView.swift */; };
@@ -181,7 +179,6 @@
 		413E60C12BBFF98A00978F6A /* AppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconView.swift; sourceTree = "<group>"; };
 		413F77A42972B2E70053349A /* DependencyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyManager.swift; sourceTree = "<group>"; };
 		413F87252D33048800D4BE10 /* InfoPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoPopup.swift; sourceTree = "<group>"; };
-		413F872B2D33E19800D4BE10 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		413F87312D33E30400D4BE10 /* SortingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortingOptions.swift; sourceTree = "<group>"; };
 		414074F128DF53E80073EB22 /* Applite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Applite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		414074F428DF53E80073EB22 /* AppliteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppliteApp.swift; sourceTree = "<group>"; };
@@ -291,7 +288,6 @@
 			files = (
 				413F87352D34109000D4BE10 /* ButtonKit in Frameworks */,
 				41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */,
-				419256B22D26033400D9EF10 /* DebouncedOnChange in Frameworks */,
 				41D325452F3A297900E3FE1E /* GRDB in Frameworks */,
 				4189CE392937CD41009C836D /* Shimmer in Frameworks */,
 				418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */,
@@ -402,14 +398,6 @@
 				413E60B62BBAE5E000978F6A /* NetworkProxyManager.swift */,
 			);
 			path = "Network Proxy";
-			sourceTree = "<group>";
-		};
-		413F872A2D33E18800D4BE10 /* Home */ = {
-			isa = PBXGroup;
-			children = (
-				413F872B2D33E19800D4BE10 /* HomeView.swift */,
-			);
-			path = Home;
 			sourceTree = "<group>";
 		};
 		414074E828DF53E80073EB22 = {
@@ -719,7 +707,6 @@
 		4196C8F728F9CB5200EADDDA /* Detail Views */ = {
 			isa = PBXGroup;
 			children = (
-				413F872A2D33E18800D4BE10 /* Home */,
 				419256502D1E0CE000D9EF10 /* Discover */,
 				416EFDEE2FAD12F000233577 /* Search */,
 				4192565C2D1E153D00D9EF10 /* Update */,
@@ -786,7 +773,6 @@
 				41C8FA282A7A598B000BB9A2 /* Sparkle */,
 				418E9EF32AACD9C000046A58 /* CircularProgress */,
 				413E60BF2BBF0E5C00978F6A /* Kingfisher */,
-				419256B12D26033400D9EF10 /* DebouncedOnChange */,
 				413F87342D34109000D4BE10 /* ButtonKit */,
 				41D325442F3A297900E3FE1E /* GRDB */,
 			);
@@ -827,7 +813,6 @@
 				41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */,
 				413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */,
 				413F87332D34109000D4BE10 /* XCRemoteSwiftPackageReference "ButtonKit" */,
 				41D325432F3A297900E3FE1E /* XCRemoteSwiftPackageReference "GRDB" */,
 			);
@@ -889,7 +874,6 @@
 				4192561C2D1DEB7E00D9EF10 /* AppView+DownloadButton.swift in Sources */,
 				419256B92D26C02E00D9EF10 /* CaskInfoWindowView.swift in Sources */,
 				4101EB4A2DCE669500BE0670 /* String+NumberOfLines.swift in Sources */,
-				413F872C2D33E19800D4BE10 /* HomeView.swift in Sources */,
 				419256232D1DF14C00D9EF10 /* SetupView+PageControllerButtons.swift in Sources */,
 				4125BB8A29539907000FBD25 /* PlaceholderAppView.swift in Sources */,
 				419256182D1DEA4400D9EF10 /* AppView+ActionsView.swift in Sources */,
@@ -1236,14 +1220,6 @@
 				minimumVersion = 1.2.2;
 			};
 		};
-		419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Tunous/DebouncedOnChange";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.1.0;
-			};
-		};
 		41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -1282,11 +1258,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */;
 			productName = CircularProgress;
-		};
-		419256B12D26033400D9EF10 /* DebouncedOnChange */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 419256B02D26033400D9EF10 /* XCRemoteSwiftPackageReference "DebouncedOnChange" */;
-			productName = DebouncedOnChange;
 		};
 		41C8FA282A7A598B000BB9A2 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;

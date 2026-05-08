@@ -14,7 +14,7 @@ extension ContentView {
         switch selection {
         case .home:
             if !brokenInstall {
-                HomeView(navigationSelection: $selection)
+                DiscoverView(navigationSelection: $selection)
             } else {
                 brokenInstallView
             }

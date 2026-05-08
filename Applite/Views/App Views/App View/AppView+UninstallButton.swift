@@ -12,8 +12,6 @@ extension AppView {
         var cask: CaskViewModel
         @Environment(CaskManager.self) var caskManager
 
-        @State var showingError = false
-
         var body: some View {
             Button {
                 caskManager.uninstall(cask)

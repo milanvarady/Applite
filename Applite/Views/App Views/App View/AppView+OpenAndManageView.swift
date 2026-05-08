@@ -19,8 +19,6 @@ extension AppView {
         @State var showAppNotFoundAlert = false
         @State var showPopover = false
 
-        @State private var isOptionKeyDown = false
-
         var body: some View {
             // Lauch app
             AsyncButton("Open") {

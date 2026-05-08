@@ -11,7 +11,6 @@ import SwiftUI
 struct DiscoverView: View {
     @Environment(CaskManager.self) var caskManager
     @Binding var navigationSelection: SidebarItem
-    @State var currentPage: Float = 0
 
     var body: some View {
         ScrollView {
