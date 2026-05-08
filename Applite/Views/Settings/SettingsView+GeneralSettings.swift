@@ -10,7 +10,7 @@ import SwiftUI
 extension SettingsView {
     struct GeneralSettingsView: View {
         @AppStorage(Preferences.colorSchemePreference.rawValue) var colorSchemePreference: ColorSchemePreference = .system
-        @AppStorage(Preferences.catalogUpdateFrequency.rawValue) var catalogUpdateFrequency: CatalogUpdateFrequency = .everyAppLaunch
+        @AppStorage(Preferences.catalogUpdateFrequency.rawValue) var catalogUpdateFrequency: CatalogUpdateFrequency = .default
         @AppStorage(Preferences.notificationSuccess.rawValue) var notificationOnSuccess: Bool = false
         @AppStorage(Preferences.notificationFailure.rawValue) var notificationOnFailure: Bool = true
 

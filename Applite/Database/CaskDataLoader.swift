@@ -95,7 +95,7 @@ final class CaskDataLoader {
 
         // 3. Batch fetch records for all tokens referenced by categories
         let categoryTokens = categoryDefs.flatMap(\.casks)
-        let categoryRecords = try dbService.fetchCasks(forTokens: categoryTokens)
+        let categoryRecords = try await dbService.fetchCasks(forTokens: categoryTokens)
         let recordsByToken = Dictionary(categoryRecords.map { ($0.token, $0) }, uniquingKeysWith: { first, _ in first })
         let recordsByFullToken = Dictionary(categoryRecords.map { ($0.fullToken, $0) }, uniquingKeysWith: { first, _ in first })
 
@@ -113,7 +113,7 @@ final class CaskDataLoader {
         }
 
         // 6. Build tap results from DB
-        let tapResults = try buildTapResults()
+        let tapResults = try await buildTapResults()
 
         logger.info("Catalog load completed: \(categoryResults.count) categories, \(tapResults.count) taps")
 
@@ -134,7 +134,7 @@ final class CaskDataLoader {
     /// and marks them installed in the registry.
     func refreshInstalled() async throws {
         let tokens = try await installedService.getInstalledCasks()
-        let records = try dbService.fetchCasks(forTokens: Array(tokens))
+        let records = try await dbService.fetchCasks(forTokens: Array(tokens))
         _ = registry.viewModels(for: records)
         registry.markInstalled(tokens: tokens)
     }
@@ -143,7 +143,7 @@ final class CaskDataLoader {
     /// and marks them outdated in the registry.
     func refreshOutdated() async throws {
         let tokens = try await installedService.getOutdatedCasks()
-        let records = try dbService.fetchCasks(forTokens: Array(tokens))
+        let records = try await dbService.fetchCasks(forTokens: Array(tokens))
         _ = registry.viewModels(for: records)
         registry.markOutdated(tokens: tokens)
     }
@@ -152,7 +152,7 @@ final class CaskDataLoader {
 
     /// Checks database freshness and syncs from API if stale
     private func syncIfNeeded() async throws {
-        guard try dbService.shouldSync() else {
+        guard try await dbService.shouldSync() else {
             logger.info("Database is fresh, skipping sync")
             return
         }
@@ -181,7 +181,7 @@ final class CaskDataLoader {
         }
 
         // Sync to database (delete removed, upsert all, rebuild FTS)
-        try dbService.syncFromAPI(records: records)
+        try await dbService.syncFromAPI(records: records)
 
         logger.info("Sync completed: \(records.count) casks")
     }
@@ -258,13 +258,13 @@ final class CaskDataLoader {
         return try JSONDecoder().decode([Category].self, from: data)
     }
 
-    /// Builds tap results from the database
-    private func buildTapResults() throws -> [TapLoadResult] {
-        let taps = try dbService.fetchAllTaps()
-        return try taps.map { tap in
-            let records = try dbService.fetchCasks(forTap: tap)
-            let vms = registry.viewModels(for: records)
-            return TapLoadResult(id: tap, casks: vms)
-        }
+    /// Builds tap results from the database in a single query, grouped in-memory by tap.
+    /// Records are pre-ordered by `tap, name` so each tap's casks come out name-sorted.
+    private func buildTapResults() async throws -> [TapLoadResult] {
+        let records = try await dbService.fetchAllNonDefaultTapCasks()
+        let grouped = Dictionary(grouping: records, by: \.tap)
+        return grouped
+            .map { TapLoadResult(id: $0.key, casks: registry.viewModels(for: $0.value)) }
+            .sorted { $0.id < $1.id }
     }
 }

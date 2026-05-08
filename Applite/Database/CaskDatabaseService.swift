@@ -24,41 +24,43 @@ struct CaskDatabaseService {
     // MARK: - Read Operations
 
     /// Fetches a single cask by token
-    func fetchCask(token: String) throws -> CaskRecord? {
-        try dbPool.read { db in
+    func fetchCask(token: String) async throws -> CaskRecord? {
+        try await dbPool.read { db in
             try CaskRecord.fetchOne(db, key: token)
         }
     }
 
     /// Fetches a single cask by full token
-    func fetchCask(fullToken: String) throws -> CaskRecord? {
-        try dbPool.read { db in
+    func fetchCask(fullToken: String) async throws -> CaskRecord? {
+        try await dbPool.read { db in
             try CaskRecord.filter(Column("fullToken") == fullToken).fetchOne(db)
         }
     }
 
     /// Fetches casks matching a list of tokens (checks both `token` and `fullToken` columns)
-    func fetchCasks(forTokens tokens: [String]) throws -> [CaskRecord] {
+    func fetchCasks(forTokens tokens: [String]) async throws -> [CaskRecord] {
         guard !tokens.isEmpty else { return [] }
-        return try dbPool.read { db in
+        return try await dbPool.read { db in
             try CaskRecord
                 .filter(tokens.contains(Column("token")) || tokens.contains(Column("fullToken")))
                 .fetchAll(db)
         }
     }
 
-    /// Fetches casks for a given tap
-    func fetchCasks(forTap tap: String) throws -> [CaskRecord] {
-        try dbPool.read { db in
-            try CaskRecord.filter(Column("tap") == tap)
-                .order(Column("name"))
+    /// Fetches all casks not in the default `homebrew/cask` tap, ordered by tap then name.
+    /// Used to build per-tap result groups via in-memory partitioning.
+    func fetchAllNonDefaultTapCasks() async throws -> [CaskRecord] {
+        try await dbPool.read { db in
+            try CaskRecord
+                .filter(Column("tap") != "homebrew/cask")
+                .order(Column("tap"), Column("name"))
                 .fetchAll(db)
         }
     }
 
     /// Fetches the most popular casks
-    func fetchPopularCasks(limit: Int = 50) throws -> [CaskRecord] {
-        try dbPool.read { db in
+    func fetchPopularCasks(limit: Int = 50) async throws -> [CaskRecord] {
+        try await dbPool.read { db in
             try CaskRecord.order(Column("downloadsIn365days").desc)
                 .limit(limit)
                 .fetchAll(db)
@@ -66,26 +68,15 @@ struct CaskDatabaseService {
     }
 
     /// Returns the count of all casks
-    func caskCount() throws -> Int {
-        try dbPool.read { db in
+    func caskCount() async throws -> Int {
+        try await dbPool.read { db in
             try CaskRecord.fetchCount(db)
         }
     }
 
     /// Checks if the database has any casks
-    func hasCasks() throws -> Bool {
-        try caskCount() > 0
-    }
-
-    /// Fetches all unique taps (excluding homebrew/cask)
-    func fetchAllTaps() throws -> [String] {
-        try dbPool.read { db in
-            try String.fetchAll(db, sql: """
-                SELECT DISTINCT tap FROM casks
-                WHERE tap != 'homebrew/cask'
-                ORDER BY tap
-            """)
-        }
+    func hasCasks() async throws -> Bool {
+        try await caskCount() > 0
     }
 
     // MARK: - FTS5 Search
@@ -114,10 +105,10 @@ struct CaskDatabaseService {
 
     /// Syncs cask records from API data: deletes removed casks and upserts all records.
     /// FTS5 stays in sync via `synchronize(withTable:)` triggers; no manual rebuild needed.
-    func syncFromAPI(records: [CaskRecord]) throws {
+    func syncFromAPI(records: [CaskRecord]) async throws {
         logger.info("Syncing \(records.count) casks to database")
 
-        try dbPool.write { db in
+        try await dbPool.write { db in
             // Collect all tokens from the new data
             let newTokens = Set(records.map(\.token))
 
@@ -150,18 +141,18 @@ struct CaskDatabaseService {
 
     // MARK: - Metadata
 
-    /// Checks whether a sync is needed based on the catalog update frequency preference
-    func shouldSync() throws -> Bool {
-        let rawValue = UserDefaults.standard.integer(forKey: Preferences.catalogUpdateFrequency.rawValue)
-        guard let frequency = CatalogUpdateFrequency(rawValue: rawValue) else {
-            return true
-        }
+    /// Checks whether a sync is needed based on the catalog update frequency preference.
+    /// Uses `object(forKey:) as? Int` (not `integer(forKey:)`) so a missing key falls back
+    /// to `CatalogUpdateFrequency.default` instead of being read as `0` (= `.everyAppLaunch`).
+    func shouldSync() async throws -> Bool {
+        let stored = UserDefaults.standard.object(forKey: Preferences.catalogUpdateFrequency.rawValue) as? Int
+        let frequency = stored.flatMap(CatalogUpdateFrequency.init(rawValue:)) ?? .default
 
         if frequency == .everyAppLaunch {
             return true
         }
 
-        guard let lastSync = try getLastSyncDate() else {
+        guard let lastSync = try await getLastSyncDate() else {
             return true
         }
 
@@ -169,8 +160,8 @@ struct CaskDatabaseService {
     }
 
     /// Returns the last sync date from the metadata table
-    func getLastSyncDate() throws -> Date? {
-        try dbPool.read { db in
+    func getLastSyncDate() async throws -> Date? {
+        try await dbPool.read { db in
             guard let value = try String.fetchOne(
                 db,
                 sql: "SELECT value FROM metadata WHERE key = ?",
@@ -183,8 +174,8 @@ struct CaskDatabaseService {
     }
 
     /// Stores the last sync date in the metadata table
-    func setLastSyncDate(_ date: Date) throws {
-        try dbPool.write { db in
+    func setLastSyncDate(_ date: Date) async throws {
+        try await dbPool.write { db in
             try db.execute(
                 sql: "INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)",
                 arguments: ["lastSyncDate", date.ISO8601Format()]
@@ -195,16 +186,16 @@ struct CaskDatabaseService {
     // MARK: - Write Operations
 
     /// Deletes a cask by token
-    func delete(token: String) throws {
-        _ = try dbPool.write { db in
-            try CaskRecord.deleteOne(db, key: token)
+    func delete(token: String) async throws {
+        try await dbPool.write { db in
+            _ = try CaskRecord.deleteOne(db, key: token)
         }
     }
 
     /// Deletes all casks
-    func deleteAll() throws {
-        _ = try dbPool.write { db in
-            try CaskRecord.deleteAll(db)
+    func deleteAll() async throws {
+        try await dbPool.write { db in
+            _ = try CaskRecord.deleteAll(db)
         }
     }
 }

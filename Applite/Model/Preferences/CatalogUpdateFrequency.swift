@@ -14,6 +14,8 @@ enum CatalogUpdateFrequency: Int, CaseIterable, Identifiable {
     case weekly
     case monthly
 
+    static let `default`: CatalogUpdateFrequency = .everyThreeDays
+
     var description: LocalizedStringKey {
         switch self {
         case .everyAppLaunch:
@@ -42,29 +44,5 @@ enum CatalogUpdateFrequency: Int, CaseIterable, Identifiable {
         case .monthly:
             return 30 * 24 * 60 * 60
         }
-    }
-
-    func shouldLoadFromCache(at cacheURL: URL) throws -> Bool {
-        if self == .everyAppLaunch {
-            return false
-        }
-
-        let fileManager = FileManager.default
-
-        // Check if cache file exists
-        guard fileManager.fileExists(atPath: cacheURL.path) else {
-            return false
-        }
-
-        let fileAttributes = try cacheURL.resourceValues(forKeys: [.contentModificationDateKey])
-        guard let modificationDate = fileAttributes.contentModificationDate else {
-            return false
-        }
-
-        // Calculate time difference
-        let timeSinceLastUpdate = Date().timeIntervalSince(modificationDate)
-
-        // Return true if the cache is still fresh
-        return timeSinceLastUpdate < self.timeInterval
     }
 }
