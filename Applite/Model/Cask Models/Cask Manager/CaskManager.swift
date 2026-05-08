@@ -36,6 +36,9 @@ final class CaskManager {
     /// Catalog (categories/taps) is independent and lights up before this flips false.
     var isResolvingInstalledState: Bool = false
 
+    /// True while a manual catalog refresh is running (toolbar action).
+    var isRefreshingCatalog: Bool = false
+
     static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: CaskManager.self)

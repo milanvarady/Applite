@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AlertModifier: ViewModifier {
-    @Binding var manager: AlertManager
+    @Bindable var manager: AlertManager
 
     func body(content: Content) -> some View {
         content
@@ -31,7 +31,7 @@ struct AlertModifier: ViewModifier {
 }
 
 extension View {
-    func alertManager(_ manager: Binding<AlertManager>) -> some View {
+    func alertManager(_ manager: AlertManager) -> some View {
         modifier(AlertModifier(manager: manager))
     }
 }

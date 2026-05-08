@@ -71,7 +71,7 @@ struct UninstallSelfView: View {
             
             Button("Cancel", role: .cancel) { }
         }
-        .alertManager($uninstallAlert)
+        .alertManager(uninstallAlert)
     }
 }
 

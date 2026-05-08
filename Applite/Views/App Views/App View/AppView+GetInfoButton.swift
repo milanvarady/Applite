@@ -31,7 +31,7 @@ extension AppView {
                 logger.error("Failed to gather additional cask info: \(error.error.localizedDescription)")
             }
             .asyncButtonStyle(.trailing)
-            .alertManager($alert)
+            .alertManager(alert)
         }
     }
 }

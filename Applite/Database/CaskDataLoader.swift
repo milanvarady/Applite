@@ -84,11 +84,16 @@ final class CaskDataLoader {
     /// Loads catalog data (categories + taps) from the database.
     /// Does NOT shell out to the brew CLI — that's `refreshInstalled`/`refreshOutdated`.
     /// On a warm DB this completes in tens of milliseconds; on a cold DB it triggers an API sync first.
-    func loadCatalogData() async throws -> (categories: [CategoryLoadResult], taps: [TapLoadResult]) {
-        logger.info("Starting catalog load")
+    /// Pass `forceSync: true` to bypass the freshness gate (used by the manual refresh action).
+    func loadCatalogData(forceSync: Bool = false) async throws -> (categories: [CategoryLoadResult], taps: [TapLoadResult]) {
+        logger.info("Starting catalog load (forceSync: \(forceSync))")
 
-        // 1. Sync database from API if stale
-        try await syncIfNeeded()
+        // 1. Sync database from API
+        if forceSync {
+            try await performSync()
+        } else {
+            try await syncIfNeeded()
+        }
 
         // 2. Load category definitions from bundled JSON
         let categoryDefs = try loadCategories()
@@ -156,8 +161,12 @@ final class CaskDataLoader {
             logger.info("Database is fresh, skipping sync")
             return
         }
+        try await performSync()
+    }
 
-        logger.info("Database is stale, syncing from API")
+    /// Always runs an API sync regardless of the freshness gate.
+    private func performSync() async throws {
+        logger.info("Syncing catalog from API")
 
         // Fetch DTOs, analytics, and tap casks concurrently
         async let dtos = fetchCaskDTOs()

@@ -3285,6 +3285,9 @@
         }
       }
     },
+    "Failed to refresh catalog" : {
+
+    },
     "Failed to refresh updates" : {
       "comment" : "Alert message",
       "localizations" : {
@@ -5430,6 +5433,9 @@
           }
         }
       }
+    },
+    "Refresh App Catalog" : {
+
     },
     "Reinstall" : {
       "comment" : "Reinstall app button",

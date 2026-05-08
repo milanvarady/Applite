@@ -37,8 +37,6 @@ struct AppView: View {
     public static let dimensions: (width: CGFloat, height: CGFloat, spacing: CGFloat) = (width: 320, height: 80, spacing: 20)
 
     var body: some View {
-        @Bindable var caskManager = caskManager
-        
         HStack {
             IconAndDescriptionView(cask: cask)
             IconsAndWarnings(cask: cask)
@@ -46,7 +44,7 @@ struct AppView: View {
         }
         .buttonStyle(.plain)
         .frame(width: Self.dimensions.width, height: Self.dimensions.height)
-        .alertManager($caskManager.brewService.alert)
+        .alertManager(caskManager.brewService.alert)
     }
 }
 

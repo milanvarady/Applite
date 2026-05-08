@@ -47,7 +47,7 @@ extension AppMigrationView {
 
                 Spacer()
             }
-            .alertManager($alert)
+            .alertManager(alert)
             .fileExporter(isPresented: $showFileExporter, document: exportFile,  contentType: .plainText, defaultFilename: "applite_export") { result in
                 switch result {
                 case .success(let url):

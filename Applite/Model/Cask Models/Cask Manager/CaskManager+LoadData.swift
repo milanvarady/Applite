@@ -42,4 +42,19 @@ extension CaskManager {
     func refreshOutdated() async throws {
         try await dataLoader.refreshOutdated()
     }
+
+    /// Manually re-syncs the catalog from the API, bypassing the freshness gate.
+    /// Picks up new third-party taps the user added externally via `brew tap`.
+    /// Does NOT re-query brew CLI for installed/outdated state — that has its own button.
+    func refreshCatalog() async throws {
+        Self.logger.info("Manual catalog refresh requested")
+        isRefreshingCatalog = true
+        defer { isRefreshingCatalog = false }
+
+        let catalog = try await dataLoader.loadCatalogData(forceSync: true)
+        withAnimation(.easeInOut(duration: 0.25)) {
+            self.categories = catalog.categories
+            self.taps = catalog.taps
+        }
+    }
 }

@@ -25,6 +25,8 @@ extension SetupView {
         @State var installationProgress = BrewInstallationProgress()
 
         var body: some View {
+            @Bindable var installAlert = installAlert
+
             VStack {
                 Text("Installing dependencies", comment: "Brew dependency installation view title")
                     .font(.appliteSmallTitle)

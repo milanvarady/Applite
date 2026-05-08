@@ -62,9 +62,9 @@ struct UpdateView: View {
             }
         }
         .toolbar {
-            ToolbarItems(loadAlert: $loadAlert)
+            ToolbarItems(loadAlert: loadAlert)
         }
-        .alertManager($loadAlert)
+        .alertManager(loadAlert)
         .onChange(of: caskManager.outdatedViewModels.isEmpty) { _, becameEmpty in
             if becameEmpty {
                 isUpdatingAll = false

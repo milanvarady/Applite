@@ -46,7 +46,7 @@ extension AppMigrationView {
 
                 Spacer()
             }
-            .alertManager($alert)
+            .alertManager(alert)
             .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.plainText, .data]) { result in
                 switch result {
                 case .success(let url):
