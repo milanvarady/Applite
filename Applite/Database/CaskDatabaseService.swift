@@ -90,30 +90,30 @@ struct CaskDatabaseService {
 
     // MARK: - FTS5 Search
 
-    /// Searches casks using FTS5 full-text search with prefix matching and BM25 ranking
+    /// Searches casks using FTS5 full-text search with prefix matching and BM25 ranking.
+    /// Uses GRDB's `FTS5Pattern(matchingAllPrefixesIn:)` so every typed token gets
+    /// prefix-matched (e.g. "adobe phot" → tokens "adobe*" AND "phot*").
     func search(query: String, limit: Int = 50) async throws -> [CaskRecord] {
-        let sanitized = sanitizeFTSQuery(query)
-        guard !sanitized.isEmpty else { return [] }
-
-        // Append * for prefix matching (e.g., "fire" matches "firefox")
-        let ftsQuery = "\(sanitized)*"
+        guard let pattern = FTS5Pattern(matchingAllPrefixesIn: query) else {
+            return []
+        }
 
         return try await dbPool.read { db in
-            let sql = """
+            try CaskRecord.fetchAll(db, sql: """
                 SELECT casks.*
                 FROM casks
                 JOIN cask_fts ON cask_fts.rowid = casks.rowid
                 WHERE cask_fts MATCH ?
                 ORDER BY bm25(cask_fts)
                 LIMIT ?
-            """
-            return try CaskRecord.fetchAll(db, sql: sql, arguments: [ftsQuery, limit])
+                """, arguments: [pattern, limit])
         }
     }
 
     // MARK: - Sync Operations
 
-    /// Syncs cask records from API data: deletes removed casks, upserts all records, rebuilds FTS5
+    /// Syncs cask records from API data: deletes removed casks and upserts all records.
+    /// FTS5 stays in sync via `synchronize(withTable:)` triggers; no manual rebuild needed.
     func syncFromAPI(records: [CaskRecord]) throws {
         logger.info("Syncing \(records.count) casks to database")
 
@@ -131,18 +131,17 @@ struct CaskDatabaseService {
                 logger.info("Removed \(toDelete.count) casks no longer in catalog")
             }
 
-            // Upsert all records
+            // Upsert all records. The FTS5 sync triggers from
+            // `synchronize(withTable: "casks")` keep `cask_fts` in lock-step,
+            // so no explicit rebuild is needed.
             for record in records {
                 try record.upsert(db)
             }
 
-            // Rebuild FTS5 index
-            try db.execute(sql: "INSERT INTO cask_fts(cask_fts) VALUES('rebuild')")
-
             // Update last sync timestamp
             try db.execute(
                 sql: "INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)",
-                arguments: ["lastSyncDate", ISO8601DateFormatter().string(from: Date())]
+                arguments: ["lastSyncDate", Date.now.ISO8601Format()]
             )
         }
 
@@ -179,7 +178,7 @@ struct CaskDatabaseService {
             ) else {
                 return nil
             }
-            return ISO8601DateFormatter().date(from: value)
+            return try? Date(value, strategy: .iso8601)
         }
     }
 
@@ -188,7 +187,7 @@ struct CaskDatabaseService {
         try dbPool.write { db in
             try db.execute(
                 sql: "INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)",
-                arguments: ["lastSyncDate", ISO8601DateFormatter().string(from: date)]
+                arguments: ["lastSyncDate", date.ISO8601Format()]
             )
         }
     }
@@ -207,16 +206,6 @@ struct CaskDatabaseService {
         _ = try dbPool.write { db in
             try CaskRecord.deleteAll(db)
         }
-    }
-
-    // MARK: - Private Helpers
-
-    /// Sanitizes a query string for FTS5 by removing special characters
-    private func sanitizeFTSQuery(_ query: String) -> String {
-        // Remove FTS5 special characters that could cause syntax errors
-        let allowed = CharacterSet.alphanumerics.union(.whitespaces)
-        return String(query.unicodeScalars.filter { allowed.contains($0) })
-            .trimmingCharacters(in: .whitespaces)
     }
 }
 

@@ -32,11 +32,6 @@ final class CaskManager {
 
     var taps: [TapLoadResult] = []
 
-    /// True until `loadCatalogData()` returns. While true, every category has empty `casks`
-    /// (placeholder shimmer state). Distinct from `isResolvingInstalledState`, which
-    /// covers the slower brew CLI stage.
-    var isCatalogLoaded: Bool = false
-
     /// True while brew CLI is being queried for installed/outdated state.
     /// Catalog (categories/taps) is independent and lights up before this flips false.
     var isResolvingInstalledState: Bool = false

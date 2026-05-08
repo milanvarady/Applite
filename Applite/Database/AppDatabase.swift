@@ -98,6 +98,8 @@ struct AppDatabase {
             try db.create(virtualTable: "cask_fts", using: FTS5()) { t in
                 t.synchronize(withTable: "casks")
                 t.tokenizer = .unicode61()
+                // Prefix index for fast `tok*` lookups used by live search.
+                t.prefixes = [2, 3]
                 t.column("token")
                 t.column("name")
                 t.column("descriptionText")
@@ -116,12 +118,11 @@ struct AppDatabase {
     /// Opens the database with DatabasePool for concurrent access
     private static func openDatabase() throws -> DatabasePool {
         var configuration = Configuration()
-        configuration.foreignKeysEnabled = true
 
-        // Optimize for read-heavy workload
         configuration.prepareDatabase { db in
-            // Enable memory-mapped I/O for better read performance
-            try db.execute(sql: "PRAGMA mmap_size = 268435456") // 256 MB
+            // Memory-mapped I/O speeds up reads on the catalog. The dataset
+            // is small (~10k rows + FTS index), so 64 MB is plenty.
+            try db.execute(sql: "PRAGMA mmap_size = 67108864")
         }
         
         try AppPaths.createApplicationSupportIfNeeded()

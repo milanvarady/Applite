@@ -102,7 +102,7 @@ extension CaskRecord {
         self.tap = dto.tap
         self.name = dto.nameArray.first ?? "N/A"
         self.descriptionText = dto.desc ?? "N/A"
-        self.homepageURL = dto.homepage
+        self.homepageURL = dto.homepage.isEmpty ? nil : dto.homepage
         self.pkgInstaller = dto.url.hasSuffix("pkg")
         self.downloadsIn365days = downloadsIn365days
 

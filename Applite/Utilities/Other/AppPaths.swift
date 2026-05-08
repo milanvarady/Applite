@@ -14,8 +14,7 @@ enum AppPaths {
     
     static let database = Self.applicationSupport
         .appending(path: "casks.sqlite")
-    
-    // TODO: call this somewhere
+
     static func createApplicationSupportIfNeeded() throws {
         try FileManager.default.createDirectory(
             at: Self.applicationSupport,

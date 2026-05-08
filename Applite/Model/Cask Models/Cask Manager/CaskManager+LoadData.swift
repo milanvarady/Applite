@@ -25,7 +25,6 @@ extension CaskManager {
         withAnimation(.easeInOut(duration: 0.25)) {
             self.categories = catalog.categories
             self.taps = catalog.taps
-            self.isCatalogLoaded = true
         }
 
         // Stage 2: Brew CLI state
