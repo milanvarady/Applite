@@ -48,10 +48,14 @@ final class CaskViewModelRegistry {
     // MARK: - Bulk State Updates
 
     /// Marks casks as installed. Tokens can be short ("firefox") or full ("homebrew/cask/firefox").
+    /// Only writes when the value actually changes — every assignment to an `@Observable`
+    /// property fires `didSet`, so unconditional writes would re-render every dependent view.
     func markInstalled(tokens: Set<String>) {
         for (key, vm) in viewModelsByToken {
             let match = tokens.contains(key) || tokens.contains(vm.fullToken)
-            vm.isInstalled = match
+            if vm.isInstalled != match {
+                vm.isInstalled = match
+            }
         }
     }
 
@@ -59,7 +63,9 @@ final class CaskViewModelRegistry {
     func markOutdated(tokens: Set<String>) {
         for (key, vm) in viewModelsByToken {
             let match = tokens.contains(key) || tokens.contains(vm.fullToken)
-            vm.isOutdated = match
+            if vm.isOutdated != match {
+                vm.isOutdated = match
+            }
         }
     }
 
@@ -82,27 +88,6 @@ final class CaskViewModelRegistry {
     /// All view models currently performing an operation (install, update, uninstall)
     var busyViewModels: [CaskViewModel] {
         viewModelsByToken.values.filter { $0.progressState != .idle }
-    }
-
-    // MARK: - Memory Management
-
-    /// Removes view models that are no longer needed, keeping installed, outdated, and in-progress VMs.
-    /// Call after loading to free memory from VMs that were only needed transiently.
-    func pruneUnused(keepTokens: Set<String>) {
-        let toRemove = viewModelsByToken.filter { key, vm in
-            !keepTokens.contains(key)
-            && !vm.isInstalled
-            && !vm.isOutdated
-            && vm.progressState == .idle
-        }
-
-        for key in toRemove.keys {
-            viewModelsByToken.removeValue(forKey: key)
-        }
-
-        if !toRemove.isEmpty {
-            logger.debug("Pruned \(toRemove.count) unused view models")
-        }
     }
 
     /// Total number of tracked view models

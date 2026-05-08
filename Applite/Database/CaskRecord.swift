@@ -9,7 +9,7 @@ import Foundation
 import GRDB
 
 /// Represents a cask stored in the database.
-/// Can be decoded directly from Homebrew API JSON or fetched from SQLite.
+/// Built from a `CaskDTO` via `init(fromDTO:)` during sync; fetched from SQLite at runtime.
 struct CaskRecord: Equatable {
     // MARK: - Primary Key
 

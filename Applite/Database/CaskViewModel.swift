@@ -79,17 +79,20 @@ final class CaskViewModel {
         let appPath: String
 
         if self.pkgInstaller {
-            // Appdir
-            if UserDefaults.standard.bool(forKey: Preferences.appdirOn.rawValue) {
-                var applicationsDirectory = UserDefaults.standard.string(forKey: Preferences.appdirPath.rawValue) ?? URL.applicationDirectory.path
-
-                // Remove trailing "/"
-                if applicationsDirectory.hasSuffix("/") {
-                    applicationsDirectory.removeLast()
-                }
+            // Resolve the user's appdir override (if enabled), falling back to the system /Applications.
+            var applicationsDirectory = URL.applicationDirectory.path
+            if UserDefaults.standard.bool(forKey: Preferences.appdirOn.rawValue),
+               let custom = UserDefaults.standard.string(forKey: Preferences.appdirPath.rawValue),
+               !custom.isEmpty {
+                applicationsDirectory = custom
             }
 
-            appPath = "\"\(URL.applicationDirectory.path)/\(self.name).app\""
+            // Remove trailing "/"
+            if applicationsDirectory.hasSuffix("/") {
+                applicationsDirectory.removeLast()
+            }
+
+            appPath = "\"\(applicationsDirectory)/\(self.name).app\""
         } else {
             // Open normal app
             let brewDirectory = BrewPaths.currentBrewDirectory.path(percentEncoded: false)

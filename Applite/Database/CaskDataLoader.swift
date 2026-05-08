@@ -180,7 +180,7 @@ final class CaskDataLoader {
             CaskRecord(fromDTO: dto, downloadsIn365days: analyticsDict[dto.token] ?? 0)
         }
 
-        // Sync to database (delete removed, upsert all, rebuild FTS)
+        // Sync to database. FTS5 stays in lock-step via synchronize(withTable:) triggers.
         try await dbService.syncFromAPI(records: records)
 
         logger.info("Sync completed: \(records.count) casks")
