@@ -28,6 +28,8 @@ struct ContentView: View {
     let logger = Logger()
 
     var body: some View {
+        @Bindable var loadAlert = loadAlert
+
         NavigationSplitView {
             sidebarViews
                 .disabled(modifyingBrew)
@@ -48,6 +50,26 @@ struct ContentView: View {
         .onChange(of: searchInput) {
             if searchInput.count > 30 {
                 searchInput = String(searchInput.prefix(30))
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button {
+                        Task {
+                            do {
+                                try await caskManager.refreshCatalog()
+                            } catch {
+                                loadAlert.show(error: error, title: "Failed to refresh catalog")
+                            }
+                        }
+                    } label: {
+                        Label("Refresh App Catalog", systemImage: "arrow.clockwise")
+                    }
+                    .disabled(caskManager.isRefreshingCatalog)
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
             }
         }
         // Load failure alert
