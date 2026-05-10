@@ -44,7 +44,7 @@ struct AppView: View {
         }
         .buttonStyle(.plain)
         .frame(width: Self.dimensions.width, height: Self.dimensions.height)
-        .alertManager(caskManager.brewService.alert)
+        .alertManager(caskManager.alert)
     }
 }
 

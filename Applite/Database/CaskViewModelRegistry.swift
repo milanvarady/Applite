@@ -15,12 +15,7 @@ import OSLog
 @MainActor
 final class CaskViewModelRegistry {
     /// All live view models keyed by cask token
-    private var viewModelsByToken: [String: CaskViewModel] = [:]
-
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier!,
-        category: String(describing: CaskViewModelRegistry.self)
-    )
+    private var viewModelsByToken: [CaskId: CaskViewModel] = [:]
 
     // MARK: - Lookup & Creation
 
@@ -41,8 +36,15 @@ final class CaskViewModelRegistry {
     }
 
     /// Looks up an existing view model by token without creating one
-    func existingViewModel(forToken token: String) -> CaskViewModel? {
+    func existingViewModel(forToken token: CaskId) -> CaskViewModel? {
         viewModelsByToken[token]
+    }
+    
+    /// Looks up an existing view models by token without creating them
+    func existingViewModels(forTokens tokens: Set<CaskId>) -> [CaskViewModel] {
+        return tokens.compactMap {
+            viewModelsByToken[$0]
+        }
     }
 
     // MARK: - Bulk State Updates
@@ -50,7 +52,7 @@ final class CaskViewModelRegistry {
     /// Marks casks as installed. Tokens can be short ("firefox") or full ("homebrew/cask/firefox").
     /// Only writes when the value actually changes — every assignment to an `@Observable`
     /// property fires `didSet`, so unconditional writes would re-render every dependent view.
-    func markInstalled(tokens: Set<String>) {
+    func markInstalled(tokens: Set<CaskId>) {
         for (key, vm) in viewModelsByToken {
             let match = tokens.contains(key) || tokens.contains(vm.fullToken)
             if vm.isInstalled != match {
@@ -60,7 +62,7 @@ final class CaskViewModelRegistry {
     }
 
     /// Marks casks as outdated. Tokens can be short or full.
-    func markOutdated(tokens: Set<String>) {
+    func markOutdated(tokens: Set<CaskId>) {
         for (key, vm) in viewModelsByToken {
             let match = tokens.contains(key) || tokens.contains(vm.fullToken)
             if vm.isOutdated != match {

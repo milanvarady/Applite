@@ -53,6 +53,7 @@
 		416EFDEA2FAC9F4100233577 /* CaskWarning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EFDE92FAC9F4100233577 /* CaskWarning.swift */; };
 		416EFDEF2FAD12F000233577 /* SortingOptionsToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EFDED2FAD12F000233577 /* SortingOptionsToolbar.swift */; };
 		416EFDF02FAD12F000233577 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EFDEC2FAD12F000233577 /* SearchView.swift */; };
+		416EFDF32FB0850100233577 /* TapLoadResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EFDF22FB0850100233577 /* TapLoadResult.swift */; };
 		4178CF922A8689AF0037F270 /* ExportCasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4178CF912A8689AF0037F270 /* ExportCasks.swift */; };
 		41857B732911A2F2004A1894 /* categories.json in Resources */ = {isa = PBXBuildFile; fileRef = 41857B722911A2F2004A1894 /* categories.json */; };
 		41857B752912D94A004A1894 /* CategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41857B742912D94A004A1894 /* CategoryView.swift */; };
@@ -102,7 +103,6 @@
 		4192568F2D22DC9E00D9EF10 /* FontExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192568E2D22DC9E00D9EF10 /* FontExtension.swift */; };
 		419256912D23F93E00D9EF10 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256902D23F93E00D9EF10 /* Card.swift */; };
 		419256942D24255000D9EF10 /* CaskLoadError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256932D24255000D9EF10 /* CaskLoadError.swift */; };
-		419256962D2430C500D9EF10 /* CaskManager+LoadData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256952D2430C500D9EF10 /* CaskManager+LoadData.swift */; };
 		4192569D2D2433E200D9EF10 /* CaskProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192569C2D2433E200D9EF10 /* CaskProgressState.swift */; };
 		419256A42D25CFE600D9EF10 /* AppMigrationView+ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256A32D25CFE600D9EF10 /* AppMigrationView+ExportView.swift */; };
 		419256A62D25D00200D9EF10 /* AppMigrationView+ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256A52D25D00200D9EF10 /* AppMigrationView+ImportView.swift */; };
@@ -197,6 +197,7 @@
 		416EFDE92FAC9F4100233577 /* CaskWarning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskWarning.swift; sourceTree = "<group>"; };
 		416EFDEC2FAD12F000233577 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		416EFDED2FAD12F000233577 /* SortingOptionsToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortingOptionsToolbar.swift; sourceTree = "<group>"; };
+		416EFDF22FB0850100233577 /* TapLoadResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapLoadResult.swift; sourceTree = "<group>"; };
 		4178CF912A8689AF0037F270 /* ExportCasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCasks.swift; sourceTree = "<group>"; };
 		41857B722911A2F2004A1894 /* categories.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = categories.json; sourceTree = "<group>"; };
 		41857B742912D94A004A1894 /* CategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryView.swift; sourceTree = "<group>"; };
@@ -244,7 +245,6 @@
 		4192568E2D22DC9E00D9EF10 /* FontExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontExtension.swift; sourceTree = "<group>"; };
 		419256902D23F93E00D9EF10 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		419256932D24255000D9EF10 /* CaskLoadError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskLoadError.swift; sourceTree = "<group>"; };
-		419256952D2430C500D9EF10 /* CaskManager+LoadData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaskManager+LoadData.swift"; sourceTree = "<group>"; };
 		4192569C2D2433E200D9EF10 /* CaskProgressState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskProgressState.swift; sourceTree = "<group>"; };
 		419256A32D25CFE600D9EF10 /* AppMigrationView+ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppMigrationView+ExportView.swift"; sourceTree = "<group>"; };
 		419256A52D25D00200D9EF10 /* AppMigrationView+ImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppMigrationView+ImportView.swift"; sourceTree = "<group>"; };
@@ -483,7 +483,6 @@
 			isa = PBXGroup;
 			children = (
 				41483CCC29101C9900BB10C2 /* Category.swift */,
-				4101EB3E2DCE1A4100BE0670 /* CategoryLoadResult+LocalizedName.swift */,
 			);
 			path = Categories;
 			sourceTree = "<group>";
@@ -495,6 +494,15 @@
 				416EFDED2FAD12F000233577 /* SortingOptionsToolbar.swift */,
 			);
 			path = Search;
+			sourceTree = "<group>";
+		};
+		416EFDF12FB084E800233577 /* Load Result Types */ = {
+			isa = PBXGroup;
+			children = (
+				4101EB3E2DCE1A4100BE0670 /* CategoryLoadResult+LocalizedName.swift */,
+				416EFDF22FB0850100233577 /* TapLoadResult.swift */,
+			);
+			path = "Load Result Types";
 			sourceTree = "<group>";
 		};
 		418F332228EC8B120023D76F /* Model */ = {
@@ -652,7 +660,6 @@
 			isa = PBXGroup;
 			children = (
 				418F332528EC921D0023D76F /* CaskManager.swift */,
-				419256952D2430C500D9EF10 /* CaskManager+LoadData.swift */,
 				4192569C2D2433E200D9EF10 /* CaskProgressState.swift */,
 				419256932D24255000D9EF10 /* CaskLoadError.swift */,
 			);
@@ -735,6 +742,7 @@
 				41D8E0412F3C8B0000FB3E72 /* CaskViewModelRegistry.swift */,
 				41D8E0432F3C8B1000FB3E72 /* CaskDataLoader.swift */,
 				416EFDE92FAC9F4100233577 /* CaskWarning.swift */,
+				416EFDF12FB084E800233577 /* Load Result Types */,
 			);
 			path = Database;
 			sourceTree = "<group>";
@@ -933,8 +941,8 @@
 				41D8E0422F3C8B0000FB3E72 /* CaskViewModelRegistry.swift in Sources */,
 				416EFDEF2FAD12F000233577 /* SortingOptionsToolbar.swift in Sources */,
 				416EFDF02FAD12F000233577 /* SearchView.swift in Sources */,
+				416EFDF32FB0850100233577 /* TapLoadResult.swift in Sources */,
 				41D8E0442F3C8B1000FB3E72 /* CaskDataLoader.swift in Sources */,
-				419256962D2430C500D9EF10 /* CaskManager+LoadData.swift in Sources */,
 				4101EB4C2DCE66D100BE0670 /* Array+SafeSubscript.swift in Sources */,
 				419256552D1E0E2500D9EF10 /* DiscoverSectionView+CategoryHeader.swift in Sources */,
 				41062C972A3A20F900FD48EA /* UninstallSelf.swift in Sources */,

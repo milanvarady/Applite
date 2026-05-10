@@ -19,10 +19,10 @@ struct ActiveBrewTask: Identifiable {
 @Observable
 @MainActor
 final class BrewService {
-    var activeTasks: [ActiveBrewTask] = []
+    private(set) var activeTasks: [ActiveBrewTask] = []
     var alert = AlertManager()
 
-    static let logger = Logger(
+    private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: BrewService.self)
     )

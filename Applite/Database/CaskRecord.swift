@@ -40,8 +40,8 @@ struct CaskRecord: Equatable {
     /// True if app uses .pkg installer
     let pkgInstaller: Bool
 
-    /// Warning type: "caveat", "deprecated", or "disabled"
-    let warningType: String?
+    /// Warning type discriminator
+    let warningType: WarningType?
 
     /// Date of deprecation/disabling (ISO 8601)
     let warningDate: String?
@@ -53,6 +53,18 @@ struct CaskRecord: Equatable {
 
     /// Number of downloads in last 365 days
     var downloadsIn365days: Int
+}
+
+// MARK: - Persistence Types
+
+extension CaskRecord {
+    /// Persistence discriminator for the three warning kinds.
+    /// Stored as TEXT in the database via the raw value.
+    enum WarningType: String, Codable {
+        case caveat
+        case deprecated
+        case disabled
+    }
 }
 
 // MARK: - GRDB Protocols
@@ -75,14 +87,12 @@ extension CaskRecord {
         guard let type = warningType else { return nil }
 
         switch type {
-        case "caveat":
+        case .caveat:
             return .hasCaveat(caveat: warningReason ?? "")
-        case "deprecated":
+        case .deprecated:
             return .deprecated(date: warningDate ?? "", reason: warningReason ?? "")
-        case "disabled":
+        case .disabled:
             return .disabled(date: warningDate ?? "", reason: warningReason ?? "")
-        default:
-            return nil
         }
     }
 
@@ -108,15 +118,15 @@ extension CaskRecord {
 
         // Determine warning type
         if dto.disabled {
-            self.warningType = "disabled"
+            self.warningType = .disabled
             self.warningDate = dto.disableDate
             self.warningReason = dto.disableReason
         } else if dto.deprecated {
-            self.warningType = "deprecated"
+            self.warningType = .deprecated
             self.warningDate = dto.deprecationDate
             self.warningReason = dto.deprecationReason
         } else if let caveat = dto.caveats {
-            self.warningType = "caveat"
+            self.warningType = .caveat
             self.warningDate = nil
             self.warningReason = caveat
         } else {
@@ -124,12 +134,5 @@ extension CaskRecord {
             self.warningDate = nil
             self.warningReason = nil
         }
-    }
-
-    /// Returns a copy with updated download count
-    func withDownloads(_ downloads: Int) -> CaskRecord {
-        var copy = self
-        copy.downloadsIn365days = downloads
-        return copy
     }
 }

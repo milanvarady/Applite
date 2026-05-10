@@ -89,15 +89,17 @@ struct CaskDatabaseService {
             return []
         }
 
+        let request: SQLRequest<CaskRecord> = """
+            SELECT casks.*
+            FROM casks
+            JOIN cask_fts ON cask_fts.rowid = casks.rowid
+            WHERE cask_fts MATCH \(pattern)
+            ORDER BY bm25(cask_fts)
+            LIMIT \(limit)
+            """
+
         return try await dbPool.read { db in
-            try CaskRecord.fetchAll(db, sql: """
-                SELECT casks.*
-                FROM casks
-                JOIN cask_fts ON cask_fts.rowid = casks.rowid
-                WHERE cask_fts MATCH ?
-                ORDER BY bm25(cask_fts)
-                LIMIT ?
-                """, arguments: [pattern, limit])
+            try request.fetchAll(db)
         }
     }
 
@@ -130,10 +132,7 @@ struct CaskDatabaseService {
             }
 
             // Update last sync timestamp
-            try db.execute(
-                sql: "INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)",
-                arguments: ["lastSyncDate", Date.now.ISO8601Format()]
-            )
+            try setLastSyncDate(Date.now, in: db)
         }
 
         logger.info("Database sync completed")
@@ -162,25 +161,34 @@ struct CaskDatabaseService {
     /// Returns the last sync date from the metadata table
     func getLastSyncDate() async throws -> Date? {
         try await dbPool.read { db in
-            guard let value = try String.fetchOne(
-                db,
-                sql: "SELECT value FROM metadata WHERE key = ?",
-                arguments: ["lastSyncDate"]
-            ) else {
-                return nil
-            }
-            return try? Date(value, strategy: .iso8601)
+            try getLastSyncDate(in: db)
         }
     }
 
     /// Stores the last sync date in the metadata table
     func setLastSyncDate(_ date: Date) async throws {
         try await dbPool.write { db in
-            try db.execute(
-                sql: "INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)",
-                arguments: ["lastSyncDate", date.ISO8601Format()]
-            )
+            try setLastSyncDate(date, in: db)
         }
+    }
+
+    /// Reads the last sync date using an existing database connection.
+    /// Use from inside an outer `dbPool.read`/`write` block to avoid a nested transaction.
+    private func getLastSyncDate(in db: Database) throws -> Date? {
+        let request: SQLRequest<String> = """
+            SELECT value FROM metadata WHERE key = 'lastSyncDate'
+            """
+        guard let value = try request.fetchOne(db) else { return nil }
+        return try? Date(value, strategy: .iso8601)
+    }
+
+    /// Writes the last sync date using an existing database connection.
+    /// Use from inside an outer `dbPool.write` block to avoid a nested transaction.
+    private func setLastSyncDate(_ date: Date, in db: Database) throws {
+        try db.execute(literal: """
+            INSERT OR REPLACE INTO metadata (key, value)
+            VALUES ('lastSyncDate', \(date.ISO8601Format()))
+            """)
     }
 
     // MARK: - Write Operations

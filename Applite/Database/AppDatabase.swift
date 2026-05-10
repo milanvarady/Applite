@@ -29,7 +29,7 @@ struct AppDatabase {
         }
     }()
 
-    static func migrator() -> DatabaseMigrator {
+    private static func migrator() -> DatabaseMigrator {
         var migrator = DatabaseMigrator()
 
         #if DEBUG

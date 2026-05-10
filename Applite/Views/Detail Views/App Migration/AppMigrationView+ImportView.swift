@@ -58,7 +58,7 @@ extension AppMigrationView {
         }
 
         private func installCasks(from url: URL) {
-            var caskIds: [CaskId] = []
+            var caskIds: Set<CaskId> = []
 
             do {
                 caskIds = try AppMigration.readCaskFile(url: url)
@@ -66,9 +66,7 @@ extension AppMigrationView {
                 logger.error("Failed to import file: \(url.path(percentEncoded: false))")
             }
 
-            let casksToInstall = caskIds.compactMap {
-                caskManager.registry.existingViewModel(forToken: $0)
-            }
+            let casksToInstall = caskManager.existingViewModels(forTokens: caskIds)
 
             guard !casksToInstall.isEmpty else {
                 logger.notice("Imported file contains no valid apps: \(url.path(percentEncoded: false))")

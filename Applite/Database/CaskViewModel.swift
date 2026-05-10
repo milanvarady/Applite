@@ -13,12 +13,12 @@ import OSLog
 @MainActor
 final class CaskViewModel {
     /// Immutable identity token, used for nonisolated protocol conformances
-    nonisolated let _token: String
+    nonisolated private let _token: String
     /// Immutable identity full token, used for nonisolated protocol conformances
-    nonisolated let _fullToken: String
+    nonisolated private let _fullToken: String
 
     /// Cask information from database
-    private(set) var record: CaskRecord
+    private var record: CaskRecord
 
     // MARK: - Runtime State (not persisted)
 
@@ -65,13 +65,6 @@ final class CaskViewModel {
 
     /// Whether this cask has any warning
     var hasWarning: Bool { record.hasWarning }
-
-    // MARK: - Logger
-
-    static let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier!,
-        category: String(describing: CaskViewModel.self)
-    )
 
     // MARK: - App Launch
 

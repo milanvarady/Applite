@@ -8,53 +8,6 @@
 import Foundation
 import OSLog
 
-// MARK: - Result Types
-
-/// A category with its resolved view models.
-///
-/// `==` includes `casks` so SwiftUI re-renders when the placeholder state
-/// (empty casks at launch) is replaced with the full result after stage 1.
-/// `hash(into:)` uses `id` only — hash buckets don't need fine-grained content.
-struct CategoryLoadResult: Identifiable, Equatable, Hashable {
-    let id: String
-    let sfSymbol: String
-    let casks: [CaskViewModel]
-
-    static func == (lhs: CategoryLoadResult, rhs: CategoryLoadResult) -> Bool {
-        lhs.id == rhs.id && lhs.casks == rhs.casks
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-}
-
-/// A third-party tap with its resolved view models.
-///
-/// Same equality contract as `CategoryLoadResult`: include `casks` for SwiftUI updates,
-/// hash by `id` only.
-struct TapLoadResult: Identifiable, Equatable, Hashable {
-    let id: String
-    let casks: [CaskViewModel]
-
-    var title: String {
-        let tapComponent = id.components(separatedBy: "/").last ?? ""
-        if id.count < 16 || tapComponent.lowercased() == "tap" {
-            return id
-        } else {
-            return tapComponent
-        }
-    }
-
-    static func == (lhs: TapLoadResult, rhs: TapLoadResult) -> Bool {
-        lhs.id == rhs.id && lhs.casks == rhs.casks
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-}
-
 // MARK: - CaskDataLoader
 
 /// Orchestrates loading cask data from the database, network, and brew CLI.
