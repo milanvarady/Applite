@@ -85,9 +85,8 @@
 		419256352D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256342D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift */; };
 		419256372D1DF34200D9EF10 /* SettingsView+ProxySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256362D1DF34200D9EF10 /* SettingsView+ProxySettings.swift */; };
 		419256392D1DF35C00D9EF10 /* SettingsView+Uninstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256382D1DF35C00D9EF10 /* SettingsView+Uninstaller.swift */; };
-		4192563C2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192563B2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift */; };
-		4192563E2D1DF3E900D9EF10 /* ContentView+DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192563D2D1DF3E900D9EF10 /* ContentView+DetailView.swift */; };
-		419256402D1DF41300D9EF10 /* ContentView+LoadCasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192563F2D1DF41300D9EF10 /* ContentView+LoadCasks.swift */; };
+		4192563C2D1DF3C900D9EF10 /* SidebarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192563B2D1DF3C900D9EF10 /* SidebarViews.swift */; };
+		4192563E2D1DF3E900D9EF10 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192563D2D1DF3E900D9EF10 /* DetailView.swift */; };
 		419256432D1E0A0200D9EF10 /* BrewPathSelectorView+PathOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256422D1E0A0200D9EF10 /* BrewPathSelectorView+PathOption.swift */; };
 		419256452D1E0A7000D9EF10 /* BrewPathSelectorView+CustomPathOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256442D1E0A7000D9EF10 /* BrewPathSelectorView+CustomPathOption.swift */; };
 		419256472D1E0B0900D9EF10 /* BrewPathSelectorView+GetPathDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419256462D1E0B0900D9EF10 /* BrewPathSelectorView+GetPathDescription.swift */; };
@@ -227,9 +226,8 @@
 		419256342D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+UpdateSettings.swift"; sourceTree = "<group>"; };
 		419256362D1DF34200D9EF10 /* SettingsView+ProxySettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+ProxySettings.swift"; sourceTree = "<group>"; };
 		419256382D1DF35C00D9EF10 /* SettingsView+Uninstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+Uninstaller.swift"; sourceTree = "<group>"; };
-		4192563B2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView+SidebarViews.swift"; sourceTree = "<group>"; };
-		4192563D2D1DF3E900D9EF10 /* ContentView+DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView+DetailView.swift"; sourceTree = "<group>"; };
-		4192563F2D1DF41300D9EF10 /* ContentView+LoadCasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView+LoadCasks.swift"; sourceTree = "<group>"; };
+		4192563B2D1DF3C900D9EF10 /* SidebarViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViews.swift; sourceTree = "<group>"; };
+		4192563D2D1DF3E900D9EF10 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		419256422D1E0A0200D9EF10 /* BrewPathSelectorView+PathOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrewPathSelectorView+PathOption.swift"; sourceTree = "<group>"; };
 		419256442D1E0A7000D9EF10 /* BrewPathSelectorView+CustomPathOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrewPathSelectorView+CustomPathOption.swift"; sourceTree = "<group>"; };
 		419256462D1E0B0900D9EF10 /* BrewPathSelectorView+GetPathDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrewPathSelectorView+GetPathDescription.swift"; sourceTree = "<group>"; };
@@ -599,9 +597,8 @@
 			isa = PBXGroup;
 			children = (
 				414074F628DF53E80073EB22 /* ContentView.swift */,
-				4192563B2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift */,
-				4192563D2D1DF3E900D9EF10 /* ContentView+DetailView.swift */,
-				4192563F2D1DF41300D9EF10 /* ContentView+LoadCasks.swift */,
+				4192563B2D1DF3C900D9EF10 /* SidebarViews.swift */,
+				4192563D2D1DF3E900D9EF10 /* DetailView.swift */,
 			);
 			path = "Content View";
 			sourceTree = "<group>";
@@ -885,7 +882,7 @@
 				413F77A52972B2E70053349A /* DependencyManager.swift in Sources */,
 				419256AB2D25E19B00D9EF10 /* BrewManagementView+ActionsView.swift in Sources */,
 				419256352D1DF30700D9EF10 /* SettingsView+UpdateSettings.swift in Sources */,
-				4192563C2D1DF3C900D9EF10 /* ContentView+SidebarViews.swift in Sources */,
+				4192563C2D1DF3C900D9EF10 /* SidebarViews.swift in Sources */,
 				4192560F2D1CC09500D9EF10 /* DependencyError.swift in Sources */,
 				4192565E2D1E155400D9EF10 /* UpdateView+UpdateAllButton.swift in Sources */,
 				4192568A2D22D67400D9EF10 /* SidebarItem.swift in Sources */,
@@ -912,7 +909,6 @@
 				41B731392A879353008BF6B9 /* ActiveTasksView.swift in Sources */,
 				411EDDD72A9F58180051E07B /* URL+QuotedPath.swift in Sources */,
 				419506A62964A5EF00FE5802 /* BrewPathSelectorView.swift in Sources */,
-				419256402D1DF41300D9EF10 /* ContentView+LoadCasks.swift in Sources */,
 				419256452D1E0A7000D9EF10 /* BrewPathSelectorView+CustomPathOption.swift in Sources */,
 				4101EB442DCE662C00BE0670 /* String+LimitedToLines.swift in Sources */,
 				415135612D307BF60025DB70 /* TapView.swift in Sources */,
@@ -963,7 +959,7 @@
 				41D8DF972F3B42F200FB3E72 /* CaskRecord.swift in Sources */,
 				419256082D1C734600D9EF10 /* Shell.swift in Sources */,
 				419256AD2D25E1F100D9EF10 /* BrewManagementView+InfoView.swift in Sources */,
-				4192563E2D1DF3E900D9EF10 /* ContentView+DetailView.swift in Sources */,
+				4192563E2D1DF3E900D9EF10 /* DetailView.swift in Sources */,
 				419256162D1DEA0A00D9EF10 /* AppView+IconAndDescriptionView.swift in Sources */,
 				419256942D24255000D9EF10 /* CaskLoadError.swift in Sources */,
 				419256A62D25D00200D9EF10 /* AppMigrationView+ImportView.swift in Sources */,

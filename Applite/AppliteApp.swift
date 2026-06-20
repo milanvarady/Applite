@@ -55,7 +55,7 @@ struct AppliteApp: App {
         }
         .windowResizability(.contentSize)
         .commands {
-            CommandsMenu(updaterController: updaterController)
+            CommandsMenu(updaterController: updaterController, caskManager: caskManager)
         }
         
         Settings {

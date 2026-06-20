@@ -49,24 +49,6 @@ struct ContentView: View {
                 searchInput = String(searchInput.prefix(30))
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    AsyncButton {
-                        do {
-                            try await caskManager.refreshCatalog()
-                        } catch {
-                            caskManager.loadAlert.show(error: error, title: "Failed to refresh catalog")
-                        }
-                    } label: {
-                        Label("Refresh App Catalog", systemImage: "arrow.clockwise")
-                    }
-                    .disabled(caskManager.isRefreshingCatalog)
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-            }
-        }
         // Load failure alert
         .alert(caskManager.loadAlert.title, isPresented: $caskManager.loadAlert.isPresented) {
             AsyncButton {
