@@ -1,5 +1,5 @@
 //
-//  ContentView+DetailView.swift
+//  DetailView.swift
 //  Applite
 //
 //  Created by Milán Várady on 2024.12.26.
@@ -8,16 +8,15 @@
 import SwiftUI
 import ButtonKit
 
-extension ContentView {
-    @ViewBuilder
-    var detailView: some View {
+struct DetailViews: View {
+    @Environment(CaskManager.self) var caskManager
+    @Binding var selection: SidebarItem
+    @Binding var modifyingBrew: Bool
+
+    var body: some View {
         switch selection {
         case .home:
-            if !brokenInstall {
-                DiscoverView(navigationSelection: $selection)
-            } else {
-                brokenInstallView
-            }
+            DiscoverView(navigationSelection: $selection)
 
         case .updates:
             UpdateView(casks: caskManager.outdatedViewModels)
@@ -46,13 +45,17 @@ extension ContentView {
             BrewManagementView(modifyingBrew: $modifyingBrew)
         }
     }
+}
 
-    private var brokenInstallView: some View {
+struct BrokenInstallView: View {
+    @Environment(CaskManager.self) var caskManager
+
+    var body: some View {
         VStack(alignment: .center) {
-            Text(DependencyManager.brokenPathOrIstallMessage)
+            Text(DependencyManager.brokenPathOrInstallMessage)
 
             AsyncButton {
-                await loadCasks()
+                await caskManager.loadData()
             } label: {
                 Label("Retry load", systemImage: "arrow.clockwise.circle")
             }

@@ -39,6 +39,14 @@ final class CaskManager {
     /// True while a manual catalog refresh is running (toolbar action).
     private(set) var isRefreshingCatalog: Bool = false
 
+    /// True when the selected brew path failed validation on the last `loadData()`.
+    /// Views read this to swap in `BrokenInstallView` for the home tab.
+    private(set) var hasBrokenInstall: Bool = false
+
+    /// Alert surface for catalog load/refresh failures. Mirrors the `BrewService.alert`
+    /// pattern so views can bind directly without owning load-error state.
+    var loadAlert = AlertManager()
+
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: CaskManager.self)
@@ -129,26 +137,50 @@ final class CaskManager {
     ///   2. Installed/outdated state from the brew CLI (slow). Updates the registry
     ///      reactively, so any view models already on screen flip their installed/outdated
     ///      flags without rebuilding the catalog views.
-    func loadData() async throws {
+    func loadData() async {
         Self.logger.info("Starting data load process")
 
-        // Stage 1: Catalog. Animate the placeholder→full transition so cask cards
-        // cross-fade into place rather than swapping instantly mid-shimmer-cycle.
-        let catalog = try await dataLoader.loadCatalogData()
-        withAnimation(.easeInOut(duration: 0.25)) {
-            self.categories = catalog.categories
-            self.taps = catalog.taps
+        guard await BrewPaths.isSelectedBrewPathValid() else {
+            hasBrokenInstall = true
+            loadAlert.show(
+                title: "Couldn't load app catalog",
+                message: DependencyManager.brokenPathOrInstallMessage
+            )
+
+            let versionOutput = (try? await Shell.runBrewCommand(["--version"])) ?? "n/a"
+            Self.logger.error(
+                """
+                Initial cask load failure. Reason: selected brew path seems invalid.
+                Brew executable path: \(BrewPaths.currentBrewExecutable.path(percentEncoded: false))
+                brew --version output: \(versionOutput)
+                """
+            )
+            return
         }
 
-        // Stage 2: Brew CLI state
-        self.isResolvingInstalledState = true
-        defer { self.isResolvingInstalledState = false }
+        do {
+            // Stage 1: Catalog. Animate the placeholder→full transition so cask cards
+            // cross-fade into place rather than swapping instantly mid-shimmer-cycle.
+            let catalog = try await dataLoader.loadCatalogData()
+            withAnimation(.easeInOut(duration: 0.25)) {
+                self.categories = catalog.categories
+                self.taps = catalog.taps
+            }
 
-        async let installed: () = dataLoader.refreshInstalled()
-        async let outdated: () = dataLoader.refreshOutdated()
-        _ = try await (installed, outdated)
+            // Stage 2: Brew CLI state
+            self.isResolvingInstalledState = true
+            defer { self.isResolvingInstalledState = false }
 
-        Self.logger.info("Cask data loaded successfully!")
+            async let installed: () = dataLoader.refreshInstalled()
+            async let outdated: () = dataLoader.refreshOutdated()
+            _ = try await (installed, outdated)
+
+            hasBrokenInstall = false
+            Self.logger.info("Cask data loaded successfully!")
+        } catch {
+            loadAlert.show(error: error, title: "Couldn't load app catalog")
+            Self.logger.error("Initial cask load failure. Reason: \(error.localizedDescription)")
+        }
     }
 
     /// Refreshes the list of outdated casks

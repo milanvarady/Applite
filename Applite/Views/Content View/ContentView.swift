@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import OSLog
 import ButtonKit
 
 struct ContentView: View {
@@ -15,34 +14,32 @@ struct ContentView: View {
     /// Currently selected tab in the sidebar
     @State var selection: SidebarItem = .home
 
-    @State var loadAlert = AlertManager()
-
-    @State var brokenInstall = false
-
     /// If true the sidebar is disabled
     @State var modifyingBrew = false
 
     /// App search query
     @State var searchInput = ""
 
-    let logger = Logger()
-
     var body: some View {
-        @Bindable var loadAlert = loadAlert
+        @Bindable var caskManager = caskManager
 
         NavigationSplitView {
-            sidebarViews
+            SidebarViews(selection: $selection)
                 .disabled(modifyingBrew)
         } detail: {
-            if searchInput.isEmpty {
-                detailView
+            if caskManager.hasBrokenInstall {
+                BrokenInstallView()
+            } else if searchInput.isEmpty {
+                DetailViews(
+                    selection: $selection,
+                    modifyingBrew: $modifyingBrew
+                )
             } else {
                 SearchView(query: $searchInput)
             }
         }
-        // Load all cask releated data
         .task {
-            await loadCasks()
+            await caskManager.loadData()
         }
         // MARK: - Search
         .searchable(text: $searchInput, placement: .sidebar)
@@ -55,13 +52,11 @@ struct ContentView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
-                    Button {
-                        Task {
-                            do {
-                                try await caskManager.refreshCatalog()
-                            } catch {
-                                loadAlert.show(error: error, title: "Failed to refresh catalog")
-                            }
+                    AsyncButton {
+                        do {
+                            try await caskManager.refreshCatalog()
+                        } catch {
+                            caskManager.loadAlert.show(error: error, title: "Failed to refresh catalog")
                         }
                     } label: {
                         Label("Refresh App Catalog", systemImage: "arrow.clockwise")
@@ -73,9 +68,9 @@ struct ContentView: View {
             }
         }
         // Load failure alert
-        .alert(loadAlert.title, isPresented: $loadAlert.isPresented) {
+        .alert(caskManager.loadAlert.title, isPresented: $caskManager.loadAlert.isPresented) {
             AsyncButton {
-                await loadCasks()
+                await caskManager.loadData()
             } label: {
                 Label("Retry", systemImage: "arrow.clockwise")
             }
@@ -86,7 +81,7 @@ struct ContentView: View {
 
             Button("OK", role: .cancel) { }
         } message: {
-            Text(loadAlert.message)
+            Text(caskManager.loadAlert.message)
         }
     }
 }

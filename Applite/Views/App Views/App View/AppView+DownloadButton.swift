@@ -70,7 +70,7 @@ extension AppView {
                 }
             }
             .alert("Broken Brew Path", isPresented: $showingBrewError) {} message: {
-                Text(DependencyManager.brokenPathOrIstallMessage)
+                Text(DependencyManager.brokenPathOrInstallMessage)
             }
 
             // More actions popover
