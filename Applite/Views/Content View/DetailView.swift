@@ -10,7 +10,7 @@ import ButtonKit
 
 struct DetailViews: View {
     @Environment(CaskManager.self) var caskManager
-    @Binding var selection: SidebarItem
+    @Binding var selection: SidebarItem?
     @Binding var modifyingBrew: Bool
 
     var body: some View {
@@ -43,6 +43,9 @@ struct DetailViews: View {
 
         case .brew:
             BrewManagementView(modifyingBrew: $modifyingBrew)
+
+        case .none:
+            EmptyView()
         }
     }
 }

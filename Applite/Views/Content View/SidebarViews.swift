@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SidebarViews: View {
     @Environment(CaskManager.self) var caskManager
-    @Binding var selection: SidebarItem
+    @Binding var selection: SidebarItem?
     
     var body: some View {
         List(selection: $selection) {

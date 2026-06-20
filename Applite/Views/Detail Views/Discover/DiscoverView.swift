@@ -10,7 +10,7 @@ import SwiftUI
 /// Shows apps in categories
 struct DiscoverView: View {
     @Environment(CaskManager.self) var caskManager
-    @Binding var navigationSelection: SidebarItem
+    @Binding var navigationSelection: SidebarItem?
 
     var body: some View {
         ScrollView {
@@ -33,6 +33,6 @@ struct DiscoverView: View {
 
 struct DiscoverView_Previews: PreviewProvider {
     static var previews: some View {
-        DiscoverView(navigationSelection: .constant(.home))
+        DiscoverView(navigationSelection: .constant(.home as SidebarItem?))
     }
 }
