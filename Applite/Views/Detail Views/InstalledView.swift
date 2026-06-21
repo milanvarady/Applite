@@ -33,13 +33,7 @@ struct InstalledView: View {
             }
         }
         .navigationTitle("Installed")
-        .modify { view in
-            if #available(macOS 26.0, *) {
-                view.searchable(text: $searchText, placement: .toolbarPrincipal)
-            } else {
-                view.searchable(text: $searchText, placement: .toolbar)
-            }
-        }
+        .searchable(text: $searchText, placement: .toolbar)
     }
 }
 

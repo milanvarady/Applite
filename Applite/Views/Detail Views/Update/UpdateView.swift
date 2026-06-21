@@ -33,6 +33,17 @@ struct UpdateView: View {
 
     var body: some View {
         VStack {
+            // App grid
+            AppGridView(casks: filteredCasks, appRole: .update)
+                .overlay(alignment: .bottom) {
+                    if filteredCasks.count > 1 {
+                        updateAllButton
+                            .shadow(radius: 8)
+                            .padding(.vertical)
+                    }
+                }
+        }
+        .overlay {
             if casks.isEmpty {
                 ContentUnavailableView(
                     "No Updates Available",
@@ -41,26 +52,10 @@ struct UpdateView: View {
                 )
             } else if filteredCasks.isEmpty {
                 ContentUnavailableView.search(text: searchText)
-            } else {
-                // App grid
-                AppGridView(casks: filteredCasks, appRole: .update)
-                    .overlay(alignment: .bottom) {
-                        if filteredCasks.count > 1 {
-                            updateAllButton
-                                .shadow(radius: 8)
-                                .padding(.vertical)
-                        }
-                    }
             }
         }
         .navigationTitle("Update")
-        .modify { view in
-            if #available(macOS 26.0, *) {
-                view.searchable(text: $searchText, placement: .toolbarPrincipal)
-            } else {
-                view.searchable(text: $searchText, placement: .toolbar)
-            }
-        }
+        .searchable(text: $searchText, placement: .toolbar)
         .toolbar {
             ToolbarItems(loadAlert: loadAlert)
         }

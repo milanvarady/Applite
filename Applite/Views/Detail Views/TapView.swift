@@ -39,13 +39,7 @@ struct TapView: View {
             AppGridView(casks: filteredCasks, appRole: .installAndManage)
         }
         .navigationTitle(tap.title)
-        .modify { view in
-            if #available(macOS 26.0, *) {
-                view.searchable(text: $searchText, placement: .toolbarPrincipal)
-            } else {
-                view.searchable(text: $searchText, placement: .toolbar)
-            }
-        }
+        .searchable(text: $searchText, placement: .toolbar)
     }
 }
 

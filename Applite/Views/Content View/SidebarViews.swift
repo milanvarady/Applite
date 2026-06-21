@@ -15,17 +15,17 @@ struct SidebarViews: View {
         List(selection: $selection) {
             Divider()
             
-            Label("Discover", systemImage: "house.fill")
+            Label("Discover", systemImage: "house")
                 .tag(SidebarItem.home)
             
-            Label("Updates", systemImage: "arrow.clockwise.circle.fill")
+            Label("Updates", systemImage: "arrow.clockwise.circle")
                 .badge(caskManager.outdatedViewModels.count)
                 .tag(SidebarItem.updates)
             
-            Label("Installed", systemImage: "externaldrive.fill.badge.checkmark")
+            Label("Installed", systemImage: "externaldrive.badge.checkmark")
                 .tag(SidebarItem.installed)
             
-            Label("Active Tasks", systemImage: "gearshape.arrow.triangle.2.circlepath")
+            Label("Active Tasks", systemImage: "gearshape")
                 .badge(caskManager.activeTasks.count)
                 .tag(SidebarItem.activeTasks)
             
