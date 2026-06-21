@@ -19,14 +19,15 @@ extension SettingsView {
 
         @State var isSelectedBrewPathValid = false
 
-        /// Brew installation option before making changes
+        /// Baseline of the settings as they were when the catalog was last loaded.
+        /// The refresh prompt shows whenever the current selection differs from these.
         @State var previousBrewOption: Int = 0
+        @State var previousIncludeCasksFromTaps: Bool = true
 
-        /// True when the user picked a different brew path from the one in effect.
-        /// Drives the inline refresh prompt under the path selector.
-        @State var pathChangedSinceLastLoad: Bool = false
-
-        @State var relaunchNeeded: Bool = false
+        var needsRefresh: Bool {
+            previousBrewOption != brewPathOption ||
+                previousIncludeCasksFromTaps != includeCasksFromTaps
+        }
 
         var body: some View {
             VStack(alignment: .leading) {
@@ -41,13 +42,12 @@ extension SettingsView {
 
                 otherFlags
 
-                if relaunchNeeded {
-                    relauchAppPrompt
-                        .padding(.top)
-                }
+                refreshCatalogPrompt
+                    .padding(.top)
             }
             .onAppear {
                 previousBrewOption = BrewPaths.selectedBrewOption.rawValue
+                previousIncludeCasksFromTaps = includeCasksFromTaps
             }
             .padding()
         }
@@ -63,56 +63,45 @@ extension SettingsView {
                     .bold()
 
                 BrewPathSelectorView(isSelectedPathValid: $isSelectedBrewPathValid)
-                    .onChange(of: brewPathOption) { _, newValue in
-                        pathChangedSinceLastLoad = previousBrewOption != newValue
-                    }
 
                 Text("Currently selected brew path is invalid", comment: "Settings invalid brew path message")
                     .foregroundColor(.red)
                     .opacity(isSelectedBrewPathValid ? 0 : 1)
-
-                refreshCatalogPrompt
             }
         }
 
-        /// Inline prompt that asks the user to refresh the catalog after picking a different
-        /// brew path. Reserves a fixed height so the form doesn't jump when the prompt appears.
+        /// Prompt asking the user to refresh the catalog after a setting that
+        /// affects the catalog (brew path or tap inclusion) has changed. Reserves
+        /// a fixed height so the form doesn't jump when it appears.
         var refreshCatalogPrompt: some View {
             HStack {
-                Image(systemName: "arrow.clockwise.circle")
+                Image(systemName: "exclamationmark.arrow.circlepath")
                     .imageScale(.large)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.yellow)
 
-                Text("Refresh to apply new brew path")
+                Text("Refresh the app catalog to apply your changes")
 
                 Spacer()
 
                 AsyncButton {
                     await caskManager.loadData(forceSync: true)
-                    
-                    // Treat the now-loaded option as the baseline so the prompt
-                    // hides until the user changes the selection again.
                     previousBrewOption = brewPathOption
-                    pathChangedSinceLastLoad = false
+                    previousIncludeCasksFromTaps = includeCasksFromTaps
                 } label: {
                     Label("Refresh Catalog", systemImage: "arrow.clockwise")
                 }
                 .disabled(caskManager.isRefreshingCatalog || !isSelectedBrewPathValid)
             }
             .frame(height: 32)
-            .opacity(pathChangedSinceLastLoad ? 1 : 0)
-            .padding(.top, 4)
+            .opacity(needsRefresh ? 1 : 0)
         }
 
         var tapSettings: some View {
             VStack(alignment: .leading) {
                 Text("Taps", comment: "Brew settings tap section title")
                     .bold()
-                
+
                 Toggle("Include Casks from Taps", isOn: $includeCasksFromTaps)
-                    .onChange(of: includeCasksFromTaps) {
-                        relaunchNeeded = true
-                    }
             }
         }
 
@@ -142,27 +131,5 @@ extension SettingsView {
             }
         }
 
-        var relauchAppPrompt: some View {
-            VStack(alignment: .leading) {
-                HStack {
-                    Image(systemName: "exclamationmark.triangle")
-                        .imageScale(.large)
-                        .foregroundStyle(.orange)
-
-                    Text("Restart Applite for changes to take effect.", comment: "Brew settings relaunch app prompt")
-                }
-
-                Button(role: .destructive) {
-                    relaunchNeeded = false
-                    
-                    Task.detached {
-                        try? await Shell.runAsync("/usr/bin/osascript -e 'tell application \"Applite\" to quit' && sleep 3 && open \"\(Bundle.main.bundlePath)\"")
-                    }
-                } label: {
-                    Label("Relaunch", systemImage: "arrow.trianglehead.clockwise.rotate.90")
-                }
-                .controlSize(.large)
-            }
-        }
     }
 }

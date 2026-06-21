@@ -5437,7 +5437,7 @@
     "Refresh Catalog" : {
 
     },
-    "Refresh to apply new brew path" : {
+    "Refresh the app catalog to apply your changes" : {
 
     },
     "Reinstall" : {
@@ -5583,6 +5583,7 @@
     },
     "Relaunch" : {
       "comment" : "Relaunch Applite button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5618,6 +5619,7 @@
     },
     "Restart Applite for changes to take effect." : {
       "comment" : "Brew settings relaunch app prompt",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

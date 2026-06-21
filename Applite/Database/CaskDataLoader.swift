@@ -165,7 +165,10 @@ final class CaskDataLoader {
     /// Fetches cask DTOs from third-party taps via brew ruby script
     private func fetchTapDTOs() async -> [CaskDTO] {
         let enabled = UserDefaults.standard.value(forKey: Preferences.includeCasksFromTaps.rawValue) as? Bool ?? true
-        guard enabled else { return [] }
+        guard enabled else {
+            logger.info("Tap fetch skipped: includeCasksFromTaps is disabled")
+            return []
+        }
 
         guard let scriptPath = Bundle.main.path(forResource: "brew-tap-cask-info", ofType: "rb") else {
             logger.error("Failed to locate tap info ruby script")
@@ -174,6 +177,7 @@ final class CaskDataLoader {
 
         let arguments = [BrewPaths.currentBrewExecutable.quotedPath(), "ruby", scriptPath.paddedWithQuotes()]
         let command = arguments.joined(separator: " ")
+        logger.info("Running tap fetch: \(command)")
 
         var shellOutput = ""
         do {
@@ -184,7 +188,10 @@ final class CaskDataLoader {
             logger.error("Failed to load tap cask info: \(error)")
         }
 
+        logger.info("Tap script output length: \(shellOutput.count) chars")
+
         guard let match = shellOutput.firstMatch(of: /\[((.|\n|\r)*)\]/) else {
+            logger.error("Tap script output did not contain a JSON array. First 500 chars: \(shellOutput.prefix(500))")
             return []
         }
 
@@ -193,12 +200,14 @@ final class CaskDataLoader {
             return []
         }
 
-        guard let dtos = try? JSONDecoder().decode([CaskDTO].self, from: jsonData) else {
-            logger.error("Failed to decode tap DTOs from JSON")
+        do {
+            let dtos = try JSONDecoder().decode([CaskDTO].self, from: jsonData)
+            logger.info("Tap fetch decoded \(dtos.count) DTOs")
+            return dtos
+        } catch {
+            logger.error("Failed to decode tap DTOs from JSON: \(error)")
             return []
         }
-
-        return dtos
     }
 
     /// Generic JSON fetch with proxy support
