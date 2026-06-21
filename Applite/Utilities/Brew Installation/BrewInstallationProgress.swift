@@ -17,6 +17,7 @@ public enum InstallPhase: Int {
 ///
 /// Used by the ``DependencyManager`` struct
 @MainActor
-final class BrewInstallationProgress: ObservableObject {
-    @Published var phase: InstallPhase = .waitingForXcodeCommandLineTools
+@Observable
+final class BrewInstallationProgress {
+    var phase: InstallPhase = .waitingForXcodeCommandLineTools
 }

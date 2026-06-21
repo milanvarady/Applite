@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AlertModifier: ViewModifier {
-    @ObservedObject var manager: AlertManager
+    @Bindable var manager: AlertManager
 
     func body(content: Content) -> some View {
         content

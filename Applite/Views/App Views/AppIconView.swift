@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Kingfisher
+//import Kingfisher
 import Shimmer
 
 enum AppIconState {
@@ -24,26 +24,28 @@ struct AppIconView: View {
 
     var body: some View {
         if state != .failed {
-            KFImage.url(state == .showingAppIcon ? iconURL : faviconURL, cacheKey: cacheKey)
-                .resizable()
-                .placeholder {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(.gray)
-                        .shimmering()
-                }
-                .setProcessor(RoundCornerImageProcessor(cornerRadius: 8)) // Round corners
-                .fade(duration: 0.25)
-                .onFailure { error in
-                    // Change state
-                    switch state {
-                    case .showingAppIcon:
-                        state = .showingFavicon
-                    case .showingFavicon:
-                        state = .failed
-                    default:
-                        state = .failed
-                    }
-                }
+//            KFImage.url(state == .showingAppIcon ? iconURL : faviconURL, cacheKey: cacheKey)
+//                .resizable()
+//                .placeholder {
+//                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+//                        .fill(.gray)
+//                        .shimmering()
+//                }
+//                .setProcessor(RoundCornerImageProcessor(cornerRadius: 8)) // Round corners
+//                .fade(duration: 0.25)
+//                .onFailure { error in
+//                    // Change state
+//                    switch state {
+//                    case .showingAppIcon:
+//                        state = .showingFavicon
+//                    case .showingFavicon:
+//                        state = .failed
+//                    default:
+//                        state = .failed
+//                    }
+//                }
+            Rectangle()
+                .foregroundStyle(Color.blue)
                 .frame(width: 54, height: 54)
         } else {
             // App icon missing

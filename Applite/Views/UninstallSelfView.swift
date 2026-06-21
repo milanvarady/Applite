@@ -13,7 +13,7 @@ struct UninstallSelfView: View {
     @State var uninstallHomebrew = false
     @State var showConfirmation = false
 
-    @StateObject var uninstallAlert = AlertManager()
+    @State var uninstallAlert = AlertManager()
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -32,7 +32,7 @@ struct UninstallSelfView: View {
             )
             
             Toggle("Uninstall Homebrew", isOn: $uninstallHomebrew)
-                .onChange(of: uninstallHomebrew) { newValue in
+                .onChange(of: uninstallHomebrew) { _, newValue in
                     if newValue {
                         deleteBrewCache = true
                     }

@@ -21,9 +21,9 @@ enum AppMigration {
         return ExportFile(initialText: exportedCasks)
     }
 
-    static func readCaskFile(url: URL) throws -> [CaskId] {
+    static func readCaskFile(url: URL) throws -> Set<CaskId> {
         let content = try String(contentsOf: url)
-        var casks: [CaskId] = []
+        var casks: Set<CaskId> = []
         let brewfileRegex = /cask "([\w-]+)"/
 
         // Check if the file being imported is a Brewfile
@@ -31,13 +31,19 @@ enum AppMigration {
         if content.contains("cask \"") {
             // Brewfile
             let matches = content.matches(of: brewfileRegex)
-            casks = matches.map({ String($0.1) })
+            casks.formUnion(
+                matches.map({ String($0.1) })
+            )
         } else {
             // Try to load casks as an Applite txt file export
-            casks = content.components(separatedBy: .newlines)
-
+            casks.formUnion(
+                content.components(separatedBy: .newlines)
+            )
+            
             // Trim whitespace
-            casks = casks.map({ $0.trimmingCharacters(in: .whitespaces) })
+            casks.formUnion(
+                casks.map({ $0.trimmingCharacters(in: .whitespaces) })
+            )
         }
 
         // Remove empty elements
