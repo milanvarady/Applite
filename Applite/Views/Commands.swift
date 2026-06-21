@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Sparkle
+import ButtonKit
 
 struct CommandsMenu: Commands {
     let updaterController: SPUStandardUpdaterController
@@ -20,14 +21,8 @@ struct CommandsMenu: Commands {
         CommandGroup(after: .appInfo) {
             Divider()
 
-            Button("Refresh App Catalog") {
-                Task {
-                    do {
-                        try await caskManager.refreshCatalog()
-                    } catch {
-                        caskManager.loadAlert.show(error: error, title: "Failed to refresh catalog")
-                    }
-                }
+            AsyncButton("Refresh App Catalog") {
+                await caskManager.loadData(forceSync: true)
             }
             .keyboardShortcut("r", modifiers: .command)
             .disabled(caskManager.isRefreshingCatalog)

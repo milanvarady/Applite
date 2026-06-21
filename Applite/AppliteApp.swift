@@ -60,6 +60,7 @@ struct AppliteApp: App {
         
         Settings {
             SettingsView(updater: updaterController.updater)
+                .environment(caskManager)
                 .preferredColorScheme(selectedColorScheme)
         }
         .windowResizability(.contentSize)

@@ -137,8 +137,11 @@ final class CaskManager {
     ///   2. Installed/outdated state from the brew CLI (slow). Updates the registry
     ///      reactively, so any view models already on screen flip their installed/outdated
     ///      flags without rebuilding the catalog views.
-    func loadData() async {
-        Self.logger.info("Starting data load process")
+    func loadData(forceSync: Bool = false) async {
+        Self.logger.info("Starting data load process (forceSync: \(forceSync))")
+
+        if forceSync { isRefreshingCatalog = true }
+        defer { if forceSync { isRefreshingCatalog = false } }
 
         guard await BrewPaths.isSelectedBrewPathValid() else {
             hasBrokenInstall = true
@@ -161,7 +164,7 @@ final class CaskManager {
         do {
             // Stage 1: Catalog. Animate the placeholder→full transition so cask cards
             // cross-fade into place rather than swapping instantly mid-shimmer-cycle.
-            let catalog = try await dataLoader.loadCatalogData()
+            let catalog = try await dataLoader.loadCatalogData(forceSync: forceSync)
             withAnimation(.easeInOut(duration: 0.25)) {
                 self.categories = catalog.categories
                 self.taps = catalog.taps
@@ -188,18 +191,4 @@ final class CaskManager {
         try await dataLoader.refreshOutdated()
     }
 
-    /// Manually re-syncs the catalog from the API, bypassing the freshness gate.
-    /// Picks up new third-party taps the user added externally via `brew tap`.
-    /// Does NOT re-query brew CLI for installed/outdated state — that has its own button.
-    func refreshCatalog() async throws {
-        Self.logger.info("Manual catalog refresh requested")
-        isRefreshingCatalog = true
-        defer { isRefreshingCatalog = false }
-
-        let catalog = try await dataLoader.loadCatalogData(forceSync: true)
-        withAnimation(.easeInOut(duration: 0.25)) {
-            self.categories = catalog.categories
-            self.taps = catalog.taps
-        }
-    }
 }

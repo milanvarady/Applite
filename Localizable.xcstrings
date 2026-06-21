@@ -3285,9 +3285,6 @@
         }
       }
     },
-    "Failed to refresh catalog" : {
-
-    },
     "Failed to refresh updates" : {
       "comment" : "Alert message",
       "localizations" : {
@@ -5435,6 +5432,12 @@
       }
     },
     "Refresh App Catalog" : {
+
+    },
+    "Refresh Catalog" : {
+
+    },
+    "Refresh to apply new brew path" : {
 
     },
     "Reinstall" : {

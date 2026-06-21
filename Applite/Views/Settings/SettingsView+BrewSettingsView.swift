@@ -6,9 +6,12 @@
 //
 
 import SwiftUI
+import ButtonKit
 
 extension SettingsView {
     struct BrewSettingsView: View {
+        @Environment(CaskManager.self) var caskManager
+
         @AppStorage(Preferences.customUserBrewPath.rawValue) var customUserBrewPath: String = "/opt/homebrew/bin/brew"
         @AppStorage(Preferences.brewPathOption.rawValue) var brewPathOption = BrewPaths.PathOption.appPath.rawValue
         @AppStorage(Preferences.includeCasksFromTaps.rawValue) var includeCasksFromTaps: Bool = true
@@ -18,6 +21,10 @@ extension SettingsView {
 
         /// Brew installation option before making changes
         @State var previousBrewOption: Int = 0
+
+        /// True when the user picked a different brew path from the one in effect.
+        /// Drives the inline refresh prompt under the path selector.
+        @State var pathChangedSinceLastLoad: Bool = false
 
         @State var relaunchNeeded: Bool = false
 
@@ -57,13 +64,44 @@ extension SettingsView {
 
                 BrewPathSelectorView(isSelectedPathValid: $isSelectedBrewPathValid)
                     .onChange(of: brewPathOption) { _, newValue in
-                        relaunchNeeded = previousBrewOption != newValue
+                        pathChangedSinceLastLoad = previousBrewOption != newValue
                     }
 
                 Text("Currently selected brew path is invalid", comment: "Settings invalid brew path message")
                     .foregroundColor(.red)
                     .opacity(isSelectedBrewPathValid ? 0 : 1)
+
+                refreshCatalogPrompt
             }
+        }
+
+        /// Inline prompt that asks the user to refresh the catalog after picking a different
+        /// brew path. Reserves a fixed height so the form doesn't jump when the prompt appears.
+        var refreshCatalogPrompt: some View {
+            HStack {
+                Image(systemName: "arrow.clockwise.circle")
+                    .imageScale(.large)
+                    .foregroundStyle(.blue)
+
+                Text("Refresh to apply new brew path")
+
+                Spacer()
+
+                AsyncButton {
+                    await caskManager.loadData(forceSync: true)
+                    
+                    // Treat the now-loaded option as the baseline so the prompt
+                    // hides until the user changes the selection again.
+                    previousBrewOption = brewPathOption
+                    pathChangedSinceLastLoad = false
+                } label: {
+                    Label("Refresh Catalog", systemImage: "arrow.clockwise")
+                }
+                .disabled(caskManager.isRefreshingCatalog || !isSelectedBrewPathValid)
+            }
+            .frame(height: 32)
+            .opacity(pathChangedSinceLastLoad ? 1 : 0)
+            .padding(.top, 4)
         }
 
         var tapSettings: some View {

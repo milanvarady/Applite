@@ -148,25 +148,23 @@ extension BrewManagementView {
             .controlSize(.large)
             .disabled(modifyingBrew)
             .confirmationDialog("Are you sure you want to \(isAppBrewInstalled ? "re" : "")install Homebrew?", isPresented: $isPresentingReinstallConfirm) {
-                Button("Reinstall", role: .destructive) {
+                AsyncButton("Reinstall", role: .destructive) {
                     withAnimation {
                         modifyingBrew = true
                     }
 
-                    Task {
-                        do {
-                            try await DependencyManager.installHomebrew()
-                        } catch {
-                            reinstallFailed = true
-                        }
+                    do {
+                        try await DependencyManager.installHomebrew()
+                    } catch {
+                        reinstallFailed = true
+                    }
 
-                        if !reinstallFailed {
-                            reinstallDone = true
-                        }
+                    if !reinstallFailed {
+                        reinstallDone = true
+                    }
 
-                        withAnimation {
-                            modifyingBrew = false
-                        }
+                    withAnimation {
+                        modifyingBrew = false
                     }
                 }
 
