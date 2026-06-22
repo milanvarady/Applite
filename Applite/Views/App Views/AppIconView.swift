@@ -24,28 +24,26 @@ struct AppIconView: View {
 
     var body: some View {
         if state != .failed {
-//            KFImage.url(state == .showingAppIcon ? iconURL : faviconURL, cacheKey: cacheKey)
-//                .resizable()
-//                .placeholder {
-//                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-//                        .fill(.gray)
-//                        .shimmering()
-//                }
-//                .setProcessor(RoundCornerImageProcessor(cornerRadius: 8)) // Round corners
-//                .fade(duration: 0.25)
-//                .onFailure { error in
-//                    // Change state
-//                    switch state {
-//                    case .showingAppIcon:
-//                        state = .showingFavicon
-//                    case .showingFavicon:
-//                        state = .failed
-//                    default:
-//                        state = .failed
-//                    }
-//                }
-            Rectangle()
-                .foregroundStyle(Color.blue)
+            KFImage.url(state == .showingAppIcon ? iconURL : faviconURL, cacheKey: cacheKey)
+                .resizable()
+                .placeholder {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(.gray)
+                        .shimmering()
+                }
+                .fade(duration: 0.25)
+                .onFailure { error in
+                    // Change state
+                    switch state {
+                    case .showingAppIcon:
+                        state = .showingFavicon
+                    case .showingFavicon:
+                        state = .failed
+                    default:
+                        state = .failed
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .frame(width: 54, height: 54)
         } else {
             // App icon missing

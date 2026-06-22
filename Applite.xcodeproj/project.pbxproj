@@ -133,6 +133,7 @@
 		41D8E0422F3C8B0000FB3E72 /* CaskViewModelRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8E0412F3C8B0000FB3E72 /* CaskViewModelRegistry.swift */; };
 		41D8E0442F3C8B1000FB3E72 /* CaskDataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8E0432F3C8B1000FB3E72 /* CaskDataLoader.swift */; };
 		41DF006429EAA094004EB7AE /* SendNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF006329EAA094004EB7AE /* SendNotification.swift */; };
+		B2F29D992FA97D340038394F /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = B2F29D982FA97D340038394F /* AppIcon.icon */; };
 		BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BD7546562A868DA30083996B /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
@@ -274,6 +275,7 @@
 		41D8E0412F3C8B0000FB3E72 /* CaskViewModelRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskViewModelRegistry.swift; sourceTree = "<group>"; };
 		41D8E0432F3C8B1000FB3E72 /* CaskDataLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaskDataLoader.swift; sourceTree = "<group>"; };
 		41DF006329EAA094004EB7AE /* SendNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendNotification.swift; sourceTree = "<group>"; };
+		B2F29D982FA97D340038394F /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		BD7546562A868DA30083996B /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -428,6 +430,7 @@
 				414074FA28DF53EB0073EB22 /* Preview Content */,
 				419506A729696A5300FE5802 /* Applite-Info.plist */,
 				414074F828DF53EB0073EB22 /* Assets.xcassets */,
+				B2F29D982FA97D340038394F /* AppIcon.icon */,
 				414074FD28DF53EB0073EB22 /* Applite.entitlements */,
 				4196C90128FAF57A00EADDDA /* AppliteDebug.entitlements */,
 			);
@@ -835,6 +838,7 @@
 				414074FC28DF53EB0073EB22 /* Preview Assets.xcassets in Resources */,
 				41857B732911A2F2004A1894 /* categories.json in Resources */,
 				BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */,
+				B2F29D992FA97D340038394F /* AppIcon.icon in Resources */,
 				41CE28C42D30687F0018483F /* brew-tap-cask-info.rb in Resources */,
 				414074F928DF53EB0073EB22 /* Assets.xcassets in Resources */,
 				419256062D1C546D00D9EF10 /* askpass.js in Resources */,

@@ -10,6 +10,7 @@ import SwiftUI
 import Sparkle
 
 /// This view model class publishes when new updates can be checked by the user
+@Mainactor
 @Observable
 final class CheckForUpdatesViewModel {
     var canCheckForUpdates = false
