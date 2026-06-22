@@ -10,19 +10,21 @@ import SwiftUI
 import Sparkle
 
 /// This view model class publishes when new updates can be checked by the user
-@MainActor
-final class CheckForUpdatesViewModel: ObservableObject {
-    @Published var canCheckForUpdates = false
+@Mainactor
+@Observable
+final class CheckForUpdatesViewModel {
+    var canCheckForUpdates = false
 
     init(updater: SPUUpdater) {
-        updater.publisher(for: \.canCheckForUpdates)
-            .assign(to: &$canCheckForUpdates)
+        // TODO: check this
+//        updater.publisher(for: \.canCheckForUpdates)
+//            .assign(to: &$canCheckForUpdates)
     }
 }
 
 /// A button that opens sparkle updater and checks for available updates
 struct CheckForUpdatesView<T: View>: View {
-    @ObservedObject private var checkForUpdatesViewModel: CheckForUpdatesViewModel
+    @State private var checkForUpdatesViewModel: CheckForUpdatesViewModel
     private let updater: SPUUpdater
     let label: ()->T
     

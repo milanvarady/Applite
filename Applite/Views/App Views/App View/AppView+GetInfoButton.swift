@@ -11,11 +11,11 @@ import OSLog
 
 extension AppView {
     struct GetInfoButton: View {
-        @ObservedObject var cask: Cask
-        @EnvironmentObject var caskManager: CaskManager
+        var cask: CaskViewModel
+        @Environment(CaskManager.self) var caskManager
         @Environment(\.openWindow) var openWindow
 
-        @StateObject var alert = AlertManager()
+        @State var alert = AlertManager()
 
         private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "GetInfoButton")
 
@@ -26,9 +26,9 @@ extension AppView {
             } label: {
                 Label("Get Info", systemImage: "info.circle")
             }
-            .onButtonError { error in
-                alert.show(error: error, title: "Failed to gather cask info")
-                logger.error("Failed to gather additional cask info: \(error.localizedDescription)")
+            .onButtonStateError { error in
+                alert.show(error: error.error, title: "Failed to gather cask info")
+                logger.error("Failed to gather additional cask info: \(error.error.localizedDescription)")
             }
             .asyncButtonStyle(.trailing)
             .alertManager(alert)

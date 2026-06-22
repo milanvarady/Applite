@@ -12,58 +12,183 @@ import SwiftUI
 typealias CaskId = String
 typealias TapId = String
 typealias BrewAnalyticsDictionary = [CaskId: Int]
-typealias BrewTask = (cask: Cask, task: Task<Void, Never>)
 
-/// Holds all cask data and provides methods to take actions on them (e.g. install, update)
+/// Thin coordinator that owns the data loader, registry, and brew service.
+/// Views access it via `@Environment(CaskManager.self)`.
+@Observable
 @MainActor
-final class CaskManager: ObservableObject {
-    /// Cask view models
-    @Published var casks: [CaskId: Cask] = [:]
-    /// All currently running brew tasks
-    @Published var activeTasks: [BrewTask] = []
-    @Published var alert = AlertManager()
+final class CaskManager {
+    private let dataLoader: CaskDataLoader
+    private let registry: CaskViewModelRegistry
+    private let brewService: BrewService
 
-    /// The data coordinator that orchestrates data loading
-    lazy var dataCoordinator = CaskDataCoordinator()
+    /// Categories shown in the sidebar and Discover view.
+    /// Initialized synchronously from the bundled `categories.json` with empty `casks`
+    /// arrays so the UI renders structure from launch; replaced with resolved view models
+    /// after `loadCatalogData()` finishes. `CategoryLoadResult` equality is id-based, so
+    /// this assignment is invisible to `selection` and to SwiftUI's identity tracking —
+    /// the cask cards inside each section just flip from shimmer placeholders to real data.
+    private(set) var categories: [CategoryLoadResult]
 
-    // Searchble cask collections
-    let allCasks = SearchableCaskCollection()
-    let installedCasks = SearchableCaskCollection()
-    let outdatedCasks = SearchableCaskCollection()
-    var taps: [TapViewModel] = []
+    private(set) var taps: [TapLoadResult] = []
 
-    // Precompiled cask category dicts
-    var categories: [CategoryViewModel] = []
+    /// True while brew CLI is being queried for installed/outdated state.
+    /// Catalog (categories/taps) is independent and lights up before this flips false.
+    private(set) var isResolvingInstalledState: Bool = false
 
-    static let logger = Logger(
+    /// True while a manual catalog refresh is running (toolbar action).
+    private(set) var isRefreshingCatalog: Bool = false
+
+    /// True when the selected brew path failed validation on the last `loadData()`.
+    /// Views read this to swap in `BrokenInstallView` for the home tab.
+    private(set) var hasBrokenInstall: Bool = false
+
+    /// Alert surface for catalog load/refresh failures. Mirrors the `BrewService.alert`
+    /// pattern so views can bind directly without owning load-error state.
+    var loadAlert = AlertManager()
+
+    private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: CaskManager.self)
     )
 
-    init() {
-        // Load categories at init so the view can display them
+    // MARK: - Convenience Forwarding
+
+    var installedViewModels: [CaskViewModel] { registry.installedViewModels }
+    var outdatedViewModels: [CaskViewModel] { registry.outdatedViewModels }
+    var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
+    var alert: AlertManager { brewService.alert }
+
+    // MARK: - Init
+
+    init(
+        dataLoader: CaskDataLoader? = nil,
+        registry: CaskViewModelRegistry? = nil,
+        brewService: BrewService? = nil
+    ) {
+        let reg = registry ?? CaskViewModelRegistry()
+        self.registry = reg
+        self.dataLoader = dataLoader ?? CaskDataLoader(registry: reg)
+        self.brewService = brewService ?? BrewService()
+        self.categories = Self.loadInitialCategories()
+    }
+
+    /// Reads the bundled `categories.json` and returns placeholder `CategoryLoadResult`s
+    /// (no resolved casks). Lets the sidebar and Discover section structure render
+    /// before stage 1 completes. Returns `[]` on parse failure — the catalog load will
+    /// repopulate it later.
+    private static func loadInitialCategories() -> [CategoryLoadResult] {
+        guard let url = Bundle.main.url(forResource: "categories", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let defs = try? JSONDecoder().decode([Category].self, from: data) else {
+            return []
+        }
+        return defs.map { CategoryLoadResult(id: $0.id, sfSymbol: $0.sfSymbol, casks: []) }
+    }
+    
+    // MARK: - Registry Forwarding
+    
+    func existingViewModels(forTokens tokens: Set<CaskId>) -> [CaskViewModel] {
+        registry.existingViewModels(forTokens: tokens)
+    }
+
+    // MARK: - Brew Operation Forwarding
+
+    func install(_ cask: CaskViewModel, force: Bool = false) {
+        brewService.install(cask, force: force)
+    }
+
+    func uninstall(_ cask: CaskViewModel, zap: Bool = false) {
+        brewService.uninstall(cask, zap: zap)
+    }
+
+    func update(_ cask: CaskViewModel) {
+        brewService.update(cask)
+    }
+
+    func reinstall(_ cask: CaskViewModel) {
+        brewService.reinstall(cask)
+    }
+
+    func installAll(_ casks: [CaskViewModel]) {
+        brewService.installAll(casks)
+    }
+
+    func updateAll(_ casks: [CaskViewModel]) {
+        brewService.updateAll(casks)
+    }
+
+    func getAdditionalInfoForCask(_ cask: CaskViewModel) async throws -> CaskAdditionalInfo {
+        try await brewService.getAdditionalInfoForCask(cask)
+    }
+
+    // MARK: - Search Forwarding
+
+    func search(query: String) async throws -> [CaskViewModel] {
+        try await dataLoader.search(query: query)
+    }
+    
+    // MARK: - Data Loading
+    
+    /// Loads cask data in two stages:
+    ///
+    ///   1. Catalog (categories + taps) from the local DB — fast, no brew CLI dependency.
+    ///      Commits to `categories`/`taps` as soon as it returns so the UI lights up.
+    ///   2. Installed/outdated state from the brew CLI (slow). Updates the registry
+    ///      reactively, so any view models already on screen flip their installed/outdated
+    ///      flags without rebuilding the catalog views.
+    func loadData(forceSync: Bool = false) async {
+        Self.logger.info("Starting data load process (forceSync: \(forceSync))")
+
+        if forceSync { isRefreshingCatalog = true }
+        defer { if forceSync { isRefreshingCatalog = false } }
+
+        guard await BrewPaths.isSelectedBrewPathValid() else {
+            hasBrokenInstall = true
+            loadAlert.show(
+                title: "Couldn't load app catalog",
+                message: DependencyManager.brokenPathOrInstallMessage
+            )
+
+            let versionOutput = (try? await Shell.runBrewCommand(["--version"])) ?? "n/a"
+            Self.logger.error(
+                """
+                Initial cask load failure. Reason: selected brew path seems invalid.
+                Brew executable path: \(BrewPaths.currentBrewExecutable.path(percentEncoded: false))
+                brew --version output: \(versionOutput)
+                """
+            )
+            return
+        }
+
         do {
-            let categories = try loadCategoryJSON()
-            let categoryViewModels = categories.map {
-                CategoryViewModel(name: $0.id, sfSymbol: $0.sfSymbol, casks: [], casksCoupled: [])
+            // Stage 1: Catalog. Animate the placeholder→full transition so cask cards
+            // cross-fade into place rather than swapping instantly mid-shimmer-cycle.
+            let catalog = try await dataLoader.loadCatalogData(forceSync: forceSync)
+            withAnimation(.easeInOut(duration: 0.25)) {
+                self.categories = catalog.categories
+                self.taps = catalog.taps
             }
 
-            self.categories = categoryViewModels
+            // Stage 2: Brew CLI state
+            self.isResolvingInstalledState = true
+            defer { self.isResolvingInstalledState = false }
+
+            async let installed: () = dataLoader.refreshInstalled()
+            async let outdated: () = dataLoader.refreshOutdated()
+            _ = try await (installed, outdated)
+
+            hasBrokenInstall = false
+            Self.logger.info("Cask data loaded successfully!")
         } catch {
-            self.alert.show(title: "Couldn't load categories")
-            Self.logger.error("Failed to load categories: \(error.localizedDescription)")
+            loadAlert.show(error: error, title: "Couldn't load app catalog")
+            Self.logger.error("Initial cask load failure. Reason: \(error.localizedDescription)")
         }
     }
 
-    func loadCategoryJSON() throws -> [Category] {
-        let decoder = JSONDecoder()
-        guard let url = Bundle.main.url(forResource: "categories", withExtension: "json") else {
-            throw CaskLoadError.failedToLoadCategoryJSON
-        }
-
-        let data = try Data(contentsOf: url)
-        let categories = try decoder.decode([Category].self, from: data)
-
-        return categories
+    /// Refreshes the list of outdated casks
+    func refreshOutdated() async throws {
+        try await dataLoader.refreshOutdated()
     }
+
 }

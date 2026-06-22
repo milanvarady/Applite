@@ -9,19 +9,19 @@ import SwiftUI
 
 extension AppView {
     struct IconsAndWarnings: View {
-        @ObservedObject var cask: Cask
+        var cask: CaskViewModel
 
         var body: some View {
             // Show tap icon if from a third-party tap
-            if cask.info.tap != "homebrew/cask" {
+            if cask.tap != "homebrew/cask" {
                 InfoPopup(
-                    text: "This app is from a third-party tap:\n`\(cask.info.tap)`",
+                    text: "This app is from a third-party tap:\n`\(cask.tap)`",
                     sfSymbol: "spigot.fill"
                 )
                 .controlSize(.large)
             }
 
-            if let warning = cask.info.warning {
+            if let warning = cask.warning {
                 Group {
                     switch warning {
                     case .hasCaveat(let caveat):

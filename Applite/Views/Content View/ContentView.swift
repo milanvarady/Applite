@@ -6,93 +6,78 @@
 //
 
 import SwiftUI
-import OSLog
 import ButtonKit
 
 struct ContentView: View {
-    @EnvironmentObject var caskManager: CaskManager
-    
-    /// Currently selected tab in the sidebar
-    @State var selection: SidebarItem = .home
+    @Environment(CaskManager.self) var caskManager
 
-    @StateObject var loadAlert = AlertManager()
+    /// Currently selected sidebar item. Optional so the selection can be cleared
+    /// while a search is active, so a sidebar tap can interrupt the search instead
+    /// of being swallowed by the SearchView in the detail pane.
+    @State var selection: SidebarItem? = .home
 
-    @State var brokenInstall = false
-    
+    /// Remembers the last non-nil selection so that clearing the search field
+    /// (e.g. via Esc) can restore the user to the screen they were on.
+    @State var lastSelection: SidebarItem = .home
+
     /// If true the sidebar is disabled
     @State var modifyingBrew = false
 
     /// App search query
     @State var searchInput = ""
-    @State var showSearchResults = false
-
-    // Sorting options
-    @AppStorage(Preferences.searchSortOption.rawValue) var sortBy = SortingOptions.mostDownloaded
-    @AppStorage(Preferences.hideUnpopularApps.rawValue) var hideUnpopularApps = false
-    @AppStorage(Preferences.hideDisabledApps.rawValue) var hideDisabledApps = false
-
-    let logger = Logger()
 
     var body: some View {
+        @Bindable var caskManager = caskManager
+
         NavigationSplitView {
-            sidebarViews
+            SidebarViews(selection: $selection)
                 .disabled(modifyingBrew)
         } detail: {
-            detailView
+            if caskManager.hasBrokenInstall {
+                BrokenInstallView()
+            } else if !searchInput.isEmpty {
+                SearchView(query: $searchInput)
+            } else if selection != nil {
+                DetailViews(
+                    selection: $selection,
+                    modifyingBrew: $modifyingBrew
+                )
+            }
         }
-        // Load all cask releated data
         .task {
-            await loadCasks()
+            await caskManager.loadData()
         }
         // MARK: - Search
         .searchable(text: $searchInput, placement: .sidebar)
-        // Submit search
-        .onSubmit(of: .search) {
-            Task {
-                await searchAndSort()
-
-                if !searchInput.isEmpty {
-                    showSearchResults = true
-
-                    if selection != .home {
-                        selection = .home
-                    }
-                }
-            }
-        }
-        // Clear search
-        .onChange(of: searchInput) { newValue in
+        .onChange(of: searchInput) { _, newValue in
             // Limit search characters
-            searchInput = String(searchInput.prefix(30))
+            if newValue.count > 30 {
+                searchInput = String(newValue.prefix(30))
+                return
+            }
 
-            if searchInput.isEmpty {
-                showSearchResults = false
+            if !newValue.isEmpty {
+                // Typing starts a search — remember where we were and clear the selection.
+                if let current = selection {
+                    lastSelection = current
+                    selection = nil
+                }
+            } else if selection == nil {
+                // Search cleared without a sidebar tap (Esc / clear button) — restore.
+                selection = lastSelection
             }
         }
-        // Apply sorting options
-        .task(id: sortBy) {
-            // Refilter if sorting options change
-            await sortCasks(ignoreBestMatch: false)
-        }
-        // Apply filter option
-        .task(id: hideUnpopularApps) {
-            if hideUnpopularApps {
-                await filterUnpopular()
-            } else {
-                await caskManager.allCasks.search(query: searchInput)
-            }
-        }
-        .task(id: hideDisabledApps) {
-            if hideDisabledApps {
-                await filterDisabled()
-            } else {
-                await caskManager.allCasks.search(query: searchInput)
+        .onChange(of: selection) { _, newValue in
+            // Sidebar tap during a search wins: clear the query so the detail
+            // switches from SearchView to the tapped destination.
+            if newValue != nil, !searchInput.isEmpty {
+                searchInput = ""
             }
         }
         // Load failure alert
-        .alert(loadAlert.title, isPresented: $loadAlert.isPresented) {
+        .alert(caskManager.loadAlert.title, isPresented: $caskManager.loadAlert.isPresented) {
             AsyncButton {
-                await loadCasks()
+                await caskManager.loadData()
             } label: {
                 Label("Retry", systemImage: "arrow.clockwise")
             }
@@ -103,7 +88,7 @@ struct ContentView: View {
 
             Button("OK", role: .cancel) { }
         } message: {
-            Text(loadAlert.message)
+            Text(caskManager.loadAlert.message)
         }
     }
 }

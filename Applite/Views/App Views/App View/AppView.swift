@@ -16,26 +16,26 @@ enum AppRole {
 
 /// Shows an application's icon and provides controls for installing, updating, uninstalling and opening the app. Used all across the app.
 struct AppView: View {
-    /// A ``Cask`` object to display
-    @ObservedObject var cask: Cask
+    /// A ``CaskViewModel`` object to display
+    var cask: CaskViewModel
     /// Role of the app, e.g. install, updated or uninstall
     var role: AppRole
-    
+
     @Environment(\.openWindow) var openWindow
-    
-    @EnvironmentObject var caskManager: CaskManager
-    
+
+    @Environment(CaskManager.self) var caskManager
+
     // Alerts
     @State var failureAlertMessage = ""
     @State var showingFailureAlert = false
-    
+
     // Success animation
     @State var successCheckmarkScale = 0.0001
     @State var keepSuccessIndicator = false
-    
+
     /// App view dimensions, and spacing
     public static let dimensions: (width: CGFloat, height: CGFloat, spacing: CGFloat) = (width: 320, height: 80, spacing: 20)
-    
+
     var body: some View {
         HStack {
             IconAndDescriptionView(cask: cask)
@@ -50,6 +50,7 @@ struct AppView: View {
 
 struct AppView_Previews: PreviewProvider {
     static var previews: some View {
-        AppView(cask: Cask.dummy, role: .installAndManage)
+        AppView(cask: .dummy, role: .installAndManage)
     }
 }
+

@@ -45,7 +45,7 @@ struct BrewPaths {
     static func getBrewExectuablePath(for option: PathOption) -> URL {
         switch option {
         case .appPath:
-            return appBrewExetutable
+            return applicationSupportBrewExetutable
 
         case .defaultAppleSilicon:
             return URL(fileURLWithPath: "/opt/homebrew/bin/brew")
@@ -59,14 +59,11 @@ struct BrewPaths {
     }
     
     /// Brew directory when installing brew separately into Application Support
-    static let appBrewDirectory = URL.applicationSupportDirectory
-        .appendingPathComponent("Applite", isDirectory: true)
-        .appendingPathComponent("homebrew", isDirectory: true)
+    static let applicationSupportHomebrew = AppPaths.applicationSupport
+        .appending(path: "Homebrew", directoryHint: .isDirectory)
     
     /// Brew exectuable path when installing brew separately into Application Support
-    static let appBrewExetutable = URL.applicationSupportDirectory
-        .appendingPathComponent("Applite", isDirectory: true)
-        .appendingPathComponent("homebrew", isDirectory: true)
+    static let applicationSupportBrewExetutable = Self.applicationSupportHomebrew
         .appendingPathComponent("bin", isDirectory: true)
         .appendingPathComponent("brew")
     
@@ -74,7 +71,7 @@ struct BrewPaths {
     static var currentBrewDirectory: URL {
         switch Self.selectedBrewOption {
         case .appPath:
-            return appBrewDirectory
+            return applicationSupportHomebrew
 
         case .defaultAppleSilicon:
             return URL(fileURLWithPath: "/opt/homebrew")
@@ -125,5 +122,4 @@ struct BrewPaths {
 
         return true
     }
-
 }

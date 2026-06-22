@@ -10,11 +10,11 @@ import OSLog
 
 extension AppMigrationView {
     struct ImportView: View {
-        @EnvironmentObject var caskManager: CaskManager
+        @Environment(CaskManager.self) var caskManager
 
         @State var showFileImporter = false
         @State var importSuccessful = false
-        @StateObject var alert = AlertManager()
+        @State var alert = AlertManager()
 
         private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigrationView.ExportView")
 
@@ -58,7 +58,7 @@ extension AppMigrationView {
         }
 
         private func installCasks(from url: URL) {
-            var caskIds: [CaskId] = []
+            var caskIds: Set<CaskId> = []
 
             do {
                 caskIds = try AppMigration.readCaskFile(url: url)
@@ -66,9 +66,7 @@ extension AppMigrationView {
                 logger.error("Failed to import file: \(url.path(percentEncoded: false))")
             }
 
-            let casksToInstall = caskIds.compactMap {
-                caskManager.casks[$0]
-            }
+            let casksToInstall = caskManager.existingViewModels(forTokens: caskIds)
 
             guard !casksToInstall.isEmpty else {
                 logger.notice("Imported file contains no valid apps: \(url.path(percentEncoded: false))")

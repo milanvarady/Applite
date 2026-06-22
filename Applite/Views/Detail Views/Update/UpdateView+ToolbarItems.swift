@@ -10,8 +10,8 @@ import ButtonKit
 
 extension UpdateView {
     struct ToolbarItems: ToolbarContent {
-        @EnvironmentObject var caskManager: CaskManager
-        @ObservedObject var loadAlert: AlertManager
+        @Environment(CaskManager.self) var caskManager
+        var loadAlert: AlertManager
         
         var body: some ToolbarContent {
             if #available(macOS 26.0, *) {
@@ -49,8 +49,8 @@ extension UpdateView {
             AsyncButton("Refresh", systemImage: "arrow.clockwise") {
                 try await caskManager.refreshOutdated()
             }
-            .onButtonError { error in
-                loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
+            .onButtonStateError { error in
+                loadAlert.show(title: "Failed to refresh updates", message: error.error.localizedDescription)
             }
         }
     }

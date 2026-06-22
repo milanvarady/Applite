@@ -14,6 +14,9 @@ enum SidebarItem: Equatable, Hashable {
     case activeTasks
     case appMigration
     case brew
-    case appCategory(category: CategoryViewModel)
-    case tap(tap: TapViewModel)
+    /// Tied to the static `Category` id rather than the loaded `CategoryLoadResult`,
+    /// so the detail view can re-resolve the freshest casks each render — critical for
+    /// the placeholder→full transition during catalog load.
+    case appCategory(id: CategoryId)
+    case tap(tap: TapLoadResult)
 }
