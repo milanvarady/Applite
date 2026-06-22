@@ -28,6 +28,9 @@ extension AppView {
                 // Name and description
                 VStack(alignment: .leading) {
                     Button {
+                        // Cmd+click is reserved for opening the homepage (handled
+                        // by the outer simultaneousGesture); don't also toggle the token.
+                        guard !NSEvent.modifierFlags.contains(.command) else { return }
                         showToken.toggle()
                     } label: {
                         Text(showToken ? cask.token : cask.name)
@@ -46,7 +49,7 @@ extension AppView {
                 TapGesture()
                     .modifiers(.command)
                     .onEnded {
-                        if let url = cask.info.homepageURL {
+                        if let url = cask.homepage {
                             openURL(url)
                         }
                     }

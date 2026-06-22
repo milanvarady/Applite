@@ -39,7 +39,7 @@ extension AppView {
                         .font(.system(size: 22))
                 } else {
                     Image(systemName: "arrow.down.to.line.circle\(buttonFill ? ".fill" : "")")
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(.primary)
                         .font(.system(size: 22))
                 }
             }

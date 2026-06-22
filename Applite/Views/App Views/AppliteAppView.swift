@@ -19,7 +19,7 @@ struct AppliteAppView: View {
     
     var body: some View {
         HStack {
-            Image("AppliteIcon")
+            Image(nsImage: NSApplication.shared.applicationIconImage)
                 .resizable()
                 .frame(width: 54, height: 54)
                 .padding(.leading, 5)
