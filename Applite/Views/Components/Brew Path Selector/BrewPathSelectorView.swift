@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import DebouncedOnChange
 
 /// Provides a picker so the user can select the brew executable path they want to use
 struct BrewPathSelectorView: View {
@@ -14,7 +13,7 @@ struct BrewPathSelectorView: View {
 
     @AppStorage(Preferences.customUserBrewPath.rawValue) var customUserBrewPath: String = BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon).path(percentEncoded: false)
     @AppStorage(Preferences.brewPathOption.rawValue) var brewPathOption = BrewPaths.PathOption.defaultAppleSilicon.rawValue
-    
+
     @State var choosingCustomFolder = false
 
     var body: some View {
@@ -35,19 +34,16 @@ struct BrewPathSelectorView: View {
         .task {
             isSelectedPathValid = await BrewPaths.isSelectedBrewPathValid()
         }
-        .onChange(of: brewPathOption) { _ in
+        .onChange(of: brewPathOption) {
             Task { @MainActor in
                 isSelectedPathValid = await BrewPaths.isSelectedBrewPathValid()
             }
         }
-        .onChange(of: customUserBrewPath, debounceTime: .seconds(0.5)) { newPath in
-            customUserBrewPath = newPath
-
-            if brewPathOption == BrewPaths.PathOption.custom.rawValue {
-                Task { @MainActor in
-                    isSelectedPathValid = await BrewPaths.isBrewPathValid(at: URL(fileURLWithPath: newPath))
-                }
-            }
+        .task(id: customUserBrewPath) {
+            try? await Task.sleep(for: .milliseconds(500))
+            guard !Task.isCancelled else { return }
+            guard brewPathOption == BrewPaths.PathOption.custom.rawValue else { return }
+            isSelectedPathValid = await BrewPaths.isBrewPathValid(at: URL(fileURLWithPath: customUserBrewPath))
         }
     }
 }

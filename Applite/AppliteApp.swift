@@ -14,7 +14,7 @@ import Kingfisher
 struct AppliteApp: App {
     @NSApplicationDelegateAdaptor(ApplicationDelegate.self) var appDelegate
 
-    @StateObject var caskManager = CaskManager()
+    @State var caskManager = CaskManager()
     
     @AppStorage(Preferences.colorSchemePreference.rawValue) var colorSchemePreference: ColorSchemePreference = .system
     @AppStorage(Preferences.setupComplete.rawValue) var setupComplete: Bool = false
@@ -44,7 +44,7 @@ struct AppliteApp: App {
         WindowGroup {
             if setupComplete {
                 ContentView()
-                    .environmentObject(caskManager)
+                    .environment(caskManager)
                     .frame(minWidth: 970, minHeight: 520)
                     .preferredColorScheme(selectedColorScheme)
             } else {
@@ -55,11 +55,12 @@ struct AppliteApp: App {
         }
         .windowResizability(.contentSize)
         .commands {
-            CommandsMenu(updaterController: updaterController)
+            CommandsMenu(updaterController: updaterController, caskManager: caskManager)
         }
         
         Settings {
             SettingsView(updater: updaterController.updater)
+                .environment(caskManager)
                 .preferredColorScheme(selectedColorScheme)
         }
         .windowResizability(.contentSize)

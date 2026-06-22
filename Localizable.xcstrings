@@ -102,6 +102,7 @@
     },
     "\"%@\" didn't match any app. Either it's not available in the Homebrew catalog or you misspelled it." : {
       "comment" : "Empty search results message",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1066,6 +1067,9 @@
         }
       }
     },
+    "All your apps are up to date." : {
+      "comment" : "Update view no updates available description"
+    },
     "App Catalog" : {
       "comment" : "Catalog settings title",
       "localizations" : {
@@ -1642,6 +1646,7 @@
     },
     "Apps with few downloads are hidden, consider turning off this filter" : {
       "comment" : "Filter removal suggestion",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2705,6 +2710,7 @@
     },
     "Couldn't load categories" : {
       "comment" : "Alert message",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -6321,6 +6327,15 @@
         }
       }
     },
+    "Refresh App Catalog" : {
+
+    },
+    "Refresh Catalog" : {
+
+    },
+    "Refresh the app catalog to apply your changes" : {
+
+    },
     "Reinstall" : {
       "comment" : "Reinstall app button",
       "localizations" : {
@@ -6488,6 +6503,7 @@
     },
     "Relaunch" : {
       "comment" : "Relaunch Applite button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -6529,6 +6545,7 @@
     },
     "Restart Applite for changes to take effect." : {
       "comment" : "Brew settings relaunch app prompt",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -7513,6 +7530,7 @@
     },
     "Turn off few downloads filter" : {
       "comment" : "Filter disable button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -8669,5 +8687,5 @@
       }
     }
   },
-  "version" : "1.0"
+  "version" : "1.1"
 }

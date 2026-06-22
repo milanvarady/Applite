@@ -9,9 +9,8 @@ import SwiftUI
 
 /// Shows apps in categories
 struct DiscoverView: View {
-    @EnvironmentObject var caskManager: CaskManager
-    @Binding var navigationSelection: SidebarItem
-    @State var currentPage: Float = 0
+    @Environment(CaskManager.self) var caskManager
+    @Binding var navigationSelection: SidebarItem?
 
     var body: some View {
         ScrollView {
@@ -19,10 +18,10 @@ struct DiscoverView: View {
                 Text("Discover", comment: "Discover view title")
                     .font(.appliteLargeTitle)
                     .padding(.bottom)
-                
+
                 ForEach(caskManager.categories) { category in
                     DiscoverSectionView(category: category, navigationSelection: $navigationSelection)
-                    
+
                     Divider()
                         .padding(.vertical, 20)
                 }
@@ -34,7 +33,6 @@ struct DiscoverView: View {
 
 struct DiscoverView_Previews: PreviewProvider {
     static var previews: some View {
-        DiscoverView(navigationSelection: .constant(.home))
-            .environmentObject(CaskManager())
+        DiscoverView(navigationSelection: .constant(.home as SidebarItem?))
     }
 }

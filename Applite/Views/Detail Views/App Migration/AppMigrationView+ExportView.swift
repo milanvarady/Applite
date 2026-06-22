@@ -14,7 +14,7 @@ extension AppMigrationView {
         @State var showFileExporter = false
         @State var exportFile: ExportFile = .init()
         @State var exportSuccessful = false
-        @StateObject var alert = AlertManager()
+        @State var alert = AlertManager()
 
         private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigrationView.ExportView")
 
@@ -31,8 +31,8 @@ extension AppMigrationView {
                         Label("Export Apps to File", systemImage: "square.and.arrow.up")
                     }
                     .controlSize(.large)
-                    .onButtonError { error in
-                        alert.show(error: error, title: "Failed to export")
+                    .onButtonStateError { error in
+                        alert.show(error: error.error, title: "Failed to export")
                     }
 
                     if exportSuccessful {

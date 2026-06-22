@@ -9,38 +9,48 @@ import SwiftUI
 
 extension AppView {
     struct IconAndDescriptionView: View {
-        @ObservedObject var cask: Cask
+        var cask: CaskViewModel
         @AppStorage("showToken") var showToken: Bool = false
-
+        @Environment(\.openURL) private var openURL
+        
         var body: some View {
             HStack {
-                if let iconURL = URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.info.token)/AppIcon.png"),
-                   let faviconURL = URL(string: "https://icon.horse/icon/\(cask.info.homepageURL?.host ?? "")") {
+                if let iconURL = URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.token)/AppIcon.png"),
+                   let faviconURL = URL(string: "https://icon.horse/icon/\(cask.homepage?.host ?? "")") {
                     AppIconView(
                         iconURL: iconURL,
                         faviconURL: faviconURL,
-                        cacheKey: cask.info.token
+                        cacheKey: cask.token
                     )
                     .padding(.leading, 5)
                 }
-                
+
                 // Name and description
                 VStack(alignment: .leading) {
                     Button {
                         showToken.toggle()
                     } label: {
-                        Text(showToken ? cask.info.token : cask.info.name)
+                        Text(showToken ? cask.token : cask.name)
                             .font(.system(size: 16, weight: .bold))
                     }
                     .buttonStyle(.plain)
 
-                    Text(cask.info.description)
+                    Text(cask.descriptionText)
                         .foregroundColor(.secondary)
                 }
-                
+
                 Spacer()
             }
             .contentShape(Rectangle())
+            .simultaneousGesture(
+                TapGesture()
+                    .modifiers(.command)
+                    .onEnded {
+                        if let url = cask.info.homepageURL {
+                            openURL(url)
+                        }
+                    }
+            )
         }
     }
 }

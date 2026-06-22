@@ -1,0 +1,14 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Rounded gradient solid app icon, 180 degrees</title>
+  <desc id="desc">Solid filled icon rotated by 180 degrees.</desc>
+  <defs>
+    <linearGradient id="iconGradient" x1="145" y1="10" x2="24" y2="166" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D832A6"/>
+      <stop offset="0.46" stop-color="#8D19DA"/>
+      <stop offset="1" stop-color="#2600FF"/>
+    </linearGradient>
+  </defs>
+  <g transform="rotate(180 90 90)">
+    <path d="M56 0H124C154.928 0 180 25.0721 180 56V124C180 154.928 154.928 180 124 180H20C8.9543 180 0 171.046 0 160V56C0 25.0721 25.0721 0 56 0Z" fill="url(#iconGradient)"/>
+  </g>
+</svg>

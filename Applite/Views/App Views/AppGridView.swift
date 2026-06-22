@@ -7,19 +7,19 @@
 
 import SwiftUI
 
-/// Displays a list of ``Cask`` objects in a flexible grid
+/// Displays a list of ``CaskViewModel`` objects in a flexible grid
 ///
 /// - Parameters:
-///   - casks: List of ``Cask`` object to display
+///   - casks: List of ``CaskViewModel`` objects to display
 ///   - appRole: Role of the casks displayed
 struct AppGridView: View {
-    let casks: [Cask]
+    let casks: [CaskViewModel]
     var appRole: AppRole
-    
+
     let columns = [
         GridItem(.adaptive(minimum: 320))
     ]
-    
+
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 20) {
@@ -29,7 +29,7 @@ struct AppGridView: View {
 
                 ForEach(casks) { cask in
                     // Filter out self
-                    if cask.info.token != "applite" {
+                    if cask.token != "applite" {
                         AppView(cask: cask, role: appRole)
                     }
                 }

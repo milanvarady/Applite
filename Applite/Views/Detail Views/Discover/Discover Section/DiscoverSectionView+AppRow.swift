@@ -9,28 +9,18 @@ import SwiftUI
 
 extension DiscoverSectionView {
     var appRowAndControls: some View {
-        ScrollViewReader { proxy in
-            HStack {
-                // Backward button
-                scrollButton(
-                    icon: "chevron.compact.left",
-                    proxy: proxy,
-                    direction: -
-                )
-                .opacity(scrollOffset <= 0 ? 0.2 : 1)
+        HStack {
+            // Backward button
+            scrollButton(icon: "chevron.compact.left", direction: -1)
+                .opacity((scrollPosition ?? 0) <= 0 ? 0.2 : 1)
 
-                // App row
-                appRow
-                    .coordinateSpace(name: "\(category.id)Scroll")
+            // App row
+            appRow
 
-                // Forward button
-                scrollButton(
-                    icon: "chevron.compact.right",
-                    proxy: proxy,
-                    direction: +
-                )
+            // Forward button
+            scrollButton(icon: "chevron.compact.right", direction: 1)
+                .opacity((scrollPosition ?? 0) >= maxLeadingIndex ? 0.2 : 1)
                 .padding(.leading, 15)
-            }
         }
     }
 
@@ -47,40 +37,56 @@ extension DiscoverSectionView {
 
                             Spacer()
                         }
-                        .id(index)
                     }
+                    .transition(.opacity)
                 } else {
                     // Placeholders
-                    ForEach(0..<6) { _ in
+                    ForEach(0..<6, id: \.self) { _ in
                         PlaceholderAppGroup()
                     }
+                    .transition(.opacity)
                 }
             }
-            .background(GeometryReader { geometry in
-                Color.clear.preference(
-                    key: ViewOffsetKey.self,
-                    value: -geometry.frame(in: .named("\(category.id)Scroll")).origin.x
-                )
-            })
+            .scrollTargetLayout()
+            // Force a clean rebuild when transitioning placeholder → loaded so
+            // `.scrollTargetLayout()` doesn't hold onto stale child identities.
+            .id(category.casksCoupled.isEmpty)
         }
-        .onPreferenceChange(ViewOffsetKey.self) { value in
-            Task { @MainActor in
-                scrollOffset = value
+        .scrollTargetBehavior(.viewAligned)
+        // `anchor: .leading` makes each scrollPosition change push that item to
+        // the leading edge. Without it, the scroll view skips the move when the
+        // target is already visible — so clicking next 3 times when 3 items
+        // fit on screen would do nothing until the 4th click.
+        .scrollPosition(id: $scrollPosition, anchor: .leading)
+        .background(
+            GeometryReader { geometry in
+                Color.clear
+                    .onAppear { scrollViewWidth = geometry.size.width }
+                    .onChange(of: geometry.size.width) { _, newWidth in
+                        scrollViewWidth = newWidth
+                    }
             }
-        }
+        )
     }
 
-    func scrollButton(icon: String, proxy: ScrollViewProxy, direction: (CGFloat, CGFloat) -> CGFloat) -> some View {
-        // Calculate new scroll position
-        let appViewWidthWithPadding = AppView.dimensions.width + AppView.dimensions.spacing
-        let newScrollOffset = direction(scrollOffset, appViewWidthWithPadding)
-        let scrollTo: Int = Int((newScrollOffset / appViewWidthWithPadding).rounded())
-        let scrollUpperBound = category.casks.count - 1
-        let scrollToClamped = min(max(scrollTo, 0), scrollUpperBound)
+    /// The last `scrollPosition` index for which the scroll view can physically scroll.
+    /// `casksCoupled.count - 1` over-shoots when several columns fit on screen — once
+    /// the scroll view is at its trailing limit, further `scrollPosition` increments
+    /// don't move anything and you'd have to click back through the phantom values.
+    private var maxLeadingIndex: Int {
+        let columnWidth = AppView.dimensions.width + AppView.dimensions.spacing
+        guard columnWidth > 0, scrollViewWidth > 0 else {
+            return max(0, category.casksCoupled.count - 1)
+        }
+        let visibleColumns = max(1, Int(scrollViewWidth / columnWidth))
+        return max(0, category.casksCoupled.count - visibleColumns)
+    }
 
-        return Button {
+    func scrollButton(icon: String, direction: Int) -> some View {
+        Button {
+            let new = min(max(0, (scrollPosition ?? 0) + direction), maxLeadingIndex)
             withAnimation(.spring()) {
-                proxy.scrollTo(scrollToClamped, anchor: .leading)
+                scrollPosition = new
             }
         } label: {
             Image(systemName: icon)

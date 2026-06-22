@@ -8,19 +8,19 @@
 import SwiftUI
 
 struct ActiveTasksView: View {
-    @EnvironmentObject var caskManager: CaskManager
-    
+    @Environment(CaskManager.self) var caskManager
+
     var body: some View {
         VStack {
-            if caskManager.activeTasks.isEmpty {
-                Text("No Active Tasks", comment: "No active tasks available message")
-                    .font(.title)
-            } else {
-                AppGridView(casks: caskManager.activeTasks.map { $0.cask }, appRole: .update)
-            }
-
+            AppGridView(casks: caskManager.activeTasks.map(\.viewModel), appRole: .update)
             Spacer()
         }
+        .overlay {
+            if caskManager.activeTasks.isEmpty {
+                ContentUnavailableView("No Active Tasks", systemImage: "gear.badge.checkmark")
+            }
+        }
+        .navigationTitle("Active Tasks")
         .padding()
     }
 }

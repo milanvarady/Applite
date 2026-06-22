@@ -10,9 +10,9 @@ import SwiftUI
 extension AppView {
     /// Button used in the Download section, downloads the app
     struct DownloadButton: View {
-        @ObservedObject var cask: Cask
+        var cask: CaskViewModel
 
-        @EnvironmentObject var caskManager: CaskManager
+        @Environment(CaskManager.self) var caskManager
 
         // Alerts
         @State var showingPopover = false
@@ -25,7 +25,7 @@ extension AppView {
         var body: some View {
             /// Download button
             Button {
-                if cask.info.warning != nil {
+                if cask.warning != nil {
                     // Show download confirmation
                     showCaveatsAndWarnings = true
                     return
@@ -33,7 +33,7 @@ extension AppView {
 
                 caskManager.install(cask)
             } label: {
-                if case .disabled(_, _) = cask.info.warning {
+                if case .disabled(_, _) = cask.warning {
                     Image(systemName: "xmark.circle")
                         .foregroundStyle(.red)
                         .font(.system(size: 22))
@@ -43,7 +43,7 @@ extension AppView {
                         .font(.system(size: 22))
                 }
             }
-            .disabled(cask.info.warning?.isDisabled ?? false)
+            .disabled(cask.warning?.isDisabled ?? false)
             .padding(.trailing, -8)
             .onHover { isHovering in
                 // Hover effect
@@ -51,14 +51,14 @@ extension AppView {
                     buttonFill = isHovering
                 }
             }
-            .alert(cask.info.warning?.title ?? "", isPresented: $showCaveatsAndWarnings) {
+            .alert(cask.warning?.title ?? "", isPresented: $showCaveatsAndWarnings) {
                 Button("Download Anyway") {
                     caskManager.install(cask)
                 }
 
                 Button("Cancel", role: .cancel) { }
             } message: {
-                if let warning = cask.info.warning {
+                if let warning = cask.warning {
                     switch warning {
                     case .hasCaveat(let caveat):
                         Text(caveat)
@@ -70,7 +70,7 @@ extension AppView {
                 }
             }
             .alert("Broken Brew Path", isPresented: $showingBrewError) {} message: {
-                Text(DependencyManager.brokenPathOrIstallMessage)
+                Text(DependencyManager.brokenPathOrInstallMessage)
             }
 
             // More actions popover
@@ -84,7 +84,7 @@ extension AppView {
             .popover(isPresented: $showingPopover) {
                 VStack(alignment: .leading, spacing: 6) {
                     // Open homepage
-                    if let homepageLink = cask.info.homepageURL {
+                    if let homepageLink = cask.homepage {
                         Link(destination: homepageLink, label: {
                             Label("Homepage", systemImage: "house")
                         })
@@ -106,7 +106,7 @@ extension AppView {
                 .padding(8)
                 .buttonStyle(.plain)
             }
-            .confirmationDialog("Are you sure you want to force install \(cask.info.name)? This will override any current installation!", isPresented: $showingForceInstallConfirmation) {
+            .confirmationDialog("Are you sure you want to force install \(cask.name)? This will override any current installation!", isPresented: $showingForceInstallConfirmation) {
                 Button("Yes") {
                     caskManager.install(cask, force: true)
                 }

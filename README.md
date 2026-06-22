@@ -1,7 +1,7 @@
-![GitHub](https://img.shields.io/github/license/milanvarady/Applite)
-![GitHub release (with filter)](https://img.shields.io/github/v/release/milanvarady/Applite)
-![GitHub all releases](https://img.shields.io/github/downloads/milanvarady/Applite/total)
-![GitHub contributors](https://img.shields.io/github/contributors/milanvarady/Applite)
+[![License](https://img.shields.io/github/license/milanvarady/Applite)](LICENSE.txt)
+[![Latest release](https://img.shields.io/github/v/release/milanvarady/Applite)](https://github.com/milanvarady/Applite/releases/latest)
+[![All releases](https://img.shields.io/github/downloads/milanvarady/Applite/total)](https://github.com/milanvarady/Applite/releases)
+[![Contributors](https://img.shields.io/github/contributors/milanvarady/Applite)](https://github.com/milanvarady/Applite/graphs/contributors)
 ![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/milanvarady/Applite/latest)
 
 
@@ -16,10 +16,11 @@ User-friendly GUI macOS application for Homebrew Casks
 3. [Screenshots](#screenshots)
 4. [Download](#download)
 5. [Contact](#contact)
-6. [Contributing](#contributing)
-7. [Packages Used](#packages-used)
-8. [License](#license)
-9. [Alternatives](#alternatives)
+6. [Roadmap](#roadmap)
+7. [Contributing](#contributing)
+8. [Packages Used](#packages-used)
+9. [License](#license)
+10. [Alternatives](#alternatives)
 
 ## Key Features
 
@@ -59,6 +60,12 @@ If you have any questions, feel free to e-mail me: [milan@aerolite.dev](mailto:m
 
 Or join the [Official Discord Server](https://discord.gg/MpDMH9cPbK).
 
+## Roadmap
+
+I don't have much time for development, but I release updates periodically.
+
+View the [roadmap](https://github.com/users/milanvarady/projects/1).
+
 ## Contributing
 
 The project is open to contributions. See the [Contribution Guidelines](docs/CONTRIBUTING.md) for more information.
@@ -81,6 +88,7 @@ Applite is licensed under the [MIT](https://choosealicense.com/licenses/mit/) Li
 
 ## Alternatives
 
+- [WailBrew](https://github.com/wickenico/WailBrew) (active)
 - [Cork](https://github.com/buresdv/Cork) (paid)
 - [Brewer X](https://panini.house/brewer/) (paid)
 - [BrewMate](https://github.com/romankurnovskii/BrewMate) (electron based)
