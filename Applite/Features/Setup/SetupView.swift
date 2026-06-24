@@ -18,7 +18,18 @@ struct SetupView: View {
         case brewPathSelection
         case allSet
     }
-    
+
+    struct PageLink: Identifiable, Hashable {
+        let title: LocalizedStringKey
+        let page: SetupPage
+
+        var id: SetupPage { page }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(page)
+        }
+    }
+
     @State var page: SetupPage = .welcome
 
     @State var detectedBrewInstallation: BrewPaths.PathOption? = nil
@@ -84,6 +95,57 @@ struct SetupView: View {
         }
         .task {
             detectedBrewInstallation = await DependencyManager.detectHomebrew(setPathOption: true)
+        }
+    }
+
+    /// Adds a Back and Continue button to the bottom of the page
+    ///
+    /// - Parameters:
+    ///   - page: Page binding so it can change the current page
+    ///   - canContinue: Controls whether it can go to the next page yet or not
+    ///   - pageAfter: Page when clicking on Continue
+    ///   - pageBefore: Page when clicking on Back
+    ///
+    /// - Returns: ``View``
+    func pageControlButtons(
+        nextPage: SetupPage,
+        canContinue: Bool = true,
+        additionalLinks: [PageLink]? = nil
+    ) -> some View {
+        VStack {
+            Divider()
+
+            HStack {
+                if let additionalLinks {
+                    ForEach(Array(additionalLinks.enumerated()), id: \.element) { index, link in
+                        Button(link.title) {
+                            page = link.page
+                        }
+                        .buttonStyle(.link)
+                        .padding(.horizontal)
+
+                        if additionalLinks.count > 1 && index != additionalLinks.count - 1 {
+
+                            Divider()
+                                .frame(height: 20)
+                        }
+                    }
+                }
+
+                Spacer()
+
+                Button("Continue") {
+                    withAnimation {
+                        page = nextPage
+                    }
+                }
+                .disabled(!canContinue)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .keyboardShortcut(.defaultAction)
+            }
+            .padding(.trailing)
+            .padding(.bottom, 8)
         }
     }
 }

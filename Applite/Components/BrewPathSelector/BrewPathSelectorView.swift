@@ -46,6 +46,80 @@ struct BrewPathSelectorView: View {
             isSelectedPathValid = await BrewPaths.isBrewPathValid(at: URL(fileURLWithPath: customUserBrewPath))
         }
     }
+
+    func pathOption(_ option: BrewPaths.PathOption, showPath: Bool = true) -> some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Text(getPathDescription(for: option))
+
+                if option.rawValue == brewPathOption {
+                    if isSelectedPathValid {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 16))
+                            .foregroundColor(.green)
+                    } else {
+                        Image(systemName: "xmark.circle")
+                            .font(.system(size: 16))
+                            .foregroundColor(.red)
+                    }
+                }
+            }
+
+            if showPath {
+                Text(BrewPaths.getBrewExectuablePath(for: option).path(percentEncoded: false))
+                    .truncationMode(.middle)
+                    .lineLimit(1)
+                    .foregroundStyle(.secondary)
+                    .fontWeight(.thin)
+                    .fontDesign(.monospaced)
+            }
+        }
+    }
+
+    func customPathOption(option: BrewPaths.PathOption) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            pathOption(option, showPath: false)
+
+            HStack {
+                TextField("Custom brew path", text: $customUserBrewPath, prompt: Text("/path/to/brew"))
+                    .textFieldStyle(.roundedBorder)
+                    .frame(maxWidth: 300)
+                    .autocorrectionDisabled()
+
+                Button("Browse") {
+                    choosingCustomFolder = true
+                }
+                .fileImporter(
+                    isPresented: $choosingCustomFolder,
+                    allowedContentTypes: [.unixExecutable]
+                ) { result in
+                    switch result {
+                    case .success(let file):
+                        customUserBrewPath = file.path(percentEncoded: false)
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                    }
+                }
+            }
+            .disabled(brewPathOption != BrewPaths.PathOption.custom.rawValue)
+        }
+    }
+
+    func getPathDescription(for option: BrewPaths.PathOption) -> LocalizedStringKey {
+        switch option {
+        case .appPath:
+            return "Applite's installation"
+
+        case .defaultAppleSilicon:
+            return "Apple Silicon Mac"
+
+        case .defaultIntel:
+            return "Intel Mac"
+
+        case .custom:
+            return "Custom"
+        }
+    }
 }
 
 struct BrewPathSelectorView_Previews: PreviewProvider {
