@@ -19,11 +19,11 @@ struct AppMigrationView: View {
                 
                 HStack(spacing: 40) {
                     Card(padding: cardPadding) {
-                        ExportView()
+                        ExportAppsView()
                     }
                     
                     Card(padding: cardPadding) {
-                        ImportView()
+                        ImportAppsView()
                     }
                 }
                 

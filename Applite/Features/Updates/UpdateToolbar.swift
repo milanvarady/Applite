@@ -1,5 +1,5 @@
 //
-//  ToolbarItems.swift
+//  UpdateToolbar.swift
 //  Applite
 //
 //  Created by Milán Várady on 2024.12.26.
@@ -8,7 +8,7 @@
 import SwiftUI
 import ButtonKit
 
-struct ToolbarItems: ToolbarContent {
+struct UpdateToolbar: ToolbarContent {
     @Environment(CaskManager.self) var caskManager
     var loadAlert: AlertManager
     

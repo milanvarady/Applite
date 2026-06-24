@@ -8,7 +8,7 @@
 import SwiftUI
 import ButtonKit
 
-struct DetailViews: View {
+struct DetailView: View {
     @Environment(CaskManager.self) var caskManager
     @Binding var selection: SidebarItem?
     @Binding var modifyingBrew: Bool

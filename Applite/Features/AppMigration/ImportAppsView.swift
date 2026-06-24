@@ -1,5 +1,5 @@
 //
-//  ImportView.swift
+//  ImportAppsView.swift
 //  Applite
 //
 //  Created by Milán Várady on 2025.01.01.
@@ -8,14 +8,14 @@
 import SwiftUI
 import OSLog
 
-struct ImportView: View {
+struct ImportAppsView: View {
     @Environment(CaskManager.self) var caskManager
 
     @State var showFileImporter = false
     @State var importSuccessful = false
     @State var alert = AlertManager()
 
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigrationView.ExportView")
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigration.ImportAppsView")
 
     var body: some View {
         VStack(alignment: .leading) {

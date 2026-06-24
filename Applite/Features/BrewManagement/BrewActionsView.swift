@@ -1,5 +1,5 @@
 //
-//  ActionsView.swift
+//  BrewActionsView.swift
 //  Applite
 //
 //  Created by Milán Várady on 2025.01.01.
@@ -8,7 +8,7 @@
 import SwiftUI
 import ButtonKit
 
-struct ActionsView: View {
+struct BrewActionsView: View {
     @Binding var modifyingBrew: Bool
     let cardWidth: CGFloat
     let cardPadding: CGFloat

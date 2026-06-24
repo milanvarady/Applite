@@ -1,5 +1,5 @@
 //
-//  InfoView.swift
+//  BrewInfoView.swift
 //  Applite
 //
 //  Created by Milán Várady on 2025.01.01.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct InfoView: View {
+struct BrewInfoView: View {
     let cardWidth: CGFloat
     let cardPadding: CGFloat
     let cardHeight: CGFloat = 120

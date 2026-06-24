@@ -1,5 +1,5 @@
 //
-//  AppliteBrewInstall.swift
+//  AppliteBrewInstallView.swift
 //  Applite
 //
 //  Created by Milán Várady on 2024.12.26.
@@ -9,7 +9,7 @@ import SwiftUI
 import ButtonKit
 
 /// Brew installation page
-struct AppliteBrewInstall: View {
+struct AppliteBrewInstallView: View {
     @Environment(\.openURL) var openURL
 
     /// This is needed so the parent view knows it can continue to the next page

@@ -1,5 +1,5 @@
 //
-//  ContentView+SidebarViews.swift
+//  SidebarView.swift
 //  Applite
 //
 //  Created by Milán Várady on 2024.12.26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SidebarViews: View {
+struct SidebarView: View {
     @Environment(CaskManager.self) var caskManager
     @Binding var selection: SidebarItem?
     

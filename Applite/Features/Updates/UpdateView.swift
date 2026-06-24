@@ -80,7 +80,7 @@ struct UpdateView: View {
         .navigationTitle("Update")
         .searchable(text: $searchText, placement: .toolbar)
         .toolbar {
-            ToolbarItems(loadAlert: loadAlert)
+            UpdateToolbar(loadAlert: loadAlert)
         }
         .alertManager(loadAlert)
         .onChange(of: caskManager.outdatedViewModels.isEmpty) { _, becameEmpty in

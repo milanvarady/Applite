@@ -1,5 +1,5 @@
 //
-//  ExportView.swift
+//  ExportAppsView.swift
 //  Applite
 //
 //  Created by Milán Várady on 2025.01.01.
@@ -9,13 +9,13 @@ import SwiftUI
 import ButtonKit
 import OSLog
 
-struct ExportView: View {
+struct ExportAppsView: View {
     @State var showFileExporter = false
     @State var exportFile: ExportFile = .init()
     @State var exportSuccessful = false
     @State var alert = AlertManager()
 
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigrationView.ExportView")
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigration.ExportAppsView")
 
     var body: some View {
         VStack(alignment: .leading) {

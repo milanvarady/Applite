@@ -28,10 +28,10 @@ struct BrewManagementView: View {
                 VStack(alignment: .leading) {
                     titleAndDescription
 
-                    InfoView(cardWidth: cardWidth, cardPadding: cardPadding)
+                    BrewInfoView(cardWidth: cardWidth, cardPadding: cardPadding)
                         .padding(.vertical, 16)
 
-                    ActionsView(modifyingBrew: $modifyingBrew, cardWidth: cardWidth, cardPadding: cardPadding)
+                    BrewActionsView(modifyingBrew: $modifyingBrew, cardWidth: cardWidth, cardPadding: cardPadding)
                     
                     Spacer()
                 }

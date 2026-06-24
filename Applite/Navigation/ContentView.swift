@@ -30,7 +30,7 @@ struct ContentView: View {
         @Bindable var caskManager = caskManager
 
         NavigationSplitView {
-            SidebarViews(selection: $selection)
+            SidebarView(selection: $selection)
                 .disabled(modifyingBrew)
         } detail: {
             if caskManager.hasBrokenInstall {
@@ -38,7 +38,7 @@ struct ContentView: View {
             } else if !searchInput.isEmpty {
                 SearchView(query: $searchInput)
             } else if selection != nil {
-                DetailViews(
+                DetailView(
                     selection: $selection,
                     modifyingBrew: $modifyingBrew
                 )

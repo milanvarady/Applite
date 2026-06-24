@@ -1,5 +1,5 @@
 //
-//  Welcome.swift
+//  WelcomeView.swift
 //  Applite
 //
 //  Created by Milán Várady on 2024.12.26.
@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// Welcome page
-struct Welcome: View {
+struct WelcomeView: View {
     var body: some View {
         VStack {
             Text("Welcome to Applite", comment: "Setup welcome page title")

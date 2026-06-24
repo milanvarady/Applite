@@ -41,7 +41,7 @@ struct SetupView: View {
         VStack {
             switch page {
             case .welcome:
-                Welcome()
+                WelcomeView()
                     .transition(.push(from: .trailing))
 
                 Spacer()
@@ -60,7 +60,7 @@ struct SetupView: View {
                 )
 
             case .appliteBrewInstall:
-                AppliteBrewInstall(isDone: $isBrewInstallDone)
+                AppliteBrewInstallView(isDone: $isBrewInstallDone)
                     .transition(.push(from: .trailing))
 
                 Spacer()
@@ -83,13 +83,13 @@ struct SetupView: View {
                 )
 
             case .brewPathSelection:
-                BrewPathSelection(isBrewPathValid: $isBrewPathValid)
+                BrewPathSelectionView(isBrewPathValid: $isBrewPathValid)
                     .transition(.push(from: .trailing))
 
                 pageControlButtons(nextPage: .allSet, canContinue: isBrewPathValid)
 
             case .allSet:
-                AllSet()
+                AllSetView()
                     .transition(.push(from: .trailing))
             }
         }

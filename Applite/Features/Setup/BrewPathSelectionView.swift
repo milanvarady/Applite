@@ -1,5 +1,5 @@
 //
-//  BrewPathSelection.swift
+//  BrewPathSelectionView.swift
 //  Applite
 //
 //  Created by Milán Várady on 2024.12.26.
@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// User can provide installed brew path here
-struct BrewPathSelection: View {
+struct BrewPathSelectionView: View {
     @Binding var isBrewPathValid: Bool
 
     var body: some View {

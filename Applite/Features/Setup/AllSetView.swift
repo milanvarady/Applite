@@ -1,5 +1,5 @@
 //
-//  AllSet.swift
+//  AllSetView.swift
 //  Applite
 //
 //  Created by Milán Várady on 2024.12.26.
@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// Page shown when setup is complete
-struct AllSet: View {
+struct AllSetView: View {
     @AppStorage(Preferences.setupComplete.rawValue) var setupComplete = false
 
     var body: some View {
