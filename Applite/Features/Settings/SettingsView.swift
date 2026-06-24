@@ -9,7 +9,7 @@ import SwiftUI
 import AppKit
 import Sparkle
 
-public enum ColorSchemePreference: String, CaseIterable, Identifiable {
+public enum ColorSchemePreference: String, CaseIterable, Identifiable, Sendable {
     case system
     case light
     case dark

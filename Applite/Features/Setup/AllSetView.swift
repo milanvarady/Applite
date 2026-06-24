@@ -9,7 +9,7 @@ import SwiftUI
 
 /// Page shown when setup is complete
 struct AllSetView: View {
-    @AppStorage(Preferences.setupComplete.rawValue) var setupComplete = false
+    @AppStorage(Preferences.setupComplete) var setupComplete
 
     var body: some View {
         Text("All set!", comment: "Setup done message")

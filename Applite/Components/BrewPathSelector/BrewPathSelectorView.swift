@@ -11,8 +11,8 @@ import SwiftUI
 struct BrewPathSelectorView: View {
     @Binding var isSelectedPathValid: Bool
 
-    @AppStorage(Preferences.customUserBrewPath.rawValue) var customUserBrewPath: String = BrewPaths.getBrewExectuablePath(for: .defaultAppleSilicon).path(percentEncoded: false)
-    @AppStorage(Preferences.brewPathOption.rawValue) var brewPathOption = BrewPaths.PathOption.defaultAppleSilicon.rawValue
+    @AppStorage(Preferences.customUserBrewPath) var customUserBrewPath
+    @AppStorage(Preferences.brewPathOption) var brewPathOption
 
     @State var choosingCustomFolder = false
 

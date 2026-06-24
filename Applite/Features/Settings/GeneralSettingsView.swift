@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct GeneralSettingsView: View {
-    @AppStorage(Preferences.colorSchemePreference.rawValue) var colorSchemePreference: ColorSchemePreference = .system
-    @AppStorage(Preferences.catalogUpdateFrequency.rawValue) var catalogUpdateFrequency: CatalogUpdateFrequency = .default
-    @AppStorage(Preferences.notificationSuccess.rawValue) var notificationOnSuccess: Bool = false
-    @AppStorage(Preferences.notificationFailure.rawValue) var notificationOnFailure: Bool = true
+    @AppStorage(Preferences.colorSchemePreference) var colorSchemePreference
+    @AppStorage(Preferences.catalogUpdateFrequency) var catalogUpdateFrequency
+    @AppStorage(Preferences.notificationSuccess) var notificationOnSuccess
+    @AppStorage(Preferences.notificationFailure) var notificationOnFailure
 
     /// Needed for a workaround for changing the color scheme
     @State var fixingColor = false

@@ -19,9 +19,9 @@ struct SearchView: View {
     @State private var results: [CaskViewModel] = []
     @State private var isSearching = false
 
-    @AppStorage(Preferences.searchSortOption.rawValue) private var sortBy = SortingOptions.mostDownloaded
-    @AppStorage(Preferences.hideUnpopularApps.rawValue) private var hideUnpopularApps = false
-    @AppStorage(Preferences.hideDisabledApps.rawValue) private var hideDisabledApps = false
+    @AppStorage(Preferences.searchSortOption) private var sortBy
+    @AppStorage(Preferences.hideUnpopularApps) private var hideUnpopularApps
+    @AppStorage(Preferences.hideDisabledApps) private var hideDisabledApps
 
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,

@@ -74,9 +74,8 @@ final class CaskViewModel {
         if self.pkgInstaller {
             // Resolve the user's appdir override (if enabled), falling back to the system /Applications.
             var applicationsDirectory = URL.applicationDirectory.path
-            if UserDefaults.standard.bool(forKey: Preferences.appdirOn.rawValue),
-               let custom = UserDefaults.standard.string(forKey: Preferences.appdirPath.rawValue),
-               !custom.isEmpty {
+            let custom = UserDefaults.standard.value(for: Preferences.appdirPath)
+            if UserDefaults.standard.value(for: Preferences.appdirOn), !custom.isEmpty {
                 applicationsDirectory = custom
             }
 

@@ -35,16 +35,16 @@ final class BrewService {
             Self.logger.info("Cask \"\(vm.token)\" installation started")
 
             // Appdir argument
-            let appdirOn = UserDefaults.standard.bool(forKey: Preferences.appdirOn.rawValue)
-            let appdirPath = UserDefaults.standard.string(forKey: Preferences.appdirPath.rawValue)
-            let appdirArgument = "--appdir=\"\(appdirPath ?? "/Applications")\""
+            let appdirOn = UserDefaults.standard.value(for: Preferences.appdirOn)
+            let appdirPath = UserDefaults.standard.value(for: Preferences.appdirPath)
+            let appdirArgument = "--appdir=\"\(appdirPath)\""
 
             // Install command
             var arguments = [vm.token]
             if force { arguments.append("--force") }
             if appdirOn { arguments.append(appdirArgument) }
 
-            let noQuarantine = UserDefaults.standard.bool(forKey: Preferences.noQuarantine.rawValue)
+            let noQuarantine = UserDefaults.standard.value(for: Preferences.noQuarantine)
             if noQuarantine { arguments.append("--no-quarantine") }
 
             let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) install --cask \(arguments.joined(separator: " "))"

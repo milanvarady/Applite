@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct GreedyUpgradeToggle: View {
-    @AppStorage(Preferences.greedyUpgrade.rawValue) var greedyUpgrade: Bool = false
+    @AppStorage(Preferences.greedyUpgrade) var greedyUpgrade
     
     var body: some View {
         HStack {

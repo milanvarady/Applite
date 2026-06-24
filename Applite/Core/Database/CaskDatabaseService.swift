@@ -141,11 +141,10 @@ struct CaskDatabaseService {
     // MARK: - Metadata
 
     /// Checks whether a sync is needed based on the catalog update frequency preference.
-    /// Uses `object(forKey:) as? Int` (not `integer(forKey:)`) so a missing key falls back
-    /// to `CatalogUpdateFrequency.default` instead of being read as `0` (= `.everyAppLaunch`).
+    /// A missing key falls back to `CatalogUpdateFrequency.default` (via the preference's
+    /// declared default) instead of being read as `0` (= `.everyAppLaunch`).
     func shouldSync() async throws -> Bool {
-        let stored = UserDefaults.standard.object(forKey: Preferences.catalogUpdateFrequency.rawValue) as? Int
-        let frequency = stored.flatMap(CatalogUpdateFrequency.init(rawValue:)) ?? .default
+        let frequency = UserDefaults.standard.value(for: Preferences.catalogUpdateFrequency)
 
         if frequency == .everyAppLaunch {
             return true

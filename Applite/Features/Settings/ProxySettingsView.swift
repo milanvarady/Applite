@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct ProxySettingsView: View {
-    @AppStorage(Preferences.networkProxyEnabled.rawValue) var proxyEnabled: Bool = true
-    @AppStorage(Preferences.preferredProxyType.rawValue) var preferredProxyType: NetworkProxyType = .http
+    @AppStorage(Preferences.networkProxyEnabled) var proxyEnabled
+    @AppStorage(Preferences.preferredProxyType) var preferredProxyType
 
     var body: some View {
         VStack(alignment: .leading) {

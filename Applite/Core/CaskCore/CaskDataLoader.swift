@@ -164,7 +164,7 @@ final class CaskDataLoader {
 
     /// Fetches cask DTOs from third-party taps via brew ruby script
     private func fetchTapDTOs() async -> [CaskDTO] {
-        let enabled = UserDefaults.standard.value(forKey: Preferences.includeCasksFromTaps.rawValue) as? Bool ?? true
+        let enabled = UserDefaults.standard.value(for: Preferences.includeCasksFromTaps)
         guard enabled else {
             logger.info("Tap fetch skipped: includeCasksFromTaps is disabled")
             return []

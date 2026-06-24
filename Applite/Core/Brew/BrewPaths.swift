@@ -28,10 +28,10 @@ struct BrewPaths {
     /// Retrieves and sets the currently selected ``PathOption`` from user defaults
     static var selectedBrewOption: PathOption {
         set {
-            UserDefaults.standard.setValue(newValue.rawValue, forKey: "brewPathOption")
+            UserDefaults.standard.setValue(newValue.rawValue, for: Preferences.brewPathOption)
         }
         get {
-            return PathOption(rawValue: UserDefaults.standard.integer(forKey: "brewPathOption")) ?? .appPath
+            return PathOption(rawValue: UserDefaults.standard.value(for: Preferences.brewPathOption)) ?? .appPath
         }
     }
     
@@ -54,7 +54,7 @@ struct BrewPaths {
             return URL(fileURLWithPath: "/usr/local/bin/brew")
 
         case .custom:
-            return URL(fileURLWithPath: UserDefaults.standard.string(forKey: "customUserBrewPath") ?? "")
+            return URL(fileURLWithPath: UserDefaults.standard.value(for: Preferences.customUserBrewPath))
         }
     }
     
@@ -80,7 +80,7 @@ struct BrewPaths {
             return URL(fileURLWithPath: "/usr/local")
 
         case .custom:
-            let path = UserDefaults.standard.string(forKey: "customUserBrewPath")?.replacing("/bin/brew", with: "") ?? ""
+            let path = UserDefaults.standard.value(for: Preferences.customUserBrewPath).replacing("/bin/brew", with: "")
             return URL(fileURLWithPath: path)
         }
     }

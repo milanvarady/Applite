@@ -11,10 +11,10 @@ import ButtonKit
 struct BrewSettingsView: View {
     @Environment(CaskManager.self) var caskManager
 
-    @AppStorage(Preferences.customUserBrewPath.rawValue) var customUserBrewPath: String = "/opt/homebrew/bin/brew"
-    @AppStorage(Preferences.brewPathOption.rawValue) var brewPathOption = BrewPaths.PathOption.appPath.rawValue
-    @AppStorage(Preferences.includeCasksFromTaps.rawValue) var includeCasksFromTaps: Bool = true
-    @AppStorage(Preferences.noQuarantine.rawValue) var noQuarantine: Bool = false
+    @AppStorage(Preferences.customUserBrewPath) var customUserBrewPath
+    @AppStorage(Preferences.brewPathOption) var brewPathOption
+    @AppStorage(Preferences.includeCasksFromTaps) var includeCasksFromTaps
+    @AppStorage(Preferences.noQuarantine) var noQuarantine
 
     @State var isSelectedBrewPathValid = false
 

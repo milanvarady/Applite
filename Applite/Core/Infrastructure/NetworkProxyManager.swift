@@ -18,8 +18,9 @@ struct NetworkProxyManager {
         }
 
         // Get preferneces
-        let proxyEnabled: Bool = UserDefaults.standard.value(forKey: Preferences.networkProxyEnabled.rawValue) as? Bool ?? true
-        let preferredProxyTypeString: String = UserDefaults.standard.string(forKey: Preferences.preferredProxyType.rawValue) ?? ""
+        let proxyEnabled = UserDefaults.standard.value(for: Preferences.networkProxyEnabled)
+        // Intentionally left optional: when unset, fall through to system proxy auto-detection below.
+        let preferredProxyTypeString = UserDefaults.standard.string(forKey: Preferences.preferredProxyType.name) ?? ""
         let preferredProxyType: NetworkProxyType? = NetworkProxyType(rawValue: preferredProxyTypeString)
 
         if !proxyEnabled {

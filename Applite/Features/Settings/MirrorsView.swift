@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct MirrorsView: View {
-    @AppStorage(Preferences.mirrorEnabled.rawValue) var mirrorEnabled: Bool = false
-    @AppStorage(Preferences.mirrorAPIDomain.rawValue) var apiDomain: String = ""
-    @AppStorage(Preferences.mirrorBrewGitRemote.rawValue) var brewGitRemote: String = ""
-    @AppStorage(Preferences.mirrorCoreGitRemote.rawValue) var coreGitRemote: String = ""
-    @AppStorage(Preferences.mirrorBottleDomain.rawValue) var bottleDomain: String = ""
+    @AppStorage(Preferences.mirrorEnabled) var mirrorEnabled
+    @AppStorage(Preferences.mirrorAPIDomain) var apiDomain
+    @AppStorage(Preferences.mirrorBrewGitRemote) var brewGitRemote
+    @AppStorage(Preferences.mirrorCoreGitRemote) var coreGitRemote
+    @AppStorage(Preferences.mirrorBottleDomain) var bottleDomain
 
     var body: some View {
         VStack(alignment: .leading) {

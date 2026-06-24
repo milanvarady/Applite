@@ -16,8 +16,8 @@ struct AppliteApp: App {
 
     @State var caskManager = CaskManager()
     
-    @AppStorage(Preferences.colorSchemePreference.rawValue) var colorSchemePreference: ColorSchemePreference = .system
-    @AppStorage(Preferences.setupComplete.rawValue) var setupComplete: Bool = false
+    @AppStorage(Preferences.colorSchemePreference) var colorSchemePreference
+    @AppStorage(Preferences.setupComplete) var setupComplete
     
     /// Sparkle update controller
     private let updaterController: SPUStandardUpdaterController

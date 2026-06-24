@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct AppdirSelectorView: View {
-    @AppStorage(Preferences.appdirOn.rawValue) var appdirOn = false
-    @AppStorage(Preferences.appdirPath.rawValue) var appdirPath = "/Applications"
+    @AppStorage(Preferences.appdirOn) var appdirOn
+    @AppStorage(Preferences.appdirPath) var appdirPath
     
     @State var choosingAppdir = false
     

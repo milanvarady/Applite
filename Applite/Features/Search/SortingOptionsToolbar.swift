@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct SortingOptionsToolbar: ToolbarContent {
-    @AppStorage(Preferences.searchSortOption.rawValue) var sortBy = SortingOptions.mostDownloaded
-    @AppStorage(Preferences.hideUnpopularApps.rawValue) var hideUnpopularApps = false
-    @AppStorage(Preferences.hideDisabledApps.rawValue) var hideDisabledApps = false
+    @AppStorage(Preferences.searchSortOption) var sortBy
+    @AppStorage(Preferences.hideUnpopularApps) var hideUnpopularApps
+    @AppStorage(Preferences.hideDisabledApps) var hideDisabledApps
 
     var body: some ToolbarContent {
         ToolbarItem {
