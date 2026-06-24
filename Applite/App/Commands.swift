@@ -33,7 +33,7 @@ struct CommandsMenu: Commands {
                 openWindow(id: "uninstall-self")
             }
 
-            CheckForUpdatesView(updater: updaterController.updater) {
+            Button(action: updaterController.updater.checkForUpdates) {
                 Text("Check for Updates...", comment: "Check for update menu bar item")
             }
 

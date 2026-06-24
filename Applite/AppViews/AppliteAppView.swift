@@ -33,10 +33,8 @@ struct AppliteAppView: View {
             Spacer()
 
             if let updater {
-                CheckForUpdatesView(updater: updater) {
-                    Label("Update", systemImage: "arrow.uturn.down")
-                        .buttonStyle(.borderedProminent)
-                }
+                Button("Check for Updates", action: updater.checkForUpdates)
+//                .buttonStyle(.borderedProminent)
                 .clipShape(Capsule())
             }
 

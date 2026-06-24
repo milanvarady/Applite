@@ -2420,6 +2420,9 @@
         }
       }
     },
+    "Check for Update" : {
+
+    },
     "Check for Updates..." : {
       "comment" : "Check for update menu bar item",
       "localizations" : {

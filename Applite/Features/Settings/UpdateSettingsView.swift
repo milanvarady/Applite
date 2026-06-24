@@ -22,8 +22,8 @@ struct UpdateSettingsView: View {
 
     var body: some View {
         VStack {
-            CheckForUpdatesView(updater: updater) {
-                Label("Check for Updates...", systemImage: "arrow.uturn.down")
+            Button(action: updater.checkForUpdates) {
+                Label("Check for Updates...", systemImage: "arrow.triangle.2.circlepath")
             }
 
             Text("Current app version: \(Bundle.main.version) (\(Bundle.main.buildNumber))", comment: "Update settings current app version text (version, build number)")
