@@ -84,7 +84,7 @@ struct AppView: View {
     private var successCheckmark: some View {
         Image(systemName: "checkmark")
             .font(.system(size: 18, weight: .bold))
-            .foregroundColor(.green)
+            .foregroundStyle(.green)
     }
 
     @ViewBuilder
@@ -113,7 +113,7 @@ struct AppView: View {
         case .success:
             Image(systemName: "checkmark")
                 .font(.system(size: 18, weight: .bold))
-                .foregroundColor(.green)
+                .foregroundStyle(.green)
                 .scaleEffect(successCheckmarkScale)
                 .onAppear {
                     withAnimation(.spring(blendDuration: 0.5)) {
@@ -157,9 +157,6 @@ struct AppView: View {
     }
 }
 
-struct AppView_Previews: PreviewProvider {
-    static var previews: some View {
-        AppView(cask: .dummy, role: .installAndManage)
-    }
+#Preview {
+    AppView(cask: .dummy, role: .installAndManage)
 }
-

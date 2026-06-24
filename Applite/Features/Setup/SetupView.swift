@@ -150,9 +150,7 @@ struct SetupView: View {
     }
 }
 
-struct SetupView_Previews: PreviewProvider {
-    static var previews: some View {
-        SetupView()
-            .frame(width: 600, height: 400)
-    }
+#Preview {
+    SetupView()
+        .frame(width: 600, height: 400)
 }

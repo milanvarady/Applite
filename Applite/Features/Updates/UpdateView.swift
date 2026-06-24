@@ -92,9 +92,7 @@ struct UpdateView: View {
     }
 }
 
-struct UpdateView_Previews: PreviewProvider {
-    static var previews: some View {
-        UpdateView(casks: Array(repeating: .dummy, count: 8))
-            .frame(width: 500, height: 400)
-    }
+#Preview {
+    UpdateView(casks: Array(repeating: .dummy, count: 8))
+        .frame(width: 500, height: 400)
 }

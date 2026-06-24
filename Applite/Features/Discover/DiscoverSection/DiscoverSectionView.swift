@@ -46,7 +46,7 @@ struct DiscoverSectionView: View {
                 navigationSelection = .appCategory(id: category.id)
             }
             .buttonStyle(.plain)
-            .foregroundColor(.blue)
+            .foregroundStyle(.blue)
             .padding(.bottom, 3)
         }
     }

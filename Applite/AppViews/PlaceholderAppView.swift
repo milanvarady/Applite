@@ -38,9 +38,7 @@ struct PlaceholderAppView: View {
     }
 }
 
-struct PlaceholderAppView_Previews: PreviewProvider {
-    static var previews: some View {
-        PlaceholderAppView()
-            .frame(width: AppView.dimensions.width, height: AppView.dimensions.height)
-    }
+#Preview {
+    PlaceholderAppView()
+        .frame(width: AppView.dimensions.width, height: AppView.dimensions.height)
 }

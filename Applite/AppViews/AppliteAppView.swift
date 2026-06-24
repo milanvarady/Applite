@@ -11,12 +11,9 @@ import Sparkle
 /// This view is included in the installed section so users can update and uninstall Applite itself
 struct AppliteAppView: View {
     @Environment(\.openWindow) var openWindow
-    private let updaterController: SPUStandardUpdaterController
-    
-    init() {
-        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
-    }
-    
+    /// The app-wide Sparkle updater, injected from `AppliteApp` (see ``UpdaterEnvironmentKey``).
+    @Environment(\.updater) private var updater
+
     var body: some View {
         HStack {
             Image(nsImage: NSApplication.shared.applicationIconImage)
@@ -30,23 +27,25 @@ struct AppliteAppView: View {
                     .font(.system(size: 16, weight: .bold))
                 
                 Text("This app", comment: "Applite app card description")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
-            
+
             Spacer()
-                
-            CheckForUpdatesView(updater: updaterController.updater) {
-                Label("Update", systemImage: "arrow.uturn.down")
-                    .buttonStyle(.borderedProminent)
+
+            if let updater {
+                CheckForUpdatesView(updater: updater) {
+                    Label("Update", systemImage: "arrow.uturn.down")
+                        .buttonStyle(.borderedProminent)
+                }
+                .clipShape(Capsule())
             }
-            .clipShape(Capsule())
-            
+
             Button {
                 openWindow(id: "uninstall-self")
             } label: {
                 Image(systemName: "trash.fill")
                     .font(.system(size: 20))
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
             }
             .buttonStyle(.plain)
         }
@@ -54,8 +53,10 @@ struct AppliteAppView: View {
     }
 }
 
-struct AppliteAppView_Previews: PreviewProvider {
-    static var previews: some View {
-        AppliteAppView()
-    }
+#Preview {
+    AppliteAppView()
+        .environment(
+            \.updater,
+            SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil).updater
+        )
 }

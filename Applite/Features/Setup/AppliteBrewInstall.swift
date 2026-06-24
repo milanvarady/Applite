@@ -99,7 +99,7 @@ struct AppliteBrewInstall: View {
                 } else {
                     Image(systemName: "xmark.circle")
                         .font(.system(size: 18))
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
                 }
             }
             .frame(height: 30)
@@ -132,7 +132,7 @@ struct AppliteBrewInstall: View {
             Text("Installed", comment: "Brew dependency installed badge text")
         }
         .padding(3)
-        .foregroundColor(.white)
+        .foregroundStyle(.white)
         .background(.green)
         .cornerRadius(4)
     }

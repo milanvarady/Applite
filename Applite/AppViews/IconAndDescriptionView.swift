@@ -38,7 +38,7 @@ struct IconAndDescriptionView: View {
                 .buttonStyle(.plain)
 
                 Text(cask.descriptionText)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()

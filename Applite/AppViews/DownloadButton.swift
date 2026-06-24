@@ -32,15 +32,11 @@ struct DownloadButton: View {
 
             caskManager.install(cask)
         } label: {
-            if case .disabled(_, _) = cask.warning {
-                Image(systemName: "xmark.circle")
-                    .foregroundStyle(.red)
-                    .font(.system(size: 22))
-            } else {
-                Image(systemName: "arrow.down.to.line.circle\(buttonFill ? ".fill" : "")")
-                    .foregroundStyle(.primary)
-                    .font(.system(size: 22))
-            }
+            let isDisabled = cask.warning?.isDisabled ?? false
+
+            Image(systemName: isDisabled ? "xmark.circle" : "arrow.down.to.line.circle\(buttonFill ? ".fill" : "")")
+                .foregroundStyle(isDisabled ? Color.red : Color.primary)
+                .font(.system(size: 22))
         }
         .disabled(cask.warning?.isDisabled ?? false)
         .padding(.trailing, -8)
@@ -87,7 +83,7 @@ struct DownloadButton: View {
                     Link(destination: homepageLink, label: {
                         Label("Homepage", systemImage: "house")
                     })
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
                 } else {
                     Text("No homepage found")
                         .fontWeight(.thin)

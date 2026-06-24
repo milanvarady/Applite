@@ -18,6 +18,6 @@ struct UpdateButton: View {
             Image(systemName: "arrow.uturn.down.circle.fill")
                 .font(.system(size: 20))
         }
-        .foregroundColor(.blue)
+        .foregroundStyle(.blue)
     }
 }

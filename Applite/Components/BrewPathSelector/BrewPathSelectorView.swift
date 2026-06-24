@@ -53,15 +53,9 @@ struct BrewPathSelectorView: View {
                 Text(getPathDescription(for: option))
 
                 if option.rawValue == brewPathOption {
-                    if isSelectedPathValid {
-                        Image(systemName: "checkmark.circle")
-                            .font(.system(size: 16))
-                            .foregroundColor(.green)
-                    } else {
-                        Image(systemName: "xmark.circle")
-                            .font(.system(size: 16))
-                            .foregroundColor(.red)
-                    }
+                    Image(systemName: isSelectedPathValid ? "checkmark.circle" : "xmark.circle")
+                        .font(.system(size: 16))
+                        .foregroundStyle(isSelectedPathValid ? .green : .red)
                 }
             }
 
@@ -122,8 +116,6 @@ struct BrewPathSelectorView: View {
     }
 }
 
-struct BrewPathSelectorView_Previews: PreviewProvider {
-    static var previews: some View {
-        BrewPathSelectorView(isSelectedPathValid: .constant(false))
-    }
+#Preview {
+    BrewPathSelectorView(isSelectedPathValid: .constant(false))
 }

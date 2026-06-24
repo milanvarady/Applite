@@ -24,7 +24,7 @@ struct BrewPathSelection: View {
                 BrewPathSelectorView(isSelectedPathValid: $isBrewPathValid)
 
                 Text("Selected brew path is invalid!", comment: "Setup view invalid brew path message")
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
                     .opacity(isBrewPathValid ? 0 : 1)
                     .padding(.bottom)
             }

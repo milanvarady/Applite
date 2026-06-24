@@ -21,17 +21,18 @@ struct AppGridView: View {
     ]
 
     var body: some View {
+        // Filter out self; done once per body pass rather than as a per-row
+        // conditional inside ForEach (which wraps every row in _ConditionalContent).
+        let displayedCasks = casks.filter { $0.token != "applite" }
+
         ScrollView {
             LazyVGrid(columns: columns, spacing: 20) {
                 if appRole == .installed {
                     AppliteAppView()
                 }
 
-                ForEach(casks) { cask in
-                    // Filter out self
-                    if cask.token != "applite" {
-                        AppView(cask: cask, role: appRole)
-                    }
+                ForEach(displayedCasks) { cask in
+                    AppView(cask: cask, role: appRole)
                 }
             }
             .padding()

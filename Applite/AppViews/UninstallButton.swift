@@ -18,6 +18,6 @@ struct UninstallButton: View {
             Image(systemName: "trash.fill")
                 .font(.system(size: 20))
         }
-        .foregroundColor(.primary)
+        .foregroundStyle(.primary)
     }
 }

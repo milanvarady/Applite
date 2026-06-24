@@ -57,8 +57,6 @@ struct BrewManagementView: View {
     }
 }
 
-struct BrewManagementView_Previews: PreviewProvider {
-    static var previews: some View {
-        BrewManagementView(modifyingBrew: .constant(false))
-    }
+#Preview {
+    BrewManagementView(modifyingBrew: .constant(false))
 }

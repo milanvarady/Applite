@@ -102,11 +102,11 @@ struct ActionsView: View {
                     VStack(alignment: .leading, spacing: 5) {
                         ForEach(remarks) { remark in
                             Text(remark.title)
-                                .foregroundColor(remark.color)
+                                .foregroundStyle(remark.color)
                                 .fontWeight(.bold)
                             +
                             Text(": ")
-                                .foregroundColor(remark.color)
+                                .foregroundStyle(remark.color)
                                 .fontWeight(.bold)
                             +
                             Text(remark.remark)

@@ -75,8 +75,6 @@ struct UninstallSelfView: View {
     }
 }
 
-struct UninstallSelfView_Previews: PreviewProvider {
-    static var previews: some View {
-        UninstallSelfView()
-    }
+#Preview {
+    UninstallSelfView()
 }

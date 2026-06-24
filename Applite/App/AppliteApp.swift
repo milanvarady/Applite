@@ -45,6 +45,7 @@ struct AppliteApp: App {
             if setupComplete {
                 ContentView()
                     .environment(caskManager)
+                    .environment(\.updater, updaterController.updater)
                     .frame(minWidth: 970, minHeight: 520)
                     .preferredColorScheme(selectedColorScheme)
             } else {

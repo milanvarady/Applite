@@ -37,8 +37,6 @@ struct InstalledView: View {
     }
 }
 
-struct InstalledView_Previews: PreviewProvider {
-    static var previews: some View {
-        InstalledView(casks: Array(repeating: .dummy, count: 8))
-    }
+#Preview {
+    InstalledView(casks: Array(repeating: .dummy, count: 8))
 }

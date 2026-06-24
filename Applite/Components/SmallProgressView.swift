@@ -15,8 +15,6 @@ struct SmallProgressView: View {
     }
 }
 
-struct SmallProgressView_Previews: PreviewProvider {
-    static var previews: some View {
-        SmallProgressView()
-    }
+#Preview {
+    SmallProgressView()
 }
