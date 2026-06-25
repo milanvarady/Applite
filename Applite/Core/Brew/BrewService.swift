@@ -15,6 +15,13 @@ struct ActiveBrewTask: Identifiable {
     let task: Task<Void, Never>
 }
 
+/// Wraps a streaming brew failure together with the output captured so far,
+/// so callers can build tailored error messages from the partial output.
+struct BrewStreamError: Error {
+    let underlying: Error
+    let output: String
+}
+
 /// Handles all brew CLI operations (install, uninstall, update, reinstall) on CaskViewModels.
 @Observable
 @MainActor
@@ -52,19 +59,16 @@ final class BrewService {
             // Setup progress
             vm.progressState = .busy(withTask: "")
 
-            /// Holds the complete output of the install process
-            var completeOutput = ""
-
             // Run install command and stream output
-            do {
-                for try await line in Shell.stream(command, pty: true) {
-                    completeOutput += line + "\n"
+            let result = await self.streamBrewCommand(
+                command,
+                vm: vm,
+                busyLabel: String(localized: "Installing", comment: "Install progress text")
+            )
 
-                    let newProgress = self.parseBrewInstall(output: line)
-                    vm.progressState = newProgress
-                }
-            } catch {
-                var alertMessage = error.localizedDescription
+            if case .failure(let error) = result {
+                let completeOutput = error.output
+                var alertMessage = error.underlying.localizedDescription
 
                 // Show a more helpful message in specific cases
                 switch completeOutput {
@@ -86,7 +90,7 @@ final class BrewService {
 
                 await self.showFailure(
                     for: vm,
-                    error: error,
+                    error: error.underlying,
                     output: completeOutput,
                     alertTitle: String(localized: "Failed to install \(vm.name)", comment: "Install failure alert title"),
                     alertMessage: alertMessage
@@ -148,19 +152,18 @@ final class BrewService {
     /// Updates the cask
     func update(_ vm: CaskViewModel) {
         runTask(for: vm) {
-            vm.progressState = .busy(withTask: String(localized: "Updating", comment: "Update progress text"))
+            let updateLabel = String(localized: "Updating", comment: "Update progress text")
+            vm.progressState = .busy(withTask: updateLabel)
 
-            var output: String = ""
+            let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) upgrade --cask \(vm.fullToken)"
 
-            do {
-                output = try await Shell.runBrewCommand(["upgrade", "--cask", vm.fullToken])
-            } catch {
+            if case .failure(let error) = await self.streamBrewCommand(command, vm: vm, busyLabel: updateLabel) {
                 await self.showFailure(
                     for: vm,
-                    error: error,
-                    output: output,
+                    error: error.underlying,
+                    output: error.output,
                     alertTitle: String(localized: "Failed to update \(vm.name)", comment: "Failed app update alert title"),
-                    alertMessage: error.localizedDescription
+                    alertMessage: error.underlying.localizedDescription
                 )
                 return
             }
@@ -179,19 +182,18 @@ final class BrewService {
     /// Reinstalls the cask
     func reinstall(_ vm: CaskViewModel) {
         runTask(for: vm) {
-            vm.progressState = .busy(withTask: String(localized: "Reinstalling", comment: "Reinstall progress text"))
+            let reinstallLabel = String(localized: "Reinstalling", comment: "Reinstall progress text")
+            vm.progressState = .busy(withTask: reinstallLabel)
 
-            var output: String = ""
+            let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) reinstall --cask \(vm.fullToken)"
 
-            do {
-                output = try await Shell.runBrewCommand(["reinstall", "--cask", vm.fullToken])
-            } catch {
+            if case .failure(let error) = await self.streamBrewCommand(command, vm: vm, busyLabel: reinstallLabel) {
                 await self.showFailure(
                     for: vm,
-                    error: error,
-                    output: output,
+                    error: error.underlying,
+                    output: error.output,
                     alertTitle: String(localized: "Failed to reinstall \(vm.name)", comment: "Failed reinstall alert title"),
-                    alertMessage: error.localizedDescription
+                    alertMessage: error.underlying.localizedDescription
                 )
                 return
             }
@@ -260,25 +262,74 @@ final class BrewService {
         self.activeTasks.append(ActiveBrewTask(viewModel: vm, task: task))
     }
 
-    /// Parses the shell output when installing a cask
-    private func parseBrewInstall(output: String) -> CaskProgressState {
-        if output.contains("Downloading") {
-            return .busy(withTask: "")
-        } else if output.contains("#") {
-            let regex = /#+\s+(\d+\.\d+)%/
-
-            if let result = output.firstMatch(of: regex) {
-                return .downloading(percent: (Double(result.1) ?? 0) / 100)
+    /// Parses a single line of streamed `brew install/upgrade --cask` output.
+    /// Returns the new progress state, or `nil` if the line carries no progress
+    /// signal (so the previous state is preserved instead of resetting to a spinner).
+    ///
+    /// NOTE: Homebrew's progress output is unstable across releases. If progress
+    /// ever stops updating, this is the place to re-check against current `brew`
+    /// output. Worst case is a spinner instead of a percentage — success/failure
+    /// is still detected via the "successfully …" strings and the process exit code.
+    private func parseBrewProgress(line: String, busyLabel: String) -> CaskProgressState? {
+        // Download phase — live-updating line, e.g.
+        //   "✔︎ Cask antinote (1.1.7)   Downloading   3.1MB/  6.7MB"
+        // The status text cycles Downloading → Downloaded → Verified while the
+        // "<downloaded>/<total>" byte counters update in place.
+        if let match = line.firstMatch(of: /([0-9.]+)\s*([KMGT]?i?B)\s*\/\s*([0-9.]+)\s*([KMGT]?i?B)/) {
+            if let downloaded = Self.byteCount(match.1, match.2),
+               let total = Self.byteCount(match.3, match.4),
+               total > 0 {
+                return .downloading(percent: min(downloaded / total, 1))
             }
         }
-        else if output.contains("Installing") || output.contains("Moving") || output.contains("Linking") {
-            return .busy(withTask: String(localized: "Installing", comment: "Install progress text"))
+
+        // Post-download phase (install / upgrade)
+        if line.contains("Installing") || line.contains("Upgrading")
+            || line.contains("Moving") || line.contains("Linking")
+            || line.contains("Backing") || line.contains("Purging") {
+            return .busy(withTask: busyLabel)
         }
-        else if output.contains("successfully installed") {
+
+        if line.contains("successfully installed") || line.contains("successfully upgraded") {
             return .success
         }
 
-        return .busy(withTask: "")
+        return nil
+    }
+
+    /// Converts a brew size token (value + unit) to bytes. Base-1000 vs 1024 is
+    /// irrelevant here — the value only feeds a ratio for the progress bar.
+    private static func byteCount(_ value: Substring, _ unit: Substring) -> Double? {
+        guard let number = Double(value) else { return nil }
+        let multiplier: Double = switch unit.first {
+            case "K": 1_000
+            case "M": 1_000_000
+            case "G": 1_000_000_000
+            case "T": 1_000_000_000_000
+            default:  1   // plain "B"
+        }
+        return number * multiplier
+    }
+
+    /// Streams a brew command, updating `vm.progressState` from each parsed line.
+    /// Returns the complete output on success, or a ``BrewStreamError`` carrying
+    /// the partial output on failure.
+    private func streamBrewCommand(_ command: String, vm: CaskViewModel, busyLabel: String) async -> Result<String, BrewStreamError> {
+        var completeOutput = ""
+
+        do {
+            for try await line in Shell.stream(command, pty: true) {
+                completeOutput += line + "\n"
+
+                if let newProgress = self.parseBrewProgress(line: line, busyLabel: busyLabel) {
+                    vm.progressState = newProgress
+                }
+            }
+        } catch {
+            return .failure(BrewStreamError(underlying: error, output: completeOutput))
+        }
+
+        return .success(completeOutput)
     }
 
     /// Register successful task

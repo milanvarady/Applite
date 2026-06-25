@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import CircularProgress
 
 /// App view role
 enum AppRole {
@@ -100,15 +99,8 @@ struct AppView: View {
             .scaleEffect(0.8)
 
         case .downloading(let percent):
-            CircularProgressView(
-                count: Int(percent * 100),
-                total: 100,
-                progress: CGFloat(percent),
-                fontOne: .system(size: 14, weight: .black),
-                lineWidth: 4,
-                showBottomText: false
-            )
-            .frame(width: 36, height: 36)
+            CircularProgressRing(progress: percent)
+                .frame(width: 30, height: 30)
 
         case .success:
             Image(systemName: "checkmark")

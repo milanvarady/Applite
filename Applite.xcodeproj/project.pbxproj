@@ -10,7 +10,6 @@
 		413E60C02BBF0E5C00978F6A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 413E60BF2BBF0E5C00978F6A /* Kingfisher */; };
 		413F87352D34109000D4BE10 /* ButtonKit in Frameworks */ = {isa = PBXBuildFile; productRef = 413F87342D34109000D4BE10 /* ButtonKit */; };
 		4189CE392937CD41009C836D /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 4189CE382937CD41009C836D /* Shimmer */; };
-		418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */ = {isa = PBXBuildFile; productRef = 418E9EF32AACD9C000046A58 /* CircularProgress */; };
 		41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 41C8FA282A7A598B000BB9A2 /* Sparkle */; };
 		41D325452F3A297900E3FE1E /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 41D325442F3A297900E3FE1E /* GRDB */; };
 		BD7546572A868DA30083996B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BD7546562A868DA30083996B /* Localizable.xcstrings */; };
@@ -57,7 +56,6 @@
 				41C8FA292A7A598B000BB9A2 /* Sparkle in Frameworks */,
 				41D325452F3A297900E3FE1E /* GRDB in Frameworks */,
 				4189CE392937CD41009C836D /* Shimmer in Frameworks */,
-				418E9EF42AACD9C000046A58 /* CircularProgress in Frameworks */,
 				413E60C02BBF0E5C00978F6A /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -105,7 +103,6 @@
 			packageProductDependencies = (
 				4189CE382937CD41009C836D /* Shimmer */,
 				41C8FA282A7A598B000BB9A2 /* Sparkle */,
-				418E9EF32AACD9C000046A58 /* CircularProgress */,
 				413E60BF2BBF0E5C00978F6A /* Kingfisher */,
 				413F87342D34109000D4BE10 /* ButtonKit */,
 				41D325442F3A297900E3FE1E /* GRDB */,
@@ -146,7 +143,6 @@
 			packageReferences = (
 				4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
 				41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */,
-				418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */,
 				413E60BE2BBF0E5C00978F6A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				413F87332D34109000D4BE10 /* XCRemoteSwiftPackageReference "ButtonKit" */,
 				41D325432F3A297900E3FE1E /* XCRemoteSwiftPackageReference "GRDB" */,
@@ -425,14 +421,6 @@
 				minimumVersion = 1.5.0;
 			};
 		};
-		418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ArnavMotwani/CircularProgressSwiftUI";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.2.2;
-			};
-		};
 		41C8FA272A7A598B000BB9A2 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -466,11 +454,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4189CE372937CD41009C836D /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
 			productName = Shimmer;
-		};
-		418E9EF32AACD9C000046A58 /* CircularProgress */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 418E9EF22AACD9C000046A58 /* XCRemoteSwiftPackageReference "CircularProgressSwiftUI" */;
-			productName = CircularProgress;
 		};
 		41C8FA282A7A598B000BB9A2 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;

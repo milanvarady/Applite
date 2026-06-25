@@ -99,10 +99,64 @@ enum Shell {
 
                     try task.run()
 
-                    for try await line in fileHandle.bytes.lines {
-                        let cleanOutput = line.cleanTerminalOutput()
-                        continuation.yield(cleanOutput)
+                    // Homebrew redraws its live download progress in place using cursor-move
+                    // escapes (ESC[0G / ESC[nF), not newlines, so `bytes.lines` would buffer
+                    // every progress frame into a single chunk until the download finished.
+                    // Split the byte stream into frames on newlines, carriage returns, AND
+                    // cursor-repositioning escapes so each redraw surfaces as its own line.
+                    var frame: [UInt8] = []
+                    var inEscape = false
+                    var escapeIsCSI = false
+
+                    func flushFrame() {
+                        guard !frame.isEmpty else { return }
+                        let text = String(decoding: frame, as: UTF8.self).cleanTerminalOutput()
+                        frame.removeAll(keepingCapacity: true)
+                        if !text.isEmpty {
+                            continuation.yield(text)
+                        }
                     }
+
+                    for try await byte in fileHandle.bytes {
+                        if inEscape {
+                            if !escapeIsCSI {
+                                // First byte after ESC determines the escape type.
+                                escapeIsCSI = (byte == UInt8(ascii: "["))
+                                // A non-CSI escape (ESC + one char) ends immediately; drop it.
+                                if !escapeIsCSI { inEscape = false }
+                                continue
+                            }
+
+                            // Inside a CSI sequence — runs until a final byte (0x40...0x7E).
+                            if (0x40...0x7E).contains(byte) {
+                                inEscape = false
+                                escapeIsCSI = false
+
+                                // Cursor-repositioning finals mark an in-place redraw → frame boundary.
+                                switch byte {
+                                case UInt8(ascii: "A"), UInt8(ascii: "B"), UInt8(ascii: "E"),
+                                     UInt8(ascii: "F"), UInt8(ascii: "G"), UInt8(ascii: "H"),
+                                     UInt8(ascii: "d"):
+                                    flushFrame()
+                                default:
+                                    break   // color / clear / cursor-visibility — strip and continue
+                                }
+                            }
+                            continue
+                        }
+
+                        switch byte {
+                        case 0x1B:              // ESC — start of an escape sequence (stripped)
+                            inEscape = true
+                            escapeIsCSI = false
+                        case 0x0A, 0x0D:        // \n or \r — frame boundary
+                            flushFrame()
+                        default:
+                            frame.append(byte)
+                        }
+                    }
+
+                    flushFrame()
 
                     task.waitUntilExit()
 
@@ -173,9 +227,15 @@ enum Shell {
         task.environment = environment
 
         if pty {
-            // Use `script` for pseudo-TTY behavior
+            // Use `script` for pseudo-TTY behavior.
+            //
+            // A GUI app has no controlling terminal, so the pty reports its window
+            // size (`stty size`) as `0 0`. Homebrew then treats the terminal width as
+            // 0 and suppresses its live download progress (the byte counters and bar
+            // we scrape). Forcing a sane window size first re-enables that output.
+            let ptyCommand = "stty rows 50 cols 200 2>/dev/null; \(command)"
             task.executableURL = URL(fileURLWithPath: "/usr/bin/script")
-            task.arguments = ["-q", "/dev/null", "/bin/sh", "-c", command]
+            task.arguments = ["-q", "/dev/null", "/bin/sh", "-c", ptyCommand]
         } else {
             task.executableURL = URL(fileURLWithPath: "/bin/sh")
             task.arguments = ["-c", command]
