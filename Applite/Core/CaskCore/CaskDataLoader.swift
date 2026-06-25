@@ -62,9 +62,12 @@ final class CaskDataLoader {
 
         // 5. Build category results
         let categoryResults: [CategoryLoadResult] = categoryDefs.compactMap { category in
-            let records = category.casks.compactMap { token -> CaskRecord? in
-                recordsByToken[token] ?? recordsByFullToken[token]
-            }
+            let records = category.casks
+                .compactMap { token -> CaskRecord? in
+                    recordsByToken[token] ?? recordsByFullToken[token]
+                }
+                // Keep curated categories clean of deprecated/disabled apps
+                .filter { !$0.isDeprecatedOrDisabled }
             guard !records.isEmpty else { return nil }
             let vms = registry.viewModels(for: records)
             return CategoryLoadResult(id: category.id, sfSymbol: category.sfSymbol, casks: vms)
