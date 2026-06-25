@@ -12,6 +12,8 @@ import Shimmer
 struct CategoryView: View {
     let category: CategoryLoadResult
 
+    @AppStorage(Preferences.categorySortOption) private var sortOption
+
     private let placeholderColumns = [GridItem(.adaptive(minimum: 320))]
 
     var body: some View {
@@ -26,12 +28,15 @@ struct CategoryView: View {
                 placeholderGrid
                     .transition(.opacity)
             } else {
-                AppGridView(casks: category.casks, appRole: .installAndManage)
+                AppGridView(casks: category.sortedCasks(by: sortOption), appRole: .installAndManage)
                     .id(category.id)
                     .transition(.opacity)
             }
         }
         .navigationTitle(category.name)
+        .toolbar {
+            CategorySortingToolbar()
+        }
     }
 
     private var placeholderGrid: some View {

@@ -13,6 +13,8 @@ struct DiscoverSectionView: View {
 
     @Environment(CaskManager.self) var caskManager
 
+    @AppStorage(Preferences.categorySortOption) private var sortOption
+
     /// Index of the leading visible column in the horizontal scroll view.
     /// Updated by SwiftUI as the user scrolls; mutated by the arrow buttons.
     @State var scrollPosition: Int? = 0
@@ -67,11 +69,16 @@ struct DiscoverSectionView: View {
         }
     }
 
+    /// Sorted casks grouped in pairs, following the global category sort preference
+    private var casksCoupled: [[CaskViewModel]] {
+        category.casksCoupled(by: sortOption)
+    }
+
     private var appRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack {
-                if category.casksCoupled.count > 0 {
-                    ForEach(Array(category.casksCoupled.enumerated()), id: \.offset) { index, casks in
+                if casksCoupled.count > 0 {
+                    ForEach(Array(casksCoupled.enumerated()), id: \.offset) { index, casks in
                         VStack {
                             ForEach(casks) { cask in
                                 AppView(cask: cask, role: .installAndManage)
@@ -93,7 +100,7 @@ struct DiscoverSectionView: View {
             .scrollTargetLayout()
             // Force a clean rebuild when transitioning placeholder → loaded so
             // `.scrollTargetLayout()` doesn't hold onto stale child identities.
-            .id(category.casksCoupled.isEmpty)
+            .id(casksCoupled.isEmpty)
         }
         .scrollTargetBehavior(.viewAligned)
         // `anchor: .leading` makes each scrollPosition change push that item to
@@ -119,10 +126,10 @@ struct DiscoverSectionView: View {
     private var maxLeadingIndex: Int {
         let columnWidth = AppView.dimensions.width + AppView.dimensions.spacing
         guard columnWidth > 0, scrollViewWidth > 0 else {
-            return max(0, category.casksCoupled.count - 1)
+            return max(0, casksCoupled.count - 1)
         }
         let visibleColumns = max(1, Int(scrollViewWidth / columnWidth))
-        return max(0, category.casksCoupled.count - visibleColumns)
+        return max(0, casksCoupled.count - visibleColumns)
     }
 
     func scrollButton(icon: String, direction: Int) -> some View {

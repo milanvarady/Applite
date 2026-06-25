@@ -39,10 +39,23 @@ extension CategoryLoadResult {
 
     var name: String { id }
 
-    /// Casks grouped in pairs for the discover section scroll view
-    var casksCoupled: [[CaskViewModel]] {
-        stride(from: 0, to: casks.count, by: 2).map { i in
-            Array(casks[i..<min(i + 2, casks.count)])
+    /// Casks ordered according to the global sorting preference.
+    @MainActor
+    func sortedCasks(by option: CategorySortingOptions) -> [CaskViewModel] {
+        switch option {
+        case .mostDownloaded:
+            return casks.sorted { $0.downloadsIn365days > $1.downloadsIn365days }
+        case .aToZ:
+            return casks.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        }
+    }
+
+    /// Sorted casks grouped in pairs for the discover section scroll view
+    @MainActor
+    func casksCoupled(by option: CategorySortingOptions) -> [[CaskViewModel]] {
+        let sorted = sortedCasks(by: option)
+        return stride(from: 0, to: sorted.count, by: 2).map { i in
+            Array(sorted[i..<min(i + 2, sorted.count)])
         }
     }
 }

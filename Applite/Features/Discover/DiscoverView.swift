@@ -28,6 +28,9 @@ struct DiscoverView: View {
             }
             .padding()
         }
+        .toolbar {
+            CategorySortingToolbar()
+        }
     }
 }
 

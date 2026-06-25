@@ -18,7 +18,7 @@ struct SidebarView: View {
             Label("Discover", systemImage: "star")
                 .tag(SidebarItem.home)
             
-            Label("Updates", systemImage: "arrow.clockwise.circle")
+            Label("Updates", systemImage: "square.and.arrow.down")
                 .badge(caskManager.outdatedViewModels.count)
                 .tag(SidebarItem.updates)
             
