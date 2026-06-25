@@ -15,7 +15,7 @@ struct SidebarView: View {
         List(selection: $selection) {
             Divider()
             
-            Label("Discover", systemImage: "house")
+            Label("Discover", systemImage: "star")
                 .tag(SidebarItem.home)
             
             Label("Updates", systemImage: "arrow.clockwise.circle")

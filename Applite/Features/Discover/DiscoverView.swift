@@ -16,7 +16,7 @@ struct DiscoverView: View {
         ScrollView {
             LazyVStack(alignment: .leading) {
                 Text("Discover", comment: "Discover view title")
-                    .font(.appliteLargeTitle)
+                    .font(.appliteMediumTitle)
                     .padding(.bottom)
 
                 ForEach(caskManager.categories) { category in

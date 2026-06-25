@@ -26,14 +26,10 @@ struct TapView: View {
     var body: some View {
         VStack(alignment: .leading) {
             // Tap name
-            Group {
-                Text(tap.title)
-                    .font(.appliteMediumTitle)
-                    .padding(.bottom, -20)
-
-                Divider()
-            }
-            .padding()
+            Text(tap.title)
+                .font(.appliteSmallTitle)
+                .padding(.bottom, -20)
+                .padding()
 
             // Apps
             AppGridView(casks: filteredCasks, appRole: .installAndManage)

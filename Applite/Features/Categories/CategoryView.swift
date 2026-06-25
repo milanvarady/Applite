@@ -17,14 +17,10 @@ struct CategoryView: View {
     var body: some View {
         VStack(alignment: .leading) {
             // Category name
-            Group {
-                Text(category.localizedName)
-                    .font(.appliteMediumTitle)
-                    .padding(.bottom, -20)
-
-                Divider()
-            }
-            .padding()
+            Text(category.localizedName)
+                .font(.appliteSmallTitle)
+                .padding(.bottom, -20)
+                .padding()
 
             if category.casks.isEmpty {
                 placeholderGrid
