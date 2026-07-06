@@ -9,14 +9,25 @@
             "brave-browser",
             "firefox",
             "google-chrome",
-            "librewolf",
             "microsoft-edge",
             "opera",
             "opera-gx",
             "orion",
             "tor-browser",
             "vivaldi",
-            "zen-browser"
+            "zen"
+        ]
+    },
+    {
+        "id": "AI",
+        "sfSymbol": "sparkles",
+        "casks": [
+            "chatgpt",
+            "claude",
+            "google-gemini",
+            "jan",
+            "lm-studio",
+            "ollama-app"
         ]
     },
     {
@@ -25,11 +36,11 @@
         "casks": [
             "beeper",
             "discord",
-            "messenger",
+            "element",
             "microsoft-teams",
             "signal",
-            "telegram-desktop",
-            "threema@beta",
+            "telegram",
+            "threema",
             "viber",
             "wechat",
             "whatsapp",
@@ -40,11 +51,11 @@
         "id": "Productivity",
         "sfSymbol": "gauge.high",
         "casks": [
+            "alfred",
             "alt-tab",
             "antinote",
             "bettertouchtool",
             "cleanshot",
-            "evernote",
             "fantastical",
             "hazel",
             "hazeover",
@@ -57,6 +68,7 @@
             "rectangle",
             "shottr",
             "soulver",
+            "superwhisper",
             "unclutter"
         ]
     },
@@ -66,6 +78,7 @@
         "casks": [
             "asana",
             "dropbox",
+            "google-drive",
             "libreoffice",
             "microsoft-excel",
             "microsoft-outlook",
@@ -74,8 +87,61 @@
             "microsoft-word",
             "onedrive",
             "onlyoffice",
-            "openoffice",
-            "slack"
+            "slack",
+            "thunderbird"
+        ]
+    },
+    {
+        "id": "Creative Tools",
+        "sfSymbol": "paintbrush.pointed",
+        "casks": [
+            "adobe-creative-cloud",
+            "affinity",
+            "audacity",
+            "blender",
+            "drawio",
+            "figma",
+            "freecad",
+            "gamemaker",
+            "gimp",
+            "godot",
+            "inkscape",
+            "kdenlive",
+            "krita",
+            "obs",
+            "scribus",
+            "sketch",
+            "unity"
+        ]
+    },
+    {
+        "id": "Media",
+        "sfSymbol": "play.tv",
+        "casks": [
+            "iina",
+            "jellyfin-media-player",
+            "kodi",
+            "netnewswire",
+            "plex",
+            "spotify",
+            "tidal",
+            "vlc"
+        ]
+    },
+    {
+        "id": "Gaming",
+        "sfSymbol": "gamecontroller",
+        "casks": [
+            "battle-net",
+            "crossover",
+            "epic-games",
+            "gog-galaxy",
+            "heroic",
+            "league-of-legends",
+            "minecraft",
+            "modrinth",
+            "prismlauncher",
+            "steam"
         ]
     },
     {
@@ -83,20 +149,22 @@
         "sfSymbol": "menubar.rectangle",
         "casks": [
             "airbuddy",
+            "aldente",
             "badgeify",
             "bartender",
+            "betterdisplay",
             "caffeine",
             "coconutbattery",
-            "flux",
+            "flux-app",
             "hiddenbar",
             "hot",
             "istat-menus",
             "itsycal",
             "jordanbaird-ice",
             "meetingbar",
+            "monitorcontrol",
             "stats",
             "ticktick",
-            "tomatobar",
             "vanilla"
         ]
     },
@@ -111,11 +179,14 @@
             "calibre",
             "downie",
             "fing",
-            "handbrake",
+            "handbrake-app",
             "imageoptim",
+            "karabiner-elements",
             "keepingyouawake",
+            "keka",
+            "linearmouse",
             "localsend",
-            "obs",
+            "mounty",
             "pdf-expert",
             "permute",
             "pika",
@@ -141,41 +212,32 @@
         ]
     },
     {
-        "id": "Creative Tools",
-        "sfSymbol": "paintbrush.pointed",
+        "id": "Password Managers",
+        "sfSymbol": "lock.square",
         "casks": [
-            "acron",
-            "adobe-creative-cloud",
-            "affinity-designer",
-            "affinity-photo",
-            "affinity-publisher",
-            "audacity",
-            "blender",
-            "figma",
-            "freecad",
-            "gamemaker",
-            "gimp",
-            "godot",
-            "inkscape",
-            "kdenlive",
-            "krita",
-            "scribus",
-            "sketch",
-            "unity"
+            "1password",
+            "bitwarden",
+            "enpass",
+            "keepassxc",
+            "keeper-password-manager",
+            "lastpass",
+            "nordpass",
+            "proton-pass",
+            "roboform"
         ]
     },
     {
-        "id": "Media",
-        "sfSymbol": "play.tv",
+        "id": "VPN",
+        "sfSymbol": "lock.shield",
         "casks": [
-            "iina",
-            "jellyfin-media-player",
-            "kodi",
-            "netnewswire",
-            "plex",
-            "spotify",
-            "tidal",
-            "vlc"
+            "cloudflare-warp",
+            "cyberghost-vpn",
+            "mullvad-vpn",
+            "nordvpn",
+            "openvpn-connect",
+            "protonvpn",
+            "tailscale-app",
+            "tunnelbear"
         ]
     },
     {
@@ -183,8 +245,11 @@
         "sfSymbol": "desktopcomputer",
         "casks": [
             "android-studio",
+            "bruno",
+            "cyberduck",
             "dash",
-            "docker",
+            "dbeaver-community",
+            "docker-desktop",
             "fork",
             "forklift",
             "github",
@@ -192,11 +257,11 @@
             "jetbrains-toolbox",
             "kaleidoscope",
             "postman",
-            "rapidapi",
             "ssh-config-editor",
+            "tableplus",
             "tower",
             "transmit",
-            "xcodes"
+            "xcodes-app"
         ]
     },
     {
@@ -204,15 +269,13 @@
         "sfSymbol": "chevron.left.slash.chevron.right",
         "casks": [
             "clion",
+            "coteditor",
             "cursor",
-            "dataspell",
             "goland",
             "intellij-idea",
-            "intellij-idea-ce",
             "nova",
             "phpstorm",
             "pycharm",
-            "pycharm-ce",
             "rider",
             "rubymine",
             "sublime-text",
@@ -226,7 +289,6 @@
         "id": "Terminals",
         "sfSymbol": "terminal",
         "casks": [
-            "alacritty",
             "ghostty",
             "hyper",
             "iterm2",
@@ -242,55 +304,11 @@
         "sfSymbol": "shippingbox",
         "casks": [
             "multipass",
+            "orbstack",
             "parallels",
+            "podman-desktop",
             "utm",
-            "virtualbox",
-            "vmware-fusion"
-        ]
-    },
-    {
-        "id": "Gaming",
-        "sfSymbol": "gamecontroller",
-        "casks": [
-            "battle-net",
-            "chiaki",
-            "epic-games",
-            "gog-galaxy",
-            "league-of-legends",
-            "minecraft",
-            "modrinth",
-            "openemu",
-            "prismlauncher",
-            "steam",
-            "the-battle-for-wesnoth",
-            "widelands"
-        ]
-    },
-    {
-        "id": "VPN",
-        "sfSymbol": "externaldrive.badge.icloud",
-        "casks": [
-            "cloudflare-warp",
-            "cyberghost-vpn",
-            "mullvad-vpn",
-            "nordvpn",
-            "openvpn-connect",
-            "protonvpn",
-            "tunnelbear"
-        ]
-    },
-    {
-        "id": "Password Managers",
-        "sfSymbol": "lock.square",
-        "casks": [
-            "1password",
-            "bitwarden",
-            "enpass",
-            "keepassxc",
-            "keeper-password-manager",
-            "lastpass",
-            "nordpass",
-            "roboform"
+            "virtualbox"
         ]
     }
     ]
