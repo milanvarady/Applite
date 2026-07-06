@@ -124,12 +124,17 @@ final class CaskDataLoader {
     private func performSync() async throws {
         logger.info("Syncing catalog from API")
 
-        // Fetch DTOs, analytics, and tap casks concurrently
+        // Fetch DTOs, analytics, and tap casks concurrently.
+        // The category refresh rides along on the same cadence; it's best-effort and never throws,
+        // so a blocked/failed fetch can't abort the sync. It completes before `loadCategories()`
+        // (step 2 of `loadCatalogData`), so a fresh list shows up within the same load.
         async let dtos = fetchCaskDTOs()
         async let analytics = fetchAnalytics()
         async let tapDTOs = fetchTapDTOs()
+        async let categoriesRefresh: Void = CategoryProvider.refreshRemoteCategories()
 
         let (dtosResult, analyticsResult, tapDTOsResult) = try await (dtos, analytics, tapDTOs)
+        await categoriesRefresh
 
         // Build analytics lookup
         var analyticsDict: [String: Int] = [:]
@@ -223,13 +228,13 @@ final class CaskDataLoader {
 
     // MARK: - Private Helpers
 
-    /// Loads category definitions from the bundled JSON file
+    /// Loads category definitions via `CategoryProvider` (cached remote copy → bundled fallback).
     private func loadCategories() throws -> [Category] {
-        guard let url = Bundle.main.url(forResource: "categories", withExtension: "json") else {
+        let defs = CategoryProvider.loadCategories()
+        guard !defs.isEmpty else {
             throw CaskLoadError.failedToLoadCategoryJSON
         }
-        let data = try Data(contentsOf: url)
-        return try JSONDecoder().decode([Category].self, from: data)
+        return defs
     }
 
     /// Builds tap results from the database in a single query, grouped in-memory by tap.

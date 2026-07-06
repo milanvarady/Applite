@@ -1,4 +1,6 @@
-[
+{
+    "schemaVersion": 1,
+    "categories": [
     {
         "id": "Browsers",
         "sfSymbol": "network",
@@ -291,4 +293,5 @@
             "roboform"
         ]
     }
-]
+    ]
+}

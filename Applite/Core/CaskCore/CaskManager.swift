@@ -73,17 +73,13 @@ final class CaskManager {
         self.categories = Self.loadInitialCategories()
     }
 
-    /// Reads the bundled `categories.json` and returns placeholder `CategoryLoadResult`s
-    /// (no resolved casks). Lets the sidebar and Discover section structure render
-    /// before stage 1 completes. Returns `[]` on parse failure — the catalog load will
-    /// repopulate it later.
+    /// Loads the category list (cached remote copy → bundled fallback) and returns placeholder
+    /// `CategoryLoadResult`s (no resolved casks). Lets the sidebar and Discover section structure
+    /// render before stage 1 completes — including any last-known-good remote curation. Returns
+    /// `[]` on total failure; the catalog load will repopulate it later.
     private static func loadInitialCategories() -> [CategoryLoadResult] {
-        guard let url = Bundle.main.url(forResource: "categories", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let defs = try? JSONDecoder().decode([Category].self, from: data) else {
-            return []
-        }
-        return defs.map { CategoryLoadResult(id: $0.id, sfSymbol: $0.sfSymbol, casks: []) }
+        CategoryProvider.loadCategories()
+            .map { CategoryLoadResult(id: $0.id, sfSymbol: $0.sfSymbol, casks: []) }
     }
     
     // MARK: - Registry Forwarding
