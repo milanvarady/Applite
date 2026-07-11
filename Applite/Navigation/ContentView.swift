@@ -62,6 +62,7 @@ struct ContentView: View {
         return NavigationSplitView {
             SidebarView(selection: $selection)
                 .disabled(modifyingBrew)
+                .navigationSplitViewColumnWidth(216)
         } detail: {
             if caskManager.hasBrokenInstall && !showSetup {
                 BrokenInstallView()
