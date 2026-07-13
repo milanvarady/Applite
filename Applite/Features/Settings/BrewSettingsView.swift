@@ -14,6 +14,10 @@ struct BrewSettingsView: View {
     @AppStorage(Preferences.customUserBrewPath) var customUserBrewPath
     @AppStorage(Preferences.brewPathOption) var brewPathOption
     @AppStorage(Preferences.includeCasksFromTaps) var includeCasksFromTaps
+    @AppStorage(Preferences.annexUpdateFrequency) var annexUpdateFrequency
+
+    /// Applite's own annex brew is the selected one.
+    var isUsingAnnexBrew: Bool { brewPathOption == BrewPaths.PathOption.annex.rawValue }
 
     @State var isSelectedBrewPathValid = false
 
@@ -30,6 +34,7 @@ struct BrewSettingsView: View {
     var body: some View {
         Form {
             pathSettings
+            annexUpdateSettings
             tapSettings
             appdirSettings
             otherFlags
@@ -91,6 +96,28 @@ struct BrewSettingsView: View {
                 .background(.bar)
             }
             .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+    }
+
+    /// How often to silently re-fetch Applite's own Homebrew tarball. Only relevant when the annex
+    /// is the selected brew — a user's own brew updates itself via `brew update` as usual.
+    @ViewBuilder
+    var annexUpdateSettings: some View {
+        if isUsingAnnexBrew {
+            Section("Homebrew Updates") {
+                Picker(selection: $annexUpdateFrequency) {
+                    ForEach(CatalogUpdateFrequency.allCases) { frequency in
+                        Text(frequency.description).tag(frequency)
+                    }
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Update Applite's Homebrew", comment: "Annex brew update frequency title")
+                        Text("Applite keeps its own Homebrew current by re-downloading it periodically. Your installed apps are kept.", comment: "Annex brew update frequency description")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
         }
     }
 

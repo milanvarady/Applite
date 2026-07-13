@@ -144,6 +144,7 @@
     },
     "[Homebrew](https://brew.sh) is a free and open source package manager tool that makes installing third-party applications really easy. Applite uses Homebrew under the hood to download and manage applications." : {
       "comment" : "Manage Homebrew view description",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -713,6 +714,7 @@
     },
     "A brew installation was detected at:" : {
       "comment" : "Setup brew path detected view text",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1002,8 +1004,12 @@
         }
       }
     },
+    "All other app functions will be disabled during the refresh!" : {
+
+    },
     "All other app functions will be disabled during the update!" : {
       "comment" : "Brew update notice",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1045,6 +1051,7 @@
     },
     "All set!" : {
       "comment" : "Setup done message",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1086,6 +1093,9 @@
     },
     "All your apps are up to date." : {
       "comment" : "Update view no updates available description"
+    },
+    "Already have Homebrew? You can switch to it anytime in Settings." : {
+      "comment" : "Components install sheet own-brew note"
     },
     "Also show apps from Homebrew taps (third-party repositories) you've added manually. (Homebrew: `tap`)" : {
       "comment" : "Brew settings tap toggle description"
@@ -1548,8 +1558,17 @@
         }
       }
     },
+    "Applite is downloading Homebrew, the engine it uses to install apps. This only happens once and takes just a few seconds." : {
+      "comment" : "Components install sheet description"
+    },
     "Applite is powered by [Homebrew](https://brew.sh/), a free and open-source tool that installs and keeps your apps up to date behind the scenes. You don't need to set it up or use it directly — Applite takes care of everything for you." : {
       "comment" : "Manage Homebrew view description"
+    },
+    "Applite is ready" : {
+      "comment" : "Components install sheet success title"
+    },
+    "Applite keeps its own Homebrew current by re-downloading it periodically. Your installed apps are kept." : {
+      "comment" : "Annex brew update frequency description"
     },
     "Applite uses the system network proxy, but it can only use one protocol (HTTP, HTTPS, or SOCKS5). Select your preferred method." : {
       "comment" : "Proxy settings description",
@@ -2045,6 +2064,7 @@
     },
     "Brew Installation Detected" : {
       "comment" : "Setup brew path detected view title",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2591,6 +2611,7 @@
     },
     "Continue" : {
       "comment" : "Onboarding next button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2632,6 +2653,7 @@
     },
     "Continue to use detected installation or select another option below." : {
       "comment" : "Setup brew path detected view text",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2800,6 +2822,9 @@
           }
         }
       }
+    },
+    "Couldn't load installed apps" : {
+
     },
     "Creative Tools" : {
       "comment" : "App category",
@@ -3400,6 +3425,7 @@
     },
     "Download third-party applications with a single click. No more \"Drag to Applications folder\"." : {
       "comment" : "Onboarding",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4272,6 +4298,9 @@
         }
       }
     },
+    "Get Started" : {
+
+    },
     "GitHub" : {
       "localizations" : {
         "fr" : {
@@ -4477,6 +4506,7 @@
     },
     "Homebrew Installation" : {
       "comment" : "Setup Applite's brew installation info view title",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4515,6 +4545,9 @@
           }
         }
       }
+    },
+    "Homebrew Updates" : {
+
     },
     "Homebrew Version" : {
       "comment" : "Brew management Homebrew version card",
@@ -4600,6 +4633,7 @@
     },
     "I already have brew installed" : {
       "comment" : "Setup link (keep it short)",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4981,6 +5015,7 @@
     },
     "Install separate brew for Applite" : {
       "comment" : "Setup link (keep it short)",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5031,6 +5066,7 @@
     },
     "Installation failed" : {
       "comment" : "App install alert",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5163,6 +5199,7 @@
     },
     "Installing dependencies" : {
       "comment" : "Brew dependency installation view title",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -6038,6 +6075,9 @@
         }
       }
     },
+    "Open Settings" : {
+      "comment" : "Components install sheet open settings button"
+    },
     "Options" : {
 
     },
@@ -6296,6 +6336,7 @@
     },
     "Provide Brew Executable Path" : {
       "comment" : "Setup brew path selector",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -6417,11 +6458,14 @@
         }
       }
     },
+    "Re-fetches the latest Homebrew over Applite's installation. Your installed apps are kept." : {
+
+    },
     "Reason" : {
 
     },
     "Refresh" : {
-      "comment" : "Update refresh button",
+      "comment" : "Brew Management view refresh section title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -6465,6 +6509,12 @@
 
     },
     "Refresh Catalog" : {
+
+    },
+    "Refresh failed" : {
+
+    },
+    "Refresh Homebrew Components" : {
 
     },
     "Refresh the app catalog to apply your changes" : {
@@ -6765,6 +6815,7 @@
     },
     "Retry Install" : {
       "comment" : "Retry Homebrew install",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -6969,6 +7020,7 @@
     },
     "Selected brew path is invalid!" : {
       "comment" : "Setup view invalid brew path message",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -7007,6 +7059,12 @@
           }
         }
       }
+    },
+    "Setting up components" : {
+      "comment" : "Components install sheet title"
+    },
+    "Setup failed" : {
+      "comment" : "Components install sheet failure title"
     },
     "Shell Output" : {
       "comment" : "Shell output window title",
@@ -7136,6 +7194,7 @@
     },
     "Start Using Applite" : {
       "comment" : "Onboarding finish button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -7396,6 +7455,9 @@
         }
       }
     },
+    "The components Applite needs are installed. You can start downloading apps right away." : {
+      "comment" : "Components install sheet success description"
+    },
     "This app" : {
       "comment" : "Applite app card description",
       "localizations" : {
@@ -7522,6 +7584,7 @@
     },
     "This application uses the free and open source [Homebrew](https://brew.sh/) package manager to download and manage applications. Applite has detected that you don't have brew installed, so it will create a new brew installation just for Applite under `~/Library/Application Support/Applite.`" : {
       "comment" : "Setup Applite's brew installtion info view description",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -8121,8 +8184,12 @@
         }
       }
     },
+    "Update Applite's Homebrew" : {
+      "comment" : "Annex brew update frequency title"
+    },
     "Update failed" : {
       "comment" : "Update failed alert",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -8164,6 +8231,7 @@
     },
     "Update Homebrew" : {
       "comment" : "Update Homebrew button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -8329,6 +8397,7 @@
     },
     "Use different brew path" : {
       "comment" : "Setup link (keep it short)",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -8663,6 +8732,7 @@
     },
     "Welcome to Applite" : {
       "comment" : "Setup welcome page title",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -8703,6 +8773,7 @@
       }
     },
     "Xcode Command Line Tools" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -8780,6 +8851,7 @@
     },
     "You will be prompted to install the Xcode Command Line Tools, please click \"Install\" as it is required for this application to work. It will take a few minutes, you can see the progress on the installation window." : {
       "comment" : "Setup Xcode Command Line install alert",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -8821,6 +8893,7 @@
     },
     "You will be prompted to install Xcode Command Line Tools. Please select \"Install\" as it is required for this application to work." : {
       "comment" : "Brew dependency installation alert",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

@@ -27,9 +27,33 @@ struct ContentView: View {
     @State var searchInput = ""
 
     var body: some View {
+        // `body` reads only `phase` (to gate the overlay), not `statusLine`. The card observes
+        // `bootstrap` directly for the streamed status line — safe because it's composited in the
+        // ZStack below rather than layered over the split view's representable (see that comment).
+        let showSetup = switch caskManager.bootstrap.phase {
+        case .installing, .installed, .failed: true
+        case .checking, .ready: false
+        }
+
+        // The setup card is a sibling layer in this top-level ZStack — NOT an `.overlay` modifier
+        // on the NavigationSplitView. On macOS the split view is backed by an AppKit NSSplitView
+        // (a representable); content layered over it via `.overlay`/`.sheet` only repainted on a
+        // forced layout pass (window drag), so the status line stalled. As a plain SwiftUI sibling
+        // here it lives in SwiftUI's own layout tree and repaints on every change, while still
+        // covering the whole window (sidebar + detail).
+        ZStack {
+            mainNavigation
+
+            if showSetup {
+                setupOverlay
+            }
+        }
+    }
+
+    private var mainNavigation: some View {
         @Bindable var caskManager = caskManager
 
-        NavigationSplitView {
+        return NavigationSplitView {
             SidebarView(selection: $selection)
                 .disabled(modifyingBrew)
         } detail: {
@@ -44,36 +68,14 @@ struct ContentView: View {
                 )
             }
         }
-        .task {
-            await caskManager.loadData()
+        // Re-runs on launch and whenever the install sheet's Retry / "use my own brew" escape
+        // hatch bumps `attempt` — bumping cancels any in-flight annex install.
+        .task(id: caskManager.bootstrap.attempt) {
+            await caskManager.bootstrapAndLoad()
         }
-        // MARK: - Search
         .searchable(text: $searchInput, placement: .sidebar)
-        .onChange(of: searchInput) { _, newValue in
-            // Limit search characters
-            if newValue.count > 30 {
-                searchInput = String(newValue.prefix(30))
-                return
-            }
-
-            if !newValue.isEmpty {
-                // Typing starts a search — remember where we were and clear the selection.
-                if let current = selection {
-                    lastSelection = current
-                    selection = nil
-                }
-            } else if selection == nil {
-                // Search cleared without a sidebar tap (Esc / clear button) — restore.
-                selection = lastSelection
-            }
-        }
-        .onChange(of: selection) { _, newValue in
-            // Sidebar tap during a search wins: clear the query so the detail
-            // switches from SearchView to the tapped destination.
-            if newValue != nil, !searchInput.isEmpty {
-                searchInput = ""
-            }
-        }
+        .onChange(of: searchInput) { _, newValue in handleSearchInputChange(newValue) }
+        .onChange(of: selection) { _, newValue in handleSelectionChange(newValue) }
         // Load failure alert
         .alert(caskManager.loadAlert.title, isPresented: $caskManager.loadAlert.isPresented) {
             AsyncButton {
@@ -89,6 +91,49 @@ struct ContentView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(caskManager.loadAlert.message)
+        }
+    }
+
+    /// Non-dismissable "Setting up components…" modal. Passes the `bootstrap` object so the card
+    /// observes it directly (see `ComponentsInstallView`).
+    private var setupOverlay: some View {
+        ZStack {
+            Rectangle()
+                .fill(.black.opacity(0.2))
+                .ignoresSafeArea()
+
+            ComponentsInstallView(bootstrap: caskManager.bootstrap)
+                .background(.background, in: RoundedRectangle(cornerRadius: 14))
+                .shadow(color: .black.opacity(0.2), radius: 24, y: 8)
+        }
+    }
+
+    // MARK: - Search
+
+    private func handleSearchInputChange(_ newValue: String) {
+        // Limit search characters
+        if newValue.count > 30 {
+            searchInput = String(newValue.prefix(30))
+            return
+        }
+
+        if !newValue.isEmpty {
+            // Typing starts a search — remember where we were and clear the selection.
+            if let current = selection {
+                lastSelection = current
+                selection = nil
+            }
+        } else if selection == nil {
+            // Search cleared without a sidebar tap (Esc / clear button) — restore.
+            selection = lastSelection
+        }
+    }
+
+    private func handleSelectionChange(_ newValue: SidebarItem?) {
+        // Sidebar tap during a search wins: clear the query so the detail
+        // switches from SearchView to the tapped destination.
+        if newValue != nil, !searchInput.isEmpty {
+            searchInput = ""
         }
     }
 }

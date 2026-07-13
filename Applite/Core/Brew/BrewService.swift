@@ -300,7 +300,7 @@ final class BrewService {
             // Make sure brew path is valid
             guard await BrewPaths.isSelectedBrewPathValid() else {
                 Self.logger.error("Couldn't start brew operation because brew path is invalid")
-                alert.show(title: "Brew path is invalid", message: DependencyManager.brokenPathOrInstallMessage)
+                alert.show(title: "Brew path is invalid", message: AnnexBrewManager.brokenPathOrInstallMessage)
                 return
             }
 

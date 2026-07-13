@@ -13,6 +13,7 @@ enum ShellError: LocalizedError {
     case outputDecodingFailed
     case coundtGetHomeDirectory
     case nonZeroExit(command: String, exitCode: Int32, output: String)
+    case timedOut(command: String, seconds: Duration)
 
     var errorDescription: String? {
         switch self {
@@ -26,6 +27,8 @@ enum ShellError: LocalizedError {
             return "Failed to get home directory"
         case .nonZeroExit(let command, let exitCode, let output):
             return "Failed to run shell command.\nCommand: \(command) (exit code: \(exitCode))\nOutput: \(output)"
+        case .timedOut(let command, let seconds):
+            return "Shell command timed out after \(seconds).\nCommand: \(command)"
         }
     }
 }

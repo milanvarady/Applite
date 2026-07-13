@@ -17,8 +17,7 @@ struct AppliteApp: App {
     @State var caskManager = CaskManager()
     
     @AppStorage(Preferences.colorSchemePreference) var colorSchemePreference
-    @AppStorage(Preferences.setupComplete) var setupComplete
-    
+
     /// Sparkle update controller
     private let updaterController: SPUStandardUpdaterController
     
@@ -42,21 +41,15 @@ struct AppliteApp: App {
     
     var body: some Scene {
         WindowGroup {
-            if setupComplete {
-                ContentView()
-                    .environment(caskManager)
-                    .environment(\.updater, updaterController.updater)
-                    .frame(minWidth: 970, minHeight: 520)
-                    .preferredColorScheme(selectedColorScheme)
-                    // Give the app delegate the live manager so it can stop running
-                    // tasks on quit. Direct reference — no `NSApp.delegate as?` cast
-                    // or timing fragility.
-                    .onAppear { appDelegate.caskManager = caskManager }
-            } else {
-                SetupView()
-                    .frame(width: 600, height: 400)
-                    .preferredColorScheme(selectedColorScheme)
-            }
+            ContentView()
+                .environment(caskManager)
+                .environment(\.updater, updaterController.updater)
+                .frame(minWidth: 970, minHeight: 520)
+                .preferredColorScheme(selectedColorScheme)
+                // Give the app delegate the live manager so it can stop running
+                // tasks on quit. Direct reference — no `NSApp.delegate as?` cast
+                // or timing fragility.
+                .onAppear { appDelegate.caskManager = caskManager }
         }
         .windowResizability(.contentSize)
         .commands {
