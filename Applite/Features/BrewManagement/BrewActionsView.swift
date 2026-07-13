@@ -53,7 +53,7 @@ struct BrewActionsView: View {
                 remark(
                     title: "Note",
                     color: .blue,
-                    message: "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/homebrew`"
+                    message: "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/Homebrew`"
                 )
 
                 remark(
@@ -165,6 +165,14 @@ struct BrewActionsView: View {
         withAnimation {
             modifyingBrew = true
         }
+        // Always clear the flag on exit — including a thrown refresh. Otherwise a failed refresh
+        // (the AsyncButton surfaces the error separately) would leave every brew action disabled
+        // until the app restarts.
+        defer {
+            withAnimation {
+                modifyingBrew = false
+            }
+        }
 
         BrewManagementView.logger.info("Refreshing annex Homebrew started")
 
@@ -175,9 +183,5 @@ struct BrewActionsView: View {
         BrewManagementView.logger.info("Annex Homebrew refresh successful")
 
         updateDone = true
-
-        withAnimation {
-            modifyingBrew = false
-        }
     }
 }

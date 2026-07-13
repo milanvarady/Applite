@@ -35,11 +35,14 @@ enum GitShim {
     static let executable = directory.appendingPathComponent("git")
 
     /// Homebrew parses the version from the trailing token of `git --version`, and requires
-    /// >= 2.14.3 on macOS — so the line must end in a plain, high-enough version number.
+    /// >= 2.14.3 on macOS — so the line must end in a plain, high-enough version number. We report a
+    /// version comfortably above brew's floor (and above current real git releases) so a future bump
+    /// to that minimum can't start failing the check. It stays plausible rather than absurdly high so
+    /// brew doesn't try to use git features newer than any that exist.
     private static let script = """
     #!/bin/sh
     if [ "$1" = "--version" ]; then
-      echo "git version 2.45.0"
+      echo "git version 2.50.0"
       exit 0
     fi
     exit 1

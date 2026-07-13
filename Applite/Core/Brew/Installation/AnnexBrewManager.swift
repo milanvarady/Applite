@@ -42,7 +42,13 @@ struct AnnexBrewManager {
     /// The shell command that fetches the Homebrew tarball and unpacks it over the annex directory.
     /// Shared by the clean install, the streaming first-run install, and the freshness refresh.
     static func annexExtractCommand() -> String {
-        "curl -L \(brewTarballURL) | tar xz --strip 1 -C \(BrewPaths.annexBrewDirectory.quotedPath())"
+        // `set -o pipefail` + `curl -fL`: without them a truncated download or an HTTP error body is
+        // swallowed — the pipeline's exit status is tar's, so tar happily extracts a partial (or
+        // garbage) tree and the command "succeeds" with a half-installed brew. `verifyAnnexInstall`'s
+        // `brew --version` check won't catch that (it loads too little), so it only surfaces later as
+        // a missing-file crash. `-f` fails on HTTP errors; pipefail propagates curl's exit through
+        // the pipe. (macOS `/bin/sh` is bash, which supports `pipefail`.)
+        "set -o pipefail; curl -fL \(brewTarballURL) | tar xz --strip 1 -C \(BrewPaths.annexBrewDirectory.quotedPath())"
     }
 
     /// Ensures the annex directory exists.

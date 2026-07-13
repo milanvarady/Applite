@@ -145,8 +145,22 @@ enum Shell {
 
                 processHolder.withLock { $0 = task }
 
+                // Set by the process's termination handler; lets the read loop's error path tell
+                // "we closed the handle to end a hung read" apart from a genuine read failure.
+                let processExited = OSAllocatedUnfairLock<Bool>(initialState: false)
+
                 do {
                     let fileHandle = pipe.fileHandleForReading
+
+                    // Force the read loop to end once the process exits. `fileHandle.bytes` blocks
+                    // until the pty reaches EOF, but a `script`-wrapped pty can linger after brew has
+                    // finished (or AsyncBytes may not observe EOF promptly). A hung loop here would
+                    // freeze the cask on its install/"success" state — so it's never marked installed.
+                    // Closing our read end on termination guarantees EOF.
+                    task.terminationHandler = { _ in
+                        processExited.withLock { $0 = true }
+                        try? fileHandle.close()
+                    }
 
                     try task.run()
 
@@ -223,8 +237,24 @@ enum Shell {
                         continuation.finish()
                     }
                 } catch {
-                    logger.error("Stream error: \(error.localizedDescription)")
-                    continuation.finish(throwing: error)
+                    // A read error *after* the process exited is the termination handler closing the
+                    // handle to break a hung read — not a real failure. Finish on the true exit status
+                    // instead of surfacing a spurious error. Anything else propagates.
+                    if processExited.withLock({ $0 }) {
+                        task.waitUntilExit()
+                        if task.terminationStatus != 0 {
+                            continuation.finish(throwing: ShellError.nonZeroExit(
+                                command: command,
+                                exitCode: task.terminationStatus,
+                                output: "n/a (streamed output)"
+                            ))
+                        } else {
+                            continuation.finish()
+                        }
+                    } else {
+                        logger.error("Stream error: \(error.localizedDescription)")
+                        continuation.finish(throwing: error)
+                    }
                 }
             }
 
