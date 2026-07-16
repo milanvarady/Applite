@@ -170,13 +170,19 @@ def run(args: list[str], *, check: bool = False, capture: bool = True,
     """Run a command. Captures output by default; pass capture=False for
     interactive commands (sudo password prompts, installers)."""
     _log("RUN  " + " ".join(args))
-    return subprocess.run(
-        args,
-        check=check,
-        text=True,
-        capture_output=capture,
-        env={**os.environ, **(env or {})} if env else None,
-    )
+    try:
+        return subprocess.run(
+            args,
+            check=check,
+            text=True,
+            capture_output=capture,
+            env={**os.environ, **(env or {})} if env else None,
+        )
+    except FileNotFoundError:
+        # The executable isn't present — e.g. the annex brew before Applite installs
+        # it, or a hidden /opt brew. Degrade to a failed command so callers (brew_healthy,
+        # brew_json, …) handle it as "not available" instead of crashing with a traceback.
+        return subprocess.CompletedProcess(args, returncode=127, stdout="", stderr="")
 
 
 def sudo(args: list[str]) -> bool:
@@ -1096,8 +1102,15 @@ def cmd_run(args) -> int:
         selected = phases[start:]
 
     heading(f"RUN round={args.round}  BREW={BREW}")
+    if args.round == "annex" and not ANNEX_BREW.exists():
+        bad("The annex Homebrew isn't installed yet — nothing to test against.")
+        info("Open Applite and let it install the annex (wait for the catalog to load "
+             "and the 'Get Started' button), then re-run:")
+        info("    applite_test.py run --round annex")
+        return 1
     if not brew_healthy() and args.round != "external":
-        warn("brew not healthy yet — is Applite installing the annex? Launch it first.")
+        warn("brew not responding yet — is Applite still installing the annex? "
+             "Wait for 'Get Started', then re-run.")
     state: dict = {}
     for pid, title, fn in selected:
         try:
