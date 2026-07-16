@@ -55,9 +55,12 @@ LOG_FILE = Path(__file__).resolve().parent / "applite-test.log"
 # each against the live catalog, so if a pick drifts you'll be told to swap it.
 DMG_CASK = "rectangle"          # small .app-artifact DMG
 PKG_CASK = "zoom"               # .pkg installer (exercises the appdir path)
-ZAP_CASK = "stats"             # distinct app with a `zap trash:` stanza
+ZAP_CASK = "stats"              # distinct app with a `zap trash:` stanza
 UPDATE_CASK = "font-hack"       # versioned, auto_updates:false (fonts never self-update)
-WARN_CASK = "keyboard-maestro"  # has a licensing caveat; preflight verifies, swap if it drifts
+WARN_CASK = "aegisub"           # deprecated → triggers the download warning dialog
+#                                 (also probes the HOMEBREW_DEVELOPER deprecation risk)
+CANCEL_CASK = "libreoffice"     # big download so there's time to hit Stop; cache cleared first
+IMPORT_CASKS = ["hiddenbar", "mos"]  # small, not-otherwise-installed casks for the import test
 
 # Paths the harness is allowed to delete outright (never a system brew/CLT).
 def _wipe_paths() -> list[Path]:
@@ -195,6 +198,20 @@ def brew_json(token: str) -> dict | None:
         return casks[0] if casks else None
     except (json.JSONDecodeError, IndexError):
         return None
+
+
+def clear_cask_cache(token: str) -> None:
+    """Remove a cask's cached download so the next install re-downloads (needed for
+    the cancel test — a cached download completes instantly, leaving nothing to stop)."""
+    path = brew("--cache", "--cask", token).stdout.strip()
+    if not path:
+        return
+    for p in (path, path + ".incomplete"):
+        try:
+            os.remove(p)
+            info(f"cleared cache: {p}")
+        except OSError:
+            pass
 
 
 # --------------------------------------------------------------------------- #
@@ -490,7 +507,7 @@ def unhide_prereqs() -> None:
 # reset / teardown
 # --------------------------------------------------------------------------- #
 
-TEST_CASKS = [DMG_CASK, PKG_CASK, ZAP_CASK, UPDATE_CASK, WARN_CASK]
+TEST_CASKS = [DMG_CASK, PKG_CASK, ZAP_CASK, UPDATE_CASK, WARN_CASK, CANCEL_CASK, *IMPORT_CASKS]
 
 
 def _uninstall_test_casks_from(brew_exe: Path) -> None:
@@ -607,6 +624,8 @@ def cmd_preflight(_args) -> int:
         (ZAP_CASK, "app", "zap"),
         (UPDATE_CASK, None, "no_auto_update"),
         (WARN_CASK, None, "warn"),
+        (CANCEL_CASK, "app", None),
+        *[(t, "app", None) for t in IMPORT_CASKS],
     ]
     print(f"  {'token':22} {'kind':6} {'auto_upd':9} {'version':12} role")
     all_ok = True
@@ -687,25 +706,33 @@ def phase_a3(_state) -> None:
 
 
 def phase_a4(_state) -> None:
-    step("4", f"warning-cask dialog ({WARN_CASK})")
-    do_in_app(f"Start installing '{WARN_CASK}' — a caveat/warning dialog should appear")
+    step("4", f"warning-cask dialog ({WARN_CASK}, deprecated)")
+    do_in_app(f"Start installing '{WARN_CASK}' — a warning dialog (deprecated) should appear")
     confirm("Did the warning dialog appear?")
     do_in_app("Choose 'Download Anyway' and let it finish")
-    check(f"{WARN_CASK} in brew list", lambda: cask_installed(WARN_CASK))
+    # If this FAILS with a deprecation error, that's the HOMEBREW_DEVELOPER risk surfacing.
+    check(f"{WARN_CASK} installed (no HOMEBREW_DEVELOPER deprecation error)",
+          lambda: cask_installed(WARN_CASK))
 
 
 def phase_a5(_state) -> None:
     step("5", f"force install ({DMG_CASK})")
-    do_in_app(f"Open '{DMG_CASK}' options (chevron) → Force Install")
-    check(f"{DMG_CASK} still installed", lambda: cask_installed(DMG_CASK))
+    # Force Install only appears in the chevron menu when a cask is NOT installed
+    # (installed casks show Reinstall instead — AppView.optionsMenuContent), so the
+    # cask must be uninstalled first to reach it.
+    do_in_app(f"If '{DMG_CASK}' shows Installed, uninstall it (plain). Then open its "
+              "options (chevron) → Force Install")
+    check(f"{DMG_CASK} installed after Force Install", lambda: cask_installed(DMG_CASK))
     confirm("Did Force Install complete with no error surfaced?")
 
 
 def phase_a6(_state) -> None:
-    step("6", "cancel mid-download")
-    do_in_app(f"Uninstall '{PKG_CASK}' first if installed, then start installing it "
-              "again and hit the STOP button mid-download")
-    check(f"{PKG_CASK} NOT installed after cancel", lambda: cask_absent(PKG_CASK))
+    step("6", f"cancel mid-download ({CANCEL_CASK})")
+    info(f"Clearing {CANCEL_CASK}'s cached download so it re-downloads (a cached "
+         "download finishes instantly — nothing to cancel)…")
+    clear_cask_cache(CANCEL_CASK)
+    do_in_app(f"Install '{CANCEL_CASK}' (large) and hit the STOP button while it downloads")
+    check(f"{CANCEL_CASK} NOT installed after cancel", lambda: cask_absent(CANCEL_CASK))
     confirm("Did the progress reset to idle (no stuck spinner)?")
 
 
@@ -773,11 +800,19 @@ def phase_a11(_state) -> None:
 
 
 def phase_a12(_state) -> None:
-    step("12", "catalog refresh + search/browse")
-    do_in_app("Press ⌘R (Refresh App Catalog); then type a query in search")
-    do_in_app("Try: sort/filter toggles, a category, a tap (if enabled), "
-              "Installed / Updates / Active Tasks tabs")
-    confirm("Did search return results and every view render without error?")
+    step("12", "catalog refresh + browse (read-only UI smoke test)")
+    info("Purpose: the read-only catalog/browse surfaces render and return data — "
+         "catalog re-sync, FTS search, sort/filter, categories, taps, and the tabs.")
+    do_in_app("Press ⌘R (Refresh App Catalog); wait for it to finish")
+    confirm("Did the catalog refresh finish with no error alert?")
+    do_in_app("Type a query in the search field")
+    confirm("Did search return matching results?")
+    do_in_app("Change the sort and toggle a filter in the search toolbar")
+    confirm("Did the result order / visibility change accordingly?")
+    do_in_app("Open a category from the sidebar, then a Tap (if taps are enabled)")
+    confirm("Did the Category and Tap views render their apps?")
+    do_in_app("Visit the Installed, Updates, and Active Tasks tabs")
+    confirm("Did each tab render the expected content?")
 
 
 def phase_a13(_state) -> None:
@@ -793,15 +828,24 @@ def phase_a13(_state) -> None:
 
 
 def phase_a14(_state) -> None:
-    step("14", "import / export")
+    step("14", "export, then import fresh casks")
     export_path = Path.home() / "Desktop/applite_export.txt"
     do_in_app(f"App Migration → Export apps to {export_path}")
     check("export file exists and is non-empty",
           lambda: export_path.exists() and export_path.stat().st_size > 0)
     check("export lists at least one token",
           lambda: bool(export_path.exists() and export_path.read_text().split()))
-    do_in_app("App Migration → Import a 1-line file with a cask token; let it install")
-    confirm("Did the import queue/complete the install?")
+
+    # Write an import file of casks NOT installed yet, so a successful import proves
+    # it actually installs (not just "already there").
+    import_path = Path.home() / "Desktop/applite_import.txt"
+    import_path.write_text("\n".join(IMPORT_CASKS) + "\n")
+    for tok in IMPORT_CASKS:
+        check(f"{tok} not installed before import", lambda t=tok: cask_absent(t))
+    do_in_app(f"App Migration → Import {import_path} "
+              f"({', '.join(IMPORT_CASKS)}); let them install")
+    for tok in IMPORT_CASKS:
+        check(f"{tok} installed via import", lambda t=tok: cask_installed(t))
 
 
 def phase_a15(_state) -> None:

@@ -89,7 +89,9 @@ Set at the top of `applite_test.py` (one per installer type); `preflight` re-che
 | `PKG_CASK` | `zoom` | `.pkg` installer (exercises the appdir path) |
 | `ZAP_CASK` | `stats` | has a `zap trash:` stanza |
 | `UPDATE_CASK` | `font-hack` | versioned, **`auto_updates: false`** — required so non-greedy `brew outdated` will report the faked-old version |
-| `WARN_CASK` | `keyboard-maestro` | has a caveat/deprecation → triggers the download warning dialog |
+| `WARN_CASK` | `aegisub` | **deprecated** → triggers the download warning dialog (and probes the HOMEBREW_DEVELOPER deprecation risk) |
+| `CANCEL_CASK` | `libreoffice` | large download so there's time to hit Stop mid-download (the harness clears its cache first) |
+| `IMPORT_CASKS` | `hiddenbar`, `mos` | small casks not installed elsewhere, so the import phase proves it actually installs |
 
 Cask metadata drifts. If `preflight` flags one (wrong artifact type, `auto_updates`
 became true, no zap/caveat), swap that variable for a cask that fits the role — the
