@@ -510,11 +510,23 @@ def unhide_prereqs() -> None:
 TEST_CASKS = [DMG_CASK, PKG_CASK, ZAP_CASK, UPDATE_CASK, WARN_CASK, CANCEL_CASK, *IMPORT_CASKS]
 
 
-def _uninstall_test_casks_from(brew_exe: Path) -> None:
+def _uninstall_all_casks(brew_exe: Path) -> None:
+    """`brew uninstall --zap --force` every installed cask on this brew — removes the
+    .app, pkg-installed files, and zap paths (prefs/caches/launch agents/fonts) via
+    brew's own logic. Best-effort. Call with CLT live so the trash step doesn't pop
+    the dialog. No-op if the brew executable isn't present (e.g. hidden)."""
     if not brew_exe.exists():
         return
-    for tok in TEST_CASKS:
-        run([str(brew_exe), "uninstall", "--cask", "--zap", "--force", tok])
+    no_update = {"HOMEBREW_NO_AUTO_UPDATE": "1"}
+    cp = run([str(brew_exe), "list", "--cask", "--full-name"], env=no_update)
+    tokens = cp.stdout.split() if cp.returncode == 0 else []
+    if not tokens:
+        return
+    info(f"uninstalling {len(tokens)} cask(s) from {brew_exe.parent.parent}: "
+         + " ".join(tokens))
+    for tok in tokens:
+        run([str(brew_exe), "uninstall", "--cask", "--zap", "--force", tok],
+            env=no_update, capture=False)
 
 
 def _delete_test_apps() -> None:
@@ -553,16 +565,23 @@ def _wipe_applite_data() -> None:
                 pass
 
 
-def cmd_reset(_args) -> int:
+def cmd_reset(args) -> int:
     heading("RESET → fresh first-run state")
-    warn("This deletes Applite's data + annex and HIDES /opt/homebrew + CLT.")
+    warn("This UNINSTALLS every installed cask (annex + /opt), deletes Applite's data,")
+    warn("and HIDES /opt/homebrew + CLT. Intended for a throwaway test VM.")
     if input("Type 'reset' to continue: ").strip() != "reset":
         raise SystemExit("Cancelled.")
     require_applite_quit()
     ensure_provisioned()
-    # Clean any test casks from a live /opt brew before hiding it.
-    _uninstall_test_casks_from(OPT_BREW)
-    _delete_test_apps()
+    if not args.keep_apps:
+        # Uninstall via brew so apps + pkg files + zap paths all go through brew's own
+        # removal. Unhide first so CLT is live and the trash step never pops the dialog;
+        # we re-hide below. (Snapshots aren't available on Apple-Silicon UTM VMs, so this
+        # sweep is what delivers the fresh state.)
+        unhide_prereqs()
+        _uninstall_all_casks(ANNEX_BREW)
+        _uninstall_all_casks(OPT_BREW)
+    _delete_test_apps()  # belt-and-suspenders for any stragglers
     hide_prereqs()
     _wipe_applite_data()
     RESULTS.add(clt_free(), "machine reads CLT-free with no system brew")
@@ -575,11 +594,11 @@ def cmd_teardown(args) -> int:
     if applite_running():
         raise SystemExit("Quit Applite first (verify self-uninstall removed it).")
     RESULTS.add(not _applite_app_present(), "Applite.app is gone (self-uninstall worked)")
-    _uninstall_test_casks_from(OPT_BREW)
-    _delete_test_apps()
-    _wipe_applite_data()
     if args.full:
-        warn("--full: deleting Homebrew and CLT entirely.")
+        warn("--full: uninstalling all casks, then deleting Homebrew + CLT entirely.")
+        _uninstall_all_casks(OPT_BREW)  # remove apps/pkg/zap before nuking brew
+        _delete_test_apps()
+        _wipe_applite_data()
         for path in (OPT_PREFIX, _hidden(OPT_PREFIX), CLT_PATH, _hidden(CLT_PATH)):
             if path.exists():
                 sudo(["rm", "-rf", str(path)])
@@ -587,6 +606,12 @@ def cmd_teardown(args) -> int:
         shutil.rmtree(Path.home() / "Library/Logs/Homebrew", ignore_errors=True)
         ok("Full teardown complete — pristine image.")
     else:
+        # Uninstall everything (CLT live so trash works), then re-hide the prereqs.
+        unhide_prereqs()
+        _uninstall_all_casks(OPT_BREW)
+        _uninstall_all_casks(ANNEX_BREW)
+        _delete_test_apps()
+        _wipe_applite_data()
         hide_prereqs()
         ok("Teardown complete — brew + CLT kept hidden for the next run.")
     return RESULTS.summary()
@@ -1033,7 +1058,10 @@ def main() -> int:
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("provision", help="one-time: install brew+CLT if missing, then hide")
-    sub.add_parser("reset", help="fast fresh state: hide prereqs + wipe Applite data")
+    p_reset = sub.add_parser(
+        "reset", help="fresh state: uninstall all casks, wipe Applite, hide prereqs")
+    p_reset.add_argument("--keep-apps", action="store_true",
+                         help="skip the brew-uninstall sweep (faster, leaves installed apps)")
 
     p_run = sub.add_parser("run", help="guided phased suite")
     p_run.add_argument("--round", choices=["annex", "external", "finalize"], default="annex")

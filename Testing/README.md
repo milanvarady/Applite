@@ -40,11 +40,18 @@ Installing brew + CLT takes ~10 min, so we don't do it every run. Instead:
    (renames `/opt/homebrew` and `/Library/Developer/CommandLineTools` aside, and
    `xcode-select --reset`). Hidden ⇒ the machine genuinely reads as CLT-free with no
    system brew, which is exactly Round A's starting condition.
-2. `reset` (fast) re-hides the prereqs and wipes Applite's data — the fresh baseline.
+2. `reset` **uninstalls every installed cask** (via brew, so apps + pkg files + zap
+   paths all go), wipes Applite's data, and hides the prereqs — the fresh baseline.
 3. Round B's first phase **unhides** them and `brew update`s.
 
-**Snapshot the VM right after `provision`** — then every run is just `reset` (seconds)
-instead of a reinstall.
+### No snapshots on Apple-Silicon UTM
+
+macOS guests on Apple Silicon use Apple's Virtualization framework, which has **no
+snapshot support** — so `reset` is what returns you to a clean state (it uninstalls
+all casks rather than assuming a snapshot rollback). If you'd rather roll back the
+whole disk, the only option is to **duplicate the `.utm` bundle** in UTM before a run
+(a full copy) and restore from that. `reset --keep-apps` skips the uninstall sweep if
+you're managing app state yourself.
 
 ## Full pass
 
@@ -74,10 +81,11 @@ $PY applite_test.py run --round external --only B3
 
 | Command | What it does |
 |---|---|
+| `reset [--keep-apps]` | Fresh state: uninstall all casks + wipe Applite + hide prereqs. `--keep-apps` skips the uninstall sweep. |
 | `preflight [--round ...]` | Validate the configured test casks against the live catalog. Run before a pass. |
 | `verify [--round ...]` | Print current brew health, installed/outdated casks, and the hide/unhide state. |
 | `fake-outdated <token> [--round ...]` | Rename a cask's installed version to `0.0.1` so `brew outdated` reports it (used by the update phases). |
-| `teardown [--full]` | Default: re-hide prereqs + wipe Applite (fast, reusable). `--full`: delete `/opt/homebrew`, CLT, and caches for a pristine image. |
+| `teardown [--full]` | Default: uninstall all casks, wipe Applite, re-hide prereqs. `--full`: also delete `/opt/homebrew`, CLT, and caches for a pristine image. |
 
 ## Test casks
 
