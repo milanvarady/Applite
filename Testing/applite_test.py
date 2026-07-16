@@ -482,14 +482,6 @@ def ask_continue() -> None:
         raise SystemExit("\nAborted.")
 
 
-def prompt_yn(question: str) -> bool:
-    """A yes/no branch prompt that does NOT record a PASS/FAIL (unlike confirm())."""
-    try:
-        return input(_c("1;36", "  ? " + question + " [y/N] ")).strip().lower() in ("y", "yes")
-    except (EOFError, KeyboardInterrupt):
-        raise SystemExit("\nAborted.")
-
-
 # --------------------------------------------------------------------------- #
 # Prerequisite provisioning (hide/unhide)
 # --------------------------------------------------------------------------- #
@@ -971,30 +963,29 @@ def phase_a13(_state) -> None:
     confirm("Did the catalog stay usable — no crash, no stuck error (silent self-heal)?")
     do_in_app("Set the brew path back to 'Applite's installation' before continuing")
 
-    # 13c — OPTIONAL: the genuinely-broken failure UI. It only appears when brew is truly
-    # unrecoverable (bad path + no system brew + no valid annex + reinstall can't run), so
-    # it needs the annex gone AND the network off. Skip unless you want it.
-    if prompt_yn("Optional: exercise the truly-broken failure UI now? (needs network OFF)"):
-        do_in_app("Turn OFF the VM's network")
-        annex = APPLITE_SUPPORT / "Homebrew"
-        stash = annex.with_name("Homebrew.brokentest")
-        moved = False
-        try:
-            if annex.exists():
-                shutil.move(str(annex), str(stash))
-                moved = True
-                info("annex temporarily hidden")
-            do_in_app("In Applite press ⌘R (annex gone + no network → brew is unrecoverable)")
-            confirm("Did a setup-failed overlay and/or 'couldn't load app catalog' alert "
-                    "appear with Retry + 'use your own Homebrew'?")
-        finally:
-            if moved and stash.exists():
-                shutil.move(str(stash), str(annex))
-                info("annex restored")
-        do_in_app("Turn the network back ON, then press Retry in Applite")
-        confirm("Did Retry recover (catalog loads again)?")
-    else:
-        RESULTS.skip("truly-broken failure UI (optional)")
+    # 13c — the genuinely-broken failure UI. Brew must be UNRECOVERABLE for it to show,
+    # so the annex is hidden AND the network taken offline (otherwise Applite just
+    # reinstalls the annex and recovers). Both are restored afterward.
+    info("Now the failure path: brew must be unrecoverable, so we hide the annex and you "
+         "take the VM offline (else Applite reinstalls the annex and recovers).")
+    do_in_app("Turn OFF the VM's network (Wi-Fi / Ethernet)")
+    annex = APPLITE_SUPPORT / "Homebrew"
+    stash = annex.with_name("Homebrew.brokentest")
+    moved = False
+    try:
+        if annex.exists():
+            shutil.move(str(annex), str(stash))
+            moved = True
+            info("annex temporarily hidden")
+        do_in_app("In Applite press ⌘R (annex gone + no network → brew is unrecoverable)")
+        confirm("Did a setup-failed overlay and/or 'Couldn't load app catalog' alert "
+                "appear with Retry + 'use your own Homebrew'?")
+    finally:
+        if moved and stash.exists():
+            shutil.move(str(stash), str(annex))
+            info("annex restored")
+    do_in_app("Turn the network back ON, then press Retry in Applite")
+    confirm("Did Retry recover (catalog loads again)?")
 
 
 def phase_a14(_state) -> None:
