@@ -803,9 +803,10 @@ def phase_a0(_state) -> None:
 
 def phase_a1(_state) -> None:
     step("1", "fresh bootstrap (first run)")
-    do_in_app("Launch Applite. Watch the setup overlay install the annex brew")
-    confirm("Did the annex install with NO 'Install Command Line Tools' popup?")
-    confirm("Did the catalog load and 'Get Started' appear?")
+    # No confirms: reaching this point means Applite already installed the annex and
+    # showed the catalog (you couldn't get here otherwise). The auto-checks below prove
+    # brew is actually usable.
+    info("Applite has installed the annex and shown the catalog + 'Get Started'.")
     check("brew_healthy (annex, no LoadError)", brew_healthy)
     check("annex brew executable exists", lambda: ANNEX_BREW.exists())
 
@@ -817,7 +818,7 @@ def phase_a2(state) -> None:
     cask = brew_json(DMG_CASK) or {}
     for name in app_names(cask):
         check(f"{name} present on disk", lambda n=name: app_present(n))
-    confirm("Did the green tick CLEAR and the app show as Installed (no popup)?")
+    confirm("Did the green tick clear and the app show as Installed?")
 
 
 def phase_a3(_state) -> None:
@@ -827,7 +828,7 @@ def phase_a3(_state) -> None:
     cask = brew_json(PKG_CASK) or {}
     for name in app_names(cask):
         check(f"{name} present (appdir {appdir()})", lambda n=name: app_present(n))
-    confirm("Did the sudo/password prompt work and the install finish (no CLT popup)?")
+    confirm("Did the password prompt appear and the install finish?")
 
 
 def phase_a4(_state) -> None:
@@ -873,7 +874,6 @@ def phase_a7(state) -> None:
     check(f"{UPDATE_CASK} no longer outdated", lambda: not outdated_lists(UPDATE_CASK))
     check(f"{UPDATE_CASK} version restored (not 0.0.1)",
           lambda: installed_version(UPDATE_CASK) not in (None, "0.0.1"))
-    confirm("Did the update finish with no CLT popup?")
 
 
 def phase_a8(_state) -> None:
@@ -904,7 +904,6 @@ def phase_a9(state) -> None:
         check("zap trash/delete paths removed", zap_clean)
     else:
         RESULTS.skip("zap path check (no zap paths captured)")
-    confirm("Did the uninstall+zap finish with NO CLT popup (trash via FFI)?")
 
 
 def phase_a10(_state) -> None:
@@ -1111,6 +1110,10 @@ def cmd_run(args) -> int:
     if not brew_healthy() and args.round != "external":
         warn("brew not responding yet — is Applite still installing the annex? "
              "Wait for 'Get Started', then re-run.")
+    if args.round == "annex":
+        warn("Invariant for this round: NO 'Install Command Line Tools' dialog should "
+             "appear at any step. If one ever does, that's a failure — abort (Ctrl-C) "
+             "and report which step. (So the phases no longer ask about it each time.)")
     state: dict = {}
     for pid, title, fn in selected:
         try:
