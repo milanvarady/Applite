@@ -724,6 +724,28 @@ def _applite_app_present() -> bool:
     return False
 
 
+def _applite_leftovers() -> list[str]:
+    """Applite support/cache/pref paths that self-uninstall SHOULD have removed — mirrors
+    the rm list in UninstallSelf.swift. Excludes ~/Library/Caches/Homebrew, which the app
+    only removes when the operator opts in. Returns any that still exist."""
+    home = Path.home()
+    fixed = [
+        APPLITE_SUPPORT,  # ~/Library/Application Support/Applite (includes the annex)
+        home / "Library/Application Support" / BUNDLE_ID,
+        home / "Library/Containers" / BUNDLE_ID,
+        home / "Library/Caches/Applite",
+        home / "Library/Caches" / BUNDLE_ID,
+        home / "Library/Applite",
+        home / "Library/Saved Application State" / f"{BUNDLE_ID}.savedState",
+        home / "Library/WebKit" / BUNDLE_ID,
+        home / "Library/HTTPStorages" / BUNDLE_ID,
+    ]
+    left = [str(p) for p in fixed if p.exists()]
+    left += glob.glob(str(home / f"Library/Preferences/*{BUNDLE_ID}*.plist"))
+    left += glob.glob(str(home / f"Library/SyncedPreferences/{BUNDLE_ID}*.plist"))
+    return left
+
+
 def cmd_provision(_args) -> int:
     heading("PROVISION (one-time per VM)")
     ensure_provisioned()
@@ -1081,6 +1103,13 @@ def phase_f1(_state) -> None:
          "manages brew so it can keep the cached prereqs.")
     do_in_app("Settings → Uninstall → Uninstall Applite; confirm")
     check("Applite.app is gone", lambda: not _applite_app_present())
+
+    def no_leftovers() -> bool:
+        left = _applite_leftovers()
+        if left:
+            warn("  still present: " + ", ".join(left))
+        return not left
+    check("Applite support/cache/prefs folders removed", no_leftovers)
     info("Run `teardown` next to re-hide the prereqs (or `teardown --full`).")
 
 
