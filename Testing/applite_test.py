@@ -267,6 +267,68 @@ def _expand(path: str) -> list[Path]:
     return [Path(expanded)]
 
 
+def _cask_json_any(token: str) -> dict | None:
+    """Resolve a cask's metadata from ANY available source — a live annex or /opt brew,
+    else the online Homebrew API via system curl. Used for cleanup by name, which must
+    work even when no brew currently tracks the cask (e.g. after a clean annex reinstall
+    unlinks installed apps)."""
+    for exe in (ANNEX_BREW, OPT_BREW):
+        if exe.exists():
+            cp = run([str(exe), "info", "--json=v2", "--cask", token])
+            if cp.returncode == 0 and cp.stdout.strip():
+                try:
+                    return json.loads(cp.stdout)["casks"][0]
+                except (json.JSONDecodeError, IndexError, KeyError):
+                    pass
+    # Online fallback (system curl — no python TLS/cert dependency).
+    cp = run(["/usr/bin/curl", "-fsSL",
+              f"https://formulae.brew.sh/api/cask/{token}.json"])
+    if cp.returncode == 0 and cp.stdout.strip():
+        try:
+            return json.loads(cp.stdout)
+        except json.JSONDecodeError:
+            pass
+    return None
+
+
+def removable_paths(cask: dict) -> list[str]:
+    """delete/trash/rmdir paths from BOTH the `uninstall` and `zap` stanzas (raw; ~ and
+    globs unexpanded). Covers pkg casks, whose app lives in `uninstall delete:` rather
+    than an `app` artifact."""
+    out: list[str] = []
+    for art in cask.get("artifacts", []):
+        if not isinstance(art, dict):
+            continue
+        for stanza in ("uninstall", "zap"):
+            for directive in art.get(stanza, []) or []:
+                if not isinstance(directive, dict):
+                    continue
+                for key in ("trash", "delete", "rmdir"):
+                    val = directive.get(key)
+                    if isinstance(val, str):
+                        out.append(val)
+                    elif isinstance(val, list):
+                        out.extend(p for p in val if isinstance(p, str))
+    return out
+
+
+def pkgutil_ids(cask: dict) -> list[str]:
+    """pkgutil receipt ids/regexes from the `uninstall`/`zap` stanzas."""
+    out: list[str] = []
+    for art in cask.get("artifacts", []):
+        if not isinstance(art, dict):
+            continue
+        for stanza in ("uninstall", "zap"):
+            for directive in art.get(stanza, []) or []:
+                if isinstance(directive, dict):
+                    val = directive.get("pkgutil")
+                    if isinstance(val, str):
+                        out.append(val)
+                    elif isinstance(val, list):
+                        out.extend(x for x in val if isinstance(x, str))
+    return out
+
+
 # --------------------------------------------------------------------------- #
 # Verifiers
 # --------------------------------------------------------------------------- #
@@ -529,25 +591,56 @@ def _uninstall_all_casks(brew_exe: Path) -> None:
             env=no_update, capture=False)
 
 
-def _delete_test_apps() -> None:
-    for base in ("/Applications", str(Path.home() / "Applications")):
-        for tok in TEST_CASKS:
-            cask = None
-            # Best effort: derive .app names from a live brew if possible.
-            for exe in (ANNEX_BREW, OPT_BREW):
-                if exe.exists():
-                    cp = run([str(exe), "info", "--json=v2", "--cask", tok])
-                    if cp.returncode == 0 and cp.stdout.strip():
-                        try:
-                            cask = json.loads(cp.stdout)["casks"][0]
-                        except (json.JSONDecodeError, IndexError, KeyError):
-                            cask = None
-                    break
-            for name in (app_names(cask) if cask else []):
-                target = Path(base) / name
-                if target.exists():
-                    info(f"removing leftover {target}")
-                    shutil.rmtree(target, ignore_errors=True)
+# Paths we refuse to delete outright — a cask zap/delete directive should never
+# resolve to one of these, but guard anyway (defense against a bad/broad stanza).
+_GUARDED = {
+    Path("/"), Path("/Applications"), Path("/Library"), Path("/System"), Path("/usr"),
+    Path("/bin"), Path("/opt"), Path("/opt/homebrew"),
+    Path.home(), Path.home() / "Library", Path.home() / "Applications",
+    Path.home() / "Documents", Path.home() / "Desktop", Path.home() / "Downloads",
+}
+
+
+def _safe_to_delete(p: Path) -> bool:
+    return Path(os.path.abspath(os.path.expanduser(str(p)))) not in _GUARDED
+
+
+def _rm(p: Path) -> None:
+    if not (p.exists() or p.is_symlink()):
+        return
+    if not _safe_to_delete(p):
+        warn(f"refusing to delete guarded path: {p}")
+        return
+    info(f"removing {p}")
+    if p.is_dir() and not p.is_symlink():
+        shutil.rmtree(p, ignore_errors=True)
+    else:
+        try:
+            p.unlink()
+        except OSError:
+            pass
+
+
+def _purge_known_casks() -> None:
+    """Remove the known test casks BY NAME, from the catalog — independent of brew's
+    install receipts. This is the workhorse: a clean annex reinstall (phase 11) unlinks
+    every previously-installed app, so `brew uninstall` can no longer see them; resolving
+    each cask's .app bundles + uninstall/zap delete paths + pkg receipts from metadata
+    removes them regardless. Best-effort."""
+    for token in dict.fromkeys(TEST_CASKS):  # dedupe, keep order
+        cask = _cask_json_any(token)
+        if not cask:
+            warn(f"could not resolve '{token}' metadata — skipping its name-based purge")
+            continue
+        for name in app_names(cask):
+            for base in ("/Applications", str(Path.home() / "Applications"), str(appdir())):
+                _rm(Path(base) / name)
+        for raw in removable_paths(cask):
+            for path in _expand(raw):
+                _rm(path)
+        for pid in pkgutil_ids(cask):
+            for real in run(["pkgutil", f"--pkgs={pid}"]).stdout.split():
+                sudo(["pkgutil", "--forget", real])
 
 
 def _wipe_applite_data() -> None:
@@ -574,14 +667,15 @@ def cmd_reset(args) -> int:
     require_applite_quit()
     ensure_provisioned()
     if not args.keep_apps:
-        # Uninstall via brew so apps + pkg files + zap paths all go through brew's own
-        # removal. Unhide first so CLT is live and the trash step never pops the dialog;
-        # we re-hide below. (Snapshots aren't available on Apple-Silicon UTM VMs, so this
-        # sweep is what delivers the fresh state.)
+        # Snapshots aren't available on Apple-Silicon UTM VMs, so this sweep IS the fresh
+        # state. Unhide first so CLT is live (trash step won't pop the dialog); re-hide below.
         unhide_prereqs()
+        # 1) brew uninstall whatever is still LINKED — full brew logic (launchctl, scripts…).
         _uninstall_all_casks(ANNEX_BREW)
         _uninstall_all_casks(OPT_BREW)
-    _delete_test_apps()  # belt-and-suspenders for any stragglers
+        # 2) name-based purge of the known casks — catches everything the annex reinstall
+        #    (phase 11) unlinked, which brew can no longer see.
+        _purge_known_casks()
     hide_prereqs()
     _wipe_applite_data()
     RESULTS.add(clt_free(), "machine reads CLT-free with no system brew")
@@ -596,8 +690,8 @@ def cmd_teardown(args) -> int:
     RESULTS.add(not _applite_app_present(), "Applite.app is gone (self-uninstall worked)")
     if args.full:
         warn("--full: uninstalling all casks, then deleting Homebrew + CLT entirely.")
-        _uninstall_all_casks(OPT_BREW)  # remove apps/pkg/zap before nuking brew
-        _delete_test_apps()
+        _uninstall_all_casks(OPT_BREW)  # linked casks: full brew removal before nuking brew
+        _purge_known_casks()            # name-based: unlinked/orphaned apps + pkg/zap
         _wipe_applite_data()
         for path in (OPT_PREFIX, _hidden(OPT_PREFIX), CLT_PATH, _hidden(CLT_PATH)):
             if path.exists():
@@ -610,7 +704,7 @@ def cmd_teardown(args) -> int:
         unhide_prereqs()
         _uninstall_all_casks(OPT_BREW)
         _uninstall_all_casks(ANNEX_BREW)
-        _delete_test_apps()
+        _purge_known_casks()
         _wipe_applite_data()
         hide_prereqs()
         ok("Teardown complete — brew + CLT kept hidden for the next run.")

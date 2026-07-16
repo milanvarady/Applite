@@ -40,8 +40,12 @@ Installing brew + CLT takes ~10 min, so we don't do it every run. Instead:
    (renames `/opt/homebrew` and `/Library/Developer/CommandLineTools` aside, and
    `xcode-select --reset`). Hidden ⇒ the machine genuinely reads as CLT-free with no
    system brew, which is exactly Round A's starting condition.
-2. `reset` **uninstalls every installed cask** (via brew, so apps + pkg files + zap
-   paths all go), wipes Applite's data, and hides the prereqs — the fresh baseline.
+2. `reset` returns to a fresh baseline: it (a) `brew uninstall`s whatever is still
+   linked, then (b) removes the known test casks **by name from the catalog** — their
+   `.app` bundles, uninstall/zap paths, and pkg receipts — independent of brew's
+   receipts, then wipes Applite's data and hides the prereqs. The name-based step is
+   essential because Phase 11 (Reinstall Homebrew) unlinks previously-installed apps,
+   so `brew uninstall` alone can no longer see them.
 3. Round B's first phase **unhides** them and `brew update`s.
 
 ### No snapshots on Apple-Silicon UTM
