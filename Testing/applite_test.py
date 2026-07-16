@@ -907,7 +907,7 @@ def phase_a9(state) -> None:
 
 
 def phase_a10(_state) -> None:
-    step("10", "Refresh Homebrew Components (annex overlay)")
+    step("14", "Refresh Homebrew Components (annex overlay)")
     do_in_app("Settings → Manage Homebrew → Refresh Homebrew Components; wait for it")
     check("brew still healthy after overlay (no LoadError)", brew_healthy)
     check(f"{UPDATE_CASK} still installed (Caskroom survived)",
@@ -916,7 +916,7 @@ def phase_a10(_state) -> None:
 
 
 def phase_a11(_state) -> None:
-    step("11", "Reinstall Homebrew (clean annex)")
+    step("15", "Reinstall Homebrew (clean annex)")
     do_in_app("Settings → Manage Homebrew → Reinstall Homebrew; confirm and wait")
     check("annex brew healthy after reinstall", brew_healthy)
     check("brew list is empty (apps unlinked)", lambda: installed_tokens() == [])
@@ -924,9 +924,9 @@ def phase_a11(_state) -> None:
 
 
 def phase_a12(_state) -> None:
-    step("12", "catalog refresh + browse (read-only UI smoke test)")
+    step("10", "catalog refresh + browse (read-only UI smoke test)")
     info("Purpose: the read-only catalog/browse surfaces render and return data — "
-         "catalog re-sync, FTS search, sort/filter, categories, taps, and the tabs.")
+         "catalog re-sync, FTS search, sort/filter, categories, taps.")
     do_in_app("Press ⌘R (Refresh App Catalog); wait for it to finish")
     confirm("Did the catalog refresh finish with no error alert?")
     do_in_app("Type a query in the search field")
@@ -935,22 +935,22 @@ def phase_a12(_state) -> None:
     confirm("Did the result order / visibility change accordingly?")
     do_in_app("Open a category from the sidebar, then a Tap (if taps are enabled)")
     confirm("Did the Category and Tap views render their apps?")
-    do_in_app("Visit the Installed, Updates, and Active Tasks tabs")
-    confirm("Did each tab render the expected content?")
 
 
 def phase_a13(_state) -> None:
-    step("13", "settings: appdir + brew-path self-heal")
+    step("11", "settings: appdir + brew-path self-heal")
 
-    # 13a — custom install directory (appdir) for pkg casks
+    # 11a — custom install directory (appdir). Use an APP cask (rectangle): brew only
+    # relocates .app artifacts to --appdir; a pkg installer (zoom) ignores it, so this
+    # must not use PKG_CASK.
     do_in_app("Settings → Brew → enable a custom install directory (appdir); then "
-              f"install '{PKG_CASK}'")
-    cask = brew_json(PKG_CASK) or {}
+              f"install '{DMG_CASK}'")
+    cask = brew_json(DMG_CASK) or {}
     for name in app_names(cask):
         check(f"{name} landed in appdir ({appdir()})",
               lambda n=name: (appdir() / (n if n.endswith('.app') else n + '.app')).exists())
 
-    # 13b — self-heal from a bad brew path (the REALISTIC behavior). A bad path shows NO
+    # 11b — self-heal from a bad brew path (the REALISTIC behavior). A bad path shows NO
     # error: on reload Applite silently re-adopts the valid annex (bootstrap step 3) and
     # clears hasBrokenInstall. So verify the recovery, not an error screen.
     info("A bad brew path shows NO error — Applite silently re-adopts the annex on reload. "
@@ -963,7 +963,7 @@ def phase_a13(_state) -> None:
     confirm("Did the catalog stay usable — no crash, no stuck error (silent self-heal)?")
     do_in_app("Set the brew path back to 'Applite's installation' before continuing")
 
-    # 13c — the genuinely-broken failure UI. Brew must be UNRECOVERABLE for it to show,
+    # 11c — the genuinely-broken failure UI. Brew must be UNRECOVERABLE for it to show,
     # so the annex is hidden AND the network taken offline (otherwise Applite just
     # reinstalls the annex and recovers). Both are restored afterward.
     info("Now the failure path: brew must be unrecoverable, so we hide the annex and you "
@@ -989,7 +989,7 @@ def phase_a13(_state) -> None:
 
 
 def phase_a14(_state) -> None:
-    step("14", "export, then import fresh casks")
+    step("12", "export, then import fresh casks")
     export_path = Path.home() / "Desktop/applite_export.txt"
     do_in_app(f"App Migration → Export apps to {export_path}")
     check("export file exists and is non-empty",
@@ -1010,7 +1010,7 @@ def phase_a14(_state) -> None:
 
 
 def phase_a15(_state) -> None:
-    step("15", "launch installed app")
+    step("13", "launch installed app")
     do_in_app("Installed tab → Open on an installed app")
     confirm("Did the app launch?")
 
@@ -1088,15 +1088,18 @@ def phase_f1(_state) -> None:
 # run
 # --------------------------------------------------------------------------- #
 
+# Execution order (the numeric id is what --only/--from take; function names are
+# historical and don't track the id). Homebrew management runs LAST — refresh preserves
+# installed apps, then reinstall wipes them all — so it can't disturb earlier phases.
 ROUND_A = [
     ("0", "preflight", phase_a0), ("1", "bootstrap", phase_a1),
     ("2", "install DMG", phase_a2), ("3", "install PKG", phase_a3),
     ("4", "warning cask", phase_a4), ("5", "force install", phase_a5),
     ("6", "cancel", phase_a6), ("7", "update", phase_a7),
     ("8", "uninstall", phase_a8), ("9", "uninstall+zap", phase_a9),
-    ("10", "refresh brew", phase_a10), ("11", "reinstall brew", phase_a11),
-    ("12", "catalog/search", phase_a12), ("13", "settings", phase_a13),
-    ("14", "import/export", phase_a14), ("15", "launch", phase_a15),
+    ("10", "catalog/search", phase_a12), ("11", "settings", phase_a13),
+    ("12", "import/export", phase_a14), ("13", "launch", phase_a15),
+    ("14", "refresh brew", phase_a10), ("15", "reinstall brew", phase_a11),
 ]
 
 ROUND_B = [
