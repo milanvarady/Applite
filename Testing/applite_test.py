@@ -396,9 +396,22 @@ def app_present(name: str) -> bool:
     return bool(glob.glob(str(caskroom_dir() / "**" / name), recursive=True))
 
 
-def zap_paths_gone(token: str, saved: list[str]) -> tuple[bool, list[str]]:
-    remaining = [str(p) for raw in saved for p in _expand(raw) if p.exists()]
-    return (not remaining, remaining)
+def seed_zap_file(zap: list[str]) -> Path | None:
+    """Create a file at a real (non-glob) zap path so `--zap` has app-data to remove.
+    Without this the zap paths don't exist (the app was never launched), so the removal
+    check passes vacuously and zap is indistinguishable from a plain uninstall. Returns
+    the seeded path, or None if the cask declares no concrete (non-glob) zap path."""
+    for raw in zap:
+        if any(c in raw for c in "*?["):
+            continue  # can't materialize a glob
+        p = Path(os.path.expanduser(raw))
+        try:
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text("applite-test zap seed\n")
+            return p
+        except OSError:
+            continue
+    return None
 
 
 def brew_healthy() -> bool:
@@ -909,23 +922,23 @@ def phase_a8(_state) -> None:
 
 def phase_a9(state) -> None:
     step("9", f"uninstall + zap ({ZAP_CASK})")
-    do_in_app(f"Install '{ZAP_CASK}' if needed, then Uninstall with 'delete app data (--zap)'")
-    saved = state.setdefault("zap_saved", {}).get(ZAP_CASK)
-    if saved is None:
-        cask = brew_json(ZAP_CASK) or {}
-        saved = zap_paths(cask)
-        state["zap_saved"][ZAP_CASK] = saved
-    check(f"{ZAP_CASK} absent from brew list", lambda: cask_absent(ZAP_CASK))
-
-    def zap_clean():
-        gone, remaining = zap_paths_gone(ZAP_CASK, saved)
-        if not gone:
-            warn("  still present: " + ", ".join(remaining[:5]))
-        return gone
-    if saved:
-        check("zap trash/delete paths removed", zap_clean)
+    do_in_app(f"Install '{ZAP_CASK}' if needed — but do NOT uninstall it yet")
+    cask = brew_json(ZAP_CASK) or {}
+    # Seed app-data at a real zap path so zap has something to remove (the app was never
+    # launched, so its prefs/caches don't exist — otherwise this would test nothing).
+    seeded = seed_zap_file(zap_paths(cask))
+    if seeded:
+        info(f"seeded app-data at a zap path: {seeded}")
     else:
-        RESULTS.skip("zap path check (no zap paths captured)")
+        warn("no concrete zap path to seed — can't distinguish zap from plain uninstall")
+    do_in_app(f"Now Uninstall '{ZAP_CASK}' with 'delete app data (--zap)'")
+    check(f"{ZAP_CASK} absent from brew list", lambda: cask_absent(ZAP_CASK))
+    for name in app_names(cask):
+        check(f"{name} removed from disk", lambda n=name: not app_present(n))
+    if seeded:
+        check("zap removed the seeded app-data file", lambda: not seeded.exists())
+    else:
+        RESULTS.skip("zap seed check (no concrete zap path)")
 
 
 def phase_a10(_state) -> None:
@@ -1082,14 +1095,17 @@ def phase_b3(state) -> None:
 
 def phase_b4(state) -> None:
     step("B4", f"uninstall + zap on external brew ({ZAP_CASK})")
-    do_in_app(f"Install '{ZAP_CASK}' if needed, then Uninstall with --zap")
+    do_in_app(f"Install '{ZAP_CASK}' if needed — do NOT uninstall yet")
     cask = brew_json(ZAP_CASK) or {}
-    saved = zap_paths(cask)
+    seeded = seed_zap_file(zap_paths(cask))
+    if seeded:
+        info(f"seeded app-data at a zap path: {seeded}")
+    do_in_app(f"Now Uninstall '{ZAP_CASK}' with --zap")
     check(f"{ZAP_CASK} absent (external brew)", lambda: cask_absent(ZAP_CASK))
-    if saved:
-        check("zap paths removed", lambda: zap_paths_gone(ZAP_CASK, saved)[0])
+    if seeded:
+        check("zap removed the seeded app-data file", lambda: not seeded.exists())
     else:
-        RESULTS.skip("external zap path check (none captured)")
+        RESULTS.skip("zap seed check (no concrete zap path)")
 
 
 # --------------------------------------------------------------------------- #
