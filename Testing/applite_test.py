@@ -482,6 +482,14 @@ def ask_continue() -> None:
         raise SystemExit("\nAborted.")
 
 
+def prompt_yn(question: str) -> bool:
+    """A yes/no branch prompt that does NOT record a PASS/FAIL (unlike confirm())."""
+    try:
+        return input(_c("1;36", "  ? " + question + " [y/N] ")).strip().lower() in ("y", "yes")
+    except (EOFError, KeyboardInterrupt):
+        raise SystemExit("\nAborted.")
+
+
 # --------------------------------------------------------------------------- #
 # Prerequisite provisioning (hide/unhide)
 # --------------------------------------------------------------------------- #
@@ -940,15 +948,53 @@ def phase_a12(_state) -> None:
 
 
 def phase_a13(_state) -> None:
-    step("13", "settings: appdir + broken-install recovery")
+    step("13", "settings: appdir + brew-path self-heal")
+
+    # 13a — custom install directory (appdir) for pkg casks
     do_in_app("Settings → Brew → enable a custom install directory (appdir); then "
               f"install '{PKG_CASK}'")
     cask = brew_json(PKG_CASK) or {}
     for name in app_names(cask):
         check(f"{name} landed in appdir ({appdir()})",
               lambda n=name: (appdir() / (n if n.endswith('.app') else n + '.app')).exists())
-    do_in_app("Now set Brew path to a bogus custom path to force a broken install")
-    confirm("Did BrokenInstallView appear, and does Retry recover after fixing the path?")
+
+    # 13b — self-heal from a bad brew path (the REALISTIC behavior). A bad path shows NO
+    # error: on reload Applite silently re-adopts the valid annex (bootstrap step 3) and
+    # clears hasBrokenInstall. So verify the recovery, not an error screen.
+    info("A bad brew path shows NO error — Applite silently re-adopts the annex on reload. "
+         "We verify that self-heal, not a broken-install screen.")
+    do_in_app("Settings → Brew Executable Path → Custom → a bogus path (e.g. /nope/brew); "
+              "then press ⌘R")
+    opt = run(["defaults", "read", BUNDLE_ID, "brewPathOption"]).stdout.strip()
+    info(f"brewPathOption now = '{opt}'  (0 = reverted to annex; may lag until Applite "
+         "flushes prefs)")
+    confirm("Did the catalog stay usable — no crash, no stuck error (silent self-heal)?")
+    do_in_app("Set the brew path back to 'Applite's installation' before continuing")
+
+    # 13c — OPTIONAL: the genuinely-broken failure UI. It only appears when brew is truly
+    # unrecoverable (bad path + no system brew + no valid annex + reinstall can't run), so
+    # it needs the annex gone AND the network off. Skip unless you want it.
+    if prompt_yn("Optional: exercise the truly-broken failure UI now? (needs network OFF)"):
+        do_in_app("Turn OFF the VM's network")
+        annex = APPLITE_SUPPORT / "Homebrew"
+        stash = annex.with_name("Homebrew.brokentest")
+        moved = False
+        try:
+            if annex.exists():
+                shutil.move(str(annex), str(stash))
+                moved = True
+                info("annex temporarily hidden")
+            do_in_app("In Applite press ⌘R (annex gone + no network → brew is unrecoverable)")
+            confirm("Did a setup-failed overlay and/or 'couldn't load app catalog' alert "
+                    "appear with Retry + 'use your own Homebrew'?")
+        finally:
+            if moved and stash.exists():
+                shutil.move(str(stash), str(annex))
+                info("annex restored")
+        do_in_app("Turn the network back ON, then press Retry in Applite")
+        confirm("Did Retry recover (catalog loads again)?")
+    else:
+        RESULTS.skip("truly-broken failure UI (optional)")
 
 
 def phase_a14(_state) -> None:
