@@ -181,11 +181,12 @@ final class CaskManager {
         await bootstrap.run()
 
         guard bootstrap.isBrewReady else {
+            // Brew is genuinely unusable. `bootstrap` is in `.failed`, so ContentView is
+            // already showing the setup overlay's failed state (message + Retry +
+            // Troubleshooting + "use your own Homebrew"). Don't also raise `loadAlert` or
+            // BrokenInstallView — one error surface, not three stacked. `hasBrokenInstall`
+            // stays set as a fallback for the (currently unreachable) no-overlay case.
             hasBrokenInstall = true
-            loadAlert.show(
-                title: "Couldn't load app catalog",
-                message: AnnexBrewManager.brokenPathOrInstallMessage
-            )
 
             let versionOutput = (try? await Shell.runBrewCommand(["--version"])) ?? "n/a"
             Self.logger.error(

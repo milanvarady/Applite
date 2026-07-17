@@ -26,14 +26,20 @@ struct ContentView: View {
     /// App search query
     @State var searchInput = ""
 
+    /// Whether the setup overlay (`ComponentsInstallView`) is covering the window — during the
+    /// annex install and on a failed bootstrap. When it's up it's the single error/status surface,
+    /// so the detail pane suppresses `BrokenInstallView` (see `mainNavigation`) to avoid stacking.
+    private var showSetup: Bool {
+        switch caskManager.bootstrap.phase {
+        case .installing, .installed, .failed: true
+        case .checking, .ready: false
+        }
+    }
+
     var body: some View {
         // `body` reads only `phase` (to gate the overlay), not `statusLine`. The card observes
         // `bootstrap` directly for the streamed status line — safe because it's composited in the
         // ZStack below rather than layered over the split view's representable (see that comment).
-        let showSetup = switch caskManager.bootstrap.phase {
-        case .installing, .installed, .failed: true
-        case .checking, .ready: false
-        }
 
         // The setup card is a sibling layer in this top-level ZStack — NOT an `.overlay` modifier
         // on the NavigationSplitView. On macOS the split view is backed by an AppKit NSSplitView
@@ -57,7 +63,7 @@ struct ContentView: View {
             SidebarView(selection: $selection)
                 .disabled(modifyingBrew)
         } detail: {
-            if caskManager.hasBrokenInstall {
+            if caskManager.hasBrokenInstall && !showSetup {
                 BrokenInstallView()
             } else if !searchInput.isEmpty {
                 SearchView(query: $searchInput)

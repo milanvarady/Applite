@@ -36,9 +36,11 @@ final class BrewService {
 
     // MARK: - Public Operations
 
-    /// Installs the cask
-    func install(_ vm: CaskViewModel, force: Bool = false) {
-        runTask(for: vm) {
+    /// Installs the cask. Returns the tracking task so callers (e.g. `installAll`) can
+    /// await completion and serialize; discardable for the common fire-and-forget case.
+    @discardableResult
+    func install(_ vm: CaskViewModel, force: Bool = false) -> Task<Void, Never> {
+        return runTask(for: vm) {
             Self.logger.info("Cask \"\(vm.token)\" installation started")
 
             // Appdir argument
@@ -152,9 +154,10 @@ final class BrewService {
         }
     }
 
-    /// Updates the cask
-    func update(_ vm: CaskViewModel) {
-        runTask(for: vm) {
+    /// Updates the cask. Returns the tracking task so `updateAll` can serialize.
+    @discardableResult
+    func update(_ vm: CaskViewModel) -> Task<Void, Never> {
+        return runTask(for: vm) {
             let updateLabel = String(localized: "Updating", comment: "Update progress text")
             vm.progressState = .busy(withTask: updateLabel)
 
@@ -225,17 +228,24 @@ final class BrewService {
         }
     }
 
-    /// Installs multiple casks
+    /// Installs multiple casks **serially** — one finishes before the next starts.
+    /// Concurrent `brew install --cask` processes collide on Homebrew's locks (and the
+    /// annex's one-time portable-ruby setup), so a batch install would drop casks; this
+    /// was why importing an app list only installed some of the apps.
     func installAll(_ vms: [CaskViewModel]) {
-        for vm in vms {
-            self.install(vm)
+        Task {
+            for vm in vms {
+                await install(vm).value
+            }
         }
     }
 
-    /// Updates multiple casks
+    /// Updates multiple casks serially (same lock-collision reason as `installAll`).
     func updateAll(_ vms: [CaskViewModel]) {
-        for vm in vms {
-            self.update(vm)
+        Task {
+            for vm in vms {
+                await update(vm).value
+            }
         }
     }
 
@@ -288,8 +298,10 @@ final class BrewService {
 
     // MARK: - Helper Functions
 
-    /// Starts a brew task and appends it to active tasks
-    private func runTask(for vm: CaskViewModel, _ operation: @escaping () async -> Void) {
+    /// Starts a brew task and appends it to active tasks. Returns the task so batch
+    /// operations can await it.
+    @discardableResult
+    private func runTask(for vm: CaskViewModel, _ operation: @escaping () async -> Void) -> Task<Void, Never> {
         let task = Task {
             defer {
                 self.activeTasks.removeAll {
@@ -308,6 +320,7 @@ final class BrewService {
         }
 
         self.activeTasks.append(ActiveBrewTask(viewModel: vm, task: task))
+        return task
     }
 
     /// Parses a single line of streamed `brew install/upgrade --cask` output.
