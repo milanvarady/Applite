@@ -4,8 +4,10 @@
 UI — *you* perform each action in the real Applite window, and after each step the
 script independently verifies the real result via the Homebrew CLI + filesystem
 (`brew info --json=v2`, the Caskroom, `/Applications`) and prints **PASS / FAIL**.
-Purely-visual outcomes (green tick cleared, no CLT popup, a dialog appeared) are
-guided `y/N` confirmations.
+Purely-visual outcomes (a green tick clearing, a dialog appearing) are guided `y/N`
+confirmations. The "no Command Line Tools dialog" rule is stated **once** at the start
+of the annex round as an invariant — if that dialog ever appears, you abort and report
+it, rather than being asked about it every step.
 
 It exists because Applite's real risk lives in the Homebrew integration — the
 CLT-free "annex" flow, FFI quarantine/trash, pty-streamed installs — which is
@@ -16,7 +18,8 @@ wipes Applite's data.
 
 ## Requirements
 
-- A macOS VM you can snapshot. Apple Silicon assumed (`/opt/homebrew`).
+- A macOS VM, Apple Silicon assumed (`/opt/homebrew`). Note: Apple-Silicon VMs have no
+  native snapshots — see "No snapshots" below for the baseline strategy.
 - **A standalone Python 3** — python.org's installer (gives `/usr/local/bin/python3`)
   or `uv python install`. Do **not** use `/usr/bin/python3`: it's a Command Line
   Tools stub that pops the very install dialog we simulate away, and it stops working
@@ -44,7 +47,7 @@ Installing brew + CLT takes ~10 min, so we don't do it every run. Instead:
    linked, then (b) removes the known test casks **by name from the catalog** — their
    `.app` bundles, uninstall/zap paths, and pkg receipts — independent of brew's
    receipts, then wipes Applite's data and hides the prereqs. The name-based step is
-   essential because Phase 11 (Reinstall Homebrew) unlinks previously-installed apps,
+   essential because the Reinstall Homebrew phase unlinks previously-installed apps,
    so `brew uninstall` alone can no longer see them.
 3. Round B's first phase **unhides** them and `brew update`s.
 
@@ -62,7 +65,7 @@ you're managing app state yourself.
 ```sh
 PY=/usr/local/bin/python3            # your standalone interpreter
 
-$PY applite_test.py provision        # once per VM  → then snapshot the VM
+$PY applite_test.py provision        # once per VM  → then save a baseline (duplicate the .utm bundle; see below)
 $PY applite_test.py reset            # hide prereqs + wipe Applite
 # → launch Applite, then:
 $PY applite_test.py run --round annex
@@ -76,8 +79,8 @@ Each `run` prints a PASS/FAIL/SKIP summary and appends to `Testing/applite-test.
 ### Running part of a round
 
 ```sh
-$PY applite_test.py run --round annex --only 7      # just the update phase
-$PY applite_test.py run --round annex --from 8      # phase 8 onward
+$PY applite_test.py run --round annex --only 6      # just the update phase
+$PY applite_test.py run --round annex --from 9      # phase 9 (catalog) onward
 $PY applite_test.py run --round external --only B3
 ```
 
@@ -97,8 +100,8 @@ Set at the top of `applite_test.py` (one per installer type); `preflight` re-che
 
 | Var | Default | Role |
 |---|---|---|
-| `DMG_CASK` | `rectangle` | `.app` DMG |
-| `PKG_CASK` | `zoom` | `.pkg` installer (exercises the appdir path) |
+| `DMG_CASK` | `rectangle` | `.app` DMG; also drives the custom-appdir test (brew only relocates `.app` artifacts) |
+| `PKG_CASK` | `zoom` | `.pkg` installer |
 | `ZAP_CASK` | `stats` | has a `zap trash:` stanza |
 | `UPDATE_CASK` | `font-hack` | versioned, **`auto_updates: false`** — required so non-greedy `brew outdated` will report the faked-old version |
 | `WARN_CASK` | `aegisub` | **deprecated** → triggers the download warning dialog (and probes the HOMEBREW_DEVELOPER deprecation risk) |
