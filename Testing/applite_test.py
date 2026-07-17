@@ -1000,14 +1000,21 @@ def phase_a13(_state) -> None:
             moved = True
             info("annex temporarily hidden")
         do_in_app("In Applite press ⌘R (annex gone + no network → brew is unrecoverable)")
-        confirm("Did a setup-failed overlay and/or 'Couldn't load app catalog' alert "
-                "appear with Retry + 'use your own Homebrew'?")
+        confirm("Did EXACTLY ONE error surface appear — the setup-failed overlay with "
+                "message + Retry + 'use your own Homebrew' — and NO duplicate alert or "
+                "broken-install screen stacked with it?")
     finally:
         if moved and stash.exists():
+            # Applite's failed reinstall attempt recreates an empty `Homebrew` dir while
+            # the real one is stashed. Remove it first, else shutil.move nests the real
+            # annex INSIDE it — leaving an invalid annex, so Applite reinstalls clean on
+            # Retry and wipes every cask link (empty export, later "still installed" fails).
+            if annex.exists():
+                shutil.rmtree(annex, ignore_errors=True)
             shutil.move(str(stash), str(annex))
-            info("annex restored")
+            info("annex restored (removed any empty dir from the failed reinstall)")
     do_in_app("Turn the network back ON, then press Retry in Applite")
-    confirm("Did Retry recover (catalog loads again)?")
+    confirm("Did Retry recover with your installed apps intact (catalog loads again)?")
 
 
 def phase_a14(_state) -> None:
