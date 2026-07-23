@@ -89,6 +89,14 @@ final class CaskDataLoader {
         return registry.viewModels(for: records)
     }
 
+    /// Resolves cask tokens to view models via the DB, creating any that aren't already live.
+    /// Unlike `registry.existingViewModels`, this finds casks the user has never browsed — needed
+    /// so an imported app list can install anything in the catalog. Unknown tokens are dropped.
+    func viewModels(forTokens tokens: Set<CaskId>) async throws -> [CaskViewModel] {
+        let records = try await dbService.fetchCasks(forTokens: Array(tokens))
+        return registry.viewModels(for: records)
+    }
+
     // MARK: - Refresh
 
     /// Re-queries brew CLI for installed casks, ensures view models exist for each,

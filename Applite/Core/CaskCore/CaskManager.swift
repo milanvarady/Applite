@@ -95,8 +95,10 @@ final class CaskManager {
     
     // MARK: - Registry Forwarding
     
-    func existingViewModels(forTokens tokens: Set<CaskId>) -> [CaskViewModel] {
-        registry.existingViewModels(forTokens: tokens)
+    /// Resolves import tokens to view models via the DB (creates them if not already live), so an
+    /// imported app list installs casks the user has never opened — not just ones already on screen.
+    func resolveViewModels(forTokens tokens: Set<CaskId>) async throws -> [CaskViewModel] {
+        try await dataLoader.viewModels(forTokens: tokens)
     }
 
     // MARK: - Brew Operation Forwarding
