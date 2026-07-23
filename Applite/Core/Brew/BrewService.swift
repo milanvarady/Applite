@@ -635,16 +635,18 @@ final class BrewService {
     /// output. Worst case is a spinner instead of a percentage — success/failure
     /// is still detected via the "successfully …" strings and the process exit code.
     private func parseBrewProgress(line: String, busyLabel: String) -> CaskProgressState? {
-        // Download phase — live-updating line, e.g.
-        //   "✔︎ Cask antinote (1.1.7)   Downloading   3.1MB/  6.7MB"
-        // The status text cycles Downloading → Downloaded → Verified while the
-        // "<downloaded>/<total>" byte counters update in place.
-        if let percent = Self.downloadPercent(from: line) {
+        // Active download → ring with %. Gate on "Downloading" specifically: the byte counter
+        // also appears on the "Downloaded"/"Verified" lines (at 100%), and treating those as
+        // downloading would freeze the ring at 100% through the verify/install gap.
+        if line.contains("Downloading"), let percent = Self.downloadPercent(from: line) {
             return .downloading(percent: percent)
         }
 
-        // Post-download phase (install / upgrade)
-        if line.contains("Installing") || line.contains("Upgrading")
+        // Fetch finished (Downloaded / Verifying / Verified / Extracting) or install underway →
+        // spinner with the operation label, so the ring doesn't linger at 100%.
+        if line.contains("Downloaded") || line.contains("Verif") || line.contains("Extract")
+            || line.contains("Preparing")
+            || line.contains("Installing") || line.contains("Upgrading")
             || line.contains("Moving") || line.contains("Linking")
             || line.contains("Backing") || line.contains("Purging") {
             return .busy(withTask: busyLabel)
