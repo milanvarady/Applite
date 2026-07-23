@@ -19,7 +19,9 @@ struct ActiveBrewTask: Identifiable {
 struct BatchProgress: Equatable {
     var completed: Int
     var total: Int
-    var label: String
+    /// True for update-all, false for install-all — drives the header wording and lets the
+    /// Update-All button ignore a *different* (install-all) batch ending.
+    var isUpdate: Bool
 }
 
 /// Wraps a streaming brew failure together with the output captured so far,
@@ -417,9 +419,6 @@ final class BrewService {
         runningBatch?.task?.cancel()
     }
 
-    /// Whether a bulk operation is currently running (drives the batch-vs-single stop affordance).
-    var isBulkRunning: Bool { batchProgress != nil }
-
     /// Runs the batch brew process and routes its streamed per-cask output to each card.
     private func runBatchOperation(_ vms: [CaskViewModel], kind: BatchKind) async {
         // token AND fullToken → vm, so brew's per-cask output lines (which name either) can be
@@ -446,7 +445,7 @@ final class BrewService {
         }
         let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) \(kind.subcommand) --cask \(arguments.joined(separator: " "))"
 
-        batchProgress = BatchProgress(completed: 0, total: vms.count, label: kind.busyLabel)
+        batchProgress = BatchProgress(completed: 0, total: vms.count, isUpdate: kind == .update)
         defer { batchProgress = nil }
 
         var perCaskError: [String: String] = [:]
@@ -598,20 +597,19 @@ final class BrewService {
             }
         }
 
-        let verb = kind == .install
-            ? String(localized: "installed", comment: "Bulk op past-tense verb")
-            : String(localized: "updated", comment: "Bulk op past-tense verb")
+        // Distinct static keys per operation (don't splice a localized verb into another
+        // localized string — that yields a dynamic key that can't be translated).
+        let successTitle = kind == .install
+            ? String(localized: "\(succeeded) apps installed", comment: "Bulk install success notification")
+            : String(localized: "\(succeeded) apps updated", comment: "Bulk update success notification")
 
         if failedNames.isEmpty {
             Self.logger.info("Batch \(kind.subcommand): \(succeeded) succeeded")
-            await sendNotification(
-                title: String(localized: "\(succeeded) apps \(verb)", comment: "Bulk op success notification"),
-                body: "",
-                reason: .success
-            )
+            await sendNotification(title: successTitle, body: "", reason: .success)
         } else {
-            let title = String(localized: "\(succeeded) apps \(verb), \(failedNames.count) failed",
-                               comment: "Bulk op partial-failure notification")
+            let title = kind == .install
+                ? String(localized: "\(succeeded) apps installed, \(failedNames.count) failed", comment: "Bulk install partial-failure notification")
+                : String(localized: "\(succeeded) apps updated, \(failedNames.count) failed", comment: "Bulk update partial-failure notification")
             let names = failedNames.joined(separator: ", ")
             Self.logger.error("Batch \(kind.subcommand): \(succeeded) ok, failed: \(names)")
             alert.show(title: LocalizedStringKey(title), message: names)

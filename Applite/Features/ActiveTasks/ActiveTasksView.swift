@@ -16,10 +16,16 @@ struct ActiveTasksView: View {
         VStack {
             if let batch = caskManager.batchProgress {
                 HStack {
-                    Label(
-                        "\(batch.label) \(batch.completed) of \(batch.total)…",
-                        systemImage: "square.stack.3d.down.forward"
-                    )
+                    Label {
+                        // Distinct keys per operation so the phrase is translatable as a unit.
+                        if batch.isUpdate {
+                            Text("Updating \(batch.completed) of \(batch.total)…", comment: "Bulk update progress header")
+                        } else {
+                            Text("Installing \(batch.completed) of \(batch.total)…", comment: "Bulk install progress header")
+                        }
+                    } icon: {
+                        Image(systemName: "square.stack.3d.down.forward")
+                    }
                     .font(.headline)
                     .foregroundStyle(.secondary)
 

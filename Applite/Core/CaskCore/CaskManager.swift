@@ -62,7 +62,6 @@ final class CaskManager {
     var outdatedViewModels: [CaskViewModel] { registry.outdatedViewModels }
     var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
     var batchProgress: BatchProgress? { brewService.batchProgress }
-    var isBulkRunning: Bool { brewService.isBulkRunning }
     var alert: AlertManager { brewService.alert }
 
     /// One-shot navigation request from deep views (e.g. the "See Active Tasks" button on a

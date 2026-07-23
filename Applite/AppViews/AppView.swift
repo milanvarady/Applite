@@ -211,7 +211,7 @@ struct AppView: View {
                 // A batch is one brew process, so a per-card stop can't cancel just this cask —
                 // redirect to Active Tasks (its header has a "Stop" for the whole bulk op) instead
                 // of silently aborting all of them.
-                if caskManager.isBulkRunning {
+                if caskManager.batchProgress != nil {
                     showingBatchStopInfo = true
                 } else {
                     caskManager.cancel(cask)
@@ -226,7 +226,7 @@ struct AppView: View {
             }
             .buttonStyle(.plain)
             .frame(width: 30, height: 30)
-            .help(caskManager.isBulkRunning ? "Part of a bulk operation" : "Stop download")
+            .help(caskManager.batchProgress != nil ? "Part of a bulk operation" : "Stop download")
 
         case .success:
             Image(systemName: "checkmark")
