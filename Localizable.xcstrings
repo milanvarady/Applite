@@ -1549,6 +1549,9 @@
     "Applite can use the system network proxy, but only one protocol (HTTP, HTTPS, or SOCKS5). Select your preferred method." : {
       "comment" : "Proxy settings description"
     },
+    "Applite couldn't locate %@ on disk" : {
+
+    },
     "Applite couldn't open %@" : {
       "comment" : "App couldn't be opened alert",
       "localizations" : {

@@ -88,16 +88,20 @@ struct BrewActionsView: View {
     private var updateButton: some View {
         HStack {
             AsyncButton {
-                try await refreshHomebrewComponents()
+                // Handle the failure inside the action rather than via `.onButtonStateError`,
+                // which re-fires on every re-render while the button stays in its sticky error
+                // state — so dismissing the alert would immediately re-present it in a loop.
+                do {
+                    try await refreshHomebrewComponents()
+                } catch {
+                    BrewManagementView.logger.error("Brew refresh failed. Error: \(error.localizedDescription)")
+                    updateFailed = true
+                }
             } label: {
                 Label("Refresh Homebrew Components", systemImage: "arrow.clockwise.circle")
             }
             .controlSize(.large)
             .disabled(modifyingBrew)
-            .onButtonStateError { error in
-                BrewManagementView.logger.error("Brew refresh failed. Error: \(error.error.localizedDescription)")
-                updateFailed = true
-            }
             .alert("Refresh failed", isPresented: $updateFailed, actions: {})
 
             // Success checkmark

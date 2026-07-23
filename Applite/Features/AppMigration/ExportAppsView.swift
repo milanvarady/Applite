@@ -34,15 +34,19 @@ struct ExportAppsView: View {
 
             HStack {
                 AsyncButton {
-                    exportFile = try await AppMigration.export()
-                    showFileExporter = true
+                    // Handle the failure inside the action rather than via `.onButtonStateError`,
+                    // which re-fires on every re-render while the button stays in its sticky error
+                    // state — so dismissing the alert would immediately re-present it in a loop.
+                    do {
+                        exportFile = try await AppMigration.export()
+                        showFileExporter = true
+                    } catch {
+                        alert.show(error: error, title: "Failed to export")
+                    }
                 } label: {
                     Label("Export Apps to File", systemImage: "square.and.arrow.up")
                 }
                 .controlSize(.large)
-                .onButtonStateError { error in
-                    alert.show(error: error.error, title: "Failed to export")
-                }
 
                 if exportSuccessful {
                     Image(systemName: "square.and.arrow.down.badge.checkmark")

@@ -69,30 +69,22 @@ final class CaskViewModel {
     // MARK: - App Launch
 
     func launchApp() async throws {
-        let appPath: String
+        let token = self.token
+        let displayName = self.name
 
-        if self.pkgInstaller {
-            // Resolve the user's appdir override (if enabled), falling back to the system /Applications.
-            var applicationsDirectory = URL.applicationDirectory.path
-            let custom = UserDefaults.standard.value(for: Preferences.appdirPath)
-            if UserDefaults.standard.value(for: Preferences.appdirOn), !custom.isEmpty {
-                applicationsDirectory = custom
-            }
+        // Resolve the real bundle location off the main actor — a few stat calls plus a small
+        // JSON read. `InstalledAppLocator` tries the Caskroom symlink, the cask's `app` artifact
+        // name, a display-name guess, and finally a LaunchServices bundle-id lookup.
+        let appURL = await Task.detached {
+            InstalledAppLocator.appURL(token: token, displayName: displayName)
+        }.value
 
-            // Remove trailing "/"
-            if applicationsDirectory.hasSuffix("/") {
-                applicationsDirectory.removeLast()
-            }
-
-            appPath = "\"\(applicationsDirectory)/\(self.name).app\""
-        } else {
-            // Open normal app
-            let brewDirectory = BrewPaths.currentBrewDirectory.path(percentEncoded: false)
-
-            appPath = "\(brewDirectory.replacingOccurrences(of: " ", with: "\\ "))/Caskroom/\(self.token)/*/*.app"
+        guard let appURL else {
+            throw AppLaunchError.appNotFound(name: displayName)
         }
 
-        try await Shell.runAsync("open \(appPath)")
+        let configuration = NSWorkspace.OpenConfiguration()
+        try await NSWorkspace.shared.openApplication(at: appURL, configuration: configuration)
     }
 
     // MARK: - Dummy for Previews
