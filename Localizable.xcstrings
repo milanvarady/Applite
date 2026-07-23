@@ -468,6 +468,7 @@
     },
     "%@ is already installed. If you want to add it to Applite click more options (chevron icon) and press Force Install." : {
       "comment" : "App already installed alert message (parameter: app name)",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -506,6 +507,9 @@
           }
         }
       }
+    },
+    "%@ is part of a bulk operation" : {
+
     },
     "%@ successfully installed!" : {
       "comment" : "Successful app install notification",
@@ -667,6 +671,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ 成功更新"
+          }
+        }
+      }
+    },
+    "%lld apps installed" : {
+      "comment" : "Bulk install success notification"
+    },
+    "%lld apps installed, %lld failed" : {
+      "comment" : "Bulk install partial-failure notification",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld apps installed, %2$lld failed"
+          }
+        }
+      }
+    },
+    "%lld apps updated" : {
+      "comment" : "Bulk update success notification"
+    },
+    "%lld apps updated, %lld failed" : {
+      "comment" : "Bulk update partial-failure notification",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld apps updated, %2$lld failed"
           }
         }
       }
@@ -1653,6 +1685,9 @@
         }
       }
     },
+    "Apps already finished stay installed; the rest are cancelled." : {
+      "comment" : "Batch stop confirmation message"
+    },
     "Apps Installed" : {
       "comment" : "Number of apps installed",
       "localizations" : {
@@ -2611,7 +2646,6 @@
     },
     "Continue" : {
       "comment" : "Onboarding next button",
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4174,6 +4208,7 @@
     },
     "Force Install" : {
       "comment" : "Force install app button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5197,6 +5232,17 @@
     "Installing %lld apps…" : {
 
     },
+    "Installing %lld of %lld…" : {
+      "comment" : "Bulk install progress header",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Installing %1$lld of %2$lld…"
+          }
+        }
+      }
+    },
     "Installing dependencies" : {
       "comment" : "Brew dependency installation view title",
       "extractionState" : "stale",
@@ -6126,6 +6172,9 @@
     "Outdated" : {
 
     },
+    "Part of a bulk operation" : {
+
+    },
     "Password Managers" : {
       "comment" : "App category",
       "extractionState" : "manual",
@@ -6936,6 +6985,9 @@
         }
       }
     },
+    "See Active Tasks" : {
+
+    },
     "See All" : {
       "comment" : "See all apps in category button",
       "localizations" : {
@@ -7234,7 +7286,16 @@
         }
       }
     },
+    "Stop" : {
+
+    },
+    "Stop %lld remaining" : {
+
+    },
     "Stop download" : {
+
+    },
+    "Stop the bulk operation?" : {
 
     },
     "Successful installs & updates" : {
@@ -7629,6 +7690,7 @@
     },
     "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/homebrew`" : {
       "comment" : "Homebrew reinstallation note",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -7667,6 +7729,9 @@
           }
         }
       }
+    },
+    "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/Homebrew`" : {
+
     },
     "This will run the Homebrew uninstaller and remove Homebrew from all known locations along with every package installed. Administrator privileges may be required." : {
 
@@ -7715,6 +7780,9 @@
     },
     "This will uninstall Applite along with all files and cache associated with it." : {
       "comment" : "Uninstall applite description"
+    },
+    "To stop it, use the Stop button in Active Tasks — it cancels the whole bulk operation." : {
+      "comment" : "Batch stop redirect message"
     },
     "Token" : {
 
@@ -8354,6 +8422,17 @@
         }
       }
     },
+    "Updating %lld of %lld…" : {
+      "comment" : "Bulk update progress header",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Updating %1$lld of %2$lld…"
+          }
+        }
+      }
+    },
     "Use Custom Installation Directory" : {
       "comment" : "Setup link (keep it short)",
       "localizations" : {
@@ -8606,6 +8685,9 @@
           }
         }
       }
+    },
+    "Waiting…" : {
+      "comment" : "Queued brew operation label"
     },
     "Warning" : {
       "comment" : "Alert title",
