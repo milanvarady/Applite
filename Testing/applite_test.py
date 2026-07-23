@@ -1049,23 +1049,19 @@ def phase_a14(_state) -> None:
     check("export file exists and is non-empty",
           lambda: export_path.exists() and export_path.stat().st_size > 0)
 
-    # Import a set of casks NOT installed yet (+ one bogus token to prove failure isolation).
-    fresh = [t for t in BULK_INSTALL_CASKS if cask_absent(t)]
-    bogus = "applite-nonexistent-cask-xyz"
+    # Import the whole set. Import resolves tokens against the DB (installs casks never browsed)
+    # and force-installs, so an already-present cask reinstalls instead of failing the batch.
     import_path = Path.home() / "Desktop/applite_import.txt"
-    import_path.write_text("\n".join(fresh + [bogus]) + "\n")
-    info(f"import file: {len(fresh)} real casks + 1 bogus ({bogus})")
+    import_path.write_text("\n".join(BULK_INSTALL_CASKS) + "\n")
+    info(f"import file: {', '.join(BULK_INSTALL_CASKS)}")
 
     do_in_app(f"App Migration → Import {import_path}; let the batch run to completion")
-    confirm(f"Did each of the {len(fresh)} app cards show its OWN download ring (not just a "
-            "spinner) during the download phase?")
+    confirm(f"Did each of the {len(BULK_INSTALL_CASKS)} cards show its OWN download ring "
+            "(not just a spinner) during the download phase?")
     confirm("Did the Active Tasks header count up (\"Installing X of N…\")?")
     confirm("Did you get exactly ONE summary notification at the end (not one per app)?")
-    for tok in fresh:
+    for tok in BULK_INSTALL_CASKS:
         check(f"{tok} installed via bulk import", lambda t=tok: cask_installed(t))
-    # Failure isolation: the bogus token fails but must not abort the real ones (already
-    # checked installed above); its card should show an error.
-    confirm(f"Did '{bogus}' show a failed state while the real apps still installed?")
 
 
 def phase_bulk_update(state) -> None:

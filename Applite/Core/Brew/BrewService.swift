@@ -439,6 +439,12 @@ final class BrewService {
 
         var arguments = vms.map(\.fullToken)
         if kind == .install {
+            // --force: bulk install is only used by app-list import, which commonly re-lists casks
+            // that are already installed (or orphaned — e.g. a font whose files remain after brew
+            // lost track). Without --force any one of those raises a hard error that can abort the
+            // whole `brew install` batch and fail the rest. Reinstalling is low-risk and makes
+            // import resilient.
+            arguments.append("--force")
             let appdirOn = UserDefaults.standard.value(for: Preferences.appdirOn)
             let appdirPath = UserDefaults.standard.value(for: Preferences.appdirPath)
             if appdirOn { arguments.append("--appdir=\"\(appdirPath)\"") }
