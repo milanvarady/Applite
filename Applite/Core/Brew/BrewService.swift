@@ -279,6 +279,14 @@ final class BrewService {
         activeTasks.first { $0.viewModel == vm }?.task.cancel()
     }
 
+    /// Dismisses a failed cask: clears its error state and drops it from the task list. (Failed
+    /// casks are kept in `activeTasks` after an op ends so the error stays reachable in
+    /// `ActiveTasksView` until the user clears it.)
+    func dismissFailure(_ vm: CaskViewModel) {
+        vm.progressState = .idle
+        activeTasks.removeAll { $0.viewModel == vm }
+    }
+
     /// Cancels every active task and waits for them to unwind (terminating their
     /// brew processes via `Shell.stream`'s onTermination), bounded by a timeout so
     /// quitting can never block indefinitely. Used by the quit-confirmation flow.
@@ -324,6 +332,9 @@ final class BrewService {
     /// until then the card shows "Waiting…".
     @discardableResult
     private func runTask(for vm: CaskViewModel, _ operation: @escaping () async -> Void) -> Task<Void, Never> {
+        // Drop any lingering (dismissed-or-not) entry for this cask before re-queuing it, so a
+        // retry of a failed op doesn't leave two cards for the same cask.
+        activeTasks.removeAll { $0.viewModel == vm }
         vm.progressState = .busy(withTask: waitingLabel)
 
         let previous = queueTail
@@ -331,8 +342,10 @@ final class BrewService {
             await previous?.value
 
             defer {
+                // Keep a failed cask in the task list (so its error stays reachable) until the user
+                // dismisses it; remove it once it succeeds or is otherwise done.
                 self.activeTasks.removeAll {
-                    $0.viewModel == vm
+                    $0.viewModel == vm && !$0.viewModel.progressState.isFailed
                 }
             }
 
@@ -380,10 +393,12 @@ final class BrewService {
     private func runBatch(_ vms: [CaskViewModel], kind: BatchKind) {
         guard !vms.isEmpty else { return }
 
+        let batchTokens = Set(vms.map(\.fullToken))
+        // Drop any lingering entries for these casks (e.g. a dismissed-or-not failure) before re-queuing.
+        activeTasks.removeAll { batchTokens.contains($0.viewModel.fullToken) }
         for vm in vms { vm.progressState = .busy(withTask: waitingLabel) }
 
         let previous = queueTail
-        let batchTokens = Set(vms.map(\.fullToken))
         let handle = BatchHandle()
         let task = Task {
             await previous?.value
@@ -391,7 +406,10 @@ final class BrewService {
             // Now running — publish this batch so the Active Tasks "Stop" can cancel just it.
             self.runningBatch = handle
             defer {
-                self.activeTasks.removeAll { batchTokens.contains($0.viewModel.fullToken) }
+                // Keep failed casks in the task list until dismissed; remove the rest.
+                self.activeTasks.removeAll {
+                    batchTokens.contains($0.viewModel.fullToken) && !$0.viewModel.progressState.isFailed
+                }
                 if self.runningBatch === handle { self.runningBatch = nil }
             }
 

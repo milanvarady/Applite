@@ -268,7 +268,7 @@ struct AppView: View {
                 .help("View terminal output")
 
                 Button {
-                    cask.progressState = .idle
+                    caskManager.dismissFailure(cask)
                 } label: {
                     Image(systemName: "xmark")
                 }

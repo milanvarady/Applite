@@ -127,6 +127,10 @@ final class CaskManager {
         brewService.cancelBatch()
     }
 
+    func dismissFailure(_ cask: CaskViewModel) {
+        brewService.dismissFailure(cask)
+    }
+
     func cancelAllAndWait() async {
         await brewService.cancelAllAndWait()
     }
