@@ -10,6 +10,8 @@ import SwiftUI
 struct ActiveTasksView: View {
     @Environment(CaskManager.self) var caskManager
 
+    @State private var showingStopConfirm = false
+
     var body: some View {
         VStack {
             if let batch = caskManager.batchProgress {
@@ -24,9 +26,21 @@ struct ActiveTasksView: View {
                     Spacer()
 
                     Button(role: .destructive) {
-                        caskManager.cancelBatch()
+                        showingStopConfirm = true
                     } label: {
                         Label("Stop", systemImage: "stop.fill")
+                    }
+                    .confirmationDialog(
+                        "Stop the bulk operation?",
+                        isPresented: $showingStopConfirm,
+                        titleVisibility: .visible
+                    ) {
+                        Button("Stop \(batch.total - batch.completed) remaining", role: .destructive) {
+                            caskManager.cancelBatch()
+                        }
+                        Button("Continue", role: .cancel) { }
+                    } message: {
+                        Text("Apps already finished stay installed; the rest are cancelled.", comment: "Batch stop confirmation message")
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
