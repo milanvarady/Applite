@@ -60,7 +60,10 @@ UPDATE_CASK = "font-hack"       # versioned, auto_updates:false (fonts never sel
 WARN_CASK = "aegisub"           # deprecated → triggers the download warning dialog
 #                                 (also probes the HOMEBREW_DEVELOPER deprecation risk)
 CANCEL_CASK = "libreoffice"     # big download so there's time to hit Stop; cache cleared first
-IMPORT_CASKS = ["hiddenbar", "mos"]  # small, not-otherwise-installed casks for the import test
+# Bulk (batch) test sets. Install-all runs via import; update-all via the Updates "Update All".
+BULK_INSTALL_CASKS = ["hiddenbar", "mos", "font-fira-code", "font-inconsolata"]  # 2 apps + 2 fonts
+BULK_UPDATE_CASKS = ["font-fira-code", "font-inconsolata"]  # subset above; fake-outdatable fonts
+BULK_STOP_CASKS = ["libreoffice", "inkscape"]  # two big downloads → time to hit the batch Stop
 
 # Paths the harness is allowed to delete outright (never a system brew/CLT).
 def _wipe_paths() -> list[Path]:
@@ -588,7 +591,8 @@ def unhide_prereqs() -> None:
 # reset / teardown
 # --------------------------------------------------------------------------- #
 
-TEST_CASKS = [DMG_CASK, PKG_CASK, ZAP_CASK, UPDATE_CASK, WARN_CASK, CANCEL_CASK, *IMPORT_CASKS]
+TEST_CASKS = [DMG_CASK, PKG_CASK, ZAP_CASK, UPDATE_CASK, WARN_CASK, CANCEL_CASK,
+              *BULK_INSTALL_CASKS, *BULK_STOP_CASKS]
 
 
 def _uninstall_all_casks(brew_exe: Path) -> None:
@@ -785,7 +789,9 @@ def cmd_preflight(_args) -> int:
         (UPDATE_CASK, None, "no_auto_update"),
         (WARN_CASK, None, "warn"),
         (CANCEL_CASK, "app", None),
-        *[(t, "app", None) for t in IMPORT_CASKS],
+        *[(t, None, None) for t in BULK_INSTALL_CASKS],
+        *[(t, None, "no_auto_update") for t in BULK_UPDATE_CASKS],
+        *[(t, "app", None) for t in BULK_STOP_CASKS],
     ]
     print(f"  {'token':22} {'kind':6} {'auto_upd':9} {'version':12} role")
     all_ok = True
@@ -931,7 +937,7 @@ def phase_a9(state) -> None:
 
 
 def phase_a10(_state) -> None:
-    step("13", "Refresh Homebrew Components (annex overlay)")
+    step("15", "Refresh Homebrew Components (annex overlay)")
     do_in_app("Settings → Manage Homebrew → Refresh Homebrew Components; wait for it")
     check("brew still healthy after overlay (no LoadError)", brew_healthy)
     check(f"{UPDATE_CASK} still installed (Caskroom survived)",
@@ -940,7 +946,7 @@ def phase_a10(_state) -> None:
 
 
 def phase_a11(_state) -> None:
-    step("14", "Reinstall Homebrew (clean annex)")
+    step("16", "Reinstall Homebrew (clean annex)")
     do_in_app("Settings → Manage Homebrew → Reinstall Homebrew; confirm and wait")
     check("annex brew healthy after reinstall", brew_healthy)
     check("brew list is empty (apps unlinked)", lambda: installed_tokens() == [])
@@ -1018,28 +1024,86 @@ def phase_a13(_state) -> None:
 
 
 def phase_a14(_state) -> None:
-    step("11", "export, then import fresh casks")
+    step("11", "export + BULK install (one batch process)")
+    # Import runs installAll → a single `brew install --cask <all>` process. This is the
+    # original dropped-casks repro (importing 2 casks once needed 3 tries) plus the batch UI.
     export_path = Path.home() / "Desktop/applite_export.txt"
     do_in_app(f"App Migration → Export apps to {export_path}")
     check("export file exists and is non-empty",
           lambda: export_path.exists() and export_path.stat().st_size > 0)
-    check("export lists at least one token",
-          lambda: bool(export_path.exists() and export_path.read_text().split()))
 
-    # Write an import file of casks NOT installed yet, so a successful import proves
-    # it actually installs (not just "already there").
+    # Import a set of casks NOT installed yet (+ one bogus token to prove failure isolation).
+    fresh = [t for t in BULK_INSTALL_CASKS if cask_absent(t)]
+    bogus = "applite-nonexistent-cask-xyz"
     import_path = Path.home() / "Desktop/applite_import.txt"
-    import_path.write_text("\n".join(IMPORT_CASKS) + "\n")
-    for tok in IMPORT_CASKS:
-        check(f"{tok} not installed before import", lambda t=tok: cask_absent(t))
-    do_in_app(f"App Migration → Import {import_path} "
-              f"({', '.join(IMPORT_CASKS)}); let them install")
-    for tok in IMPORT_CASKS:
-        check(f"{tok} installed via import", lambda t=tok: cask_installed(t))
+    import_path.write_text("\n".join(fresh + [bogus]) + "\n")
+    info(f"import file: {len(fresh)} real casks + 1 bogus ({bogus})")
+
+    do_in_app(f"App Migration → Import {import_path}; let the batch run to completion")
+    confirm(f"Did each of the {len(fresh)} app cards show its OWN download ring (not just a "
+            "spinner) during the download phase?")
+    confirm("Did the Active Tasks header count up (\"Installing X of N…\")?")
+    confirm("Did you get exactly ONE summary notification at the end (not one per app)?")
+    for tok in fresh:
+        check(f"{tok} installed via bulk import", lambda t=tok: cask_installed(t))
+    # Failure isolation: the bogus token fails but must not abort the real ones (already
+    # checked installed above); its card should show an error.
+    confirm(f"Did '{bogus}' show a failed state while the real apps still installed?")
+
+
+def phase_bulk_update(state) -> None:
+    step("12", "BULK update (Update All, one batch process)")
+    # Reuse the fonts installed by the bulk-install phase; fake them outdated, then Update All.
+    targets = [t for t in BULK_UPDATE_CASKS if cask_installed(t)]
+    if len(targets) < 2:
+        do_in_app(f"Install {BULK_UPDATE_CASKS} first if missing (App Migration import)")
+        targets = [t for t in BULK_UPDATE_CASKS if cask_installed(t)]
+    if len(targets) < 2:
+        RESULTS.skip("bulk update (need ≥2 installed update targets)")
+        return
+
+    for tok in targets:
+        check(f"faked {tok} outdated", lambda t=tok: fake_outdated(t))
+    do_in_app("Open the Updates tab (⌘R there if needed) — all faked casks should be listed")
+    check("brew reports all targets outdated",
+          lambda: all(outdated_lists(t) for t in targets))
+    do_in_app("Press 'Update All'")
+    confirm("Did 'Update All' become disabled + spin while the batch ran?")
+    confirm("Did the Active Tasks header show \"Updating X of N…\"?")
+    for tok in targets:
+        check(f"{tok} no longer outdated", lambda t=tok: not outdated_lists(t))
+        check(f"{tok} version restored (not 0.0.1)",
+              lambda t=tok: installed_version(t) not in (None, "0.0.1"))
+    confirm("Did 'Update All' re-enable once the batch finished?")
+
+
+def phase_batch_stop(state) -> None:
+    step("13", "batch STOP + per-card redirect")
+    # Big downloads so the batch is still running when you go to stop it. They must NOT be
+    # installed (else import skips them → nothing downloads → nothing to stop). Clear caches so
+    # they re-download. (Uninstall via Applite, not the harness — a CLT-free harness uninstall of
+    # an app cask would hit Swift-trash and pop the CLT dialog.)
+    for tok in BULK_STOP_CASKS:
+        clear_cask_cache(tok)
+    if any(cask_installed(t) for t in BULK_STOP_CASKS):
+        do_in_app(f"In Applite, uninstall any of {BULK_STOP_CASKS} that are installed "
+                  "(they must re-download for this test)")
+    stop_path = Path.home() / "Desktop/applite_bulkstop.txt"
+    stop_path.write_text("\n".join(BULK_STOP_CASKS) + "\n")
+    do_in_app(f"Import {stop_path} ({', '.join(BULK_STOP_CASKS)}) — big downloads, keep it running")
+
+    do_in_app("While it downloads, click the STOP button on ONE app card")
+    confirm("Did an alert appear (\"…is part of a bulk operation\") with a 'See Active Tasks' "
+            "button — instead of silently cancelling everything?")
+    do_in_app("Press 'See Active Tasks'")
+    confirm("Did it switch to the Active Tasks tab?")
+    do_in_app("Press the 'Stop' button in the Active Tasks header, then confirm")
+    check("brew still healthy after batch stop (no orphaned process)", brew_healthy)
+    confirm("Did the cards reset (no stuck spinners) after stopping?")
 
 
 def phase_a15(_state) -> None:
-    step("12", "launch installed app")
+    step("14", "launch installed app")
     do_in_app("Installed tab → Open on an installed app")
     confirm("Did the app launch?")
 
@@ -1137,8 +1201,9 @@ ROUND_A = [
     ("5", "cancel", phase_a6), ("6", "update", phase_a7),
     ("7", "uninstall", phase_a8), ("8", "uninstall+zap", phase_a9),
     ("9", "catalog/search", phase_a12), ("10", "settings", phase_a13),
-    ("11", "import/export", phase_a14), ("12", "launch", phase_a15),
-    ("13", "refresh brew", phase_a10), ("14", "reinstall brew", phase_a11),
+    ("11", "bulk install", phase_a14), ("12", "bulk update", phase_bulk_update),
+    ("13", "batch stop", phase_batch_stop), ("14", "launch", phase_a15),
+    ("15", "refresh brew", phase_a10), ("16", "reinstall brew", phase_a11),
 ]
 
 ROUND_B = [

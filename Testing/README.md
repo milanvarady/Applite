@@ -106,7 +106,9 @@ Set at the top of `applite_test.py` (one per installer type); `preflight` re-che
 | `UPDATE_CASK` | `font-hack` | versioned, **`auto_updates: false`** — required so non-greedy `brew outdated` will report the faked-old version |
 | `WARN_CASK` | `aegisub` | **deprecated** → triggers the download warning dialog (and probes the HOMEBREW_DEVELOPER deprecation risk) |
 | `CANCEL_CASK` | `libreoffice` | large download so there's time to hit Stop mid-download (the harness clears its cache first) |
-| `IMPORT_CASKS` | `hiddenbar`, `mos` | small casks not installed elsewhere, so the import phase proves it actually installs |
+| `BULK_INSTALL_CASKS` | `hiddenbar`, `mos`, `font-fira-code`, `font-inconsolata` | set imported in one batch (`installAll`) — proves reliable bulk install + per-cask rings + one summary |
+| `BULK_UPDATE_CASKS` | `font-fira-code`, `font-inconsolata` | subset of the above, fake-outdated then "Update All" (batch upgrade) — must be `auto_updates:false` |
+| `BULK_STOP_CASKS` | `libreoffice`, `inkscape` | two big downloads so the batch is still running when you exercise the batch Stop |
 
 Cask metadata drifts. If `preflight` flags one (wrong artifact type, `auto_updates`
 became true, no zap/caveat), swap that variable for a cask that fits the role — the
