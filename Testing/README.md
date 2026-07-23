@@ -106,8 +106,8 @@ Set at the top of `applite_test.py` (one per installer type); `preflight` re-che
 | `UPDATE_CASK` | `font-hack` | versioned, **`auto_updates: false`** — required so non-greedy `brew outdated` will report the faked-old version |
 | `WARN_CASK` | `aegisub` | **deprecated** → triggers the download warning dialog (and probes the HOMEBREW_DEVELOPER deprecation risk) |
 | `CANCEL_CASK` | `libreoffice` | large download so there's time to hit Stop mid-download (the harness clears its cache first) |
-| `BULK_INSTALL_CASKS` | `hiddenbar`, `mos`, `font-fira-code`, `font-inconsolata` | set imported in one batch (`installAll`) — proves reliable bulk install + per-cask rings + one summary |
-| `BULK_UPDATE_CASKS` | `font-fira-code`, `font-inconsolata` | subset of the above, fake-outdated then "Update All" (batch upgrade) — must be `auto_updates:false` |
+| `BULK_INSTALL_CASKS` | `hiddenbar`, `mos`, `font-fira-code`, `font-jetbrains-mono` | set imported in one batch (`installAll`) — proves reliable bulk install + per-cask rings + one summary |
+| `BULK_UPDATE_CASKS` | `font-fira-code`, `font-jetbrains-mono` | subset of the above, fake-outdated then "Update All" (batch upgrade) — need `auto_updates:false` **and a concrete version** (not `:latest`) |
 | `BULK_STOP_CASKS` | `libreoffice`, `inkscape` | two big downloads so the batch is still running when you exercise the batch Stop |
 
 Cask metadata drifts. If `preflight` flags one (wrong artifact type, `auto_updates`

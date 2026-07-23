@@ -61,8 +61,8 @@ WARN_CASK = "aegisub"           # deprecated → triggers the download warning d
 #                                 (also probes the HOMEBREW_DEVELOPER deprecation risk)
 CANCEL_CASK = "libreoffice"     # big download so there's time to hit Stop; cache cleared first
 # Bulk (batch) test sets. Install-all runs via import; update-all via the Updates "Update All".
-BULK_INSTALL_CASKS = ["hiddenbar", "mos", "font-fira-code", "font-inconsolata"]  # 2 apps + 2 fonts
-BULK_UPDATE_CASKS = ["font-fira-code", "font-inconsolata"]  # subset above; fake-outdatable fonts
+BULK_INSTALL_CASKS = ["hiddenbar", "mos", "font-fira-code", "font-jetbrains-mono"]  # 2 apps + 2 fonts
+BULK_UPDATE_CASKS = ["font-fira-code", "font-jetbrains-mono"]  # subset; concrete-version fonts (fake-outdatable)
 BULK_STOP_CASKS = ["libreoffice", "inkscape"]  # two big downloads → time to hit the batch Stop
 
 # Paths the harness is allowed to delete outright (never a system brew/CLT).
