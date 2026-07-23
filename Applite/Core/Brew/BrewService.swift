@@ -400,12 +400,21 @@ final class BrewService {
 
     /// Runs the batch brew process and routes its streamed per-cask output to each card.
     private func runBatchOperation(_ vms: [CaskViewModel], kind: BatchKind) async {
-        // token AND fullToken → vm, so brew's per-cask output lines can be routed to a card.
+        // token AND fullToken → vm, so brew's per-cask output lines (which name either) can be
+        // routed to a card. If two casks in the batch share a key (e.g. a core cask and a tap cask
+        // with the same bare token), drop that key so it can't mis-route — those fall to reconcile.
         var lookup: [String: CaskViewModel] = [:]
+        var ambiguousKeys: Set<String> = []
         for vm in vms {
-            lookup[vm.token] = vm
-            lookup[vm.fullToken] = vm
+            for key in [vm.token, vm.fullToken] {
+                if let existing = lookup[key], existing !== vm {
+                    ambiguousKeys.insert(key)
+                } else {
+                    lookup[key] = vm
+                }
+            }
         }
+        for key in ambiguousKeys { lookup[key] = nil }
 
         var arguments = vms.map(\.fullToken)
         if kind == .install {
@@ -428,8 +437,11 @@ final class BrewService {
                 applyBatchLine(line, kind: kind, lookup: lookup, perCaskError: &perCaskError)
             }
         } catch {
-            // A non-zero exit is expected when any cask fails; reconcile decides per-cask outcome.
-            Self.logger.error("Batch \(kind.subcommand) stream ended: \(error.localizedDescription)")
+            // A non-zero exit is expected when any cask fails (reconcile decides per-cask outcome).
+            // A user cancel also throws here — don't log that as an error.
+            if !Task.isCancelled {
+                Self.logger.error("Batch \(kind.subcommand) stream ended: \(error.localizedDescription)")
+            }
         }
 
         if Task.isCancelled {
@@ -484,6 +496,10 @@ final class BrewService {
            let vm = lookup[String(match.1)] {
             perCaskError[vm.fullToken] = line
             vm.progressState = .failed(output: line)
+            if var progress = batchProgress {   // a failure still counts as "done"
+                progress.completed += 1
+                batchProgress = progress
+            }
         }
     }
 

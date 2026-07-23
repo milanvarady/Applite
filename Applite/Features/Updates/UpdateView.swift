@@ -89,6 +89,14 @@ struct UpdateView: View {
                 updateAllButtonRotation = 0
             }
         }
+        .onChange(of: caskManager.batchProgress == nil) { _, batchEnded in
+            // Re-enable the button once the bulk update finishes even if some casks failed —
+            // a failed cask stays outdated, so the isEmpty check above would never fire.
+            if batchEnded && isUpdatingAll {
+                isUpdatingAll = false
+                updateAllButtonRotation = 0
+            }
+        }
     }
 }
 
