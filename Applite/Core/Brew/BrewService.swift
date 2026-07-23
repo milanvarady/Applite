@@ -68,7 +68,7 @@ final class BrewService {
     /// Installs the cask. Returns the tracking task so callers (e.g. `installAll`) can
     /// await completion and serialize; discardable for the common fire-and-forget case.
     @discardableResult
-    func install(_ vm: CaskViewModel, force: Bool = false) -> Task<Void, Never> {
+    func install(_ vm: CaskViewModel) -> Task<Void, Never> {
         return runTask(for: vm) {
             Self.logger.info("Cask \"\(vm.token)\" installation started")
 
@@ -77,9 +77,10 @@ final class BrewService {
             let appdirPath = UserDefaults.standard.value(for: Preferences.appdirPath)
             let appdirArgument = "--appdir=\"\(appdirPath)\""
 
-            // Install command
-            var arguments = [vm.token]
-            if force { arguments.append("--force") }
+            // Always --force: the Install button only shows when the cask isn't tracked as
+            // installed, so force just overwrites/adopts any untracked copy already on disk instead
+            // of erroring — and it's identical to a plain install when nothing is there.
+            var arguments = [vm.token, "--force"]
             if appdirOn { arguments.append(appdirArgument) }
 
             let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) install --cask \(arguments.joined(separator: " "))"
@@ -106,12 +107,6 @@ final class BrewService {
 
                 // Show a more helpful message in specific cases
                 switch completeOutput {
-                    // Already installed
-                case _ where completeOutput.contains("It seems there is already an App"):
-                    alertMessage = String(
-                        localized: "\(vm.name) is already installed. If you want to add it to Applite click more options (chevron icon) and press Force Install.",
-                        comment: "App already installed alert message (parameter: app name)"
-                    )
                     // Network error
                 case _ where completeOutput.contains("Could not resolve host"):
                     alertMessage = String(localized: "Couldn't download app. No internet connection, or host is unreachable.", comment: "No internet alert message")

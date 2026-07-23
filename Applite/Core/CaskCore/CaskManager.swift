@@ -103,8 +103,8 @@ final class CaskManager {
 
     // MARK: - Brew Operation Forwarding
 
-    func install(_ cask: CaskViewModel, force: Bool = false) {
-        brewService.install(cask, force: force)
+    func install(_ cask: CaskViewModel) {
+        brewService.install(cask)
     }
 
     func uninstall(_ cask: CaskViewModel, zap: Bool = false) {

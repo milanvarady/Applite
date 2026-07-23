@@ -109,14 +109,6 @@ struct AppView: View {
             }
 
             getInfoButton
-
-            Divider()
-
-            Button {
-                caskManager.install(cask, force: true)
-            } label: {
-                Label("Force Install", systemImage: "bolt.trianglebadge.exclamationmark.fill")
-            }
         }
     }
 
