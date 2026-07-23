@@ -61,8 +61,11 @@ WARN_CASK = "aegisub"           # deprecated → triggers the download warning d
 #                                 (also probes the HOMEBREW_DEVELOPER deprecation risk)
 CANCEL_CASK = "libreoffice"     # big download so there's time to hit Stop; cache cleared first
 # Bulk (batch) test sets. Install-all runs via import; update-all via the Updates "Update All".
-BULK_INSTALL_CASKS = ["hiddenbar", "mos", "font-fira-code", "font-jetbrains-mono"]  # 2 apps + 2 fonts
-BULK_UPDATE_CASKS = ["font-fira-code", "font-jetbrains-mono"]  # subset; concrete-version fonts (fake-outdatable)
+BULK_INSTALL_CASKS = ["hiddenbar", "mos", "font-fira-code"]  # 2 apps + 1 font (fonts barely used)
+# Update-all targets: the two apps (versioned + auto_updates:false, so fake-outdatable) — NOT the
+# font. Fonts persist on disk and a plain reinstall errors ("already exists"); the harness cleans
+# the font's files (see _purge_known_casks) so a fresh install works, but keep them out of update.
+BULK_UPDATE_CASKS = ["hiddenbar", "mos"]
 BULK_STOP_CASKS = ["libreoffice", "inkscape"]  # two big downloads → time to hit the batch Stop
 
 # Paths the harness is allowed to delete outright (never a system brew/CLT).
@@ -247,6 +250,15 @@ def app_names(cask: dict) -> list[str]:
             for entry in art["app"]:
                 if isinstance(entry, str):
                     names.append(entry)
+    return names
+
+
+def font_names(cask: dict) -> list[str]:
+    """The font filenames a `font` cask installs (into ~/Library/Fonts)."""
+    names: list[str] = []
+    for art in cask.get("artifacts", []):
+        if isinstance(art, dict) and "font" in art:
+            names += [e for e in art["font"] if isinstance(e, str)]
     return names
 
 
@@ -658,6 +670,11 @@ def _purge_known_casks() -> None:
         for name in app_names(cask):
             for base in ("/Applications", str(Path.home() / "Applications"), str(appdir())):
                 _rm(Path(base) / name)
+        # Font casks install .ttf/.otf into ~/Library/Fonts; brew's own uninstall handles them,
+        # but a wiped/reinstalled annex orphans them → a later plain install errors "already
+        # exists". Remove them here so a fresh install works without needing Force Install.
+        for name in font_names(cask):
+            _rm(Path.home() / "Library/Fonts" / name)
         for raw in removable_paths(cask):
             for path in _expand(raw):
                 _rm(path)
@@ -789,7 +806,7 @@ def cmd_preflight(_args) -> int:
         (UPDATE_CASK, None, "no_auto_update"),
         (WARN_CASK, None, "warn"),
         (CANCEL_CASK, "app", None),
-        *[(t, None, None) for t in BULK_INSTALL_CASKS],
+        *[(t, None, None) for t in BULK_INSTALL_CASKS if t not in BULK_UPDATE_CASKS],
         *[(t, None, "no_auto_update") for t in BULK_UPDATE_CASKS],
         *[(t, "app", None) for t in BULK_STOP_CASKS],
     ]
