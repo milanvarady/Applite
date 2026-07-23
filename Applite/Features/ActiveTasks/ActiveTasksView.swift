@@ -12,6 +12,17 @@ struct ActiveTasksView: View {
 
     var body: some View {
         VStack {
+            if let batch = caskManager.batchProgress {
+                Label(
+                    "\(batch.label) \(batch.completed) of \(batch.total)…",
+                    systemImage: "square.stack.3d.down.forward"
+                )
+                .font(.headline)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, 4)
+            }
+
             AppGridView(casks: caskManager.activeTasks.map(\.viewModel), appRole: .update)
             Spacer()
         }

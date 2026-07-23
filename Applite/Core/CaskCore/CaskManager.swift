@@ -61,6 +61,7 @@ final class CaskManager {
     var installedViewModels: [CaskViewModel] { registry.installedViewModels }
     var outdatedViewModels: [CaskViewModel] { registry.outdatedViewModels }
     var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
+    var batchProgress: BatchProgress? { brewService.batchProgress }
     var alert: AlertManager { brewService.alert }
 
     // MARK: - Init

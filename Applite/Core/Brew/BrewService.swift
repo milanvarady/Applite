@@ -15,6 +15,13 @@ struct ActiveBrewTask: Identifiable {
     let task: Task<Void, Never>
 }
 
+/// Progress of an in-flight bulk operation (install-all / update-all).
+struct BatchProgress: Equatable {
+    var completed: Int
+    var total: Int
+    var label: String
+}
+
 /// Wraps a streaming brew failure together with the output captured so far,
 /// so callers can build tailored error messages from the partial output.
 struct BrewStreamError: Error {
@@ -28,6 +35,20 @@ struct BrewStreamError: Error {
 final class BrewService {
     private(set) var activeTasks: [ActiveBrewTask] = []
     var alert = AlertManager()
+
+    /// Progress of an in-flight bulk operation, or `nil` when none. Drives an aggregate
+    /// "Installing X of N…" header (see `ActiveTasksView`).
+    private(set) var batchProgress: BatchProgress?
+
+    /// Tail of the serial operation queue. Every brew op chains after this so only ONE brew
+    /// process runs at a time — Homebrew doesn't support concurrent `brew` invocations, and
+    /// concurrent ones collide on its lock (silently dropping casks). A queued op shows "Waiting…".
+    private var queueTail: Task<Void, Never>?
+
+    /// Label shown on a cask's card while its operation is queued behind a running one.
+    private var waitingLabel: String {
+        String(localized: "Waiting…", comment: "Queued brew operation label")
+    }
 
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -228,25 +249,17 @@ final class BrewService {
         }
     }
 
-    /// Installs multiple casks **serially** — one finishes before the next starts.
-    /// Concurrent `brew install --cask` processes collide on Homebrew's locks (and the
-    /// annex's one-time portable-ruby setup), so a batch install would drop casks; this
-    /// was why importing an app list only installed some of the apps.
+    /// Installs many casks as ONE `brew install --cask <all>` process (queued behind any
+    /// running op). One process avoids the lock collisions that dropped casks with the old
+    /// per-cask concurrent approach; brew downloads them concurrently, so it stays fast, and
+    /// its per-cask output drives each card's progress (see `runBatchOperation`).
     func installAll(_ vms: [CaskViewModel]) {
-        Task {
-            for vm in vms {
-                await install(vm).value
-            }
-        }
+        runBatch(vms, kind: .install)
     }
 
-    /// Updates multiple casks serially (same lock-collision reason as `installAll`).
+    /// Updates many casks as ONE `brew upgrade --cask <all>` process (see `installAll`).
     func updateAll(_ vms: [CaskViewModel]) {
-        Task {
-            for vm in vms {
-                await update(vm).value
-            }
-        }
+        runBatch(vms, kind: .update)
     }
 
     /// Stops the cask's in-progress streaming operation (install, update, reinstall).
@@ -298,29 +311,274 @@ final class BrewService {
 
     // MARK: - Helper Functions
 
-    /// Starts a brew task and appends it to active tasks. Returns the task so batch
-    /// operations can await it.
+    /// Enqueues a single-cask brew operation on the serial queue and tracks it. Returns the
+    /// task. The op waits for any earlier queued op to finish (only one brew process at a time);
+    /// until then the card shows "Waiting…".
     @discardableResult
     private func runTask(for vm: CaskViewModel, _ operation: @escaping () async -> Void) -> Task<Void, Never> {
+        vm.progressState = .busy(withTask: waitingLabel)
+
+        let previous = queueTail
         let task = Task {
+            await previous?.value
+
             defer {
                 self.activeTasks.removeAll {
                     $0.viewModel == vm
                 }
             }
 
+            // Cancelled while still queued — reset and skip cleanly.
+            if Task.isCancelled {
+                vm.progressState = .idle
+                return
+            }
+
             // Make sure brew path is valid
             guard await BrewPaths.isSelectedBrewPathValid() else {
                 Self.logger.error("Couldn't start brew operation because brew path is invalid")
                 alert.show(title: "Brew path is invalid", message: AnnexBrewManager.brokenPathOrInstallMessage)
+                vm.progressState = .idle
                 return
             }
 
             await operation()
         }
 
+        queueTail = task
         self.activeTasks.append(ActiveBrewTask(viewModel: vm, task: task))
         return task
+    }
+
+    // MARK: - Bulk (batch) operations
+
+    private enum BatchKind {
+        case install, update
+
+        var subcommand: String { self == .install ? "install" : "upgrade" }
+        var busyLabel: String {
+            self == .install
+                ? String(localized: "Installing", comment: "Install progress text")
+                : String(localized: "Updating", comment: "Update progress text")
+        }
+        /// `==> Installing Cask <token>` (install) / `==> Upgrading <token>` (update).
+        var startMarker: String { self == .install ? "Installing Cask " : "Upgrading " }
+        /// The tail of `🍺 <token> was successfully installed!/upgraded!`.
+        var successNeedle: String { self == .install ? "successfully installed" : "successfully upgraded" }
+    }
+
+    /// Enqueues a bulk op as ONE brew process on the serial queue, tracking every cask as its
+    /// own `ActiveBrewTask` (all sharing this batch task) so each card shows in `ActiveTasksView`.
+    private func runBatch(_ vms: [CaskViewModel], kind: BatchKind) {
+        guard !vms.isEmpty else { return }
+
+        for vm in vms { vm.progressState = .busy(withTask: waitingLabel) }
+
+        let previous = queueTail
+        let batchTokens = Set(vms.map(\.fullToken))
+        let task = Task {
+            await previous?.value
+
+            defer { self.activeTasks.removeAll { batchTokens.contains($0.viewModel.fullToken) } }
+
+            if Task.isCancelled {
+                for vm in vms { vm.progressState = .idle }
+                return
+            }
+            guard await BrewPaths.isSelectedBrewPathValid() else {
+                Self.logger.error("Couldn't start bulk operation because brew path is invalid")
+                alert.show(title: "Brew path is invalid", message: AnnexBrewManager.brokenPathOrInstallMessage)
+                for vm in vms { vm.progressState = .idle }
+                return
+            }
+            await self.runBatchOperation(vms, kind: kind)
+        }
+
+        queueTail = task
+        for vm in vms { activeTasks.append(ActiveBrewTask(viewModel: vm, task: task)) }
+    }
+
+    /// Runs the batch brew process and routes its streamed per-cask output to each card.
+    private func runBatchOperation(_ vms: [CaskViewModel], kind: BatchKind) async {
+        // token AND fullToken → vm, so brew's per-cask output lines can be routed to a card.
+        var lookup: [String: CaskViewModel] = [:]
+        for vm in vms {
+            lookup[vm.token] = vm
+            lookup[vm.fullToken] = vm
+        }
+
+        var arguments = vms.map(\.fullToken)
+        if kind == .install {
+            let appdirOn = UserDefaults.standard.value(for: Preferences.appdirOn)
+            let appdirPath = UserDefaults.standard.value(for: Preferences.appdirPath)
+            if appdirOn { arguments.append("--appdir=\"\(appdirPath)\"") }
+        }
+        let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) \(kind.subcommand) --cask \(arguments.joined(separator: " "))"
+
+        batchProgress = BatchProgress(completed: 0, total: vms.count, label: kind.busyLabel)
+        defer { batchProgress = nil }
+
+        var perCaskError: [String: String] = [:]
+        var completeOutput = ""
+
+        do {
+            for try await line in Shell.stream(command, pty: true) {
+                if Task.isCancelled { break }
+                completeOutput += line + "\n"
+                applyBatchLine(line, kind: kind, lookup: lookup, perCaskError: &perCaskError)
+            }
+        } catch {
+            // A non-zero exit is expected when any cask fails; reconcile decides per-cask outcome.
+            Self.logger.error("Batch \(kind.subcommand) stream ended: \(error.localizedDescription)")
+        }
+
+        if Task.isCancelled {
+            for vm in vms { vm.progressState = .idle }
+            return
+        }
+
+        await reconcileBatch(vms, kind: kind, perCaskError: perCaskError, output: completeOutput)
+    }
+
+    /// Routes one streamed batch-output line to the matching cask's `progressState`.
+    private func applyBatchLine(
+        _ line: String,
+        kind: BatchKind,
+        lookup: [String: CaskViewModel],
+        perCaskError: inout [String: String]
+    ) {
+        // 1. Per-cask download line: "⠙ Cask <token> (<ver>) … Downloading <dl>/<total>".
+        //    Brew redraws these in place; `Shell.stream` yields each as its own frame.
+        if let match = line.firstMatch(of: /Cask (\S+) \(/),
+           let vm = lookup[String(match.1)],
+           let percent = Self.downloadPercent(from: line) {
+            vm.progressState = .downloading(percent: percent)
+            return
+        }
+
+        // 2. Install/upgrade start marker.
+        if let range = line.range(of: kind.startMarker) {
+            let token = line[range.upperBound...].trimmingCharacters(in: .whitespaces)
+            if let vm = lookup[token] {
+                vm.progressState = .busy(withTask: kind.busyLabel)
+                return
+            }
+        }
+
+        // 3. Per-cask success: "🍺  <token> was successfully installed!/upgraded!".
+        if line.contains(kind.successNeedle),
+           let match = line.firstMatch(of: /(\S+) was successfully/),
+           let vm = lookup[String(match.1)] {
+            vm.progressState = .success
+            if kind == .install { vm.isInstalled = true } else { vm.isOutdated = false }
+            if var progress = batchProgress {
+                progress.completed += 1
+                batchProgress = progress
+            }
+            return
+        }
+
+        // 4. Per-cask error: "Error: <token>: <reason>" (batch continues past a failure).
+        if line.hasPrefix("Error: "),
+           let match = line.firstMatch(of: /Error: (\S+?):/),
+           let vm = lookup[String(match.1)] {
+            perCaskError[vm.fullToken] = line
+            vm.progressState = .failed(output: line)
+        }
+    }
+
+    /// Extracts a `<downloaded>/<total>` → ratio from a brew download line, or `nil`.
+    private static func downloadPercent(from line: String) -> Double? {
+        guard let match = line.firstMatch(of: /([0-9.]+)\s*([KMGT]?i?B)\s*\/\s*([0-9.]+)\s*([KMGT]?i?B)/),
+              let downloaded = byteCount(match.1, match.2),
+              let total = byteCount(match.3, match.4),
+              total > 0 else {
+            return nil
+        }
+        return min(downloaded / total, 1)
+    }
+
+    /// After the batch process ends, reconcile every cask's real end state with one brew query
+    /// (covers "already installed" warnings and unmatched markers), reset cards, and send a
+    /// single summary notification instead of one per cask.
+    private func reconcileBatch(
+        _ vms: [CaskViewModel],
+        kind: BatchKind,
+        perCaskError: [String: String],
+        output: String
+    ) async {
+        // Casks that already got a success/error marker while streaming are authoritative — do
+        // NOT re-derive them from a list query (its `--full-name` format may not match a token,
+        // which would flip a genuinely-installed cask to a false failure). Only query brew for
+        // casks with no marker ("already installed" warnings, unmatched output).
+        func isResolved(_ vm: CaskViewModel) -> Bool {
+            switch vm.progressState {
+            case .success, .failed: return true
+            default: return false
+            }
+        }
+        var brewTokens: Set<String> = []
+        if vms.contains(where: { !isResolved($0) }) {
+            let args = kind == .install ? ["list", "--cask", "--full-name"] : ["outdated", "--cask", "-q"]
+            let out = (try? await Shell.runBrewCommand(args)) ?? ""
+            brewTokens = Set(out.split(whereSeparator: \.isNewline).map(String.init))
+        }
+
+        var succeeded = 0
+        var failedNames: [String] = []
+
+        for vm in vms {
+            let ok: Bool
+            switch vm.progressState {
+            case .success:
+                ok = true   // isInstalled / isOutdated already set from the success marker
+            case .failed:
+                ok = false
+            default:
+                // No marker seen — decide from the single brew query.
+                let listed = brewTokens.contains(vm.fullToken) || brewTokens.contains(vm.token)
+                switch kind {
+                case .install:
+                    ok = listed
+                    vm.isInstalled = listed
+                case .update:
+                    ok = !listed           // absent from `outdated` == up to date
+                    vm.isOutdated = listed
+                }
+            }
+
+            if ok {
+                vm.progressState = .idle
+                succeeded += 1
+            } else {
+                if case .failed = vm.progressState {
+                    // keep the per-cask error already parsed onto the card
+                } else {
+                    vm.progressState = .failed(output: perCaskError[vm.fullToken] ?? output)
+                }
+                failedNames.append(vm.name)
+            }
+        }
+
+        let verb = kind == .install
+            ? String(localized: "installed", comment: "Bulk op past-tense verb")
+            : String(localized: "updated", comment: "Bulk op past-tense verb")
+
+        if failedNames.isEmpty {
+            Self.logger.info("Batch \(kind.subcommand): \(succeeded) succeeded")
+            await sendNotification(
+                title: String(localized: "\(succeeded) apps \(verb)", comment: "Bulk op success notification"),
+                body: "",
+                reason: .success
+            )
+        } else {
+            let title = String(localized: "\(succeeded) apps \(verb), \(failedNames.count) failed",
+                               comment: "Bulk op partial-failure notification")
+            let names = failedNames.joined(separator: ", ")
+            Self.logger.error("Batch \(kind.subcommand): \(succeeded) ok, failed: \(names)")
+            alert.show(title: LocalizedStringKey(title), message: names)
+            await sendNotification(title: title, body: names, reason: .failure)
+        }
     }
 
     /// Parses a single line of streamed `brew install/upgrade --cask` output.
@@ -336,12 +594,8 @@ final class BrewService {
         //   "✔︎ Cask antinote (1.1.7)   Downloading   3.1MB/  6.7MB"
         // The status text cycles Downloading → Downloaded → Verified while the
         // "<downloaded>/<total>" byte counters update in place.
-        if let match = line.firstMatch(of: /([0-9.]+)\s*([KMGT]?i?B)\s*\/\s*([0-9.]+)\s*([KMGT]?i?B)/) {
-            if let downloaded = Self.byteCount(match.1, match.2),
-               let total = Self.byteCount(match.3, match.4),
-               total > 0 {
-                return .downloading(percent: min(downloaded / total, 1))
-            }
+        if let percent = Self.downloadPercent(from: line) {
+            return .downloading(percent: percent)
         }
 
         // Post-download phase (install / upgrade)
