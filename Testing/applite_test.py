@@ -671,8 +671,9 @@ def _purge_known_casks() -> None:
             for base in ("/Applications", str(Path.home() / "Applications"), str(appdir())):
                 _rm(Path(base) / name)
         # Font casks install .ttf/.otf into ~/Library/Fonts; brew's own uninstall handles them,
-        # but a wiped/reinstalled annex orphans them → a later plain install errors "already
-        # exists". Remove them here so a fresh install works without needing Force Install.
+        # but a wiped/reinstalled annex orphans them. Remove them here so the machine returns to a
+        # truly clean state and `cask_absent` is accurate (Applite force-installs anyway, so an
+        # orphan wouldn't error, but leaving font files around is untidy).
         for name in font_names(cask):
             _rm(Path.home() / "Library/Fonts" / name)
         for raw in removable_paths(cask):
