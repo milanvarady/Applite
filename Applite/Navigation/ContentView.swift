@@ -82,6 +82,14 @@ struct ContentView: View {
         .searchable(text: $searchInput, placement: .sidebar)
         .onChange(of: searchInput) { _, newValue in handleSearchInputChange(newValue) }
         .onChange(of: selection) { _, newValue in handleSelectionChange(newValue) }
+        // A deep view (e.g. "See Active Tasks" on a batched card) requested a tab — apply it.
+        .onChange(of: caskManager.requestedTab) { _, requested in
+            if let requested {
+                searchInput = ""
+                selection = requested
+                caskManager.requestedTab = nil
+            }
+        }
         // Load failure alert
         .alert(caskManager.loadAlert.title, isPresented: $caskManager.loadAlert.isPresented) {
             AsyncButton {

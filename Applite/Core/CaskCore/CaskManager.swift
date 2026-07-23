@@ -62,7 +62,14 @@ final class CaskManager {
     var outdatedViewModels: [CaskViewModel] { registry.outdatedViewModels }
     var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
     var batchProgress: BatchProgress? { brewService.batchProgress }
+    var isBulkRunning: Bool { brewService.isBulkRunning }
     var alert: AlertManager { brewService.alert }
+
+    /// One-shot navigation request from deep views (e.g. the "See Active Tasks" button on a
+    /// batched app card) to the `ContentView`, which applies it to its sidebar selection and
+    /// resets this to nil. Lives here because `CaskManager` is the shared environment object
+    /// every card already holds, so no extra wiring is needed.
+    var requestedTab: SidebarItem?
 
     // MARK: - Init
 
@@ -113,6 +120,10 @@ final class CaskManager {
 
     func cancel(_ cask: CaskViewModel) {
         brewService.cancel(cask)
+    }
+
+    func cancelBatch() {
+        brewService.cancelBatch()
     }
 
     func cancelAllAndWait() async {

@@ -13,12 +13,22 @@ struct ActiveTasksView: View {
     var body: some View {
         VStack {
             if let batch = caskManager.batchProgress {
-                Label(
-                    "\(batch.label) \(batch.completed) of \(batch.total)…",
-                    systemImage: "square.stack.3d.down.forward"
-                )
-                .font(.headline)
-                .foregroundStyle(.secondary)
+                HStack {
+                    Label(
+                        "\(batch.label) \(batch.completed) of \(batch.total)…",
+                        systemImage: "square.stack.3d.down.forward"
+                    )
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Button(role: .destructive) {
+                        caskManager.cancelBatch()
+                    } label: {
+                        Label("Stop", systemImage: "stop.fill")
+                    }
+                }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, 4)
             }

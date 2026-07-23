@@ -45,6 +45,12 @@ final class BrewService {
     /// concurrent ones collide on its lock (silently dropping casks). A queued op shows "Waiting…".
     private var queueTail: Task<Void, Never>?
 
+    /// Reference holder so a batch's `Task` can be published (after it's created) for cancellation.
+    private final class BatchHandle { var task: Task<Void, Never>? }
+    /// The currently-executing bulk op, or nil. Set when a batch actually starts running (not while
+    /// queued) so `cancelBatch()` cancels only the running batch, never queued single ops.
+    private var runningBatch: BatchHandle?
+
     /// Label shown on a cask's card while its operation is queued behind a running one.
     private var waitingLabel: String {
         String(localized: "Waiting…", comment: "Queued brew operation label")
@@ -376,10 +382,16 @@ final class BrewService {
 
         let previous = queueTail
         let batchTokens = Set(vms.map(\.fullToken))
+        let handle = BatchHandle()
         let task = Task {
             await previous?.value
 
-            defer { self.activeTasks.removeAll { batchTokens.contains($0.viewModel.fullToken) } }
+            // Now running — publish this batch so the Active Tasks "Stop" can cancel just it.
+            self.runningBatch = handle
+            defer {
+                self.activeTasks.removeAll { batchTokens.contains($0.viewModel.fullToken) }
+                if self.runningBatch === handle { self.runningBatch = nil }
+            }
 
             if Task.isCancelled {
                 for vm in vms { vm.progressState = .idle }
@@ -394,9 +406,19 @@ final class BrewService {
             await self.runBatchOperation(vms, kind: kind)
         }
 
+        handle.task = task
         queueTail = task
         for vm in vms { activeTasks.append(ActiveBrewTask(viewModel: vm, task: task)) }
     }
+
+    /// Cancels the currently-running bulk operation (the whole `brew install/upgrade --cask <all>`
+    /// process, since it's one invocation). Queued single ops are unaffected. No-op if none running.
+    func cancelBatch() {
+        runningBatch?.task?.cancel()
+    }
+
+    /// Whether a bulk operation is currently running (drives the batch-vs-single stop affordance).
+    var isBulkRunning: Bool { batchProgress != nil }
 
     /// Runs the batch brew process and routes its streamed per-cask output to each card.
     private func runBatchOperation(_ vms: [CaskViewModel], kind: BatchKind) async {

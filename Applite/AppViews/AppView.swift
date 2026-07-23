@@ -33,6 +33,9 @@ struct AppView: View {
     @State var successCheckmarkScale = 0.0001
     @State var keepSuccessIndicator = false
 
+    /// Shown when the stop button is pressed on a cask that's part of a running bulk operation.
+    @State var showingBatchStopInfo = false
+
     /// App view dimensions, and spacing
     public static let dimensions: (width: CGFloat, height: CGFloat, spacing: CGFloat) = (width: 320, height: 80, spacing: 20)
 
@@ -53,6 +56,17 @@ struct AppView: View {
             }
         }
         .alertManager(caskManager.alert)
+        .alert(
+            "\(cask.name) is part of a bulk operation",
+            isPresented: $showingBatchStopInfo
+        ) {
+            Button("See Active Tasks") {
+                caskManager.requestedTab = .activeTasks
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("To stop it, use the Stop button in Active Tasks — it cancels the whole bulk operation.", comment: "Batch stop redirect message")
+        }
     }
 
     /// The chevron and right-click menu are shown for installable/installed apps,
@@ -194,7 +208,14 @@ struct AppView: View {
 
         case .downloading(let percent):
             Button {
-                caskManager.cancel(cask)
+                // A batch is one brew process, so a per-card stop can't cancel just this cask —
+                // redirect to Active Tasks (its header has a "Stop" for the whole bulk op) instead
+                // of silently aborting all of them.
+                if caskManager.isBulkRunning {
+                    showingBatchStopInfo = true
+                } else {
+                    caskManager.cancel(cask)
+                }
             } label: {
                 ZStack {
                     CircularProgressRing(progress: percent)
@@ -205,7 +226,7 @@ struct AppView: View {
             }
             .buttonStyle(.plain)
             .frame(width: 30, height: 30)
-            .help("Stop download")
+            .help(caskManager.isBulkRunning ? "Part of a bulk operation" : "Stop download")
 
         case .success:
             Image(systemName: "checkmark")
