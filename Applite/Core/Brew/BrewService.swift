@@ -482,10 +482,19 @@ final class BrewService {
     ) {
         // 1. Per-cask download line: "⠙ Cask <token> (<ver>) … Downloading <dl>/<total>".
         //    Brew redraws these in place; `Shell.stream` yields each as its own frame.
-        if let match = line.firstMatch(of: /Cask (\S+) \(/),
-           let vm = lookup[String(match.1)],
-           let percent = Self.downloadPercent(from: line) {
-            vm.progressState = .downloading(percent: percent)
+        if let match = line.firstMatch(of: /Cask (\S+) \(/), let vm = lookup[String(match.1)] {
+            if line.contains("Downloading"), let percent = Self.downloadPercent(from: line) {
+                vm.progressState = .downloading(percent: percent)
+                return
+            }
+            // Fetch finished (Downloaded / Verifying / Verified) — but a batch installs each cask
+            // sequentially *after* all downloads, so show "Waiting…" rather than a stuck 100% ring
+            // until this cask's "Installing Cask …" marker arrives.
+            if line.contains("Downloaded") || line.contains("Verif") {
+                vm.progressState = .busy(withTask: waitingLabel)
+                return
+            }
+            // Any other Cask-mentioning line (e.g. the "Fetching downloads for:" heading) — ignore.
             return
         }
 
