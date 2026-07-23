@@ -326,17 +326,16 @@ enum Shell {
         // availability check passes; brew still curls the cask download. Only for the annex — a
         // user's own brew keeps its real git so git-source casks and `brew update` still work.
         //
-        // `HOMEBREW_DEVELOPER=1` unlocks brew's FFI quarantine + trash paths (gated upstream on
-        // `Homebrew::EnvConfig.developer?` via `ffi_quarantine?`/`ffi_trash?`), so casks install
-        // and uninstall/zap without ever shelling out to Swift or `xcrun` — the last two CLT-dialog
-        // triggers on a machine without Command Line Tools. Brew 6.0.10 already handles the other
-        // triggers natively (the fatal ARM dev-tools check and the `xcrun -find` fallback in
-        // `DevelopmentTools.locate`). Annex-only: a user's own brew has Swift/CLT and shouldn't get
-        // the developer flag (it would turn some deprecated-DSL warnings into hard errors).
+        // No `HOMEBREW_DEVELOPER` needed anymore: brew 6.0.12 (PR #23061) enabled the FFI
+        // quarantine/xattr/trash helpers for all users and deleted the Swift fallback scripts, so
+        // casks install and uninstall/zap without ever shelling out to Swift or `xcrun` — the last
+        // two CLT-dialog triggers on a machine without Command Line Tools — with no developer flag.
+        // Brew 6.0.10 had already dropped the earlier triggers (the fatal ARM dev-tools check and
+        // the `xcrun -find` fallback in `DevelopmentTools.locate`). Not setting the flag is also
+        // safer: it would otherwise turn some deprecated-DSL warnings into hard errors.
         if BrewPaths.selectedBrewOption == .annex {
             GitShim.ensureInstalled()
             environment["HOMEBREW_GIT_PATH"] = GitShim.executable.path(percentEncoded: false)
-            environment["HOMEBREW_DEVELOPER"] = "1"
             // Disable bootsnap for the annex. Its load-path cache is keyed only on the Ruby
             // version + installed gems (see brew's startup/bootsnap.rb) — NOT the brew version — and
             // lives under HOMEBREW_CACHE, which survives an annex wipe. Because the annex tracks

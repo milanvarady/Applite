@@ -16,9 +16,10 @@ import OSLog
 /// then runs in API mode (cask metadata over curl) with auto-update disabled (see `Shell`), which
 /// keeps git — the one tool macOS won't provide without CLT — off the cask install path.
 ///
-/// As of Homebrew 6.0.10 the CLT-free cask flow is handled entirely by brew itself: the fatal ARM
-/// dev-tools check and the `xcrun -find` fallback are gone, and the FFI quarantine/trash paths
-/// (which need no Swift) are enabled via `HOMEBREW_DEVELOPER` in `Shell`. So the annex is now an
+/// As of Homebrew 6.0.12 the CLT-free cask flow is handled entirely by brew itself: the fatal ARM
+/// dev-tools check and the `xcrun -find` fallback went away in 6.0.10, and the FFI
+/// quarantine/xattr/trash helpers (which need no Swift) became the default for all users in 6.0.12
+/// (PR #23061), replacing the old `HOMEBREW_DEVELOPER`-gated path. So the annex is now an
 /// unpatched, plain extraction that tracks `master` — kept current by the periodic refresh (see
 /// `refreshAnnexBrew`), the same rolling source `brew update` pulls.
 struct AnnexBrewManager {
