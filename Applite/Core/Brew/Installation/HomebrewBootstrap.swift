@@ -127,8 +127,30 @@ final class HomebrewBootstrap {
             // leave the selection alone; the follow-up bootstrap pass sets the real phase.
             if Task.isCancelled { return }
             Self.logger.error("Annex install failed: \(error.localizedDescription)")
-            phase = .failed(error.localizedDescription)
+            phase = .failed(Self.setupFailureMessage(for: error))
         }
+    }
+
+    /// The message the setup overlay shows on a failed annex install. The overwhelmingly common
+    /// failure — no network — gets a plain-language line instead of the raw `curl | tar` command
+    /// dump (which a non-technical user can't act on); the raw output still lands in the log above.
+    /// Any other failure falls through to `localizedDescription` so support can still read it.
+    private static func setupFailureMessage(for error: Error) -> String {
+        // curl network exit codes: 6 = couldn't resolve host, 7 = couldn't connect, 28 = timeout.
+        let isOffline: Bool = {
+            if error is URLError { return true }
+            if case let ShellError.nonZeroExit(_, code, _) = error { return [6, 7, 28].contains(code) }
+            if case ShellError.timedOut = error { return true }
+            return false
+        }()
+
+        if isOffline {
+            return String(
+                localized: "No internet connection. Applite needs to connect to the internet to download Homebrew and finish setting up. Check your connection and try again.",
+                comment: "Setup overlay message when the Homebrew download fails because the machine is offline"
+            )
+        }
+        return error.localizedDescription
     }
 
     /// Boots brew's Portable Ruby once by running a single command serially.

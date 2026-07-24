@@ -1549,6 +1549,9 @@
     "Applite can use the system network proxy, but only one protocol (HTTP, HTTPS, or SOCKS5). Select your preferred method." : {
       "comment" : "Proxy settings description"
     },
+    "Applite couldn't find %@ on your Mac. It may be installed under a different name — try opening it from Spotlight (⌘ Space) or your Applications folder." : {
+      "comment" : "Shown when Applite can't locate an installed app's bundle to launch it"
+    },
     "Applite couldn't locate %@ on disk" : {
 
     },
@@ -5830,6 +5833,9 @@
           }
         }
       }
+    },
+    "No internet connection. Applite needs to connect to the internet to download Homebrew and finish setting up. Check your connection and try again." : {
+      "comment" : "Setup overlay message when the Homebrew download fails because the machine is offline"
     },
     "No Quarantine" : {
       "comment" : "Brew no quarantine flag toggle title",

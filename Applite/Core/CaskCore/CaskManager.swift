@@ -164,11 +164,17 @@ final class CaskManager {
     func bootstrapAndLoad() async {
         Self.logger.info("Bootstrap + load started")
 
-        await loadCatalog()
+        // Defer the catalog error: if the brew bootstrap also fails (same offline root cause), the
+        // setup overlay is the single error surface — the catalog alert must not stack on it. Only
+        // raise it below, once brew is ready and the overlay won't appear.
+        let catalogError = await loadCatalog(surfaceError: false)
         await bootstrap.run()
 
         if bootstrap.isBrewReady {
             hasBrokenInstall = false
+            if let catalogError {
+                loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+            }
             await loadInstalledState()
             await bootstrap.refreshAnnexIfStale()
         } else if case .failed(let message) = bootstrap.phase {
@@ -186,10 +192,16 @@ final class CaskManager {
         if forceSync { isRefreshingCatalog = true }
         defer { if forceSync { isRefreshingCatalog = false } }
 
-        await loadCatalog(forceSync: forceSync)
+        // Defer the catalog error (see `bootstrapAndLoad`): a forced ⌘R sync while brew is also
+        // unusable and offline would otherwise stack the catalog alert on the setup overlay. Raise
+        // it only on the branches where brew is valid/recovered and no overlay will show.
+        let catalogError = await loadCatalog(forceSync: forceSync, surfaceError: false)
 
         if await BrewPaths.isSelectedBrewPathValid() {
             hasBrokenInstall = false
+            if let catalogError {
+                loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+            }
             await loadInstalledState()
             return
         }
@@ -200,9 +212,10 @@ final class CaskManager {
         guard bootstrap.isBrewReady else {
             // Brew is genuinely unusable. `bootstrap` is in `.failed`, so ContentView is
             // already showing the setup overlay's failed state (message + Retry +
-            // Troubleshooting + "use your own Homebrew"). Don't also raise `loadAlert` or
-            // BrokenInstallView — one error surface, not three stacked. `hasBrokenInstall`
-            // stays set as a fallback for the (currently unreachable) no-overlay case.
+            // Troubleshooting + "use your own Homebrew"). Don't also raise `loadAlert` (the
+            // catalog error is dropped here — the overlay owns the surface) or BrokenInstallView.
+            // `hasBrokenInstall` stays set as a fallback for the (currently unreachable)
+            // no-overlay case.
             hasBrokenInstall = true
 
             let versionOutput = (try? await Shell.runBrewCommand(["--version"])) ?? "n/a"
@@ -217,11 +230,21 @@ final class CaskManager {
         }
 
         hasBrokenInstall = false
+        // Recovered — the catalog alert is now the only possible surface, so raise it.
+        if let catalogError {
+            loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+        }
         await loadInstalledState()
     }
 
     /// Stage 1: catalog (categories + taps) from the local DB — fast, no brew CLI dependency.
-    private func loadCatalog(forceSync: Bool = false) async {
+    ///
+    /// Returns the failure (or `nil` on success) instead of surfacing it directly, so the caller
+    /// can decide *whether* to raise `loadAlert`: on launch/recovery a catalog failure often shares
+    /// its root cause (offline) with a brew bootstrap failure, and the setup overlay must be the
+    /// single error surface — the alert can't stack on top. Pass `surfaceError: false` to defer.
+    @discardableResult
+    private func loadCatalog(forceSync: Bool = false, surfaceError: Bool = true) async -> Error? {
         do {
             // Animate the placeholder→full transition so cask cards cross-fade into place
             // rather than swapping instantly mid-shimmer-cycle.
@@ -230,9 +253,13 @@ final class CaskManager {
                 self.categories = catalog.categories
                 self.taps = catalog.taps
             }
+            return nil
         } catch {
-            loadAlert.show(error: error, title: "Couldn't load app catalog")
             Self.logger.error("Catalog load failure. Reason: \(error.localizedDescription)")
+            if surfaceError {
+                loadAlert.show(error: error, title: "Couldn't load app catalog")
+            }
+            return error
         }
     }
 
