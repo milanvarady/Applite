@@ -11,6 +11,8 @@ import ButtonKit
 struct BrewActionsView: View {
     @Binding var modifyingBrew: Bool
 
+    @Environment(CaskManager.self) private var caskManager
+
     @State var updateDone = false
     @State var reinstallDone = false
 
@@ -137,6 +139,10 @@ struct BrewActionsView: View {
 
                     if !reinstallFailed {
                         reinstallDone = true
+                        // A clean reinstall unlinks every previously-installed app, so the cached
+                        // installed/outdated state is now stale — reload it so the UI reflects the
+                        // unlinked apps instead of waiting for a manual ⌘R.
+                        await caskManager.loadData()
                     }
 
                     withAnimation {
