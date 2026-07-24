@@ -31,7 +31,7 @@ struct ContentView: View {
     /// so the detail pane suppresses `BrokenInstallView` (see `mainNavigation`) to avoid stacking.
     private var showSetup: Bool {
         switch caskManager.bootstrap.phase {
-        case .installing, .installed, .failed: true
+        case .installing, .installed, .failed, .brewMissing: true
         case .checking, .ready: false
         }
     }

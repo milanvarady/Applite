@@ -1051,20 +1051,25 @@ def phase_a12(_state) -> None:
 
 
 def phase_a13(_state) -> None:
-    step("10", "settings: brew-path self-heal")
+    step("10", "settings: missing-brew error + failure UI")
 
-    # 10a — self-heal from a bad brew path (the REALISTIC behavior). A bad path shows NO
-    # error: on reload Applite silently re-adopts the valid annex (bootstrap step 3) and
-    # clears hasBrokenInstall. So verify the recovery, not an error screen.
-    info("A bad brew path shows NO error — Applite silently re-adopts the annex on reload. "
-         "We verify that self-heal, not a broken-install screen.")
+    # 10a — a selected NON-annex brew that's missing must surface the "Homebrew not found"
+    # overlay, and must NOT silently switch to / reinstall the annex (which would orphan the
+    # user's own installed apps). A bogus *custom* path is a non-annex selection, so it hits
+    # exactly this branch (BrewPaths.selectedBrewOption != .annex).
+    info("A bogus custom (non-annex) brew path must show the 'Homebrew not found' overlay — "
+         "Applite must NOT silently switch to or reinstall the annex.")
     do_in_app("Settings → Brew Executable Path → Custom → a bogus path (e.g. /nope/brew); "
               "then press ⌘R")
     opt = run(["defaults", "read", BUNDLE_ID, "brewPathOption"]).stdout.strip()
-    info(f"brewPathOption now = '{opt}'  (0 = reverted to annex; may lag until Applite "
-         "flushes prefs)")
-    confirm("Did the catalog stay usable — no crash, no stuck error (silent self-heal)?")
-    do_in_app("Set the brew path back to 'Applite's installation' before continuing")
+    info(f"brewPathOption now = '{opt}'  (should stay 3 = custom, NOT 0 = annex; "
+         "may lag until Applite flushes prefs)")
+    confirm("Did a 'Homebrew not found' overlay appear, naming the bogus path (/nope/brew)?")
+    confirm("Did Applite NOT switch to the annex (no catalog reappearing, no install spinner)?")
+    do_in_app("Recover: Settings → Brew Executable Path → 'Applite's installation', "
+              "then press Retry on the overlay (or ⌘R)")
+    check("annex brew still healthy (never touched by the bad selection)", brew_healthy)
+    confirm("Did the overlay dismiss and the catalog reload after switching back?")
 
     # 10b — the genuinely-broken failure UI. Brew must be UNRECOVERABLE for it to show,
     # so the annex is hidden AND the network taken offline (otherwise Applite just

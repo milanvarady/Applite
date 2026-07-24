@@ -2866,6 +2866,9 @@
     "Couldn't load installed apps" : {
 
     },
+    "Couldn't locate the Homebrew executable at %@. The installation is missing or damaged. Try running `brew doctor` in Terminal." : {
+      "comment" : "Components install sheet description when the user's selected brew is missing"
+    },
     "Creative Tools" : {
       "comment" : "App category",
       "extractionState" : "manual",
@@ -4586,6 +4589,9 @@
           }
         }
       }
+    },
+    "Homebrew not found" : {
+      "comment" : "Components install sheet title when the user's selected brew is missing"
     },
     "Homebrew Updates" : {
 

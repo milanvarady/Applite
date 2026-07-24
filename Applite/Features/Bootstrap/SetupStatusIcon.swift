@@ -46,7 +46,7 @@ struct SetupStatusIcon: View {
     private var iconName: String {
         switch phase {
         case .installed: "checkmark.circle.fill"
-        case .failed: "exclamationmark.triangle.fill"
+        case .failed, .brewMissing: "exclamationmark.triangle.fill"
         default: "arrow.down.circle.fill"
         }
     }
@@ -54,14 +54,14 @@ struct SetupStatusIcon: View {
     private var iconColor: Color {
         switch phase {
         case .installed: .green
-        case .failed: .orange
+        case .failed, .brewMissing: .orange
         default: .accentColor
         }
     }
 
     private var isInstalling: Bool {
         switch phase {
-        case .installed, .failed: false
+        case .installed, .failed, .brewMissing: false
         default: true
         }
     }

@@ -179,6 +179,8 @@ final class CaskManager {
             await bootstrap.refreshAnnexIfStale()
         } else if case .failed(let message) = bootstrap.phase {
             Self.logger.error("Bootstrap failed: \(message)")
+        } else if case .brewMissing(let path) = bootstrap.phase {
+            Self.logger.error("Selected brew missing at \(path)")
         }
     }
 

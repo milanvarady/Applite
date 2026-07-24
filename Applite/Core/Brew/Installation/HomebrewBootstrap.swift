@@ -28,6 +28,10 @@ final class HomebrewBootstrap {
         case ready
         /// Bootstrap failed; the overlay shows the message plus Retry and the "use my own brew" escape hatch.
         case failed(String)
+        /// The user selected their *own* (non-annex) brew and it can't be found. Distinct from
+        /// `.failed` so we can name the missing path and never silently install/switch to the annex
+        /// over their explicit choice.
+        case brewMissing(path: String)
     }
 
     private(set) var phase: Phase = .checking
@@ -63,6 +67,13 @@ final class HomebrewBootstrap {
         category: String(describing: HomebrewBootstrap.self)
     )
 
+    /// Extra re-checks of the user's *own* selected brew before declaring it missing. A single
+    /// `brew --version` probe can fail transiently (cold start, machine under load), and we must
+    /// not throw a "Homebrew not found" overlay at a user whose brew is actually fine. Only runs
+    /// when their brew already looks invalid, so it adds no latency to the healthy path.
+    private static let selectedBrewRevalidationRetries = 2
+    private static let selectedBrewRevalidationDelay: Duration = .milliseconds(400)
+
     /// Resolves brew, installing the annex only as a last resort. Safe to call again (Retry).
     func run() async {
         phase = .checking
@@ -72,6 +83,29 @@ final class HomebrewBootstrap {
         if await BrewPaths.isSelectedBrewPathValid() {
             Self.logger.info("Selected brew path is valid — ready")
             phase = .ready
+            return
+        }
+
+        // 1b. The user is pointed at their *own* brew (not the annex) and step 1 said it's invalid.
+        //     We must NOT fall through to the steps below: detect-and-switch (2) would silently
+        //     move them to a *different* brew if theirs is gone, and adopt/install-annex (3, 4)
+        //     would switch to the annex — all three orphan their installed apps, the very bug
+        //     we're preventing. What we CAN safely do is re-check their *own* path, since a
+        //     `brew --version` probe fails transiently now and then; only after it stays invalid
+        //     do we surface it (the annex path gets an equivalent recheck at step 3).
+        if BrewPaths.selectedBrewOption != .annex {
+            for retry in 1...Self.selectedBrewRevalidationRetries {
+                try? await Task.sleep(for: Self.selectedBrewRevalidationDelay)
+                if Task.isCancelled { return }  // escape hatch / Retry superseded us
+                if await BrewPaths.isSelectedBrewPathValid() {
+                    Self.logger.info("Selected brew validated on retry \(retry) — ready")
+                    phase = .ready
+                    return
+                }
+            }
+            let path = BrewPaths.currentBrewExecutable.path(percentEncoded: false)
+            Self.logger.error("Selected non-annex brew still invalid at \(path) after \(Self.selectedBrewRevalidationRetries) retries")
+            phase = .brewMissing(path: path)
             return
         }
 

@@ -78,6 +78,8 @@ struct ComponentsInstallView: View {
             Text("Applite is ready", comment: "Components install sheet success title")
         case .failed:
             Text("Setup failed", comment: "Components install sheet failure title")
+        case .brewMissing:
+            Text("Homebrew not found", comment: "Components install sheet title when the user's selected brew is missing")
         default:
             Text("Setting up components", comment: "Components install sheet title")
         }
@@ -89,6 +91,8 @@ struct ComponentsInstallView: View {
             Text("The components Applite needs are installed. You can start downloading apps right away.", comment: "Components install sheet success description")
         case .failed(let message):
             Text(message)
+        case .brewMissing(let path):
+            Text("Couldn't locate the Homebrew executable at \(path). The installation is missing or damaged. Try running `brew doctor` in Terminal.", comment: "Components install sheet description when the user's selected brew is missing")
         default:
             Text("Applite is downloading Homebrew, the engine it uses to install apps. This only happens once and takes just a few seconds.", comment: "Components install sheet description")
         }
@@ -108,7 +112,7 @@ struct ComponentsInstallView: View {
             .keyboardShortcut(.defaultAction)
             .transition(.opacity)
 
-        case .failed:
+        case .failed, .brewMissing:
             HStack {
                 Button {
                     bootstrap.requestReload()
