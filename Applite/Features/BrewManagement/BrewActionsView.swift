@@ -138,11 +138,13 @@ struct BrewActionsView: View {
                     }
 
                     if !reinstallFailed {
-                        reinstallDone = true
                         // A clean reinstall unlinks every previously-installed app, so the cached
                         // installed/outdated state is now stale — reload it so the UI reflects the
-                        // unlinked apps instead of waiting for a manual ⌘R.
+                        // unlinked apps instead of waiting for a manual ⌘R. Do this BEFORE showing
+                        // the success tick, so the checkmark lands with the UI re-enable below
+                        // rather than while the reload is still running.
                         await caskManager.loadData()
+                        reinstallDone = true
                     }
 
                     withAnimation {
