@@ -144,12 +144,14 @@ final class BrewService {
         runTask(for: vm) {
             vm.progressState = .busy(withTask: String(localized: "Uninstalling", comment: "Uninstall progress text"))
 
-            var arguments: [String] = ["uninstall", "--cask", vm.fullToken]
+            // Always --force (mirrors the bulk-install rationale): a cask whose files are partly
+            // gone — app manually trashed, an orphaned font, a half-finished install — otherwise
+            // fails a plain uninstall and strands the entry. Force makes uninstall resilient.
+            var arguments: [String] = ["uninstall", "--cask", vm.fullToken, "--force"]
 
-            // Add --zap argument
+            // --zap additionally removes the cask's app data (prefs/caches/launch agents).
             if zap {
                 arguments.append("--zap")
-                arguments.append("--force")
             }
 
             var output: String = ""
