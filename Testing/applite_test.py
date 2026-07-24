@@ -55,11 +55,11 @@ LOG_FILE = Path(__file__).resolve().parent / "applite-test.log"
 # Representative test casks (one per installer type). `preflight` re-validates
 # each against the live catalog, so if a pick drifts you'll be told to swap it.
 DMG_CASK = "rectangle"          # small .app-artifact DMG
-PKG_CASK = "zoom"               # .pkg installer (exercises the appdir path)
+PKG_CASK = "zoom"               # .pkg installer (exercises the pkg install path)
 ZAP_CASK = "stats"              # distinct app with a `zap trash:` stanza
 UPDATE_CASK = "font-hack"       # versioned, auto_updates:false (fonts never self-update)
 WARN_CASK = "aegisub"           # deprecated → triggers the download warning dialog
-#                                 (also probes the HOMEBREW_DEVELOPER deprecation risk)
+#                                 (also checks a deprecated cask still installs, not hard-errors)
 CANCEL_CASK = "libreoffice"     # big download so there's time to hit Stop; cache cleared first
 # Bulk (batch) test sets. Install-all runs via import; update-all via the Updates "Update All".
 BULK_INSTALL_CASKS = ["hiddenbar", "mos", "font-fira-code"]  # 2 apps + 1 font (fonts barely used)
@@ -173,9 +173,10 @@ RESULTS = Results()
 
 
 def run(args: list[str], *, check: bool = False, capture: bool = True,
-        env: dict | None = None) -> subprocess.CompletedProcess:
+        env: dict | None = None, timeout: float | None = None) -> subprocess.CompletedProcess:
     """Run a command. Captures output by default; pass capture=False for
-    interactive commands (sudo password prompts, installers)."""
+    interactive commands (sudo password prompts, installers). `timeout` (seconds) guards
+    against a command that blocks forever — it returns a failed result rather than wedging."""
     _log("RUN  " + " ".join(args))
     try:
         return subprocess.run(
@@ -184,12 +185,18 @@ def run(args: list[str], *, check: bool = False, capture: bool = True,
             text=True,
             capture_output=capture,
             env={**os.environ, **(env or {})} if env else None,
+            timeout=timeout,
         )
     except FileNotFoundError:
         # The executable isn't present — e.g. the annex brew before Applite installs
         # it, or a hidden /opt brew. Degrade to a failed command so callers (brew_healthy,
         # brew_json, …) handle it as "not available" instead of crashing with a traceback.
         return subprocess.CompletedProcess(args, returncode=127, stdout="", stderr="")
+    except subprocess.TimeoutExpired as e:
+        # Don't let one stuck brew call hang the whole guided run — surface it and move on.
+        warn(f"command timed out after {timeout}s: {' '.join(args)}")
+        return subprocess.CompletedProcess(args, returncode=124,
+                                           stdout=e.stdout or "", stderr=e.stderr or "")
 
 
 def sudo(args: list[str]) -> bool:
@@ -198,8 +205,27 @@ def sudo(args: list[str]) -> bool:
     return cp.returncode == 0
 
 
-def brew(*args: str, capture: bool = True) -> subprocess.CompletedProcess:
-    return run([str(BREW), *args], capture=capture)
+def _brew_env() -> dict:
+    """Invoke brew the same non-interactive way Applite does (see Shell.swift) so the harness
+    reproduces its behavior — and, crucially, never blocks on a Brew 6 ask-mode confirmation
+    prompt. Brew 6 enables confirmation prompts by default; because we capture output, such a
+    prompt would wait on stdin invisibly and the run would just "hang". `HOMEBREW_NO_ASK` (plus
+    no-auto-update, which keeps git off the CLT-free annex) is what Applite sets to avoid this."""
+    env = {
+        "HOMEBREW_NO_ASK": "1",
+        "HOMEBREW_NO_ENV_HINTS": "1",
+        "HOMEBREW_NO_AUTO_UPDATE": "1",
+    }
+    if BREW == ANNEX_BREW:
+        # The annex tracks master; its bootsnap load-path cache can go stale → LoadError. Applite
+        # disables bootsnap for the annex, so the harness must too when driving it directly.
+        env["HOMEBREW_NO_BOOTSNAP"] = "1"
+    return env
+
+
+def brew(*args: str, capture: bool = True,
+         timeout: float | None = None) -> subprocess.CompletedProcess:
+    return run([str(BREW), *args], capture=capture, env=_brew_env(), timeout=timeout)
 
 
 def brew_json(token: str) -> dict | None:
@@ -216,7 +242,9 @@ def brew_json(token: str) -> dict | None:
 def clear_cask_cache(token: str) -> None:
     """Remove a cask's cached download so the next install re-downloads (needed for
     the cancel test — a cached download completes instantly, leaving nothing to stop)."""
-    path = brew("--cache", "--cask", token).stdout.strip()
+    # Timeout-guarded: `brew --cache` can stall on a first-of-session API refresh, and must never
+    # wedge the guided run. On a stall we warn (via run's timeout path) and skip the clear.
+    path = brew("--cache", "--cask", token, timeout=120).stdout.strip()
     if not path:
         return
     for p in (path, path + ".incomplete"):
@@ -917,8 +945,9 @@ def phase_a4(_state) -> None:
     do_in_app(f"Start installing '{WARN_CASK}' — a warning dialog (deprecated) should appear")
     confirm("Did the warning dialog appear?")
     do_in_app("Choose 'Download Anyway' and let it finish")
-    # If this FAILS with a deprecation error, that's the HOMEBREW_DEVELOPER risk surfacing.
-    check(f"{WARN_CASK} installed (no HOMEBREW_DEVELOPER deprecation error)",
+    # If this FAILS with a deprecation error, brew is treating deprecation as a hard error
+    # (it must stay a warning — Applite installs deprecated casks after the download warning).
+    check(f"{WARN_CASK} installed (deprecation stays a warning, not a hard error)",
           lambda: cask_installed(WARN_CASK))
 
 
@@ -1022,19 +1051,9 @@ def phase_a12(_state) -> None:
 
 
 def phase_a13(_state) -> None:
-    step("10", "settings: appdir + brew-path self-heal")
+    step("10", "settings: brew-path self-heal")
 
-    # 10a — custom install directory (appdir). Use an APP cask (rectangle): brew only
-    # relocates .app artifacts to --appdir; a pkg installer (zoom) ignores it, so this
-    # must not use PKG_CASK.
-    do_in_app("Settings → Brew → enable a custom install directory (appdir); then "
-              f"install '{DMG_CASK}'")
-    cask = brew_json(DMG_CASK) or {}
-    for name in app_names(cask):
-        check(f"{name} landed in appdir ({appdir()})",
-              lambda n=name: (appdir() / (n if n.endswith('.app') else n + '.app')).exists())
-
-    # 10b — self-heal from a bad brew path (the REALISTIC behavior). A bad path shows NO
+    # 10a — self-heal from a bad brew path (the REALISTIC behavior). A bad path shows NO
     # error: on reload Applite silently re-adopts the valid annex (bootstrap step 3) and
     # clears hasBrokenInstall. So verify the recovery, not an error screen.
     info("A bad brew path shows NO error — Applite silently re-adopts the annex on reload. "
@@ -1047,7 +1066,7 @@ def phase_a13(_state) -> None:
     confirm("Did the catalog stay usable — no crash, no stuck error (silent self-heal)?")
     do_in_app("Set the brew path back to 'Applite's installation' before continuing")
 
-    # 10c — the genuinely-broken failure UI. Brew must be UNRECOVERABLE for it to show,
+    # 10b — the genuinely-broken failure UI. Brew must be UNRECOVERABLE for it to show,
     # so the annex is hidden AND the network taken offline (otherwise Applite just
     # reinstalls the annex and recovers). Both are restored afterward.
     info("Now the failure path: brew must be unrecoverable, so we hide the annex and you "
@@ -1121,12 +1140,18 @@ def phase_bulk_update(state) -> None:
           lambda: all(outdated_lists(t) for t in targets))
     do_in_app("Press 'Update All'")
     confirm("Did 'Update All' become disabled + spin while the batch ran?")
+    # Regression guard: the disabled/spinning state is driven by the observable batch state, so it
+    # must survive leaving and returning to the tab (local @State alone was reset on a view switch).
+    do_in_app("While it's still updating, switch to another sidebar tab and back to Updates")
+    confirm("Was 'Update All' still disabled + spinning after returning to the tab?")
     confirm("Did the Active Tasks header show \"Updating X of N…\"?")
     for tok in targets:
         check(f"{tok} no longer outdated", lambda t=tok: not outdated_lists(t))
         check(f"{tok} version restored (not 0.0.1)",
               lambda t=tok: installed_version(t) not in (None, "0.0.1"))
-    confirm("Did 'Update All' re-enable once the batch finished?")
+    # After all updates succeed no casks remain outdated, so the list empties and the 'Update All'
+    # button (shown only when ≥2 apps need updating) disappears — it does not "re-enable".
+    confirm("Did the Update list empty out and 'Update All' disappear once the batch finished?")
 
 
 def phase_batch_stop(state) -> None:

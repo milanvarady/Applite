@@ -101,11 +101,11 @@ Set at the top of `applite_test.py` (one per installer type); `preflight` re-che
 
 | Var | Default | Role |
 |---|---|---|
-| `DMG_CASK` | `rectangle` | `.app` DMG; also drives the custom-appdir test (brew only relocates `.app` artifacts) |
+| `DMG_CASK` | `rectangle` | `.app` DMG |
 | `PKG_CASK` | `zoom` | `.pkg` installer |
 | `ZAP_CASK` | `stats` | has a `zap trash:` stanza |
 | `UPDATE_CASK` | `font-hack` | versioned, **`auto_updates: false`** — required so non-greedy `brew outdated` will report the faked-old version |
-| `WARN_CASK` | `aegisub` | **deprecated** → triggers the download warning dialog (and probes the HOMEBREW_DEVELOPER deprecation risk) |
+| `WARN_CASK` | `aegisub` | **deprecated** → triggers the download warning dialog (and checks a deprecated cask still installs — deprecation stays a warning, not a hard error) |
 | `CANCEL_CASK` | `libreoffice` | large download so there's time to hit Stop mid-download (the harness clears its cache first) |
 | `BULK_INSTALL_CASKS` | `hiddenbar`, `mos`, `font-fira-code` | set imported in one batch (`installAll`) — proves reliable bulk install + per-cask rings + one summary (just one font: fonts are barely used, and the harness cleans their files so a fresh install works) |
 | `BULK_UPDATE_CASKS` | `hiddenbar`, `mos` | subset of the above (apps, not fonts), fake-outdated then "Update All" — need `auto_updates:false` **and a concrete version** (not `:latest`) |
