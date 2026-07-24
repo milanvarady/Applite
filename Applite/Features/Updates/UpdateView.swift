@@ -31,14 +31,18 @@ struct UpdateView: View {
         }
     }
 
+    /// True while a bulk update is running. Reads the observable batch state (`batchProgress`),
+    /// which survives leaving and re-entering this tab, OR the just-pressed local flag (which
+    /// covers the brief gap before the batch actually starts). Deriving `disabled` from local
+    /// `@State` alone was the bug: switching tabs destroys the view, resetting `isUpdatingAll`, so
+    /// the button re-enabled mid-update.
+    private var isUpdatingAllActive: Bool {
+        isUpdatingAll || caskManager.batchProgress?.isUpdate == true
+    }
+
     var updateAllButton: some View {
         Button {
             isUpdatingAll = true
-
-            withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
-                updateAllButtonRotation = 360.0
-            }
-
             caskManager.updateAll(caskManager.outdatedViewModels)
         } label: {
             HStack {
@@ -51,7 +55,21 @@ struct UpdateView: View {
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
         .padding(.vertical)
-        .disabled(isUpdatingAll)
+        .disabled(isUpdatingAllActive)
+    }
+
+    /// Starts/stops the icon spin to track the running state — so it spins on press, resumes if you
+    /// return to the tab mid-update, and stops when the batch ends.
+    private func syncUpdateAllSpin(_ running: Bool) {
+        if running {
+            withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
+                updateAllButtonRotation = 360.0
+            }
+        } else {
+            withAnimation(.default) {
+                updateAllButtonRotation = 0
+            }
+        }
     }
 
     var body: some View {
@@ -83,19 +101,19 @@ struct UpdateView: View {
             UpdateToolbar(loadAlert: loadAlert)
         }
         .alertManager(loadAlert)
-        .onChange(of: caskManager.outdatedViewModels.isEmpty) { _, becameEmpty in
-            if becameEmpty {
-                isUpdatingAll = false
-                updateAllButtonRotation = 0
-            }
+        .onChange(of: isUpdatingAllActive) { _, running in
+            syncUpdateAllSpin(running)
+        }
+        .onAppear {
+            // Returning to the tab mid-update: resume the spin from the observable state.
+            syncUpdateAllSpin(isUpdatingAllActive)
         }
         .onChange(of: caskManager.batchProgress) { old, new in
-            // Re-enable the button once *this* bulk update finishes, even if some casks failed
-            // (a failed cask stays outdated, so the isEmpty check above would never fire). Gate on
-            // the ended batch being an update — a concurrent install-all ending must not reset us.
-            if new == nil, old?.isUpdate == true, isUpdatingAll {
+            // The bulk update finished (even if some casks failed and stay outdated) — clear the
+            // local press flag so `isUpdatingAllActive` can fall back to false. Gate on the ended
+            // batch being an update so a concurrent install-all ending doesn't reset us.
+            if new == nil, old?.isUpdate == true {
                 isUpdatingAll = false
-                updateAllButtonRotation = 0
             }
         }
     }
