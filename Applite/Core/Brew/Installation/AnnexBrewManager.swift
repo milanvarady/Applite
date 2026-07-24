@@ -112,5 +112,24 @@ struct AnnexBrewManager {
         try await verifyAnnexInstall()
         stampAnnexRefreshed()
         Self.logger.info("Annex Homebrew refresh done")
+
+        await pruneAnnexCache()
+    }
+
+    /// Best-effort `brew cleanup --prune=all` on the annex's periodic refresh tick.
+    ///
+    /// Applite installs only casks, and a downloaded cask artifact (`dmg`/`pkg`/`zip`) is reused
+    /// only for a same-version reinstall or an interrupted-download resume — for a self-updating
+    /// app store it's effectively write-once, read-never, so we drop *all* cached downloads to
+    /// reclaim disk that annex users never asked brew to hold. This runs as a silent maintenance
+    /// step, so a failure here must never fail the refresh — we log and move on. Caller has already
+    /// verified the annex is the selected, working brew (see `refreshAnnexBrew`).
+    static func pruneAnnexCache() async {
+        do {
+            try await Shell.runBrewCommand(["cleanup", "--prune=all"])
+            Self.logger.info("Pruned annex Homebrew cache")
+        } catch {
+            Self.logger.warning("Annex cache prune failed (non-fatal): \(error.localizedDescription)")
+        }
     }
 }

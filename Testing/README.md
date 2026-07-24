@@ -10,7 +10,8 @@ of the annex round as an invariant — if that dialog ever appears, you abort an
 it, rather than being asked about it every step.
 
 It exists because Applite's real risk lives in the Homebrew integration — the
-CLT-free "annex" flow, FFI quarantine/trash, pty-streamed installs — which is
+CLT-free "annex" flow, FFI quarantine/trash, pty-streamed installs, the annex
+refresh (tarball overlay + `brew cleanup --prune=all` cache reclaim) — which is
 impractical to unit-test and needs a real (fresh, CLT-free) machine to exercise.
 
 Run it on a **throwaway VM**, not your dev machine — it hides/deletes Homebrew and

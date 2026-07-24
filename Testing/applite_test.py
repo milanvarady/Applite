@@ -48,6 +48,7 @@ ANNEX_BREW = APPLITE_SUPPORT / "Homebrew/bin/brew"
 OPT_PREFIX = Path("/opt/homebrew")
 OPT_BREW = OPT_PREFIX / "bin/brew"
 CLT_PATH = Path("/Library/Developer/CommandLineTools")
+HOMEBREW_CACHE = Path.home() / "Library/Caches/Homebrew"  # brew's default (Applite sets no HOMEBREW_CACHE)
 HIDDEN_SUFFIX = ".applite-hidden"
 LOG_FILE = Path(__file__).resolve().parent / "applite-test.log"
 
@@ -224,6 +225,27 @@ def clear_cask_cache(token: str) -> None:
             info(f"cleared cache: {p}")
         except OSError:
             pass
+
+
+def cache_download_count() -> int:
+    """Number of cached download artifacts in the Homebrew cache. `brew cleanup --prune=all`
+    (which the annex refresh now runs — see AnnexBrewManager.pruneAnnexCache) should drive
+    this to 0. Only the `downloads/` subdir is counted, not brew's `api/` metadata cache."""
+    downloads = HOMEBREW_CACHE / "downloads"
+    if not downloads.is_dir():
+        return 0
+    return sum(1 for p in downloads.iterdir() if not p.name.startswith("."))
+
+
+def seed_download_cache(token: str) -> bool:
+    """`brew fetch` a cask — downloads its artifact into the cache WITHOUT installing it — so
+    the prune check has something to remove. fetch never installs, so it stays CLT-free (no
+    quarantine/trash). Best-effort: needs network. Returns whether the cache is now non-empty."""
+    cp = run([str(BREW), "fetch", "--cask", token],
+             env={"HOMEBREW_NO_AUTO_UPDATE": "1"})  # no auto-update → no git → no CLT dialog
+    if cp.returncode != 0:
+        warn(f"brew fetch {token} failed — can't seed the download cache (offline?)")
+    return cache_download_count() > 0
 
 
 # --------------------------------------------------------------------------- #
@@ -956,10 +978,26 @@ def phase_a9(state) -> None:
 
 def phase_a10(_state) -> None:
     step("15", "Refresh Homebrew Components (annex overlay)")
+
+    # The annex refresh now also prunes the download cache (brew cleanup --prune=all): annex
+    # users install only casks and never reuse a cached download, so the refresh reclaims it.
+    # Seed the cache first so the prune has an artifact to remove, then verify it's emptied.
+    seedable = seed_download_cache(DMG_CASK)
+    before = cache_download_count()
+    info(f"annex download cache before refresh: {before} file(s)")
+
     do_in_app("Settings → Manage Homebrew → Refresh Homebrew Components; wait for it")
     check("brew still healthy after overlay (no LoadError)", brew_healthy)
     check(f"{UPDATE_CASK} still installed (Caskroom survived)",
           lambda: cask_installed(UPDATE_CASK))
+
+    after = cache_download_count()
+    info(f"annex download cache after refresh: {after} file(s)")
+    if seedable or before > 0:
+        check("refresh pruned the download cache to empty (brew cleanup --prune=all)",
+              lambda: after == 0)
+    else:
+        RESULTS.skip("cache-prune check (cache was empty and couldn't be seeded — offline?)")
     confirm("Did the refresh finish and re-enable the UI?")
 
 
