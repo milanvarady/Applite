@@ -19,15 +19,20 @@ struct BrewSettingsView: View {
     /// Applite's own annex brew is the selected one.
     var isUsingAnnexBrew: Bool { brewPathOption == BrewPaths.PathOption.annex.rawValue }
 
-    @State var isSelectedBrewPathValid = false
+    // Optimistically assume the path is valid; the async `BrewPathSelectorView` check flips it to
+    // false only if it genuinely is. Starting `false` would flash the invalid-path text on the
+    // first frame (before the check runs) and then animate it out.
+    @State var isSelectedBrewPathValid = true
 
-    /// Baseline of the settings as they were when the catalog was last loaded.
-    /// The refresh prompt shows whenever the current selection differs from these.
-    @State var previousBrewOption: Int = 0
-    @State var previousIncludeCasksFromTaps: Bool = true
+    /// Baseline of the settings as they were when the catalog was last loaded, captured from the
+    /// `@AppStorage` values in `.onAppear`. `nil` until then — so `needsRefresh` is false on the
+    /// first frame and the refresh banner can't flash in before a baseline exists.
+    @State var previousBrewOption: Int?
+    @State var previousIncludeCasksFromTaps: Bool?
 
     var needsRefresh: Bool {
-        previousBrewOption != brewPathOption ||
+        guard let previousBrewOption, let previousIncludeCasksFromTaps else { return false }
+        return previousBrewOption != brewPathOption ||
             previousIncludeCasksFromTaps != includeCasksFromTaps
     }
 
@@ -46,7 +51,7 @@ struct BrewSettingsView: View {
         .animation(.default, value: needsRefresh)
         .animation(.default, value: isSelectedBrewPathValid)
         .onAppear {
-            previousBrewOption = BrewPaths.selectedBrewOption.rawValue
+            previousBrewOption = brewPathOption
             previousIncludeCasksFromTaps = includeCasksFromTaps
         }
     }
