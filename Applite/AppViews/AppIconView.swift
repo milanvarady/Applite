@@ -11,7 +11,6 @@ import Shimmer
 
 enum AppIconState {
     case showingAppIcon
-    case showingFavicon
     case failed
 }
 
@@ -19,12 +18,12 @@ struct AppIconView: View {
     @State private var state: AppIconState = .showingAppIcon
 
     let iconURL: URL
-    let faviconURL: URL
     let cacheKey: String
+    let fallbackInitial: String
 
     var body: some View {
-        if state != .failed {
-            KFImage.url(state == .showingAppIcon ? iconURL : faviconURL, cacheKey: cacheKey)
+        if state == .showingAppIcon {
+            KFImage.url(iconURL, cacheKey: cacheKey)
                 .resizable()
                 .placeholder {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -32,30 +31,22 @@ struct AppIconView: View {
                         .shimmering()
                 }
                 .fade(duration: 0.25)
-                .onFailure { error in
-                    // Change state
-                    switch state {
-                    case .showingAppIcon:
-                        state = .showingFavicon
-                    case .showingFavicon:
-                        state = .failed
-                    default:
-                        state = .failed
-                    }
+                .onFailure { _ in
+                    state = .failed
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .frame(width: 54, height: 54)
         } else {
-            // App icon missing
+            // A homepage favicon can describe the host rather than the cask.
             ZStack {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(.gray, lineWidth: 3)
+                    .fill(.gray)
 
-                Text("?")
-                    .font(.system(size: 24, weight: .light))
+                Text(fallbackInitial)
+                    .font(.system(size: 24, weight: .medium))
             }
-            .foregroundStyle(.gray)
-            .frame(width: 40, height: 40)
+            .foregroundStyle(.white)
+            .frame(width: 54, height: 54)
         }
     }
 }
