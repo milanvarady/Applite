@@ -62,27 +62,31 @@ struct ImportAppsView: View {
     }
 
     private func installCasks(from url: URL) {
-        var caskIds: Set<CaskId> = []
-
+        let caskIds: Set<CaskId>
         do {
             caskIds = try AppMigration.readCaskFile(url: url)
         } catch {
             logger.error("Failed to import file: \(url.path(percentEncoded: false))")
-        }
-
-        let casksToInstall = caskManager.existingViewModels(forTokens: caskIds)
-
-        guard !casksToInstall.isEmpty else {
-            logger.notice("Imported file contains no valid apps: \(url.path(percentEncoded: false))")
             alert.show(title: "Imported file contains no valid apps", message: "Check if file contains valid cask tokens")
             return
         }
 
-        caskManager.installAll(casksToInstall)
+        Task {
+            // Resolve against the DB so casks the user has never opened still install.
+            let casksToInstall = (try? await caskManager.resolveViewModels(forTokens: caskIds)) ?? []
 
-        withAnimation {
-            importedCount = casksToInstall.count
-            importSuccessful = true
+            guard !casksToInstall.isEmpty else {
+                logger.notice("Imported file contains no valid apps: \(url.path(percentEncoded: false))")
+                alert.show(title: "Imported file contains no valid apps", message: "Check if file contains valid cask tokens")
+                return
+            }
+
+            caskManager.installAll(casksToInstall)
+
+            withAnimation {
+                importedCount = casksToInstall.count
+                importSuccessful = true
+            }
         }
     }
 }

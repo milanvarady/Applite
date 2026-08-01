@@ -63,7 +63,7 @@ struct DownloadButton: View {
             }
         }
         .alert("Broken Brew Path", isPresented: $showingBrewError) {} message: {
-            Text(DependencyManager.brokenPathOrInstallMessage)
+            Text(AnnexBrewManager.brokenPathOrInstallMessage)
         }
     }
 }

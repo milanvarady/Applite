@@ -7,6 +7,7 @@
 
 import Foundation
 import OSLog
+import os
 
 /// Namespace for shell command execution utilities
 enum Shell {
@@ -16,54 +17,85 @@ enum Shell {
     /// We want to make sure the script isn't modified by any outside actor
     private static let askpassChecksum = "fAl63ShrMp8Sp9HIj/FYYA=="
 
-    /// Executes a shell command synchronously
-    ///
-    /// - Parameters:
-    ///   - command: The shell command to run
-    ///   - pty: Wether to use pseudo-TTY behavior or not
-    ///
-    /// - Returns: The output of the shell command
-    ///
-    /// Using the `pty` option can leave unwanted characters in the output, use only when necessary
-    @discardableResult
-    static func run(_ command: String, pty: Bool = false) throws -> String {
-        let (task, pipe) = try createProcess(command: command, pty: pty)
-
-        try task.run()
-        task.waitUntilExit()
-
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-
-        guard let output = String(data: data, encoding: .utf8) else {
-            throw ShellError.outputDecodingFailed
-        }
-
-        let cleanOutput = output.cleanTerminalOutput()
-
-        guard task.terminationStatus == 0 else {
-            throw ShellError.nonZeroExit(
-                command: command,
-                exitCode: task.terminationStatus,
-                output: cleanOutput
-            )
-        }
-
-        return cleanOutput
-    }
-
     /// Executes a shell command asynchronously
     ///
     /// - Parameters:
     ///   - command: The shell command to run
     ///   - pty: Wether to use pseudo-TTY behavior or not
+    ///   - timeout: If set, the process is killed after this duration and ``ShellError/timedOut``
+    ///     is thrown. Use for commands that could hang (e.g. a login shell sourcing a broken config).
     ///
     /// - Returns: The output of the shell command
     ///
     /// Using the `pty` option can leave unwanted characters in the output, use only when necessary
     @discardableResult
-    static func runAsync(_ command: String, pty: Bool = false) async throws -> String {
-        // Simply mark it as async and use the same implementation
-        try run(command)
+    static func runAsync(_ command: String, pty: Bool = false, timeout: Duration? = nil) async throws -> String {
+        try await runProcessAsync(command, pty: pty, timeout: timeout)
+    }
+
+    /// Runs a command and awaits its termination handler — **never blocks a thread** on
+    /// `waitUntilExit()`. Blocking inside async code (as the old `runAsync` did) starves the
+    /// concurrency pool and stalls SwiftUI's main-run-loop updates, so all async runs go through here.
+    ///
+    /// - Parameter timeout: If set, the process is killed after this duration and
+    ///   ``ShellError/timedOut`` is thrown (used for commands that could hang, e.g. a login shell).
+    private static func runProcessAsync(_ command: String, pty: Bool, timeout: Duration?) async throws -> String {
+        let (task, pipe) = try createProcess(command: command, pty: pty)
+        let handle = pipe.fileHandleForReading
+
+        // Drain the pipe *concurrently* (not after exit) so a large output can't fill the ~64 KB
+        // pipe buffer and block the child before it exits — which would hang `terminationHandler`
+        // (and the continuation) forever. `readabilityHandler` fires on a background queue; the lock
+        // makes the append safe against the termination-time tail drain.
+        let collected = OSAllocatedUnfairLock<Data>(initialState: Data())
+        handle.readabilityHandler = { fileHandle in
+            let chunk = fileHandle.availableData
+            if !chunk.isEmpty {
+                collected.withLock { $0.append(chunk) }
+            }
+        }
+
+        let watchdog: Task<Void, Never>? = timeout.map { duration in
+            Task {
+                try? await Task.sleep(for: duration)
+                if task.isRunning { task.terminate() }
+            }
+        }
+        defer { watchdog?.cancel() }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            task.terminationHandler = { proc in
+                handle.readabilityHandler = nil
+                // Capture any bytes buffered between the last readability callback and exit.
+                let tail = handle.availableData
+                let data = collected.withLock { buffer -> Data in
+                    if !tail.isEmpty { buffer.append(tail) }
+                    return buffer
+                }
+                let output = String(decoding: data, as: UTF8.self).cleanTerminalOutput()
+
+                // A timeout kills the process with SIGTERM (uncaught signal) — distinguish that
+                // from a normal non-zero exit.
+                if let timeout, proc.terminationReason == .uncaughtSignal, proc.terminationStatus == SIGTERM {
+                    continuation.resume(throwing: ShellError.timedOut(command: command, seconds: timeout))
+                } else if proc.terminationStatus == 0 {
+                    continuation.resume(returning: output)
+                } else {
+                    continuation.resume(throwing: ShellError.nonZeroExit(
+                        command: command,
+                        exitCode: proc.terminationStatus,
+                        output: output
+                    ))
+                }
+            }
+
+            do {
+                try task.run()
+            } catch {
+                handle.readabilityHandler = nil
+                continuation.resume(throwing: error)
+            }
+        }
     }
 
     /// Executes a brew command asynchronously
@@ -92,33 +124,43 @@ enum Shell {
     /// Using the `pty` option can leave unwanted characters in the output, use only when necessary
     static func stream(_ command: String, pty: Bool = false) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
-            let task: Process
-            let pipe: Pipe
+            // `stream` is called synchronously, so a plain `Task {}` here would inherit the caller's
+            // actor — and callers are `@MainActor`. The reader does blocking process I/O
+            // (`FileHandle.bytes`, `waitUntilExit`), which on the main actor freezes the UI for the
+            // whole command. Run it detached so it never touches the caller's actor. The non-Sendable
+            // `Process`/`Pipe` are created *inside* the task; a lock hands the process back so
+            // `onTermination` (which can fire on any thread) can still kill it.
+            let processHolder = OSAllocatedUnfairLock<Process?>(initialState: nil)
 
-            do {
-                (task, pipe) = try createProcess(command: command, pty: pty)
-            } catch {
-                continuation.finish(throwing: error)
-                return
-            }
+            let reader = Task.detached {
+                let task: Process
+                let pipe: Pipe
 
-            // Terminate the process if the consumer cancels (or otherwise stops iterating).
-            //
-            // This is a hard kill, not a graceful cancellation: `terminate()` sends SIGTERM
-            // to the `script` wrapper, which closes the pty and SIGHUPs the foreground
-            // process group (brew + curl). brew does NOT run its cooperative SIGINT-cancel
-            // path here — SIGINT can't be used because `script` ignores it (so a real Ctrl-C
-            // passes through to the child instead of killing the wrapper). The hard kill is
-            // safe for the download phase: brew downloads to `*.incomplete` temp files and
-            // only renames them on success, and its cache locks are OS `flock`s that the
-            // kernel releases on process death. Worst case is a resumable leftover temp file.
-            continuation.onTermination = { _ in
-                if task.isRunning { task.terminate() }
-            }
+                do {
+                    (task, pipe) = try createProcess(command: command, pty: pty)
+                } catch {
+                    continuation.finish(throwing: error)
+                    return
+                }
 
-            Task {
+                processHolder.withLock { $0 = task }
+
+                // Set by the process's termination handler; lets the read loop's error path tell
+                // "we closed the handle to end a hung read" apart from a genuine read failure.
+                let processExited = OSAllocatedUnfairLock<Bool>(initialState: false)
+
                 do {
                     let fileHandle = pipe.fileHandleForReading
+
+                    // Force the read loop to end once the process exits. `fileHandle.bytes` blocks
+                    // until the pty reaches EOF, but a `script`-wrapped pty can linger after brew has
+                    // finished (or AsyncBytes may not observe EOF promptly). A hung loop here would
+                    // freeze the cask on its install/"success" state — so it's never marked installed.
+                    // Closing our read end on termination guarantees EOF.
+                    task.terminationHandler = { _ in
+                        processExited.withLock { $0 = true }
+                        try? fileHandle.close()
+                    }
 
                     try task.run()
 
@@ -195,8 +237,41 @@ enum Shell {
                         continuation.finish()
                     }
                 } catch {
-                    logger.error("Stream error: \(error.localizedDescription)")
-                    continuation.finish(throwing: error)
+                    // A read error *after* the process exited is the termination handler closing the
+                    // handle to break a hung read — not a real failure. Finish on the true exit status
+                    // instead of surfacing a spurious error. Anything else propagates.
+                    if processExited.withLock({ $0 }) {
+                        task.waitUntilExit()
+                        if task.terminationStatus != 0 {
+                            continuation.finish(throwing: ShellError.nonZeroExit(
+                                command: command,
+                                exitCode: task.terminationStatus,
+                                output: "n/a (streamed output)"
+                            ))
+                        } else {
+                            continuation.finish()
+                        }
+                    } else {
+                        logger.error("Stream error: \(error.localizedDescription)")
+                        continuation.finish(throwing: error)
+                    }
+                }
+            }
+
+            // Terminate the process if the consumer cancels (or otherwise stops iterating).
+            //
+            // This is a hard kill, not a graceful cancellation: `terminate()` sends SIGTERM
+            // to the `script` wrapper, which closes the pty and SIGHUPs the foreground
+            // process group (brew + curl). brew does NOT run its cooperative SIGINT-cancel
+            // path here — SIGINT can't be used because `script` ignores it (so a real Ctrl-C
+            // passes through to the child instead of killing the wrapper). The hard kill is
+            // safe for the download phase: brew downloads to `*.incomplete` temp files and
+            // only renames them on success, and its cache locks are OS `flock`s that the
+            // kernel releases on process death. Worst case is a resumable leftover temp file.
+            continuation.onTermination = { _ in
+                reader.cancel()
+                processHolder.withLock { proc in
+                    if proc?.isRunning == true { proc?.terminate() }
                 }
             }
         }
@@ -234,8 +309,42 @@ enum Shell {
             "TERM": "xterm-256color", // Ensure terminal emulation
             "HOME": homeDirectory,
             "HOMEBREW_NO_ASK": "1", // Brew 6+ enables ask mode (confirmation prompts) by default; Applite drives brew non-interactively
-            "HOMEBREW_NO_ENV_HINTS": "1" // Suppress advisory hint lines so they don't clutter the parsed output stream
+            "HOMEBREW_NO_ENV_HINTS": "1", // Suppress advisory hint lines so they don't clutter the parsed output stream
+            // Load-bearing for the CLT-free annex: without this every brew command tries a
+            // git-based self-update, which needs git (absent without Command Line Tools) and
+            // would pop the macOS CLT install dialog. Applite keeps the annex fresh by
+            // re-fetching the tarball instead (see AnnexBrewManager.refreshAnnexBrew).
+            "HOMEBREW_NO_AUTO_UPDATE": "1",
+            // Pin brew to the system curl (always present on macOS, works without CLT) so it
+            // never probes for a Homebrew-installed curl. Cask downloads and the portable-ruby
+            // fetch both go through this. Combined with API mode (HOMEBREW_NO_INSTALL_FROM_API
+            // left unset) this keeps git off the cask install path entirely.
+            "HOMEBREW_CURL_PATH": "/usr/bin/curl"
         ]
+
+        // The annex has no real git (no CLT). Point brew at a shim so its `git --version`
+        // availability check passes; brew still curls the cask download. Only for the annex — a
+        // user's own brew keeps its real git so git-source casks and `brew update` still work.
+        //
+        // No `HOMEBREW_DEVELOPER` needed anymore: brew 6.0.12 (PR #23061) enabled the FFI
+        // quarantine/xattr/trash helpers for all users and deleted the Swift fallback scripts, so
+        // casks install and uninstall/zap without ever shelling out to Swift or `xcrun` — the last
+        // two CLT-dialog triggers on a machine without Command Line Tools — with no developer flag.
+        // Brew 6.0.10 had already dropped the earlier triggers (the fatal ARM dev-tools check and
+        // the `xcrun -find` fallback in `DevelopmentTools.locate`). Not setting the flag is also
+        // safer: it would otherwise turn some deprecated-DSL warnings into hard errors.
+        if BrewPaths.selectedBrewOption == .annex {
+            GitShim.ensureInstalled()
+            environment["HOMEBREW_GIT_PATH"] = GitShim.executable.path(percentEncoded: false)
+            // Disable bootsnap for the annex. Its load-path cache is keyed only on the Ruby
+            // version + installed gems (see brew's startup/bootsnap.rb) — NOT the brew version — and
+            // lives under HOMEBREW_CACHE, which survives an annex wipe. Because the annex tracks
+            // `master` and is refreshed by re-extracting the tarball *over* the tree, brew's own Ruby
+            // files change while that cache key stays constant, so a stale entry makes brew report an
+            // on-disk file as "cannot load such file" (e.g. `lock_file/formula_lock`). A version pin
+            // hid this by keeping the files byte-identical; unpinned, we must bypass the cache.
+            environment["HOMEBREW_NO_BOOTSNAP"] = "1"
+        }
 
         if let proxySettings = try? NetworkProxyManager.getSystemProxySettings() {
             logger.info("Network proxy is enabled. Type: \(proxySettings.type.rawValue)")

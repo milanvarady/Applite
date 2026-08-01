@@ -11,10 +11,16 @@ import ButtonKit
 struct BrewActionsView: View {
     @Binding var modifyingBrew: Bool
 
+    @Environment(CaskManager.self) private var caskManager
+
     @State var updateDone = false
     @State var reinstallDone = false
 
-    @State var isAppBrewInstalled = false
+    @State var isAnnexBrewInstalled = false
+
+    /// Whether Applite's own annex brew is the one currently selected. The refresh action only
+    /// applies to the annex; a user's own brew is theirs to update.
+    @State var isUsingAnnexBrew = false
 
     @State var isPresentingReinstallConfirm = false
 
@@ -23,16 +29,24 @@ struct BrewActionsView: View {
 
     var body: some View {
         Group {
-            Section {
-                updateButton
+            if isUsingAnnexBrew {
+                Section {
+                    updateButton
 
-                remark(
-                    title: "Warning",
-                    color: .orange,
-                    message: "All other app functions will be disabled during the update!"
-                )
-            } header: {
-                Text("Update", comment: "Brew Management view update section title")
+                    remark(
+                        title: "Note",
+                        color: .blue,
+                        message: "Re-fetches the latest Homebrew over Applite's installation. Your installed apps are kept."
+                    )
+
+                    remark(
+                        title: "Warning",
+                        color: .orange,
+                        message: "All other app functions will be disabled during the refresh!"
+                    )
+                } header: {
+                    Text("Refresh", comment: "Brew Management view refresh section title")
+                }
             }
 
             Section {
@@ -41,7 +55,7 @@ struct BrewActionsView: View {
                 remark(
                     title: "Note",
                     color: .blue,
-                    message: "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/homebrew`"
+                    message: "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/Homebrew`"
                 )
 
                 remark(
@@ -55,7 +69,8 @@ struct BrewActionsView: View {
         }
         .task {
             // Check if brew is installed in application support
-            isAppBrewInstalled = await BrewPaths.isBrewPathValid(at: BrewPaths.getBrewExectuablePath(for: .appPath))
+            isAnnexBrewInstalled = await BrewPaths.isBrewPathValid(at: BrewPaths.brewExecutable(for: .annex))
+            isUsingAnnexBrew = BrewPaths.selectedBrewOption == .annex
         }
     }
 
@@ -75,17 +90,21 @@ struct BrewActionsView: View {
     private var updateButton: some View {
         HStack {
             AsyncButton {
-                try await updateHomebrew()
+                // Handle the failure inside the action rather than via `.onButtonStateError`,
+                // which re-fires on every re-render while the button stays in its sticky error
+                // state — so dismissing the alert would immediately re-present it in a loop.
+                do {
+                    try await refreshHomebrewComponents()
+                } catch {
+                    BrewManagementView.logger.error("Brew refresh failed. Error: \(error.localizedDescription)")
+                    updateFailed = true
+                }
             } label: {
-                Label("Update Homebrew", systemImage: "arrow.uturn.down.circle")
+                Label("Refresh Homebrew Components", systemImage: "arrow.clockwise.circle")
             }
             .controlSize(.large)
             .disabled(modifyingBrew)
-            .onButtonStateError { error in
-                BrewManagementView.logger.error("Brew update failed. Error: \(error.error.localizedDescription)")
-                updateFailed = true
-            }
-            .alert("Update failed", isPresented: $updateFailed, actions: {})
+            .alert("Refresh failed", isPresented: $updateFailed, actions: {})
 
             // Success checkmark
             if updateDone {
@@ -102,23 +121,29 @@ struct BrewActionsView: View {
             Button(role: .destructive) {
                 isPresentingReinstallConfirm = true
             } label: {
-                Label(isAppBrewInstalled ? "Reinstall Homebrew" : "Install Separate Brew", systemImage: "wrench.and.screwdriver")
+                Label(isAnnexBrewInstalled ? "Reinstall Homebrew" : "Install Separate Brew", systemImage: "wrench.and.screwdriver")
             }
             .controlSize(.large)
             .disabled(modifyingBrew)
-            .confirmationDialog("Are you sure you want to \(isAppBrewInstalled ? "re" : "")install Homebrew?", isPresented: $isPresentingReinstallConfirm) {
+            .confirmationDialog("Are you sure you want to \(isAnnexBrewInstalled ? "re" : "")install Homebrew?", isPresented: $isPresentingReinstallConfirm) {
                 AsyncButton("Reinstall", role: .destructive) {
                     withAnimation {
                         modifyingBrew = true
                     }
 
                     do {
-                        try await DependencyManager.installHomebrew()
+                        try await AnnexBrewManager.installAnnexClean()
                     } catch {
                         reinstallFailed = true
                     }
 
                     if !reinstallFailed {
+                        // A clean reinstall unlinks every previously-installed app, so the cached
+                        // installed/outdated state is now stale — reload it so the UI reflects the
+                        // unlinked apps instead of waiting for a manual ⌘R. Do this BEFORE showing
+                        // the success tick, so the checkmark lands with the UI re-enable below
+                        // rather than while the reload is still running.
+                        await caskManager.loadData()
                         reinstallDone = true
                     }
 
@@ -129,7 +154,7 @@ struct BrewActionsView: View {
 
                 Button("Cancel", role: .cancel) { }
             } message: {
-                if isAppBrewInstalled {
+                if isAnnexBrewInstalled {
                     Text("All currently installed apps will be unlinked from Applite.", comment: "Brew reinstallation alert warning")
                 } else {
                     Text("A new Homebrew installation will be installed into `~/Library/Application Support/Applite`", comment: "Brew installation alert notice")
@@ -148,21 +173,27 @@ struct BrewActionsView: View {
         }
     }
 
-    func updateHomebrew() async throws {
+    func refreshHomebrewComponents() async throws {
         withAnimation {
             modifyingBrew = true
         }
+        // Always clear the flag on exit — including a thrown refresh. Otherwise a failed refresh
+        // (the AsyncButton surfaces the error separately) would leave every brew action disabled
+        // until the app restarts.
+        defer {
+            withAnimation {
+                modifyingBrew = false
+            }
+        }
 
-        BrewManagementView.logger.info("Updating brew started")
+        BrewManagementView.logger.info("Refreshing annex Homebrew started")
 
-        try await Shell.runBrewCommand(["update"])
+        // brew's git-based `brew update` can't run without Command Line Tools; re-fetch the tarball
+        // over the annex instead (preserves installed apps).
+        try await AnnexBrewManager.refreshAnnexBrew()
 
-        BrewManagementView.logger.info("Brew update successful")
+        BrewManagementView.logger.info("Annex Homebrew refresh successful")
 
         updateDone = true
-
-        withAnimation {
-            modifyingBrew = false
-        }
     }
 }

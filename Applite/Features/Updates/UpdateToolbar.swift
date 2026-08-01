@@ -46,10 +46,14 @@ struct UpdateToolbar: ToolbarContent {
 
     private var refreshButton: some View {
         AsyncButton("Refresh", systemImage: "arrow.clockwise") {
-            try await caskManager.refreshOutdated()
-        }
-        .onButtonStateError { error in
-            loadAlert.show(title: "Failed to refresh updates", message: error.error.localizedDescription)
+            // Handle the failure inside the action rather than via `.onButtonStateError`,
+            // which re-fires on every re-render while the button stays in its sticky error
+            // state — so dismissing the alert would immediately re-present it in a loop.
+            do {
+                try await caskManager.refreshOutdated()
+            } catch {
+                loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
+            }
         }
     }
 }

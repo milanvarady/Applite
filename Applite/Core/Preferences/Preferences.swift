@@ -26,9 +26,6 @@ struct PreferenceKey<Value: Sendable>: Sendable {
 /// Read in SwiftUI with `@AppStorage(Preferences.someKey)` and outside SwiftUI with
 /// `UserDefaults.standard.value(for: Preferences.someKey)`. The default is defined here, once.
 enum Preferences {
-    // Setup
-    static let setupComplete = PreferenceKey("setupComplete", default: false)
-
     // General
     static let colorSchemePreference = PreferenceKey("colorSchemePreference", default: ColorSchemePreference.system)
     static let catalogUpdateFrequency = PreferenceKey("catalogUpdateFrequency", default: CatalogUpdateFrequency.default)
@@ -36,12 +33,16 @@ enum Preferences {
     static let notificationFailure = PreferenceKey("notificationFailure", default: true)
 
     // Brew
-    static let brewPathOption = PreferenceKey("brewPathOption", default: BrewPaths.PathOption.appPath.rawValue)
+    static let brewPathOption = PreferenceKey("brewPathOption", default: BrewPaths.PathOption.annex.rawValue)
     static let customUserBrewPath = PreferenceKey("customUserBrewPath", default: "/opt/homebrew/bin/brew")
     static let includeCasksFromTaps = PreferenceKey("includeCasksFromTaps", default: true)
     static let appdirOn = PreferenceKey("appdirOn", default: false)
     static let appdirPath = PreferenceKey("appdirPath", default: "/Applications")
     static let greedyUpgrade = PreferenceKey("greedyUpgrade", default: false)
+
+    // Annex Homebrew freshness (Applite's own tarball install; brew's git self-update is unavailable without CLT)
+    static let annexLastRefreshDate = PreferenceKey("annexLastRefreshDate", default: 0.0) // timeIntervalSince1970; 0 = never
+    static let annexUpdateFrequency = PreferenceKey("annexUpdateFrequency", default: CatalogUpdateFrequency.default)
 
     // Proxy
     static let networkProxyEnabled = PreferenceKey("networkProxyEnabled", default: true)
@@ -101,6 +102,11 @@ extension UserDefaults {
     /// Reads a preference, returning its defined default value when the key is unset.
     func value(for key: PreferenceKey<Int>) -> Int {
         object(forKey: key.name) as? Int ?? key.defaultValue
+    }
+
+    /// Reads a preference, returning its defined default value when the key is unset.
+    func value(for key: PreferenceKey<Double>) -> Double {
+        object(forKey: key.name) as? Double ?? key.defaultValue
     }
 
     /// Reads a `RawRepresentable` preference (Int-backed enum), returning its default when the key is unset or invalid.

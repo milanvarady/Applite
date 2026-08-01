@@ -22,6 +22,10 @@ final class CaskManager {
     private let registry: CaskViewModelRegistry
     private let brewService: BrewService
 
+    /// Resolves brew on launch (detect existing / install annex) without onboarding or CLT.
+    /// `ContentView` observes `bootstrap.phase` to show the install sheet.
+    let bootstrap = HomebrewBootstrap()
+
     /// Categories shown in the sidebar and Discover view.
     /// Initialized synchronously from the bundled `categories.json` with empty `casks`
     /// arrays so the UI renders structure from launch; replaced with resolved view models
@@ -57,7 +61,14 @@ final class CaskManager {
     var installedViewModels: [CaskViewModel] { registry.installedViewModels }
     var outdatedViewModels: [CaskViewModel] { registry.outdatedViewModels }
     var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
+    var batchProgress: BatchProgress? { brewService.batchProgress }
     var alert: AlertManager { brewService.alert }
+
+    /// One-shot navigation request from deep views (e.g. the "See Active Tasks" button on a
+    /// batched app card) to the `ContentView`, which applies it to its sidebar selection and
+    /// resets this to nil. Lives here because `CaskManager` is the shared environment object
+    /// every card already holds, so no extra wiring is needed.
+    var requestedTab: SidebarItem?
 
     // MARK: - Init
 
@@ -84,14 +95,16 @@ final class CaskManager {
     
     // MARK: - Registry Forwarding
     
-    func existingViewModels(forTokens tokens: Set<CaskId>) -> [CaskViewModel] {
-        registry.existingViewModels(forTokens: tokens)
+    /// Resolves import tokens to view models via the DB (creates them if not already live), so an
+    /// imported app list installs casks the user has never opened — not just ones already on screen.
+    func resolveViewModels(forTokens tokens: Set<CaskId>) async throws -> [CaskViewModel] {
+        try await dataLoader.viewModels(forTokens: tokens)
     }
 
     // MARK: - Brew Operation Forwarding
 
-    func install(_ cask: CaskViewModel, force: Bool = false) {
-        brewService.install(cask, force: force)
+    func install(_ cask: CaskViewModel) {
+        brewService.install(cask)
     }
 
     func uninstall(_ cask: CaskViewModel, zap: Bool = false) {
@@ -108,6 +121,14 @@ final class CaskManager {
 
     func cancel(_ cask: CaskViewModel) {
         brewService.cancel(cask)
+    }
+
+    func cancelBatch() {
+        brewService.cancelBatch()
+    }
+
+    func dismissFailure(_ cask: CaskViewModel) {
+        brewService.dismissFailure(cask)
     }
 
     func cancelAllAndWait() async {
@@ -133,31 +154,76 @@ final class CaskManager {
     }
     
     // MARK: - Data Loading
-    
-    /// Loads cask data in two stages:
-    ///
-    ///   1. Catalog (categories + taps) from the local DB — fast, no brew CLI dependency.
-    ///      Commits to `categories`/`taps` as soon as it returns so the UI lights up.
-    ///   2. Installed/outdated state from the brew CLI (slow). Updates the registry
-    ///      reactively, so any view models already on screen flip their installed/outdated
-    ///      flags without rebuilding the catalog views.
+
+    /// Launch entry point. Loads the brew-independent catalog immediately (so the UI lights up
+    /// even while the annex is still installing), resolves brew via `bootstrap`, then loads the
+    /// installed/outdated state once a valid brew is `.ready`. Finally kicks a silent annex
+    /// freshness check. The install sheet (shown by `ContentView` while `bootstrap` is
+    /// `.installing`) covers the app during step 2 — `hasBrokenInstall` is never set here, so
+    /// `BrokenInstallView` can't flash during a normal first-run install.
+    func bootstrapAndLoad() async {
+        Self.logger.info("Bootstrap + load started")
+
+        // Defer the catalog error: if the brew bootstrap also fails (same offline root cause), the
+        // setup overlay is the single error surface — the catalog alert must not stack on it. Only
+        // raise it below, once brew is ready and the overlay won't appear.
+        let catalogError = await loadCatalog(surfaceError: false)
+        await bootstrap.run()
+
+        if bootstrap.isBrewReady {
+            hasBrokenInstall = false
+            if let catalogError {
+                loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+            }
+            await loadInstalledState()
+            await bootstrap.refreshAnnexIfStale()
+        } else if case .failed(let message) = bootstrap.phase {
+            Self.logger.error("Bootstrap failed: \(message)")
+        } else if case .brewMissing(let path) = bootstrap.phase {
+            Self.logger.error("Selected brew missing at \(path)")
+        }
+    }
+
+    /// Explicit reload used by the ⌘R menu action, the Settings "Refresh Catalog" prompt, and the
+    /// `BrokenInstallView`/alert retry. Reloads the catalog, then — if the selected brew is valid —
+    /// the installed/outdated state; otherwise re-runs `bootstrap` to try to recover, and only
+    /// surfaces `hasBrokenInstall` if brew is genuinely unusable afterwards.
     func loadData(forceSync: Bool = false) async {
         Self.logger.info("Starting data load process (forceSync: \(forceSync))")
 
         if forceSync { isRefreshingCatalog = true }
         defer { if forceSync { isRefreshingCatalog = false } }
 
-        guard await BrewPaths.isSelectedBrewPathValid() else {
+        // Defer the catalog error (see `bootstrapAndLoad`): a forced ⌘R sync while brew is also
+        // unusable and offline would otherwise stack the catalog alert on the setup overlay. Raise
+        // it only on the branches where brew is valid/recovered and no overlay will show.
+        let catalogError = await loadCatalog(forceSync: forceSync, surfaceError: false)
+
+        if await BrewPaths.isSelectedBrewPathValid() {
+            hasBrokenInstall = false
+            if let catalogError {
+                loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+            }
+            await loadInstalledState()
+            return
+        }
+
+        // Selected brew is invalid — attempt recovery (detect existing / reinstall annex).
+        await bootstrap.run()
+
+        guard bootstrap.isBrewReady else {
+            // Brew is genuinely unusable. `bootstrap` is in `.failed`, so ContentView is
+            // already showing the setup overlay's failed state (message + Retry +
+            // Troubleshooting + "use your own Homebrew"). Don't also raise `loadAlert` (the
+            // catalog error is dropped here — the overlay owns the surface) or BrokenInstallView.
+            // `hasBrokenInstall` stays set as a fallback for the (currently unreachable)
+            // no-overlay case.
             hasBrokenInstall = true
-            loadAlert.show(
-                title: "Couldn't load app catalog",
-                message: DependencyManager.brokenPathOrInstallMessage
-            )
 
             let versionOutput = (try? await Shell.runBrewCommand(["--version"])) ?? "n/a"
             Self.logger.error(
                 """
-                Initial cask load failure. Reason: selected brew path seems invalid.
+                Cask load failure. Reason: selected brew path seems invalid and recovery failed.
                 Brew executable path: \(BrewPaths.currentBrewExecutable.path(percentEncoded: false))
                 brew --version output: \(versionOutput)
                 """
@@ -165,28 +231,56 @@ final class CaskManager {
             return
         }
 
+        hasBrokenInstall = false
+        // Recovered — the catalog alert is now the only possible surface, so raise it.
+        if let catalogError {
+            loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+        }
+        await loadInstalledState()
+    }
+
+    /// Stage 1: catalog (categories + taps) from the local DB — fast, no brew CLI dependency.
+    ///
+    /// Returns the failure (or `nil` on success) instead of surfacing it directly, so the caller
+    /// can decide *whether* to raise `loadAlert`: on launch/recovery a catalog failure often shares
+    /// its root cause (offline) with a brew bootstrap failure, and the setup overlay must be the
+    /// single error surface — the alert can't stack on top. Pass `surfaceError: false` to defer.
+    @discardableResult
+    private func loadCatalog(forceSync: Bool = false, surfaceError: Bool = true) async -> Error? {
         do {
-            // Stage 1: Catalog. Animate the placeholder→full transition so cask cards
-            // cross-fade into place rather than swapping instantly mid-shimmer-cycle.
+            // Animate the placeholder→full transition so cask cards cross-fade into place
+            // rather than swapping instantly mid-shimmer-cycle.
             let catalog = try await dataLoader.loadCatalogData(forceSync: forceSync)
             withAnimation(.easeInOut(duration: 0.25)) {
                 self.categories = catalog.categories
                 self.taps = catalog.taps
             }
-
-            // Stage 2: Brew CLI state
-            self.isResolvingInstalledState = true
-            defer { self.isResolvingInstalledState = false }
-
-            async let installed: () = dataLoader.refreshInstalled()
-            async let outdated: () = dataLoader.refreshOutdated()
-            _ = try await (installed, outdated)
-
-            hasBrokenInstall = false
-            Self.logger.info("Cask data loaded successfully!")
+            return nil
         } catch {
-            loadAlert.show(error: error, title: "Couldn't load app catalog")
-            Self.logger.error("Initial cask load failure. Reason: \(error.localizedDescription)")
+            Self.logger.error("Catalog load failure. Reason: \(error.localizedDescription)")
+            if surfaceError {
+                loadAlert.show(error: error, title: "Couldn't load app catalog")
+            }
+            return error
+        }
+    }
+
+    /// Stage 2: installed/outdated state from the brew CLI (slow). Updates the registry reactively,
+    /// so view models already on screen flip their flags without rebuilding the catalog views.
+    private func loadInstalledState() async {
+        self.isResolvingInstalledState = true
+        defer { self.isResolvingInstalledState = false }
+
+        do {
+            // Serial, not concurrent: on a fresh annex the first brew command triggers a one-time
+            // `brew vendor-install ruby`, and two brews racing that lock fail with "already locked".
+            // Bootstrap primes Ruby up front, but keep these ordered as a second line of defense.
+            try await dataLoader.refreshInstalled()
+            try await dataLoader.refreshOutdated()
+            Self.logger.info("Installed/outdated state loaded successfully!")
+        } catch {
+            loadAlert.show(error: error, title: "Couldn't load installed apps")
+            Self.logger.error("Installed-state load failure. Reason: \(error.localizedDescription)")
         }
     }
 

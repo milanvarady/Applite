@@ -26,7 +26,11 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
     /// termination and the dialog loops. There's no clean way around that today —
     /// revisit if SwiftUI gains native control over termination.
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard let caskManager, !caskManager.activeTasks.isEmpty else { return .terminateNow }
+        // Only prompt for genuinely-running work — dismissed-or-not failed cards linger in
+        // `activeTasks` (so their error stays reachable) but must not block quitting.
+        guard let caskManager,
+              caskManager.activeTasks.contains(where: { $0.viewModel.progressState.isActive })
+        else { return .terminateNow }
 
         Task { @MainActor in
             await caskManager.cancelAllAndWait()

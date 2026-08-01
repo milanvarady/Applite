@@ -60,7 +60,7 @@ struct BrewPathSelectorView: View {
             }
 
             if showPath {
-                Text(BrewPaths.getBrewExectuablePath(for: option).path(percentEncoded: false))
+                Text(BrewPaths.brewExecutable(for: option).path(percentEncoded: false))
                     .truncationMode(.middle)
                     .lineLimit(1)
                     .foregroundStyle(.secondary)
@@ -101,7 +101,7 @@ struct BrewPathSelectorView: View {
 
     func getPathDescription(for option: BrewPaths.PathOption) -> LocalizedStringKey {
         switch option {
-        case .appPath:
+        case .annex:
             return "Applite's installation"
 
         case .defaultAppleSilicon:

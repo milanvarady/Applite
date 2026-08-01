@@ -11,8 +11,8 @@ import Foundation
 struct BrewPaths {
     /// Brew executable path options
     enum PathOption: Int, CaseIterable, Identifiable {
-        /// Applite's own brew in Application Support folder
-        case appPath = 0
+        /// Applite's own ("annex") brew in the Application Support folder
+        case annex = 0
         /// Default path for Apple Silicon macs
         case defaultAppleSilicon = 1
         /// Default path for Intel based macs
@@ -31,21 +31,15 @@ struct BrewPaths {
             UserDefaults.standard.setValue(newValue.rawValue, for: Preferences.brewPathOption)
         }
         get {
-            return PathOption(rawValue: UserDefaults.standard.value(for: Preferences.brewPathOption)) ?? .appPath
+            return PathOption(rawValue: UserDefaults.standard.value(for: Preferences.brewPathOption)) ?? .annex
         }
     }
     
-    /// Returns the brew executable path for the specified option
-    ///
-    /// - Parameters:
-    ///   - for: Brew path to return
-    ///   - shellFriendly: If true the path will be enclosed in " marks so shell doesn't fail on spaces
-    ///
-    /// - Returns: `String`
-    static func getBrewExectuablePath(for option: PathOption) -> URL {
+    /// Returns the `brew` executable URL for the specified option.
+    static func brewExecutable(for option: PathOption) -> URL {
         switch option {
-        case .appPath:
-            return applicationSupportBrewExetutable
+        case .annex:
+            return annexBrewExecutable
 
         case .defaultAppleSilicon:
             return URL(fileURLWithPath: "/opt/homebrew/bin/brew")
@@ -58,36 +52,26 @@ struct BrewPaths {
         }
     }
     
-    /// Brew directory when installing brew separately into Application Support
-    static let applicationSupportHomebrew = AppPaths.applicationSupport
+    /// Directory of Applite's own ("annex") brew, installed into Application Support
+    static let annexBrewDirectory = AppPaths.applicationSupport
         .appending(path: "Homebrew", directoryHint: .isDirectory)
-    
-    /// Brew exectuable path when installing brew separately into Application Support
-    static let applicationSupportBrewExetutable = Self.applicationSupportHomebrew
+
+    /// Executable path of Applite's own ("annex") brew, installed into Application Support
+    static let annexBrewExecutable = Self.annexBrewDirectory
         .appendingPathComponent("bin", isDirectory: true)
         .appendingPathComponent("brew")
-    
-    /// Dynamically returns the current brew directory in use
+
+    /// The prefix (Homebrew root) of the currently selected brew. Every option's executable is
+    /// `<prefix>/bin/brew`, so the directory is that path with the two trailing components dropped.
     static var currentBrewDirectory: URL {
-        switch Self.selectedBrewOption {
-        case .appPath:
-            return applicationSupportHomebrew
-
-        case .defaultAppleSilicon:
-            return URL(fileURLWithPath: "/opt/homebrew")
-
-        case .defaultIntel:
-            return URL(fileURLWithPath: "/usr/local")
-
-        case .custom:
-            let path = UserDefaults.standard.value(for: Preferences.customUserBrewPath).replacing("/bin/brew", with: "")
-            return URL(fileURLWithPath: path)
-        }
+        currentBrewExecutable
+            .deletingLastPathComponent()  // drop "brew"
+            .deletingLastPathComponent()  // drop "bin"
     }
-    
-    /// Returns the brew path currently in use (selected in settings), as a `String` enclosed in " marks so shell scripts don't fail beacuse of spaces
+
+    /// The `brew` executable currently in use (selected in settings).
     static var currentBrewExecutable: URL {
-        return getBrewExectuablePath(for: selectedBrewOption)
+        return brewExecutable(for: selectedBrewOption)
     }
 
     /// Checks if a brew executable path is valid or not
@@ -110,16 +94,79 @@ struct BrewPaths {
         return await isBrewPathValid(at: Self.currentBrewExecutable)
     }
 
-    /// Checks if Xcode Command Line Tools is installed
+    // MARK: - Detection
+
+    /// Attempts to locate a working Homebrew installation, fail-safe: the two arch-default
+    /// prefixes are probed concurrently, then any brew on the user's `PATH` (covering
+    /// non-standard prefixes). Every candidate is validated by actually running `brew --version`.
     ///
-    /// - Returns: Whether it is installed or not
-    static func isCommandLineToolsInstalled() async -> Bool {
-        do {
-            try await Shell.runAsync("xcode-select -p")
-        } catch {
-            return false
+    /// - Parameter setPathOption: When `true`, the first match is written to
+    ///   ``selectedBrewOption`` (and, for a non-standard location, `customUserBrewPath`).
+    /// - Returns: The matched ``PathOption``, or `nil` if no working brew was found.
+    static func detectHomebrew(setPathOption: Bool) async -> PathOption? {
+        async let appleSilicon = isBrewPathValid(at: brewExecutable(for: .defaultAppleSilicon))
+        async let intel = isBrewPathValid(at: brewExecutable(for: .defaultIntel))
+
+        if await appleSilicon {
+            if setPathOption { selectedBrewOption = .defaultAppleSilicon }
+            return .defaultAppleSilicon
         }
 
-        return true
+        if await intel {
+            if setPathOption { selectedBrewOption = .defaultIntel }
+            return .defaultIntel
+        }
+
+        // Last resort: a brew installed at a non-standard prefix, resolved via the login shell's PATH.
+        if let resolved = await resolveBrewOnPath(), await isBrewPathValid(at: resolved) {
+            return adopt(resolvedBrewExecutable: resolved, setPathOption: setPathOption)
+        }
+
+        return nil
+    }
+
+    /// Maps a resolved brew executable to a ``PathOption``. Standard prefixes map to their arch
+    /// default; anything else is stored as the custom path so the rest of the app (which switches
+    /// on `PathOption`) keeps working.
+    private static func adopt(resolvedBrewExecutable url: URL, setPathOption: Bool) -> PathOption {
+        let path = url.path(percentEncoded: false)
+        let option: PathOption
+
+        switch path {
+        case "/opt/homebrew/bin/brew":
+            option = .defaultAppleSilicon
+        case "/usr/local/bin/brew":
+            option = .defaultIntel
+        default:
+            UserDefaults.standard.setValue(path, for: Preferences.customUserBrewPath)
+            option = .custom
+        }
+
+        if setPathOption { selectedBrewOption = option }
+        return option
+    }
+
+    /// Resolves a `brew` executable from the environment: `$HOMEBREW_PREFIX/bin/brew` if set,
+    /// otherwise the login shell's `PATH`. The login-shell probe uses a timeout so a hung shell
+    /// (e.g. a broken `.zshrc`) can never stall app launch.
+    private static func resolveBrewOnPath() async -> URL? {
+        if let prefix = ProcessInfo.processInfo.environment["HOMEBREW_PREFIX"], !prefix.isEmpty {
+            let candidate = URL(fileURLWithPath: prefix)
+                .appendingPathComponent("bin", isDirectory: true)
+                .appendingPathComponent("brew")
+            if FileManager.default.isExecutableFile(atPath: candidate.path) {
+                return candidate
+            }
+        }
+
+        // A login shell (`-l`) sources the user's profile, so `command -v brew` sees the PATH they
+        // actually use — this is what finds brew at a non-standard prefix.
+        guard let output = try? await Shell.runAsync("zsh -lc 'command -v brew'", timeout: .seconds(5)) else {
+            return nil
+        }
+
+        let path = output.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !path.isEmpty else { return nil }
+        return URL(fileURLWithPath: path)
     }
 }

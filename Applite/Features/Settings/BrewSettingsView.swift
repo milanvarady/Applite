@@ -14,22 +14,32 @@ struct BrewSettingsView: View {
     @AppStorage(Preferences.customUserBrewPath) var customUserBrewPath
     @AppStorage(Preferences.brewPathOption) var brewPathOption
     @AppStorage(Preferences.includeCasksFromTaps) var includeCasksFromTaps
+    @AppStorage(Preferences.annexUpdateFrequency) var annexUpdateFrequency
 
-    @State var isSelectedBrewPathValid = false
+    /// Applite's own annex brew is the selected one.
+    var isUsingAnnexBrew: Bool { brewPathOption == BrewPaths.PathOption.annex.rawValue }
 
-    /// Baseline of the settings as they were when the catalog was last loaded.
-    /// The refresh prompt shows whenever the current selection differs from these.
-    @State var previousBrewOption: Int = 0
-    @State var previousIncludeCasksFromTaps: Bool = true
+    // Optimistically assume the path is valid; the async `BrewPathSelectorView` check flips it to
+    // false only if it genuinely is. Starting `false` would flash the invalid-path text on the
+    // first frame (before the check runs) and then animate it out.
+    @State var isSelectedBrewPathValid = true
+
+    /// Baseline of the settings as they were when the catalog was last loaded, captured from the
+    /// `@AppStorage` values in `.onAppear`. `nil` until then — so `needsRefresh` is false on the
+    /// first frame and the refresh banner can't flash in before a baseline exists.
+    @State var previousBrewOption: Int?
+    @State var previousIncludeCasksFromTaps: Bool?
 
     var needsRefresh: Bool {
-        previousBrewOption != brewPathOption ||
+        guard let previousBrewOption, let previousIncludeCasksFromTaps else { return false }
+        return previousBrewOption != brewPathOption ||
             previousIncludeCasksFromTaps != includeCasksFromTaps
     }
 
     var body: some View {
         Form {
             pathSettings
+            annexUpdateSettings
             tapSettings
             appdirSettings
             otherFlags
@@ -41,7 +51,7 @@ struct BrewSettingsView: View {
         .animation(.default, value: needsRefresh)
         .animation(.default, value: isSelectedBrewPathValid)
         .onAppear {
-            previousBrewOption = BrewPaths.selectedBrewOption.rawValue
+            previousBrewOption = brewPathOption
             previousIncludeCasksFromTaps = includeCasksFromTaps
         }
     }
@@ -91,6 +101,28 @@ struct BrewSettingsView: View {
                 .background(.bar)
             }
             .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+    }
+
+    /// How often to silently re-fetch Applite's own Homebrew tarball. Only relevant when the annex
+    /// is the selected brew — a user's own brew updates itself via `brew update` as usual.
+    @ViewBuilder
+    var annexUpdateSettings: some View {
+        if isUsingAnnexBrew {
+            Section("Homebrew Updates") {
+                Picker(selection: $annexUpdateFrequency) {
+                    ForEach(CatalogUpdateFrequency.allCases) { frequency in
+                        Text(frequency.description).tag(frequency)
+                    }
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Update Applite's Homebrew", comment: "Annex brew update frequency title")
+                        Text("Applite keeps its own Homebrew current by re-downloading it periodically. Your installed apps are kept.", comment: "Annex brew update frequency description")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
         }
     }
 

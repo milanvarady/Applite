@@ -64,14 +64,13 @@ func uninstallSelf(deleteBrewCache: Bool, uninstallHomebrew: Bool = false) async
 
     logger.notice("Self destructing. Goodbye world! o7")
 
-    // Quit the app, remove the bundle, and reset the setup flag.
+    // Quit the app and remove the bundle.
     // Steps are newline-separated (not &&) so a slow/failed quit still
     // lets the cleanup run.
     let selfDestruct = """
     osascript -e 'tell application "Applite" to quit'
     sleep 2
     rm -rf "\(Bundle.main.bundlePath)"
-    defaults write \(bundleID) setupComplete 0
     """
 
     let process = Process()

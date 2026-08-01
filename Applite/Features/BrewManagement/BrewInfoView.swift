@@ -23,19 +23,31 @@ struct BrewInfoView: View {
             }
         }
         .task {
-            // Get version
-            guard let versionOutput = try? await Shell.runBrewCommand(["--version"]),
-                  let version = versionOutput.firstMatch(of: /Homebrew ([\d\.]+)/),
-                  let casksInstalled = try? await Shell.runBrewCommand(["list", "--cask", "--full-name", "|", "wc", "-w"]) else {
-
-                homebrewVersion = String(localized: "Error", comment: "Brew info value when loading fails")
-                numberOfCasks = String(localized: "Error", comment: "Brew info value when loading fails")
-                return
-            }
-
-            homebrewVersion = String(version.1)
-            numberOfCasks = casksInstalled.trimmingCharacters(in: .whitespacesAndNewlines)
+            // Resolved independently so a failure in one doesn't blank out the other.
+            homebrewVersion = await loadHomebrewVersion()
+            numberOfCasks = await loadInstalledCaskCount()
         }
+    }
+
+    private func loadHomebrewVersion() async -> String {
+        // The annex is a tarball with no `.git`, so brew can't resolve an exact version and reports
+        // e.g. "Homebrew >=4.3.0 (shallow or no git repository)". Capture the whole version token
+        // (including a possible `>=`), not just leading digits.
+        guard let output = try? await Shell.runBrewCommand(["--version"]),
+              let match = output.firstMatch(of: /Homebrew (\S+)/) else {
+            return String(localized: "Error", comment: "Brew info value when loading fails")
+        }
+
+        return String(match.1)
+    }
+
+    private func loadInstalledCaskCount() async -> String {
+        // `-1` prints one cask per line; count non-empty lines instead of shelling out to `wc`.
+        guard let output = try? await Shell.runBrewCommand(["list", "--cask", "-1"]) else {
+            return String(localized: "Error", comment: "Brew info value when loading fails")
+        }
+
+        return String(output.split(whereSeparator: \.isNewline).count)
     }
 
     @ViewBuilder
