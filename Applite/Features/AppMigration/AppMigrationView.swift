@@ -8,48 +8,50 @@
 import SwiftUI
 
 struct AppMigrationView: View {
-    let width: CGFloat = 620
-    let cardPadding: CGFloat = 24
+    private let width: CGFloat = 620
+    private let cardPadding: CGFloat = 24
+    private let cardHeight: CGFloat = 320
 
     var body: some View {
-        ScrollView {
-            VStack {
-                titleAndDescription
-                    .padding(.vertical, 40)
-                
-                HStack(spacing: 40) {
-                    Card(padding: cardPadding) {
-                        ExportAppsView()
-                    }
-                    
-                    Card(padding: cardPadding) {
-                        ImportAppsView()
-                    }
+        VStack(spacing: 0) {
+            titleAndDescription
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Spacer(minLength: 24)
+
+            HStack(spacing: 32) {
+                Card(padding: cardPadding) {
+                    ExportAppsView()
                 }
-                
-                Spacer()
+
+                Card(padding: cardPadding) {
+                    ImportAppsView()
+                }
             }
-            .navigationTitle("App Migration")
-            .frame(maxWidth: width)
-            .padding()
+            .frame(maxHeight: cardHeight)
+
+            Spacer(minLength: 24)
         }
+        .frame(maxWidth: width, maxHeight: .infinity)   // fill height, cap width
+        .frame(maxWidth: .infinity)                     // center the column in the pane
+        .padding(40)
+        .navigationTitle("App Migration")
     }
 
-    var titleAndDescription: some View {
-        VStack(alignment: .leading) {
+    private var titleAndDescription: some View {
+        VStack(alignment: .leading, spacing: 4) {
             Text("App Migration", comment: "App Migration view title")
                 .font(.appliteMediumTitle)
-                .padding(.bottom, 2)
 
             Text(
-                "Export all of your currently installed apps to a file. Import the file to another device to install them all. Useful when setting up a new Mac.",
+                "Export your installed apps to a file, then import it on another Mac to reinstall them all — the easy way to set up a new machine.",
                 comment: "App migration view description"
             )
+            .foregroundStyle(.secondary)
         }
     }
 }
 
 #Preview {
     AppMigrationView()
-        .padding()
 }

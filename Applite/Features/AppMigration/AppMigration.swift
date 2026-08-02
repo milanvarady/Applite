@@ -13,36 +13,47 @@ enum CaskImportError: Error {
 }
 
 enum AppMigration {
-    static func export() async throws -> ExportFile {
-        let output = try await Shell.runBrewCommand(["list", "--cask", "--full-name"])
+    /// Builds Brewfile-syntax text from the selected view models: a `tap "user/repo"` line for each
+    /// distinct non-default tap present, then a `cask "<fullToken>"` line per app. Output is sorted
+    /// so exports are deterministic. Uses `fullToken` so cross-tap setups re-import cleanly.
+    ///
+    /// `@MainActor` because `CaskViewModel`'s `tap`/`fullToken` are main-actor isolated.
+    @MainActor
+    static func makeBrewfile(from casks: [CaskViewModel]) -> String {
+        let taps = Set(casks.map(\.tap))
+            .subtracting(["homebrew/cask"])
+            .sorted()
 
-        let exportedCasks = output.trimmingCharacters(in: .whitespacesAndNewlines)
+        let tapLines = taps.map { "tap \"\($0)\"" }
+        let caskLines = casks
+            .map(\.fullToken)
+            .sorted()
+            .map { "cask \"\($0)\"" }
 
-        return ExportFile(initialText: exportedCasks)
+        return (tapLines + caskLines).joined(separator: "\n") + "\n"
     }
 
     static func readCaskFile(url: URL) throws -> Set<CaskId> {
         let content = try String(contentsOf: url)
         var casks: Set<CaskId> = []
-        let brewfileRegex = /cask "([\w-]+)"/
+        // `[\w/-]+` (not `[\w-]+`) so tap-qualified tokens like `user/repo/token` also match.
+        // Extended delimiters `#/.../#` let the `/` appear unescaped without ending the literal.
+        let brewfileRegex = #/cask "([\w/-]+)"/#
 
         // Check if the file being imported is a Brewfile
         // Brewfiles store casks as cask "caskName"
         if content.contains("cask \"") {
-            // Brewfile
+            // Brewfile — `tap "..."` lines are intentionally ignored (brew auto-taps on install of
+            // a full-token cask).
             let matches = content.matches(of: brewfileRegex)
             casks.formUnion(
                 matches.map({ String($0.1) })
             )
         } else {
-            // Try to load casks as an Applite txt file export
+            // Legacy Applite txt export: one token per line, trimmed.
             casks.formUnion(
                 content.components(separatedBy: .newlines)
-            )
-            
-            // Trim whitespace
-            casks.formUnion(
-                casks.map({ $0.trimmingCharacters(in: .whitespaces) })
+                    .map({ $0.trimmingCharacters(in: .whitespaces) })
             )
         }
 

@@ -107,6 +107,26 @@ final class CaskViewModel {
     )
 }
 
+// MARK: - Icon URLs
+
+extension CaskViewModel {
+    /// Primary app-icon URL (App-Fair appcasks release asset).
+    ///
+    /// Centralized here so every icon call site (app cards, the migration selection sheet) shares
+    /// one source — the single edit point when the icon source is swapped.
+    var iconURL: URL? {
+        URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(token)/AppIcon.png")
+    }
+
+    /// Fallback favicon URL derived from the homepage host.
+    var faviconURL: URL? {
+        URL(string: "https://icon.horse/icon/\(homepage?.host ?? "")")
+    }
+
+    /// Stable Kingfisher cache key for the icon.
+    var iconCacheKey: String { token }
+}
+
 // MARK: -  Protocol conformances
 
 // MARK: - Identifiable

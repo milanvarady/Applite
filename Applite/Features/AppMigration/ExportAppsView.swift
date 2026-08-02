@@ -6,58 +6,81 @@
 //
 
 import SwiftUI
-import ButtonKit
 import OSLog
 
 struct ExportAppsView: View {
-    @State var showFileExporter = false
-    @State var exportFile: ExportFile = .init()
-    @State var exportSuccessful = false
-    @State var alert = AlertManager()
+    @Environment(CaskManager.self) private var caskManager
+
+    @State private var showSelectionSheet = false
+    @State private var showFileExporter = false
+    @State private var exportFile = ExportFile()
+    /// Set when the selection sheet is confirmed; the file exporter is opened from `onDismiss` so it
+    /// never races the selection sheet's own dismissal.
+    @State private var hasPendingExport = false
+    @State private var exportSuccessful = false
+    @State private var alert = AlertManager()
 
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigration.ExportAppsView")
 
+    /// Bare stem (no extension) — `.plainText` appends `.txt`, so adding it here would double it.
+    private static var defaultFilename: String {
+        "Applite-export-\(Date.now.formatted(.iso8601.year().month().day().dateSeparator(.dash)))"
+    }
+
+    /// Installed apps to offer for export, excluding Applite itself: an import only ever runs from
+    /// inside a running Applite, so it is always already installed — listing it is redundant.
+    /// (Mirrors `AppGridView`, which hides the self-cask.)
+    private var exportableCasks: [CaskViewModel] {
+        caskManager.installedViewModels.filter { $0.token != "applite" }
+    }
+
     var body: some View {
         VStack(spacing: 12) {
+            Spacer(minLength: 0)
+
             Image(systemName: "tray.and.arrow.up.fill")
-                .font(.system(size: 40))
+                .font(.system(size: 44))
                 .foregroundStyle(.tint)
 
             Text("Export", comment: "App migration export card title")
                 .font(.appliteSmallTitle)
 
-            Text("Export all apps currently installed by Applite to a file.", comment: "App Migration export card description")
+            Text("Save your selected apps to a file you can import on another Mac.",
+                 comment: "App Migration export card description")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
 
-            Spacer()
+            Spacer(minLength: 12)
 
-            HStack {
-                AsyncButton {
-                    // Handle the failure inside the action rather than via `.onButtonStateError`,
-                    // which re-fires on every re-render while the button stays in its sticky error
-                    // state — so dismissing the alert would immediately re-present it in a loop.
-                    do {
-                        exportFile = try await AppMigration.export()
-                        showFileExporter = true
-                    } catch {
-                        alert.show(error: error, title: "Failed to export")
-                    }
-                } label: {
-                    Label("Export Apps to File", systemImage: "square.and.arrow.up")
-                }
-                .controlSize(.large)
-
-                if exportSuccessful {
-                    Image(systemName: "square.and.arrow.down.badge.checkmark")
-                        .foregroundStyle(.green)
-                        .imageScale(.large)
-                }
+            Button {
+                showSelectionSheet = true
+            } label: {
+                Text("Export Apps…", comment: "App Migration export button")
             }
+            .cardActionPill()
+            .disabled(exportableCasks.isEmpty)
+
+            statusLine
         }
         .frame(maxWidth: .infinity)
         .alertManager(alert)
-        .fileExporter(isPresented: $showFileExporter, document: exportFile,  contentType: .plainText, defaultFilename: "applite_export") { result in
+        .sheet(isPresented: $showSelectionSheet, onDismiss: {
+            if hasPendingExport {
+                hasPendingExport = false
+                showFileExporter = true
+            }
+        }) {
+            CaskSelectionSheet(
+                title: "Select Apps to Export",
+                confirmLabel: "Export",
+                casks: exportableCasks
+            ) { selected in
+                exportFile = ExportFile(initialText: AppMigration.makeBrewfile(from: selected))
+                hasPendingExport = true
+            }
+        }
+        .fileExporter(isPresented: $showFileExporter, document: exportFile, contentType: .plainText, defaultFilename: Self.defaultFilename) { result in
             switch result {
             case .success(let url):
                 logger.notice("Successful cask export: \(url.path(percentEncoded: false))")
@@ -67,5 +90,22 @@ struct ExportAppsView: View {
                 alert.show(error: error, title: "Failed to export")
             }
         }
+    }
+
+    /// Confirmation / waiting caption under the button. Shown in a fixed-height slot so the card
+    /// layout doesn't shift when it appears.
+    @ViewBuilder
+    private var statusLine: some View {
+        Group {
+            if exportSuccessful {
+                Label("Saved to file", systemImage: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+            } else if exportableCasks.isEmpty && caskManager.isResolvingInstalledState {
+                Text("Waiting for installed apps to load…", comment: "App Migration export waiting caption")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .font(.callout)
+        .frame(height: 20)
     }
 }
