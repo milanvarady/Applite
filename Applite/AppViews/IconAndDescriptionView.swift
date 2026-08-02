@@ -14,12 +14,11 @@ struct IconAndDescriptionView: View {
     
     var body: some View {
         HStack {
-            if let iconURL = URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(cask.token)/AppIcon.png"),
-               let faviconURL = URL(string: "https://icon.horse/icon/\(cask.homepage?.host ?? "")") {
+            if let iconURL = cask.iconURL, let faviconURL = cask.faviconURL {
                 AppIconView(
                     iconURL: iconURL,
                     faviconURL: faviconURL,
-                    cacheKey: cask.token
+                    cacheKey: cask.iconCacheKey
                 )
                 .padding(.leading, 5)
             }

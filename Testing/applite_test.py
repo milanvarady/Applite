@@ -1104,21 +1104,47 @@ def phase_a13(_state) -> None:
 
 
 def phase_a14(_state) -> None:
-    step("11", "export + BULK install (one batch process)")
-    # Import runs installAll → a single `brew install --cask <all>` process. This is the
-    # original dropped-casks repro (importing 2 casks once needed 3 tries) plus the batch UI.
-    export_path = Path.home() / "Desktop/applite_export.txt"
-    do_in_app(f"App Migration → Export apps to {export_path}")
-    check("export file exists and is non-empty",
-          lambda: export_path.exists() and export_path.stat().st_size > 0)
+    step("11", "export (selectable Brewfile) + BULK install (one batch process)")
+    # Migration v2: Export and Import each open a CHECKLIST SHEET first (pick which apps).
+    # Export then writes a Brewfile (`cask "<token>"` lines, plus `tap "…"` for non-default taps)
+    # via the save panel, default name Applite-export-<date>.txt. Import resolves tokens against
+    # the DB (installs casks never browsed) and force-installs, so an already-present cask
+    # reinstalls instead of failing the batch. Import runs installAll → a single
+    # `brew install --cask <all>` process (the original dropped-casks repro plus the batch UI).
+    desktop = Path.home() / "Desktop"
+    # Clear stale exports so the glob below matches only this run's file.
+    for old in glob.glob(str(desktop / "Applite-export-*.txt")):
+        try:
+            os.remove(old)
+        except OSError:
+            pass
 
-    # Import the whole set. Import resolves tokens against the DB (installs casks never browsed)
-    # and force-installs, so an already-present cask reinstalls instead of failing the batch.
-    import_path = Path.home() / "Desktop/applite_import.txt"
+    do_in_app("App Migration → Export Apps to File (a selection sheet should open)")
+    confirm("Did a selection sheet list your installed apps, each PRE-CHECKED and showing an "
+            "icon, with Applite itself NOT in the list (excluded — you're already running it)?")
+    confirm("Do 'Select All' / 'Deselect All' flip every checkbox and the \"N selected\" count "
+            "update live?")
+    do_in_app("Make sure all are checked, press Export, and SAVE to the Desktop "
+              "(accept the default name Applite-export-<date>.txt)")
+
+    exports = sorted(glob.glob(str(desktop / "Applite-export-*.txt")))
+    check("a dated export appeared on the Desktop (Applite-export-*.txt)",
+          lambda: bool(exports))
+    if exports:
+        text = Path(exports[-1]).read_text()
+        check("export is Brewfile syntax (has cask \"…\" lines)",
+              lambda t=text: 'cask "' in t)
+
+    # Import a controlled set. A plain-text token list also exercises the legacy-format import
+    # path (readCaskFile falls back to newline-separated tokens when there's no `cask "` line).
+    import_path = desktop / "applite_import.txt"
     import_path.write_text("\n".join(BULK_INSTALL_CASKS) + "\n")
     info(f"import file: {', '.join(BULK_INSTALL_CASKS)}")
 
-    do_in_app(f"App Migration → Import {import_path}; let the batch run to completion")
+    do_in_app(f"App Migration → Import → pick {import_path}")
+    confirm(f"Did the import selection sheet show ALL {len(BULK_INSTALL_CASKS)} apps on the "
+            "FIRST attempt? (regression: it used to list 0 the first time.)")
+    do_in_app("Leave every app checked, press Install, and let the batch run to completion")
     confirm(f"Did each of the {len(BULK_INSTALL_CASKS)} cards show its OWN download ring "
             "(not just a spinner) during the download phase?")
     confirm("Did the Active Tasks header count up (\"Installing X of N…\")?")
@@ -1132,7 +1158,8 @@ def phase_bulk_update(state) -> None:
     # Reuse the fonts installed by the bulk-install phase; fake them outdated, then Update All.
     targets = [t for t in BULK_UPDATE_CASKS if cask_installed(t)]
     if len(targets) < 2:
-        do_in_app(f"Install {BULK_UPDATE_CASKS} first if missing (App Migration import)")
+        do_in_app(f"Install {BULK_UPDATE_CASKS} first if missing (App Migration → Import → "
+                  "select all → Install)")
         targets = [t for t in BULK_UPDATE_CASKS if cask_installed(t)]
     if len(targets) < 2:
         RESULTS.skip("bulk update (need ≥2 installed update targets)")
@@ -1172,7 +1199,8 @@ def phase_batch_stop(state) -> None:
                   "(they must re-download for this test)")
     stop_path = Path.home() / "Desktop/applite_bulkstop.txt"
     stop_path.write_text("\n".join(BULK_STOP_CASKS) + "\n")
-    do_in_app(f"Import {stop_path} ({', '.join(BULK_STOP_CASKS)}) — big downloads, keep it running")
+    do_in_app(f"App Migration → Import → pick {stop_path} ({', '.join(BULK_STOP_CASKS)}); in the "
+              "selection sheet leave both checked and press Install — big downloads, keep it running")
 
     do_in_app("While it downloads, click the STOP button on ONE app card")
     confirm("Did an alert appear (\"…is part of a bulk operation\") with a 'See Active Tasks' "

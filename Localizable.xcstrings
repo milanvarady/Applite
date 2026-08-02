@@ -280,6 +280,7 @@
     },
     "**Tip:** You can also import apps from a Brewfile. However, only casks will be installed, other items like formulae and taps will be skipped." : {
       "comment" : "App Migration import card tip",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -675,6 +676,9 @@
         }
       }
     },
+    "%lld apps could not be found" : {
+
+    },
     "%lld apps installed" : {
       "comment" : "Bulk install success notification"
     },
@@ -702,6 +706,9 @@
           }
         }
       }
+    },
+    "%lld selected" : {
+      "comment" : "Cask selection sheet count"
     },
     "3 days" : {
       "comment" : "App catalog frequency option",
@@ -2188,6 +2195,7 @@
     },
     "Broken Brew Path" : {
       "comment" : "Broken brew path alert title",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3216,6 +3224,9 @@
     "Deprecated" : {
 
     },
+    "Deselect All" : {
+
+    },
     "Developer Tools" : {
       "comment" : "App category",
       "extractionState" : "manual",
@@ -3340,6 +3351,9 @@
     },
     "Dismiss" : {
 
+    },
+    "Done" : {
+      "comment" : "Accessibility label for the success checkmark"
     },
     "Download Anyway" : {
       "comment" : "App download confirmation button",
@@ -3681,6 +3695,7 @@
     },
     "Export all apps currently installed by Applite to a file." : {
       "comment" : "App Migration export card description",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3722,6 +3737,7 @@
     },
     "Export all of your currently installed apps to a file. Import the file to another device to install them all. Useful when setting up a new Mac." : {
       "comment" : "App migration view description",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3763,6 +3779,7 @@
     },
     "Export Apps to File" : {
       "comment" : "App export button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3801,6 +3818,12 @@
           }
         }
       }
+    },
+    "Export Apps…" : {
+      "comment" : "App Migration export button"
+    },
+    "Export your installed apps to a file, then import it on another Mac to reinstall them all — the easy way to set up a new machine." : {
+      "comment" : "App migration view description"
     },
     "Failed installs & updates" : {
 
@@ -4805,6 +4828,7 @@
     },
     "Import Apps" : {
       "comment" : "Import apps button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4843,6 +4867,9 @@
           }
         }
       }
+    },
+    "Import Apps…" : {
+      "comment" : "App Migration import button"
     },
     "Imported file contains no valid apps" : {
       "comment" : "Alert message",
@@ -5018,6 +5045,9 @@
     },
     "Install" : {
 
+    },
+    "Install apps from a file exported by Applite — or any Brewfile." : {
+      "comment" : "App Migration import card description"
     },
     "Install apps to a folder of your choice instead of /Applications. (Homebrew: `--appdir`)" : {
       "comment" : "Appdir setting description"
@@ -6963,6 +6993,12 @@
         }
       }
     },
+    "Save your selected apps to a file you can import on another Mac." : {
+      "comment" : "App Migration export card description"
+    },
+    "Saved to file" : {
+
+    },
     "Search Sorting Options" : {
       "localizations" : {
         "fr" : {
@@ -7046,6 +7082,15 @@
           }
         }
       }
+    },
+    "Select All" : {
+
+    },
+    "Select Apps to Export" : {
+
+    },
+    "Select Apps to Import" : {
+
     },
     "Select Folder" : {
       "comment" : "Appdir folder selector",
@@ -8703,6 +8748,9 @@
           }
         }
       }
+    },
+    "Waiting for installed apps to load…" : {
+      "comment" : "App Migration export waiting caption"
     },
     "Waiting…" : {
       "comment" : "Queued brew operation label"
