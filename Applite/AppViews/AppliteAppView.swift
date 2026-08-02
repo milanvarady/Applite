@@ -34,15 +34,15 @@ struct AppliteAppView: View {
 
             if let updater {
                 Button("Check for Updates", action: updater.checkForUpdates)
-                    .clipShape(Capsule())
+                    .cardActionPill()
             }
 
             Button {
                 openWindow(id: "uninstall-self")
             } label: {
-                Image(systemName: "trash.fill")
-                    .font(.system(size: 20))
-                    .foregroundStyle(.primary)
+                Image(systemName: "trash")
+                    .font(.system(size: 18))
+                    .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
         }

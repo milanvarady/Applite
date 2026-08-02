@@ -15,9 +15,8 @@ struct UpdateButton: View {
         Button {
             caskManager.update(cask)
         } label: {
-            Image(systemName: "arrow.uturn.down.circle.fill")
-                .font(.system(size: 20))
+            Label("Update", systemImage: "arrow.triangle.2.circlepath")
         }
-        .foregroundStyle(.blue)
+        .cardActionPill()
     }
 }

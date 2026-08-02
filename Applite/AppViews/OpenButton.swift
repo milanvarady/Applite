@@ -1,5 +1,5 @@
 //
-//  OpenAndManageView.swift
+//  OpenButton.swift
 //  Applite
 //
 //  Created by Milán Várady on 2024.12.26.
@@ -8,15 +8,14 @@
 import SwiftUI
 import ButtonKit
 
-/// Button used in the Download section, launches, uninstalls or reinstalls the app
-struct OpenAndManageView: View {
+/// Pill button shown on installed app cards; launches the app.
+struct OpenButton: View {
     var cask: CaskViewModel
-    let deleteButton: Bool
 
     @State private var showAppNotFoundAlert = false
 
     var body: some View {
-        // Lauch app
+        // Launch app
         AsyncButton("Open") {
             // Handle the failure here rather than through ButtonKit's `.onButtonStateError`.
             // That handler re-fires on every re-render while the button stays in its sticky
@@ -28,9 +27,7 @@ struct OpenAndManageView: View {
                 showAppNotFoundAlert = true
             }
         }
-        .font(.system(size: 14))
-        .buttonStyle(.bordered)
-        .clipShape(Capsule())
+        .cardActionPill()
         .asyncButtonStyle(.none)
         .alert("Applite couldn't open \(cask.name)", isPresented: $showAppNotFoundAlert) {
         } message: {
@@ -38,10 +35,6 @@ struct OpenAndManageView: View {
                 "Applite couldn't find \(cask.name) on your Mac. It may be installed under a different name — try opening it from Spotlight (⌘ Space) or your Applications folder.",
                 comment: "Shown when Applite can't locate an installed app's bundle to launch it"
             )
-        }
-
-        if deleteButton {
-            UninstallButton(cask: cask)
         }
     }
 }

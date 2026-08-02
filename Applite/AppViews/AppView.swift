@@ -30,8 +30,10 @@ struct AppView: View {
     @State var showingFailureAlert = false
 
     // Success animation
-    @State var successCheckmarkScale = 0.0001
     @State var keepSuccessIndicator = false
+    /// Clears `keepSuccessIndicator` a beat after a success ends, so a card that stays put
+    /// (e.g. reinstall) never gets stuck on the badge. Cancelled if a new success starts.
+    @State private var successResetTask: Task<Void, Never>? = nil
 
     /// Shown when the stop button is pressed on a cask that's part of a running bulk operation.
     @State var showingBatchStopInfo = false
@@ -48,7 +50,7 @@ struct AppView: View {
         .buttonStyle(.plain)
         .frame(width: Self.dimensions.width, height: Self.dimensions.height)
         .modify { view in
-            // Right-click access to the same actions as the chevron menu
+            // Right-click access to the same actions as the ellipsis menu
             if showsOptionsMenu {
                 view.contextMenu { optionsMenuContent }
             } else {
@@ -67,15 +69,39 @@ struct AppView: View {
         } message: {
             Text("To stop it, use the Stop button in Active Tasks — it cancels the whole bulk operation.", comment: "Batch stop redirect message")
         }
+        .onChange(of: cask.progressState) { oldState, newState in
+            manageSuccessIndicator(from: oldState, to: newState)
+        }
     }
 
-    /// The chevron and right-click menu are shown for installable/installed apps,
+    /// Keeps the success badge on screen through the brief async gap between `progressState`
+    /// hitting `.idle` and the row leaving its list (update/uninstall), then *always* clears the
+    /// flag via `defer` so a card that stays put (reinstall) returns to its buttons instead of
+    /// sticking on the checkmark. Discover cards persist and swap to Open on their own, so they
+    /// don't need the flag at all.
+    private func manageSuccessIndicator(from oldState: CaskProgressState, to newState: CaskProgressState) {
+        guard role != .installAndManage else { return }
+
+        if newState == .success {
+            successResetTask?.cancel()
+            successResetTask = nil
+            keepSuccessIndicator = true
+        } else if oldState == .success {
+            successResetTask?.cancel()
+            successResetTask = Task { @MainActor in
+                defer { keepSuccessIndicator = false }
+                try? await Task.sleep(for: .milliseconds(600))
+            }
+        }
+    }
+
+    /// The ellipsis and right-click menu are shown for installable/installed apps,
     /// but not in the update list.
     private var showsOptionsMenu: Bool {
         role != .update
     }
 
-    /// "More options" menu shared by the chevron button and the card's
+    /// "More options" menu shared by the ellipsis button and the card's
     /// right-click context menu. Items depend on whether the app is installed.
     @ViewBuilder
     private var optionsMenuContent: some View {
@@ -120,12 +146,12 @@ struct AppView: View {
         }
     }
 
-    /// Chevron button that opens the options menu (native dropdown).
+    /// Ellipsis button that opens the "more options" menu (native dropdown).
     private var optionsMenuButton: some View {
         Menu {
             optionsMenuContent
         } label: {
-            Image(systemName: "chevron.down")
+            Image(systemName: "ellipsis")
                 .padding(.vertical)
                 .contentShape(Rectangle())
         }
@@ -145,15 +171,31 @@ struct AppView: View {
 
     @ViewBuilder
     var actionsView: some View {
-        if self.cask.progressState == .idle {
-            if !keepSuccessIndicator {
-                mainButtons
-            } else {
+        Group {
+            if showsSuccessIndicator {
                 successCheckmark
+                    // Grow in via the badge's own onAppear; shrink away on exit
+                    // (role change → Open, or the card leaving its list).
+                    .transition(.asymmetric(
+                        insertion: .opacity,
+                        removal: .scale(scale: 0.3).combined(with: .opacity)
+                    ))
+            } else if self.cask.progressState == .idle {
+                mainButtons
+                    .transition(.opacity.combined(with: .scale(scale: 0.92)))
+            } else {
+                progressView
+                    .transition(.opacity)
             }
-        } else {
-            progressView
         }
+        .animation(.smooth(duration: 0.3), value: cask.progressState)
+        .animation(.smooth(duration: 0.3), value: keepSuccessIndicator)
+    }
+
+    /// The success badge owns a single branch across the `.success` → `.idle` boundary so the
+    /// drawn checkmark isn't re-mounted (and re-animated) when `progressState` settles.
+    private var showsSuccessIndicator: Bool {
+        cask.progressState == .success || keepSuccessIndicator
     }
 
     @ViewBuilder
@@ -161,10 +203,9 @@ struct AppView: View {
         switch role {
         case .installAndManage:
             if cask.isInstalled {
-                OpenAndManageView(cask: cask, deleteButton: false)
+                OpenButton(cask: cask)
             } else {
                 DownloadButton(cask: cask)
-                    .padding(.trailing, 5)
             }
 
             optionsMenuButton
@@ -173,17 +214,14 @@ struct AppView: View {
             UpdateButton(cask: cask)
 
         case .installed:
-            OpenAndManageView(cask: cask, deleteButton: true)
-                .padding(.trailing, 5)
+            OpenButton(cask: cask)
 
             optionsMenuButton
         }
     }
 
     private var successCheckmark: some View {
-        Image(systemName: "checkmark")
-            .font(.system(size: 18, weight: .bold))
-            .foregroundStyle(.green)
+        SuccessCheckmark()
     }
 
     @ViewBuilder
@@ -221,26 +259,8 @@ struct AppView: View {
             .help(caskManager.batchProgress != nil ? "Part of a bulk operation" : "Stop download")
 
         case .success:
-            Image(systemName: "checkmark")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(.green)
-                .scaleEffect(successCheckmarkScale)
-                .onAppear {
-                    withAnimation(.spring(blendDuration: 0.5)) {
-                        successCheckmarkScale = 1
-                    }
-
-                    if self.role == .installAndManage {
-                        Task { @MainActor in
-                            try await Task.sleep(for: .seconds(1.5))
-                            withAnimation(.spring(blendDuration: 1)) {
-                                successCheckmarkScale = 0.0001
-                            }
-                        }
-                    } else {
-                        keepSuccessIndicator = true
-                    }
-                }
+            // Handled upstream by `showsSuccessIndicator` in `actionsView`; unreachable here.
+            EmptyView()
 
         case .failed(let output):
             HStack(spacing: 6) {
