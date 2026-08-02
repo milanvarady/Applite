@@ -7,20 +7,17 @@
 
 import SwiftUI
 
-/// Button used in the Download section, downloads the app
+/// Install pill shown on app cards when the app isn't installed yet.
 struct DownloadButton: View {
     var cask: CaskViewModel
 
     @Environment(CaskManager.self) var caskManager
 
     // Alerts
-    @State var showingBrewError = false
     @State var showCaveatsAndWarnings = false
 
-    @State var buttonFill = false
-
     var body: some View {
-        /// Download button
+        /// Install button
         Button {
             if cask.warning != nil {
                 // Show download confirmation
@@ -30,20 +27,10 @@ struct DownloadButton: View {
 
             caskManager.install(cask)
         } label: {
-            let isDisabled = cask.warning?.isDisabled ?? false
-
-            Image(systemName: isDisabled ? "xmark.circle" : "arrow.down.to.line.circle\(buttonFill ? ".fill" : "")")
-                .foregroundStyle(isDisabled ? Color.red : Color.primary)
-                .font(.system(size: 22))
+            Label("Install", systemImage: "arrow.down")
         }
+        .cardActionPill()
         .disabled(cask.warning?.isDisabled ?? false)
-        .padding(.trailing, -8)
-        .onHover { isHovering in
-            // Hover effect
-            withAnimation(.snappy) {
-                buttonFill = isHovering
-            }
-        }
         .alert(cask.warning?.title ?? "", isPresented: $showCaveatsAndWarnings) {
             Button("Download Anyway") {
                 caskManager.install(cask)
@@ -61,9 +48,6 @@ struct DownloadButton: View {
                     Text("**This app is disabled**\n**Reason:** \(reason)\n**Date:** \(date)")
                 }
             }
-        }
-        .alert("Broken Brew Path", isPresented: $showingBrewError) {} message: {
-            Text(AnnexBrewManager.brokenPathOrInstallMessage)
         }
     }
 }

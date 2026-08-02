@@ -5016,6 +5016,9 @@
         }
       }
     },
+    "Install" : {
+
+    },
     "Install apps to a folder of your choice instead of /Applications. (Homebrew: `--appdir`)" : {
       "comment" : "Appdir setting description"
     },

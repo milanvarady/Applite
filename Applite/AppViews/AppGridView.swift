@@ -33,9 +33,13 @@ struct AppGridView: View {
 
                 ForEach(displayedCasks) { cask in
                     AppView(cask: cask, role: appRole)
+                        .transition(.scale(scale: 0.85).combined(with: .opacity))
                 }
             }
             .padding()
+            // Animate cards fading/scaling in and out as they join or leave the list
+            // (install/update/uninstall, search results), keyed on membership only.
+            .animation(.smooth(duration: 0.35), value: displayedCasks.map(\.id))
         }
     }
 }
