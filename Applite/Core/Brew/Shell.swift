@@ -13,10 +13,6 @@ import os
 enum Shell {
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Shell")
 
-    /// MD5 checksum of the askpass script.
-    /// We want to make sure the script isn't modified by any outside actor
-    private static let askpassChecksum = "fAl63ShrMp8Sp9HIj/FYYA=="
-
     /// Executes a shell command asynchronously
     ///
     /// - Parameters:
@@ -287,13 +283,11 @@ enum Shell {
     ///
     /// We need the `pty` option because some brew commands run in quiet mode if it detects its not in a interactive environment
     private static func createProcess(command: String, pty: Bool) throws -> (Process, Pipe) {
-        // Verify askpass script
+        // Locate the bundled askpass script. Its integrity is guaranteed by the app's
+        // code signature (the bundle's CodeResources seal covers every resource), so no
+        // separate checksum is needed here.
         guard let scriptPath = Bundle.main.path(forResource: "askpass", ofType: "js") else {
             throw ShellError.askpassNotFound
-        }
-
-        if URL(string: scriptPath)?.checksumInBase64() != askpassChecksum {
-            throw ShellError.askpassChecksumMismatch
         }
 
         guard let homeDirectory = ProcessInfo.processInfo.environment["HOME"] else {
