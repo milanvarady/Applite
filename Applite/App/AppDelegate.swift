@@ -13,6 +13,12 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
     /// Set by `AppliteApp` so termination can stop running brew tasks.
     weak var caskManager: CaskManager?
 
+    /// Write the app icon to the fixed path the askpass dialog reads, so the sudo
+    /// password prompt shows Applite's icon. See ``AskpassIcon``.
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        AskpassIcon.write()
+    }
+
     // Close app after last window closed
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return true

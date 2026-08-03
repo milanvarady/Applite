@@ -9,7 +9,6 @@ import Foundation
 
 enum ShellError: LocalizedError {
     case askpassNotFound
-    case askpassChecksumMismatch
     case outputDecodingFailed
     case coundtGetHomeDirectory
     case nonZeroExit(command: String, exitCode: Int32, output: String)
@@ -19,8 +18,6 @@ enum ShellError: LocalizedError {
         switch self {
         case .askpassNotFound:
             return "askpass script not found"
-        case .askpassChecksumMismatch:
-            return "Script checksum mismatch. The file has been modified."
         case .outputDecodingFailed:
             return "Failed to decode command output as UTF-8"
         case .coundtGetHomeDirectory:
