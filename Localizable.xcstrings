@@ -66,6 +66,7 @@
       "shouldTranslate" : false
     },
     "?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
