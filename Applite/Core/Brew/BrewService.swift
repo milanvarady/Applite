@@ -617,7 +617,7 @@ final class BrewService {
                 ok = false
             default:
                 // No marker seen — decide from the single brew query.
-                let listed = brewTokens.contains(vm.fullToken) || brewTokens.contains(vm.token)
+                let listed = vm.matches(anyOf: brewTokens)
                 switch kind {
                 case .install:
                     ok = listed

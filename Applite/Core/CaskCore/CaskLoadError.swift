@@ -22,15 +22,4 @@ enum CaskLoadError: LocalizedError {
             return "Failed to get update frequency"
         }
     }
-
-    var failureReason: String? {
-        switch self {
-        case .failedToLoadCategoryJSON:
-            return "Couldn't load category JSON file"
-        case .failedToLoadAdditionalInfo:
-            return "The response object was empty"
-        case .failedToGetUpdateFrequency:
-            return "Couldn't init update frequency from raw value"
-        }
-    }
 }

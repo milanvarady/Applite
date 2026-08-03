@@ -96,11 +96,6 @@ extension CaskRecord {
         }
     }
 
-    /// Returns true if this cask has any warning
-    var hasWarning: Bool {
-        warningType != nil
-    }
-
     /// True for casks Applite hides from its curated category lists
     /// (deprecated or disabled upstream). Caveats are not hidden.
     var isDeprecatedOrDisabled: Bool {

@@ -172,7 +172,7 @@ final class CaskManager {
         // Defer the catalog error: if the brew bootstrap also fails (same offline root cause), the
         // setup overlay is the single error surface — the catalog alert must not stack on it. Only
         // raise it below, once brew is ready and the overlay won't appear.
-        let catalogError = await loadCatalog(surfaceError: false)
+        let catalogError = await loadCatalog()
         await bootstrap.run()
 
         if bootstrap.isBrewReady {
@@ -202,7 +202,7 @@ final class CaskManager {
         // Defer the catalog error (see `bootstrapAndLoad`): a forced ⌘R sync while brew is also
         // unusable and offline would otherwise stack the catalog alert on the setup overlay. Raise
         // it only on the branches where brew is valid/recovered and no overlay will show.
-        let catalogError = await loadCatalog(forceSync: forceSync, surfaceError: false)
+        let catalogError = await loadCatalog(forceSync: forceSync)
 
         if await BrewPaths.isSelectedBrewPathValid() {
             hasBrokenInstall = false
@@ -249,9 +249,10 @@ final class CaskManager {
     /// Returns the failure (or `nil` on success) instead of surfacing it directly, so the caller
     /// can decide *whether* to raise `loadAlert`: on launch/recovery a catalog failure often shares
     /// its root cause (offline) with a brew bootstrap failure, and the setup overlay must be the
-    /// single error surface — the alert can't stack on top. Pass `surfaceError: false` to defer.
+    /// single error surface — the alert can't stack on top. Every caller currently defers, so this
+    /// only logs and returns the error.
     @discardableResult
-    private func loadCatalog(forceSync: Bool = false, surfaceError: Bool = true) async -> Error? {
+    private func loadCatalog(forceSync: Bool = false) async -> Error? {
         do {
             // Animate the placeholder→full transition so cask cards cross-fade into place
             // rather than swapping instantly mid-shimmer-cycle.
@@ -263,9 +264,6 @@ final class CaskManager {
             return nil
         } catch {
             Self.logger.error("Catalog load failure. Reason: \(error.localizedDescription)")
-            if surfaceError {
-                loadAlert.show(error: error, title: "Couldn't load app catalog")
-            }
             return error
         }
     }
