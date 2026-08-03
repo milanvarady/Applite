@@ -369,7 +369,7 @@ final class BrewService {
     private func brewPathIsValid() async -> Bool {
         guard await BrewPaths.isSelectedBrewPathValid() else {
             Self.logger.error("Couldn't start brew operation because brew path is invalid")
-            alert.show(title: "Brew path is invalid", message: AnnexBrewManager.brokenPathOrInstallMessage)
+            alert.show(title: "Brew path is invalid", message: BrewPaths.brokenPathOrInstallMessage)
             return false
         }
         return true

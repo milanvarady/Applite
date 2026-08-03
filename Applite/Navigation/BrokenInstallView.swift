@@ -15,7 +15,7 @@ struct BrokenInstallView: View {
 
     var body: some View {
         VStack(alignment: .center) {
-            Text(AnnexBrewManager.brokenPathOrInstallMessage)
+            Text(BrewPaths.brokenPathOrInstallMessage)
 
             AsyncButton {
                 await caskManager.loadData()

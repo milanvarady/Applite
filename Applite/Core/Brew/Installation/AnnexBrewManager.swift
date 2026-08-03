@@ -28,9 +28,6 @@ struct AnnexBrewManager {
         category: String(describing: AnnexBrewManager.self)
     )
 
-    /// Message shown when brew path is broken
-    static let brokenPathOrInstallMessage = "Error. Broken brew path, or damaged installation. Check brew path in settings, or try reinstalling Homebrew (Manage Homebrew->Reinstall)"
-
     /// Homebrew source tarball, extracted verbatim into the annex directory.
     ///
     /// Tracks `master` (no version pin) — the same rolling source `brew update` pulls — because the

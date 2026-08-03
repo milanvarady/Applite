@@ -34,7 +34,10 @@ enum AppMigration {
     }
 
     static func readCaskFile(url: URL) throws -> Set<CaskId> {
-        let content = try String(contentsOf: url)
+        var content = try String(contentsOf: url)
+        // Strip a leading UTF-8 BOM: CharacterSet.whitespaces doesn't include U+FEFF, so a
+        // BOM-prefixed first token would silently fail to resolve on import (P2-22).
+        if content.hasPrefix("\u{FEFF}") { content.removeFirst() }
         var casks: Set<CaskId> = []
         // `[\w/@.-]+` matches tap-qualified tokens (`user/repo/token`) AND versioned ones
         // (`temurin@17`, `firefox@esr`) — dropping `@`/`.` silently lost those on import and broke
