@@ -9,54 +9,76 @@ import SwiftUI
 import Kingfisher
 import Shimmer
 
-enum AppIconState {
-    case showingAppIcon
-    case showingFavicon
-    case failed
-}
-
 struct AppIconView: View {
-    @State private var state: AppIconState = .showingAppIcon
+    @State private var iconFailed = false
 
     let iconURL: URL
-    let faviconURL: URL
+    /// App display name — its first letter is shown in the monogram fallback.
+    let name: String
     let cacheKey: String
     var size: CGFloat = 54
 
-    var body: some View {
-        if state != .failed {
-            KFImage.url(state == .showingAppIcon ? iconURL : faviconURL, cacheKey: cacheKey)
-                .resizable()
-                .placeholder {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(.gray)
-                        .shimmering()
-                }
-                .fade(duration: 0.25)
-                .onFailure { error in
-                    // Change state
-                    switch state {
-                    case .showingAppIcon:
-                        state = .showingFavicon
-                    case .showingFavicon:
-                        state = .failed
-                    default:
-                        state = .failed
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .frame(width: size, height: size)
-        } else {
-            // App icon missing
-            ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(.gray, lineWidth: 3)
+    private var cornerRadius: CGFloat { size * 0.2 }
 
-                Text("?")
-                    .font(.system(size: size * 0.44, weight: .light))
+    var body: some View {
+        Group {
+            if iconFailed {
+                monogram
+            } else {
+                KFImage.url(iconURL, cacheKey: cacheKey)
+                    .resizable()
+                    .placeholder {
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .fill(.gray)
+                            .shimmering()
+                    }
+                    .fade(duration: 0.25)
+                    .onFailure { _ in iconFailed = true }
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             }
-            .foregroundStyle(.gray)
-            .frame(width: size * 0.74, height: size * 0.74)
         }
+        .frame(width: size, height: size)
     }
+
+    /// Deterministic letter-on-color tile shown when the remote icon can't be loaded. Replaces the
+    /// old third-party favicon fallback: no network round-trip, no privacy leak, works offline, and
+    /// reads as intentional rather than a broken image.
+    private var monogram: some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .fill(monogramColor)
+            .overlay {
+                Text(monogramLetter)
+                    .font(.system(size: size * 0.5, weight: .medium))
+                    .foregroundStyle(.white)
+            }
+    }
+
+    private var monogramLetter: String {
+        name.first.map { String($0).uppercased() } ?? "?"
+    }
+
+    /// Stable, pleasant color seeded from the cache key so a given app always gets the same tile.
+    private var monogramColor: Color {
+        let hash = cacheKey.unicodeScalars.reduce(UInt64(5381)) { ($0 &* 31) &+ UInt64($1.value) }
+        let hue = Double(hash % 360) / 360
+        return Color(hue: hue, saturation: 0.55, brightness: 0.6)
+    }
+}
+
+#Preview {
+    HStack(spacing: 16) {
+        // Working icon
+        AppIconView(
+            iconURL: URL(string: "https://cdn.jsdelivr.net/gh/alielsokary/CaskFlow@icons/firefox.png")!,
+            name: "Firefox",
+            cacheKey: "caskflow-firefox"
+        )
+        // Monogram fallback (unresolvable URL)
+        AppIconView(
+            iconURL: URL(string: "https://example.invalid/nope.png")!,
+            name: "Some App",
+            cacheKey: "caskflow-some-app"
+        )
+    }
+    .padding()
 }

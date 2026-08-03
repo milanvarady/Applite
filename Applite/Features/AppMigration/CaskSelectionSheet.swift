@@ -95,10 +95,10 @@ struct CaskSelectionSheet: View {
     private func row(for cask: CaskViewModel) -> some View {
         Toggle(isOn: binding(for: cask)) {
             HStack(spacing: 8) {
-                if let iconURL = cask.iconURL, let faviconURL = cask.faviconURL {
+                if let iconURL = cask.iconURL {
                     AppIconView(
                         iconURL: iconURL,
-                        faviconURL: faviconURL,
+                        name: cask.name,
                         cacheKey: cask.iconCacheKey,
                         size: 24
                     )

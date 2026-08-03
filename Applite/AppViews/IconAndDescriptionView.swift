@@ -14,10 +14,10 @@ struct IconAndDescriptionView: View {
     
     var body: some View {
         HStack {
-            if let iconURL = cask.iconURL, let faviconURL = cask.faviconURL {
+            if let iconURL = cask.iconURL {
                 AppIconView(
                     iconURL: iconURL,
-                    faviconURL: faviconURL,
+                    name: cask.name,
                     cacheKey: cask.iconCacheKey
                 )
                 .padding(.leading, 5)

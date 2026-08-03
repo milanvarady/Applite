@@ -110,21 +110,20 @@ final class CaskViewModel {
 // MARK: - Icon URLs
 
 extension CaskViewModel {
-    /// Primary app-icon URL (App-Fair appcasks release asset).
+    /// Primary app-icon URL: CaskFlow's token-named icons (MIT), served via the jsDelivr CDN.
+    /// jsDelivr avoids the unauthenticated `raw.githubusercontent.com` rate limits that a
+    /// catalog full of icon loads would otherwise hit. Token characters (e.g. `+`) serve unencoded.
     ///
     /// Centralized here so every icon call site (app cards, the migration selection sheet) shares
     /// one source — the single edit point when the icon source is swapped.
     var iconURL: URL? {
-        URL(string: "https://github.com/App-Fair/appcasks/releases/download/cask-\(token)/AppIcon.png")
+        URL(string: "https://cdn.jsdelivr.net/gh/alielsokary/CaskFlow@icons/\(token).png")
     }
 
-    /// Fallback favicon URL derived from the homepage host.
-    var faviconURL: URL? {
-        URL(string: "https://icon.horse/icon/\(homepage?.host ?? "")")
-    }
-
-    /// Stable Kingfisher cache key for the icon.
-    var iconCacheKey: String { token }
+    /// Stable Kingfisher cache key for the icon. The `caskflow-` namespace deliberately differs
+    /// from the bare token used by the previous (App-Fair) icon source, so existing installs
+    /// re-fetch from CaskFlow instead of serving the old image cached under the plain token.
+    var iconCacheKey: String { "caskflow-\(token)" }
 }
 
 // MARK: -  Protocol conformances
