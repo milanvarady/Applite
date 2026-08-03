@@ -65,6 +65,10 @@ final class CaskManager {
 
     var installedViewModels: [CaskViewModel] { registry.installedViewModels }
     var outdatedViewModels: [CaskViewModel] { registry.outdatedViewModels }
+    /// Sort-free counts for sidebar badges (see registry) — avoids sorting the whole registry just
+    /// to render a number.
+    var installedCount: Int { registry.installedCount }
+    var outdatedCount: Int { registry.outdatedCount }
     var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
     var batchProgress: BatchProgress? { brewService.batchProgress }
     var alert: AlertManager { brewService.alert }

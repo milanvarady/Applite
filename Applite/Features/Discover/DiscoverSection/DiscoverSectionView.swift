@@ -26,10 +26,13 @@ struct DiscoverSectionView: View {
     @State var scrollViewWidth: CGFloat = 0
 
     var body: some View {
+        // Compute the sorted+chunked casks ONCE per body pass and thread it through, instead of
+        // recomputing (sort + chunk) in each of appRow / maxLeadingIndex / the .id modifier (D2).
+        let coupled = casksCoupled
         VStack(alignment: .leading) {
             categoryHeader
 
-            appRowAndControls
+            appRowAndControls(coupled)
                 .frame(height: AppView.dimensions.height * 2 + 20)
         }
     }
@@ -53,18 +56,18 @@ struct DiscoverSectionView: View {
         }
     }
 
-    var appRowAndControls: some View {
+    func appRowAndControls(_ coupled: [[CaskViewModel]]) -> some View {
         HStack {
             // Backward button
             scrollButton(icon: "chevron.compact.left", direction: -1)
                 .opacity((scrollPosition ?? 0) <= 0 ? 0.2 : 1)
 
             // App row
-            appRow
+            appRow(coupled)
 
             // Forward button
             scrollButton(icon: "chevron.compact.right", direction: 1)
-                .opacity((scrollPosition ?? 0) >= maxLeadingIndex ? 0.2 : 1)
+                .opacity((scrollPosition ?? 0) >= maxLeadingIndex(coupled) ? 0.2 : 1)
                 .padding(.leading, 15)
         }
     }
@@ -74,7 +77,7 @@ struct DiscoverSectionView: View {
         category.casksCoupled(by: sortOption)
     }
 
-    private var appRow: some View {
+    private func appRow(_ casksCoupled: [[CaskViewModel]]) -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack {
                 if casksCoupled.count > 0 {
@@ -123,7 +126,7 @@ struct DiscoverSectionView: View {
     /// `casksCoupled.count - 1` over-shoots when several columns fit on screen — once
     /// the scroll view is at its trailing limit, further `scrollPosition` increments
     /// don't move anything and you'd have to click back through the phantom values.
-    private var maxLeadingIndex: Int {
+    private func maxLeadingIndex(_ casksCoupled: [[CaskViewModel]]) -> Int {
         let columnWidth = AppView.dimensions.width + AppView.dimensions.spacing
         guard columnWidth > 0, scrollViewWidth > 0 else {
             return max(0, casksCoupled.count - 1)
@@ -134,7 +137,7 @@ struct DiscoverSectionView: View {
 
     func scrollButton(icon: String, direction: Int) -> some View {
         Button {
-            let new = min(max(0, (scrollPosition ?? 0) + direction), maxLeadingIndex)
+            let new = min(max(0, (scrollPosition ?? 0) + direction), maxLeadingIndex(casksCoupled))
             withAnimation(.spring()) {
                 scrollPosition = new
             }

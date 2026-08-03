@@ -29,11 +29,13 @@ struct SearchView: View {
     )
 
     var body: some View {
-        Group {
-            if displayedResults.isEmpty && !isSearching {
+        // Filter + sort once per body pass instead of twice (empty-check and grid) (D4).
+        let displayed = displayedResults
+        return Group {
+            if displayed.isEmpty && !isSearching {
                 ContentUnavailableView.search(text: query)
             } else {
-                AppGridView(casks: displayedResults, appRole: .installAndManage)
+                AppGridView(casks: displayed, appRole: .installAndManage)
             }
         }
         .overlay(alignment: .top) {

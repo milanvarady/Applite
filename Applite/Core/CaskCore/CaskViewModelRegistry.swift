@@ -87,6 +87,16 @@ final class CaskViewModelRegistry {
             .sorted()
     }
 
+    /// O(n) counts that skip the O(n log n) `.sorted()` of the full list — for the always-on-screen
+    /// sidebar badge, which only needs the number, not the ordered view models (D1).
+    var installedCount: Int {
+        viewModelsByToken.values.lazy.filter(\.isInstalled).count
+    }
+
+    var outdatedCount: Int {
+        viewModelsByToken.values.lazy.filter(\.isOutdated).count
+    }
+
     /// Total number of tracked view models
     var count: Int {
         viewModelsByToken.count
