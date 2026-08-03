@@ -46,20 +46,20 @@ func uninstallSelf(deleteBrewCache: Bool, uninstallHomebrew: Bool = false) async
 
     logger.notice("Deleting library files:\n\(deleteCommand)")
 
-    let output = try await Shell.runAsync(deleteCommand)
+    let output = try await Shell.runShellScript(deleteCommand)
     logger.notice("Uninstall result: \(output)")
 
     // If uninstalling Homebrew, delete cache first and then uninstall Homebrew
     if uninstallHomebrew {
         logger.notice("Deleting Homebrew cache before uninstalling Homebrew")
-        try await Shell.runAsync("rm -rf $HOME/Library/Caches/Homebrew")
+        try await Shell.runShellScript("rm -rf $HOME/Library/Caches/Homebrew")
 
         logger.notice("Uninstalling Homebrew")
         try await uninstallHomebrewCompletely()
     } else if deleteBrewCache {
         // Only delete cache if not uninstalling Homebrew (since it would be redundant)
         logger.notice("Deleting Homebrew cache")
-        try await Shell.runAsync("rm -rf $HOME/Library/Caches/Homebrew")
+        try await Shell.runShellScript("rm -rf $HOME/Library/Caches/Homebrew")
     }
 
     logger.notice("Self destructing. Goodbye world! o7")
@@ -92,7 +92,7 @@ private func uninstallHomebrewCompletely() async throws {
     """
     
     do {
-        let output = try await Shell.runAsync(uninstallCommand)
+        let output = try await Shell.runShellScript(uninstallCommand)
         logger.notice("Homebrew uninstall output: \(output)")
     } catch {
         logger.error("Failed to uninstall Homebrew: \(error.localizedDescription)")

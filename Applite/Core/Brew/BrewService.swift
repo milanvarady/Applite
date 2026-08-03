@@ -72,25 +72,20 @@ final class BrewService {
         return runTask(for: vm) {
             Self.logger.info("Cask \"\(vm.token)\" installation started")
 
-            // Appdir argument
-            let appdirOn = UserDefaults.standard.value(for: Preferences.appdirOn)
-            let appdirPath = UserDefaults.standard.value(for: Preferences.appdirPath)
-            let appdirArgument = "--appdir=\"\(appdirPath)\""
-
             // Always --force: the Install button only shows when the cask isn't tracked as
             // installed, so force just overwrites/adopts any untracked copy already on disk instead
             // of erroring — and it's identical to a plain install when nothing is there.
-            var arguments = [vm.token, "--force"]
-            if appdirOn { arguments.append(appdirArgument) }
-
-            let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) install --cask \(arguments.joined(separator: " "))"
+            // Use `fullToken` (like every sibling op) so a tapped token that collides with a core
+            // cask installs the intended cask, not the core one.
+            var arguments = ["install", "--cask", vm.fullToken, "--force"]
+            arguments.append(contentsOf: Self.appdirArguments())
 
             // Setup progress
             vm.progressState = .busy(withTask: "")
 
             // Run install command and stream output
             let result = await self.streamBrewCommand(
-                command,
+                arguments,
                 vm: vm,
                 busyLabel: String(localized: "Installing", comment: "Install progress text")
             )
@@ -187,9 +182,7 @@ final class BrewService {
             let updateLabel = String(localized: "Updating", comment: "Update progress text")
             vm.progressState = .busy(withTask: updateLabel)
 
-            let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) upgrade --cask \(vm.fullToken)"
-
-            let result = await self.streamBrewCommand(command, vm: vm, busyLabel: updateLabel)
+            let result = await self.streamBrewCommand(["upgrade", "--cask", vm.fullToken], vm: vm, busyLabel: updateLabel)
 
             // Stopped by the user — no success/failure surface.
             if Task.isCancelled {
@@ -225,9 +218,7 @@ final class BrewService {
             let reinstallLabel = String(localized: "Reinstalling", comment: "Reinstall progress text")
             vm.progressState = .busy(withTask: reinstallLabel)
 
-            let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) reinstall --cask \(vm.fullToken)"
-
-            let result = await self.streamBrewCommand(command, vm: vm, busyLabel: reinstallLabel)
+            let result = await self.streamBrewCommand(["reinstall", "--cask", vm.fullToken], vm: vm, busyLabel: reinstallLabel)
 
             // Stopped by the user — no success/failure surface.
             if Task.isCancelled {
@@ -452,7 +443,7 @@ final class BrewService {
         }
         for key in ambiguousKeys { lookup[key] = nil }
 
-        var arguments = vms.map(\.fullToken)
+        var arguments = [kind.subcommand, "--cask"] + vms.map(\.fullToken)
         if kind == .install {
             // --force: bulk install is only used by app-list import, which commonly re-lists casks
             // that are already installed (or orphaned — e.g. a font whose files remain after brew
@@ -460,11 +451,8 @@ final class BrewService {
             // whole `brew install` batch and fail the rest. Reinstalling is low-risk and makes
             // import resilient.
             arguments.append("--force")
-            let appdirOn = UserDefaults.standard.value(for: Preferences.appdirOn)
-            let appdirPath = UserDefaults.standard.value(for: Preferences.appdirPath)
-            if appdirOn { arguments.append("--appdir=\"\(appdirPath)\"") }
+            arguments.append(contentsOf: Self.appdirArguments())
         }
-        let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) \(kind.subcommand) --cask \(arguments.joined(separator: " "))"
 
         batchProgress = BatchProgress(completed: 0, total: vms.count, isUpdate: kind == .update)
         defer { batchProgress = nil }
@@ -473,7 +461,7 @@ final class BrewService {
         var completeOutput = ""
 
         do {
-            for try await line in Shell.stream(command, pty: true) {
+            for try await line in Shell.streamBrewCommand(arguments, pty: true) {
                 if Task.isCancelled { break }
                 completeOutput += line + "\n"
                 applyBatchLine(line, kind: kind, lookup: lookup, perCaskError: &perCaskError)
@@ -694,14 +682,22 @@ final class BrewService {
         return number * multiplier
     }
 
+    /// The `--appdir=<path>` argument (as a single argv element, no shell quoting) when the user
+    /// has set a custom install directory, else empty. Shared by single and bulk install.
+    private static func appdirArguments() -> [String] {
+        guard UserDefaults.standard.value(for: Preferences.appdirOn) else { return [] }
+        let appdirPath = UserDefaults.standard.value(for: Preferences.appdirPath)
+        return ["--appdir=\(appdirPath)"]
+    }
+
     /// Streams a brew command, updating `vm.progressState` from each parsed line.
     /// Returns the complete output on success, or a ``BrewStreamError`` carrying
     /// the partial output on failure.
-    private func streamBrewCommand(_ command: String, vm: CaskViewModel, busyLabel: String) async -> Result<String, BrewStreamError> {
+    private func streamBrewCommand(_ arguments: [String], vm: CaskViewModel, busyLabel: String) async -> Result<String, BrewStreamError> {
         var completeOutput = ""
 
         do {
-            for try await line in Shell.stream(command, pty: true) {
+            for try await line in Shell.streamBrewCommand(arguments, pty: true) {
                 completeOutput += line + "\n"
 
                 if let newProgress = self.parseBrewProgress(line: line, busyLabel: busyLabel) {

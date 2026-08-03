@@ -89,7 +89,7 @@ struct AnnexBrewManager {
         Self.logger.info("Clean annex Homebrew install started")
 
         try prepareAnnexDirectory(clean: true)
-        try await Shell.runAsync(annexExtractCommand())
+        try await Shell.runShellScript(annexExtractCommand())
         try await verifyAnnexInstall()
 
         BrewPaths.selectedBrewOption = .annex
@@ -108,7 +108,7 @@ struct AnnexBrewManager {
 
         Self.logger.info("Refreshing annex Homebrew (non-destructive overlay)")
         try prepareAnnexDirectory(clean: false)
-        try await Shell.runAsync(annexExtractCommand())
+        try await Shell.runShellScript(annexExtractCommand())
         try await verifyAnnexInstall()
         stampAnnexRefreshed()
         Self.logger.info("Annex Homebrew refresh done")

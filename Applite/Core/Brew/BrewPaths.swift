@@ -81,8 +81,10 @@ struct BrewPaths {
     ///
     /// - Returns: Whether the path is valid or not
     static func isBrewPathValid(at url: URL) async -> Bool {
-        // Check if Homebrew is returned when checking version
-        guard let output = try? await Shell.runAsync("\(url.quotedPath()) --version") else {
+        // Check if Homebrew is returned when checking version. Argv-based (the path is never
+        // spliced into a shell) and time-boxed so a hung/locked/network-mounted brew can't stall
+        // app launch — the whole bootstrap awaits this before it can leave `.checking`.
+        guard let output = try? await Shell.run(url, ["--version"], timeout: .seconds(10)) else {
             return false
         }
 
@@ -161,7 +163,7 @@ struct BrewPaths {
 
         // A login shell (`-l`) sources the user's profile, so `command -v brew` sees the PATH they
         // actually use — this is what finds brew at a non-standard prefix.
-        guard let output = try? await Shell.runAsync("zsh -lc 'command -v brew'", timeout: .seconds(5)) else {
+        guard let output = try? await Shell.run(URL(fileURLWithPath: "/bin/zsh"), ["-lc", "command -v brew"], timeout: .seconds(5)) else {
             return nil
         }
 

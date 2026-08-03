@@ -137,7 +137,7 @@ final class HomebrewBootstrap {
         do {
             try AnnexBrewManager.prepareAnnexDirectory(clean: true)
 
-            for try await line in Shell.stream(AnnexBrewManager.annexExtractCommand(), pty: true) {
+            for try await line in Shell.streamShellScript(AnnexBrewManager.annexExtractCommand(), pty: true) {
                 statusLine = line
             }
 

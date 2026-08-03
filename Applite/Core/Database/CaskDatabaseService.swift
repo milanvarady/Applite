@@ -107,16 +107,30 @@ struct CaskDatabaseService {
 
     /// Syncs cask records from API data: deletes removed casks and upserts all records.
     /// FTS5 stays in sync via `synchronize(withTable:)` triggers; no manual rebuild needed.
-    func syncFromAPI(records: [CaskRecord]) async throws {
-        logger.info("Syncing \(records.count) casks to database")
+    ///
+    /// - Parameter pruneTapCasks: When `false`, casks outside the default `homebrew/cask` tap are
+    ///   never deleted even if absent from `records`. Pass `false` when the third-party tap fetch
+    ///   failed (returned no trustworthy data) so a transient failure can't wipe every custom-tap
+    ///   cask — including installed ones — from the DB.
+    func syncFromAPI(records: [CaskRecord], pruneTapCasks: Bool = true) async throws {
+        logger.info("Syncing \(records.count) casks to database (pruneTapCasks: \(pruneTapCasks))")
 
         try await dbPool.write { db in
             // Collect all tokens from the new data
             let newTokens = Set(records.map(\.token))
 
-            // Delete casks that are no longer in the catalog
-            let allExisting = try String.fetchAll(db, sql: "SELECT token FROM casks")
-            let toDelete = allExisting.filter { !newTokens.contains($0) }
+            // Delete casks that are no longer in the catalog. When tap data is untrusted
+            // (`pruneTapCasks == false`), protect every non-default-tap cask from deletion.
+            let existing = try Row.fetchAll(db, sql: "SELECT token, tap FROM casks")
+            let toDelete: [String] = existing.compactMap { row in
+                let token: String = row["token"]
+                if newTokens.contains(token) { return nil }
+                if !pruneTapCasks {
+                    let tap: String? = row["tap"]
+                    if tap != "homebrew/cask" { return nil }
+                }
+                return token
+            }
             if !toDelete.isEmpty {
                 try CaskRecord
                     .filter(toDelete.contains(Column("token")))
