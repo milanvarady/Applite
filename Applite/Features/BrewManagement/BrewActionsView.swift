@@ -76,18 +76,6 @@ struct BrewActionsView: View {
         }
     }
 
-    private func remark(title: LocalizedStringKey, color: Color, message: LocalizedStringKey) -> Text {
-        Text(title)
-            .foregroundStyle(color)
-            .fontWeight(.bold)
-        +
-        Text(": ")
-            .foregroundStyle(color)
-            .fontWeight(.bold)
-        +
-        Text(message)
-    }
-
     @MainActor
     private var updateButton: some View {
         HStack {

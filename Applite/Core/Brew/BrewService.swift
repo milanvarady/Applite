@@ -351,9 +351,7 @@ final class BrewService {
             }
 
             // Make sure brew path is valid
-            guard await BrewPaths.isSelectedBrewPathValid() else {
-                Self.logger.error("Couldn't start brew operation because brew path is invalid")
-                alert.show(title: "Brew path is invalid", message: AnnexBrewManager.brokenPathOrInstallMessage)
+            guard await self.brewPathIsValid() else {
                 vm.progressState = .idle
                 return
             }
@@ -364,6 +362,17 @@ final class BrewService {
         queueTail = task
         self.activeTasks.append(ActiveBrewTask(operationID: operationID, viewModel: vm, task: task))
         return task
+    }
+
+    /// Validates the selected brew path before an operation runs; on failure logs and surfaces the
+    /// shared alert, returning `false`. The caller resets its own casks' progress state on `false`.
+    private func brewPathIsValid() async -> Bool {
+        guard await BrewPaths.isSelectedBrewPathValid() else {
+            Self.logger.error("Couldn't start brew operation because brew path is invalid")
+            alert.show(title: "Brew path is invalid", message: AnnexBrewManager.brokenPathOrInstallMessage)
+            return false
+        }
+        return true
     }
 
     /// Runs `operation` on the serial brew queue (after any in-flight/queued op) and returns its
@@ -431,9 +440,7 @@ final class BrewService {
                 for vm in vms { vm.progressState = .idle }
                 return
             }
-            guard await BrewPaths.isSelectedBrewPathValid() else {
-                Self.logger.error("Couldn't start bulk operation because brew path is invalid")
-                alert.show(title: "Brew path is invalid", message: AnnexBrewManager.brokenPathOrInstallMessage)
+            guard await self.brewPathIsValid() else {
                 for vm in vms { vm.progressState = .idle }
                 return
             }
