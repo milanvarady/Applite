@@ -26,6 +26,8 @@ struct BrewActionsView: View {
 
     @State var updateFailed = false
     @State var reinstallFailed = false
+    @State var updateFailedMessage = ""
+    @State var reinstallFailedMessage = ""
 
     var body: some View {
         Group {
@@ -97,6 +99,7 @@ struct BrewActionsView: View {
                     try await refreshHomebrewComponents()
                 } catch {
                     BrewManagementView.logger.error("Brew refresh failed. Error: \(error.localizedDescription)")
+                    updateFailedMessage = error.localizedDescription
                     updateFailed = true
                 }
             } label: {
@@ -104,7 +107,10 @@ struct BrewActionsView: View {
             }
             .controlSize(.large)
             .disabled(modifyingBrew)
-            .alert("Refresh failed", isPresented: $updateFailed, actions: {})
+            .alert("Refresh failed", isPresented: $updateFailed) {
+            } message: {
+                Text(updateFailedMessage)
+            }
 
             // Success checkmark
             if updateDone {
@@ -134,6 +140,8 @@ struct BrewActionsView: View {
                     do {
                         try await AnnexBrewManager.installAnnexClean()
                     } catch {
+                        BrewManagementView.logger.error("Brew reinstall failed. Error: \(error.localizedDescription)")
+                        reinstallFailedMessage = error.localizedDescription
                         reinstallFailed = true
                     }
 
@@ -160,9 +168,11 @@ struct BrewActionsView: View {
                     Text("A new Homebrew installation will be installed into `~/Library/Application Support/Applite`", comment: "Brew installation alert notice")
                 }
             }
-            .alert("Reinstall failed", isPresented: $reinstallFailed, actions: {
+            .alert("Reinstall failed", isPresented: $reinstallFailed) {
                 Button("OK", role: .cancel) { }
-            })
+            } message: {
+                Text(reinstallFailedMessage)
+            }
 
             // Success checkmark
             if reinstallDone {

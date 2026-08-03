@@ -143,13 +143,24 @@ struct AnnexBrewManager {
         }
 
         Self.logger.info("Refreshing annex Homebrew (non-destructive overlay)")
-        try prepareAnnexDirectory(clean: false)
-        try await Shell.runShellScript(annexExtractCommand())
-        try await verifyAnnexInstall()
-        stampAnnexRefreshed()
-        Self.logger.info("Annex Homebrew refresh done")
 
+        var refreshError: Error?
+        do {
+            try prepareAnnexDirectory(clean: false)
+            try await Shell.runShellScript(annexExtractCommand())
+            try await verifyAnnexInstall()
+            stampAnnexRefreshed()
+            Self.logger.info("Annex Homebrew refresh done")
+        } catch {
+            refreshError = error
+        }
+
+        // Prune regardless of the refresh outcome. This was the *only* prune site and it ran only on
+        // full success, so repeated refresh failures + continued installs grew HOMEBREW_CACHE without
+        // bound (P3-9). Best-effort: it logs and moves on if brew is unusable.
         await pruneAnnexCache()
+
+        if let refreshError { throw refreshError }
     }
 
     /// Best-effort `brew cleanup --prune=all` on the annex's periodic refresh tick.
