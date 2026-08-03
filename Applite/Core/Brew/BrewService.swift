@@ -11,6 +11,11 @@ import OSLog
 
 struct ActiveBrewTask: Identifiable {
     let id = UUID()
+    /// Groups the rows belonging to the same brew operation (a batch shares one across its casks).
+    /// Eviction is scoped to this, so a finishing op only removes its *own* rows — never a
+    /// different, still-queued op's row for the same cask (which would make that card vanish and
+    /// its cancel silently no-op while brew still ran).
+    let operationID: UUID
     let viewModel: CaskViewModel
     let task: Task<Void, Never>
 }
@@ -326,14 +331,16 @@ final class BrewService {
         vm.progressState = .busy(withTask: waitingLabel)
 
         let previous = queueTail
+        let operationID = UUID()
         let task = Task {
             await previous?.value
 
             defer {
                 // Keep a failed cask in the task list (so its error stays reachable) until the user
-                // dismisses it; remove it once it succeeds or is otherwise done.
+                // dismisses it; remove it once it succeeds or is otherwise done. Scope to THIS
+                // operation's row so a separate queued op for the same cask isn't evicted (P2-10).
                 self.activeTasks.removeAll {
-                    $0.viewModel == vm && !$0.viewModel.progressState.isFailed
+                    $0.operationID == operationID && !$0.viewModel.progressState.isFailed
                 }
             }
 
@@ -355,7 +362,7 @@ final class BrewService {
         }
 
         queueTail = task
-        self.activeTasks.append(ActiveBrewTask(viewModel: vm, task: task))
+        self.activeTasks.append(ActiveBrewTask(operationID: operationID, viewModel: vm, task: task))
         return task
     }
 
@@ -405,15 +412,17 @@ final class BrewService {
 
         let previous = queueTail
         let handle = BatchHandle()
+        let operationID = UUID()
         let task = Task {
             await previous?.value
 
             // Now running — publish this batch so the Active Tasks "Stop" can cancel just it.
             self.runningBatch = handle
             defer {
-                // Keep failed casks in the task list until dismissed; remove the rest.
+                // Keep failed casks in the task list until dismissed; remove the rest. Scope to this
+                // batch's rows so it can't evict a separate op's row for a shared cask (P2-10).
                 self.activeTasks.removeAll {
-                    batchTokens.contains($0.viewModel.fullToken) && !$0.viewModel.progressState.isFailed
+                    $0.operationID == operationID && !$0.viewModel.progressState.isFailed
                 }
                 if self.runningBatch === handle { self.runningBatch = nil }
             }
@@ -433,7 +442,7 @@ final class BrewService {
 
         handle.task = task
         queueTail = task
-        for vm in vms { activeTasks.append(ActiveBrewTask(viewModel: vm, task: task)) }
+        for vm in vms { activeTasks.append(ActiveBrewTask(operationID: operationID, viewModel: vm, task: task)) }
     }
 
     /// Cancels the currently-running bulk operation (the whole `brew install/upgrade --cask <all>`

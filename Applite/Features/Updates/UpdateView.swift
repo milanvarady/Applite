@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ButtonKit
 
 /// Update section
 struct UpdateView: View {
@@ -86,11 +87,28 @@ struct UpdateView: View {
         }
         .overlay {
             if casks.isEmpty {
-                ContentUnavailableView(
-                    "No Updates Available",
-                    systemImage: "checkmark.circle",
-                    description: Text("All your apps are up to date.", comment: "Update view no updates available description")
-                )
+                if caskManager.outdatedRefreshFailed {
+                    // The outdated check failed/never ran — don't claim everything is up to date.
+                    ContentUnavailableView {
+                        Label("Couldn't Check for Updates", systemImage: "exclamationmark.triangle")
+                    } description: {
+                        Text("Applite couldn't check which of your apps are outdated. Check your Homebrew installation and try again.", comment: "Update view outdated-check-failed description")
+                    } actions: {
+                        AsyncButton("Retry", systemImage: "arrow.clockwise") {
+                            do {
+                                try await caskManager.refreshOutdated()
+                            } catch {
+                                loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
+                            }
+                        }
+                    }
+                } else {
+                    ContentUnavailableView(
+                        "No Updates Available",
+                        systemImage: "checkmark.circle",
+                        description: Text("All your apps are up to date.", comment: "Update view no updates available description")
+                    )
+                }
             } else if filteredCasks.isEmpty {
                 ContentUnavailableView.search(text: searchText)
             }

@@ -47,6 +47,11 @@ final class CaskManager {
     /// Views read this to swap in `BrokenInstallView` for the home tab.
     private(set) var hasBrokenInstall: Bool = false
 
+    /// True when the last `brew outdated` check failed (or couldn't run). `UpdateView` reads this so
+    /// an empty outdated list shows "couldn't check for updates" instead of a false "all up to date"
+    /// when the check never actually ran (P3-3).
+    private(set) var outdatedRefreshFailed: Bool = false
+
     /// Alert surface for catalog load/refresh failures. Mirrors the `BrewService.alert`
     /// pattern so views can bind directly without owning load-error state.
     var loadAlert = AlertManager()
@@ -282,18 +287,40 @@ final class CaskManager {
             // ordered as a second line of defense.
             try await brewService.runSerialized {
                 try await self.dataLoader.refreshInstalled()
-                try await self.dataLoader.refreshOutdated()
+                // Outdated is a nested best-effort step: if it fails, keep the (good) installed state
+                // and just flag the failure, so UpdateView shows "couldn't check" instead of a false
+                // "all up to date" (P3-3).
+                do {
+                    try await self.dataLoader.refreshOutdated()
+                    self.outdatedRefreshFailed = false
+                } catch {
+                    self.outdatedRefreshFailed = true
+                    Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
+                }
             }
             Self.logger.info("Installed/outdated state loaded successfully!")
         } catch {
+            // Installed refresh itself failed — outdated state is unknown too, so don't let
+            // UpdateView claim everything is up to date.
+            self.outdatedRefreshFailed = true
             loadAlert.show(error: error, title: "Couldn't load installed apps")
             Self.logger.error("Installed-state load failure. Reason: \(error.localizedDescription)")
         }
     }
 
-    /// Refreshes the list of outdated casks
+    /// Refreshes the list of outdated casks (the toolbar "Refresh" action and UpdateView's retry).
+    /// Serialized behind the brew queue (like `loadInstalledState`) so it can't race an install's
+    /// optimistic write, and updates `outdatedRefreshFailed` so the empty-state UI stays accurate.
     func refreshOutdated() async throws {
-        try await dataLoader.refreshOutdated()
+        do {
+            try await brewService.runSerialized {
+                try await self.dataLoader.refreshOutdated()
+            }
+            outdatedRefreshFailed = false
+        } catch {
+            outdatedRefreshFailed = true
+            throw error
+        }
     }
 
 }

@@ -39,6 +39,22 @@ func uninstallSelf(deleteBrewCache: Bool, uninstallHomebrew: Bool = false) async
         "$HOME/Library/HTTPStorages/\(bundleID)"
     ]
 
+    // Do the step that can fail on permissions (Homebrew uninstall) BEFORE any irreversible wipe of
+    // Applite's own data. Otherwise a no-admin failure throws *after* the data is already gone,
+    // leaving the user with wiped settings, a failed uninstall, and a still-installed app (P2-12).
+    if uninstallHomebrew {
+        logger.notice("Uninstalling Homebrew")
+        try await uninstallHomebrewCompletely()
+
+        logger.notice("Deleting Homebrew cache")
+        try await Shell.runShellScript("rm -rf $HOME/Library/Caches/Homebrew")
+    } else if deleteBrewCache {
+        // Only delete cache if not uninstalling Homebrew (since it would be redundant)
+        logger.notice("Deleting Homebrew cache")
+        try await Shell.runShellScript("rm -rf $HOME/Library/Caches/Homebrew")
+    }
+
+    // Everything below is irreversible — only reached once the throwing Homebrew uninstall succeeded.
     // -rf so missing files are ignored; each path on its own line runs independently
     let deleteCommand = paths
         .map { "rm -rf \($0)" }
@@ -48,19 +64,6 @@ func uninstallSelf(deleteBrewCache: Bool, uninstallHomebrew: Bool = false) async
 
     let output = try await Shell.runShellScript(deleteCommand)
     logger.notice("Uninstall result: \(output)")
-
-    // If uninstalling Homebrew, delete cache first and then uninstall Homebrew
-    if uninstallHomebrew {
-        logger.notice("Deleting Homebrew cache before uninstalling Homebrew")
-        try await Shell.runShellScript("rm -rf $HOME/Library/Caches/Homebrew")
-
-        logger.notice("Uninstalling Homebrew")
-        try await uninstallHomebrewCompletely()
-    } else if deleteBrewCache {
-        // Only delete cache if not uninstalling Homebrew (since it would be redundant)
-        logger.notice("Deleting Homebrew cache")
-        try await Shell.runShellScript("rm -rf $HOME/Library/Caches/Homebrew")
-    }
 
     logger.notice("Self destructing. Goodbye world! o7")
 

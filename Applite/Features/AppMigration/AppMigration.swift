@@ -36,9 +36,11 @@ enum AppMigration {
     static func readCaskFile(url: URL) throws -> Set<CaskId> {
         let content = try String(contentsOf: url)
         var casks: Set<CaskId> = []
-        // `[\w/-]+` (not `[\w-]+`) so tap-qualified tokens like `user/repo/token` also match.
+        // `[\w/@.-]+` matches tap-qualified tokens (`user/repo/token`) AND versioned ones
+        // (`temurin@17`, `firefox@esr`) — dropping `@`/`.` silently lost those on import and broke
+        // Applite's own export→import round trip (export writes fullToken).
         // Extended delimiters `#/.../#` let the `/` appear unescaped without ending the literal.
-        let brewfileRegex = #/cask "([\w/-]+)"/#
+        let brewfileRegex = #/cask "([\w/@.-]+)"/#
 
         // Check if the file being imported is a Brewfile
         // Brewfiles store casks as cask "caskName"
