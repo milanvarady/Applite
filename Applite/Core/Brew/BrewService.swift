@@ -359,6 +359,23 @@ final class BrewService {
         return task
     }
 
+    /// Runs `operation` on the serial brew queue (after any in-flight/queued op) and returns its
+    /// result. Used to sequence the read-side installed/outdated refresh with install/uninstall/
+    /// update *writes*: without this, a stage-2 `brew list`/`outdated` snapshot taken before an
+    /// install finishes can land afterwards and reconcile the just-installed cask back to "not
+    /// installed" (the F2 / P2-3 dual-writer stomp). On the queue, the refresh's snapshot is always
+    /// taken after every completed op, so it can never revert one.
+    func runSerialized<T: Sendable>(_ operation: @escaping @MainActor () async throws -> T) async throws -> T {
+        let previous = queueTail
+        let opTask = Task { @MainActor () async throws -> T in
+            await previous?.value
+            return try await operation()
+        }
+        // Chain the queue tail so later ops wait for this one; the op's own error is the caller's.
+        queueTail = Task { _ = try? await opTask.value }
+        return try await opTask.value
+    }
+
     // MARK: - Bulk (batch) operations
 
     private enum BatchKind {

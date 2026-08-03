@@ -272,11 +272,18 @@ final class CaskManager {
         defer { self.isResolvingInstalledState = false }
 
         do {
-            // Serial, not concurrent: on a fresh annex the first brew command triggers a one-time
-            // `brew vendor-install ruby`, and two brews racing that lock fail with "already locked".
-            // Bootstrap primes Ruby up front, but keep these ordered as a second line of defense.
-            try await dataLoader.refreshInstalled()
-            try await dataLoader.refreshOutdated()
+            // Run the refresh on the serial brew queue so its `brew list`/`outdated` snapshot can't
+            // interleave with — and then revert — a concurrent install/update's optimistic state
+            // write (F2 / P2-3 dual-writer stomp).
+            //
+            // Within the queue slot the two calls stay serial, not concurrent: on a fresh annex the
+            // first brew command triggers a one-time `brew vendor-install ruby`, and two brews racing
+            // that lock fail with "already locked". Bootstrap primes Ruby up front, but keep these
+            // ordered as a second line of defense.
+            try await brewService.runSerialized {
+                try await self.dataLoader.refreshInstalled()
+                try await self.dataLoader.refreshOutdated()
+            }
             Self.logger.info("Installed/outdated state loaded successfully!")
         } catch {
             loadAlert.show(error: error, title: "Couldn't load installed apps")
