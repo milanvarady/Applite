@@ -16,8 +16,6 @@ struct ImportAppsView: View {
     /// sheet's content a pure function of the resolved casks, so it can never present with a stale
     /// empty list — the race that showed "0 casks" on the first import attempt.
     @State private var importSelection: ImportSelection?
-    @State private var importSuccessful = false
-    @State private var importedCount = 0
     @State private var alert = AlertManager()
 
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigration.ImportAppsView")
@@ -47,15 +45,6 @@ struct ImportAppsView: View {
                 Text("Import Apps…", comment: "App Migration import button")
             }
             .cardActionPill()
-
-            Group {
-                if importSuccessful {
-                    Label("Installing \(importedCount) apps…", systemImage: "checkmark.circle")
-                        .foregroundStyle(.green)
-                }
-            }
-            .font(.callout)
-            .frame(height: 20)
         }
         .frame(maxWidth: .infinity)
         .alertManager(alert)
@@ -76,10 +65,11 @@ struct ImportAppsView: View {
                 casks: selection.casks
             ) { selected in
                 caskManager.installAll(selected)
-                withAnimation {
-                    importedCount = selected.count
-                    importSuccessful = true
-                }
+                // Take the user to Active Tasks, where each cask's real progress AND failures show.
+                // The old inline "Installing N apps…" label claimed success optimistically — before
+                // the batch ran — and the batch's failure alert couldn't even present on this screen
+                // (it binds inside AppView cards, which the migration screen doesn't mount) (P3-4).
+                caskManager.requestedTab = .activeTasks
             }
         }
     }
