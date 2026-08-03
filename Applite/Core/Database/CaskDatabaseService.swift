@@ -11,28 +11,29 @@ import OSLog
 
 /// Service for all cask database operations
 struct CaskDatabaseService {
-    private let dbPool: DatabasePool
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: CaskDatabaseService.self)
     )
 
-    init(dbPool: DatabasePool = AppDatabase.shared) {
-        self.dbPool = dbPool
+    /// The shared pool, obtained async-lazily so the (potentially slow) open never runs on the main
+    /// actor at construction time — this service is created during `CaskManager` init (P2-13).
+    private func pool() async throws -> DatabasePool {
+        try await AppDatabase.pool()
     }
 
     // MARK: - Read Operations
 
     /// Fetches a single cask by token
     func fetchCask(token: String) async throws -> CaskRecord? {
-        try await dbPool.read { db in
+        try await pool().read { db in
             try CaskRecord.fetchOne(db, key: token)
         }
     }
 
     /// Fetches a single cask by full token
     func fetchCask(fullToken: String) async throws -> CaskRecord? {
-        try await dbPool.read { db in
+        try await pool().read { db in
             try CaskRecord.filter(Column("fullToken") == fullToken).fetchOne(db)
         }
     }
@@ -40,7 +41,7 @@ struct CaskDatabaseService {
     /// Fetches casks matching a list of tokens (checks both `token` and `fullToken` columns)
     func fetchCasks(forTokens tokens: [String]) async throws -> [CaskRecord] {
         guard !tokens.isEmpty else { return [] }
-        return try await dbPool.read { db in
+        return try await pool().read { db in
             try CaskRecord
                 .filter(tokens.contains(Column("token")) || tokens.contains(Column("fullToken")))
                 .fetchAll(db)
@@ -50,7 +51,7 @@ struct CaskDatabaseService {
     /// Fetches all casks not in the default `homebrew/cask` tap, ordered by tap then name.
     /// Used to build per-tap result groups via in-memory partitioning.
     func fetchAllNonDefaultTapCasks() async throws -> [CaskRecord] {
-        try await dbPool.read { db in
+        try await pool().read { db in
             try CaskRecord
                 .filter(Column("tap") != "homebrew/cask")
                 .order(Column("tap"), Column("name"))
@@ -60,7 +61,7 @@ struct CaskDatabaseService {
 
     /// Fetches the most popular casks
     func fetchPopularCasks(limit: Int = 50) async throws -> [CaskRecord] {
-        try await dbPool.read { db in
+        try await pool().read { db in
             try CaskRecord.order(Column("downloadsIn365days").desc)
                 .limit(limit)
                 .fetchAll(db)
@@ -69,7 +70,7 @@ struct CaskDatabaseService {
 
     /// Returns the count of all casks
     func caskCount() async throws -> Int {
-        try await dbPool.read { db in
+        try await pool().read { db in
             try CaskRecord.fetchCount(db)
         }
     }
@@ -98,7 +99,7 @@ struct CaskDatabaseService {
             LIMIT \(limit)
             """
 
-        return try await dbPool.read { db in
+        return try await pool().read { db in
             try request.fetchAll(db)
         }
     }
@@ -115,7 +116,7 @@ struct CaskDatabaseService {
     func syncFromAPI(records: [CaskRecord], pruneTapCasks: Bool = true) async throws {
         logger.info("Syncing \(records.count) casks to database (pruneTapCasks: \(pruneTapCasks))")
 
-        try await dbPool.write { db in
+        try await pool().write { db in
             // Collect all tokens from the new data
             let newTokens = Set(records.map(\.token))
 
@@ -173,14 +174,14 @@ struct CaskDatabaseService {
 
     /// Returns the last sync date from the metadata table
     func getLastSyncDate() async throws -> Date? {
-        try await dbPool.read { db in
+        try await pool().read { db in
             try getLastSyncDate(in: db)
         }
     }
 
     /// Stores the last sync date in the metadata table
     func setLastSyncDate(_ date: Date) async throws {
-        try await dbPool.write { db in
+        try await pool().write { db in
             try setLastSyncDate(date, in: db)
         }
     }
@@ -208,14 +209,14 @@ struct CaskDatabaseService {
 
     /// Deletes a cask by token
     func delete(token: String) async throws {
-        try await dbPool.write { db in
+        try await pool().write { db in
             _ = try CaskRecord.deleteOne(db, key: token)
         }
     }
 
     /// Deletes all casks
     func deleteAll() async throws {
-        try await dbPool.write { db in
+        try await pool().write { db in
             _ = try CaskRecord.deleteAll(db)
         }
     }
