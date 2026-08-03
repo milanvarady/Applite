@@ -53,9 +53,6 @@ extension CategoryLoadResult {
     /// Sorted casks grouped in pairs for the discover section scroll view
     @MainActor
     func casksCoupled(by option: CategorySortingOptions) -> [[CaskViewModel]] {
-        let sorted = sortedCasks(by: option)
-        return stride(from: 0, to: sorted.count, by: 2).map { i in
-            Array(sorted[i..<min(i + 2, sorted.count)])
-        }
+        sortedCasks(by: option).chunked(into: 2)
     }
 }

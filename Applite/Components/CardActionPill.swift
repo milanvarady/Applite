@@ -1,5 +1,5 @@
 //
-//  View+CardActionPill.swift
+//  CardActionPill.swift
 //  Applite
 //
 //  Created by Milán Várady on 2026.08.01.

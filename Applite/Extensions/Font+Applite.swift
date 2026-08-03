@@ -1,5 +1,5 @@
 //
-//  FontExtension.swift
+//  Font+Applite.swift
 //  Applite
 //
 //  Created by Milán Várady on 2024.12.30.
