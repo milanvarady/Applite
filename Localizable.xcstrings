@@ -677,7 +677,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ déinstaller avec succès!"
+            "value" : "%@ désinstallé avec succès !"
           }
         },
         "hu" : {
@@ -707,7 +707,7 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ 已成功卸載"
+            "value" : "%@ 已成功解除安裝"
           }
         }
       }
@@ -2117,7 +2117,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App Költöztetés"
+            "value" : "Appok költöztetése"
           }
         },
         "ja" : {
@@ -3042,13 +3042,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "您确定要永久卸载 Applite 吗？"
+            "value" : "确定要永久卸载 Applite 吗？"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "您確定要永久卸載Applite嗎？"
+            "value" : "確定要永久解除安裝 Applite 嗎？"
           }
         }
       }
@@ -5999,7 +5999,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "更新の更新に失敗しました"
+            "value" : "アップデートの再取得に失敗しました"
           }
         },
         "tr" : {
@@ -6157,7 +6157,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ letöltése sikertelen"
+            "value" : "%@ frissítése sikertelen"
           }
         },
         "ja" : {
@@ -7849,7 +7849,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "インストール"
+            "value" : "インストール中"
           }
         },
         "tr" : {
@@ -12183,7 +12183,7 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "卸載"
+            "value" : "解除安裝"
           }
         }
       }
@@ -12265,7 +12265,7 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "卸載Applite"
+            "value" : "解除安裝 Applite"
           }
         }
       }
@@ -12348,7 +12348,7 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "卸載Applite…"
+            "value" : "解除安裝 Applite…"
           }
         }
       }
@@ -12413,7 +12413,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アンインストール"
+            "value" : "アンインストール中"
           }
         },
         "tr" : {
@@ -12431,7 +12431,7 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在卸載"
+            "value" : "正在解除安裝"
           }
         }
       }
@@ -12970,13 +12970,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "公用设施"
+            "value" : "实用工具"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "公用事業"
+            "value" : "公用程式"
           }
         }
       }
