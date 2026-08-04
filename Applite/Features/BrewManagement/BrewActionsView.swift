@@ -109,6 +109,16 @@ struct BrewActionsView: View {
         }
     }
 
+    /// Two whole sentences rather than one with a `"re"` spliced in. A bare fragment can't be
+    /// translated on its own — it only works in languages that happen to build the word by
+    /// prefixing — so the Hungarian translator dropped the placeholder entirely and a reinstall
+    /// prompt ended up saying "install". The `message:` closure below already worked this way.
+    private var reinstallConfirmTitle: LocalizedStringKey {
+        isAnnexBrewInstalled
+            ? "Are you sure you want to reinstall Homebrew?"
+            : "Are you sure you want to install Homebrew?"
+    }
+
     @MainActor
     private var reinstallButton: some View {
         HStack {
@@ -119,7 +129,7 @@ struct BrewActionsView: View {
             }
             .controlSize(.large)
             .disabled(modifyingBrew)
-            .confirmationDialog("Are you sure you want to \(isAnnexBrewInstalled ? "re" : "")install Homebrew?", isPresented: $isPresentingReinstallConfirm) {
+            .confirmationDialog(reinstallConfirmTitle, isPresented: $isPresentingReinstallConfirm) {
                 AsyncButton("Reinstall", role: .destructive) {
                     withAnimation {
                         modifyingBrew = true

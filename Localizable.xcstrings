@@ -2967,7 +2967,8 @@
             "value" : "確定要%@安裝 Homebrew 嗎？"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Are you sure you want to force install %@? This will override any current installation!" : {
       "comment" : "App force install confirmation",
@@ -14086,6 +14087,88 @@
           }
         }
       }
+    },
+    "Are you sure you want to install Homebrew?" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biztos telepíti a Homebrew-t?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Êtes-vous sûr de vouloir installer Homebrew ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew をインストールしてもよろしいですか？"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定要安装 Homebrew 吗？"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "確定要安裝 Homebrew 嗎？"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew'i kurmak istediğinizden emin misiniz?"
+          }
+        }
+      },
+      "comment" : "Confirmation dialog title when Applite has no Homebrew of its own yet"
+    },
+    "Are you sure you want to reinstall Homebrew?" : {
+      "localizations" : {
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biztos újratelepíti a Homebrew-t?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Êtes-vous sûr de vouloir réinstaller Homebrew ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew を再インストールしてもよろしいですか？"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定要重新安装 Homebrew 吗？"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "確定要重新安裝 Homebrew 嗎？"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew'i yeniden kurmak istediğinizden emin misiniz?"
+          }
+        }
+      },
+      "comment" : "Confirmation dialog title when Applite's own Homebrew is already installed"
     }
   },
   "version" : "1.1"
