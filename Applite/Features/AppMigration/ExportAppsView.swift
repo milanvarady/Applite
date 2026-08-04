@@ -18,7 +18,6 @@ struct ExportAppsView: View {
     /// never races the selection sheet's own dismissal.
     @State private var hasPendingExport = false
     @State private var exportSuccessful = false
-    @State private var alert = AlertManager()
 
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigration.ExportAppsView")
 
@@ -64,7 +63,6 @@ struct ExportAppsView: View {
             statusLine
         }
         .frame(maxWidth: .infinity)
-        .alertManager(alert)
         .sheet(isPresented: $showSelectionSheet, onDismiss: {
             if hasPendingExport {
                 hasPendingExport = false
@@ -87,7 +85,7 @@ struct ExportAppsView: View {
                 withAnimation { exportSuccessful = true }
             case .failure(let error):
                 logger.error("File exporter failed: \(error.localizedDescription)")
-                alert.show(error: error, title: "Failed to export")
+                caskManager.alert.show(error: error, title: "Failed to export")
             }
         }
     }

@@ -16,7 +16,6 @@ struct ImportAppsView: View {
     /// sheet's content a pure function of the resolved casks, so it can never present with a stale
     /// empty list — the race that showed "0 casks" on the first import attempt.
     @State private var importSelection: ImportSelection?
-    @State private var alert = AlertManager()
 
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppMigration.ImportAppsView")
 
@@ -47,14 +46,13 @@ struct ImportAppsView: View {
             .cardActionPill()
         }
         .frame(maxWidth: .infinity)
-        .alertManager(alert)
         // `.item` allows any file so extensionless Brewfiles are selectable, not greyed out.
         .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.item]) { result in
             switch result {
             case .success(let url):
                 gatherCasks(from: url)
             case .failure(let error):
-                alert.show(error: error, title: "Failed to import")
+                caskManager.alert.show(error: error, title: "Failed to import")
             }
         }
         .sheet(item: $importSelection) { selection in
@@ -81,7 +79,7 @@ struct ImportAppsView: View {
             tokens = try AppMigration.readCaskFile(url: url)
         } catch {
             logger.error("Failed to import file: \(url.path(percentEncoded: false))")
-            alert.show(title: "Imported file contains no valid apps", message: "Check if file contains valid cask tokens")
+            caskManager.alert.show(title: "Imported file contains no valid apps", message: "Check if file contains valid cask tokens")
             return
         }
 
@@ -97,7 +95,7 @@ struct ImportAppsView: View {
 
             guard !resolved.isEmpty else {
                 logger.notice("Imported file contains no valid apps: \(url.path(percentEncoded: false))")
-                alert.show(title: "Imported file contains no valid apps", message: "Check if file contains valid cask tokens")
+                caskManager.alert.show(title: "Imported file contains no valid apps", message: "Check if file contains valid cask tokens")
                 return
             }
 

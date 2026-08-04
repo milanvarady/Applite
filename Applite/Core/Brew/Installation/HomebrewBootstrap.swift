@@ -34,12 +34,25 @@ final class HomebrewBootstrap {
         case brewMissing(path: String)
     }
 
+    /// The single source of truth for "can Applite use brew". Every surface that reacts to a
+    /// broken/missing brew derives from this — there is no parallel flag anywhere (E1/F1).
     private(set) var phase: Phase = .checking
 
     /// Whether brew is usable — either a pre-existing brew (`.ready`) or a freshly installed annex
     /// still awaiting the user's acknowledgment (`.installed`). Data loading gates on this.
     var isBrewReady: Bool {
         phase == .ready || phase == .installed
+    }
+
+    /// Whether the non-dismissable setup card should cover the window. It's up for the annex install
+    /// *and* for every broken outcome, which is why brokenness needs no second UI surface of its own:
+    /// the card already shows the real message plus Retry, Troubleshooting and the own-brew escape
+    /// hatch. Lives here, next to `phase`, so `ContentView` doesn't re-derive it.
+    var needsSetupOverlay: Bool {
+        switch phase {
+        case .installing, .installed, .failed, .brewMissing: true
+        case .checking, .ready: false
+        }
     }
 
     /// Latest streamed line from the tarball install, shown in the overlay.

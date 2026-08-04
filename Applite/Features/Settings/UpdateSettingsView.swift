@@ -6,19 +6,11 @@
 //
 
 import SwiftUI
-import Sparkle
 
 struct UpdateSettingsView: View {
-    private let updater: SPUUpdater
-
-    @State private var automaticallyChecksForUpdates: Bool
-    @State private var automaticallyDownloadsUpdates: Bool
-
-    init(updater: SPUUpdater) {
-        self.updater = updater
-        self.automaticallyChecksForUpdates = updater.automaticallyChecksForUpdates
-        self.automaticallyDownloadsUpdates = updater.automaticallyDownloadsUpdates
-    }
+    /// The app-wide updater bridge. Bound directly — the toggles used to be `@State` copies taken in
+    /// `init`, i.e. a snapshot that never heard about a change made anywhere else (P3-19).
+    @Bindable var updater: UpdaterViewModel
 
     var body: some View {
         Form {
@@ -26,6 +18,7 @@ struct UpdateSettingsView: View {
                 Button(action: updater.checkForUpdates) {
                     Label("Check for Updates...", systemImage: "arrow.triangle.2.circlepath")
                 }
+                .disabled(!updater.canCheckForUpdates)
 
                 LabeledContent("Current app version") {
                     Text("\(Bundle.main.version) (\(Bundle.main.buildNumber))", comment: "Update settings current app version text (version, build number)")
@@ -33,16 +26,12 @@ struct UpdateSettingsView: View {
             }
 
             Section {
-                Toggle("Automatically check for updates", isOn: $automaticallyChecksForUpdates)
-                    .onChange(of: automaticallyChecksForUpdates) { _, newValue in
-                        updater.automaticallyChecksForUpdates = newValue
-                    }
+                Toggle("Automatically check for updates", isOn: $updater.automaticallyChecksForUpdates)
 
-                Toggle("Automatically download updates", isOn: $automaticallyDownloadsUpdates)
-                    .disabled(!automaticallyChecksForUpdates)
-                    .onChange(of: automaticallyDownloadsUpdates) { _, newValue in
-                        updater.automaticallyDownloadsUpdates = newValue
-                    }
+                // Sparkle's own gate: it folds in the host's `SUAllowsAutomaticUpdates` Info.plist
+                // key as well as the checks-for-updates setting.
+                Toggle("Automatically download updates", isOn: $updater.automaticallyDownloadsUpdates)
+                    .disabled(!updater.allowsAutomaticUpdates)
             }
         }
         .formStyle(.grouped)

@@ -43,18 +43,18 @@ final class CaskManager {
     /// True while a manual catalog refresh is running (toolbar action).
     private(set) var isRefreshingCatalog: Bool = false
 
-    /// True when the selected brew path failed validation on the last `loadData()`.
-    /// Views read this to swap in `BrokenInstallView` for the home tab.
-    private(set) var hasBrokenInstall: Bool = false
-
     /// True when the last `brew outdated` check failed (or couldn't run). `UpdateView` reads this so
     /// an empty outdated list shows "couldn't check for updates" instead of a false "all up to date"
     /// when the check never actually ran (P3-3).
     private(set) var outdatedRefreshFailed: Bool = false
 
-    /// Alert surface for catalog load/refresh failures. Mirrors the `BrewService.alert`
-    /// pattern so views can bind directly without owning load-error state.
-    var loadAlert = AlertManager()
+    /// The main window's single alert surface — brew failures, catalog/load failures and errors
+    /// raised by views all queue here, and `ContentView` presents it once at the window root.
+    /// Windows that can't see that root (Settings, the uninstaller) own a local one instead.
+    ///
+    /// Note what does *not* feed it: `BrewService` reports install/update failures on the cask's own
+    /// card and in Active Tasks, so it needs no alert surface at all.
+    let alert = AlertManager()
 
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -71,7 +71,6 @@ final class CaskManager {
     var outdatedCount: Int { registry.outdatedCount }
     var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
     var batchProgress: BatchProgress? { brewService.batchProgress }
-    var alert: AlertManager { brewService.alert }
 
     /// One-shot navigation request from deep views (e.g. the "See Active Tasks" button on a
     /// batched app card) to the `ContentView`, which applies it to its sidebar selection and
@@ -91,6 +90,14 @@ final class CaskManager {
         self.dataLoader = dataLoader ?? CaskDataLoader(registry: reg)
         self.brewService = brewService ?? BrewService()
         self.categories = Self.loadInitialCategories()
+
+        // An operation that finds the brew path invalid re-resolves brew through `bootstrap` — the
+        // one owned "is brew usable" state — instead of handling a broken brew its own way (E1/F1).
+        let bootstrap = self.bootstrap
+        self.brewService.recoverBrew = {
+            await bootstrap.run()
+            return bootstrap.isBrewReady
+        }
     }
 
     /// Loads the category list (cached remote copy → bundled fallback) and returns placeholder
@@ -164,12 +171,31 @@ final class CaskManager {
     
     // MARK: - Data Loading
 
+    /// Buttons for a load-failure alert. These used to live in a hand-rolled `.alert` in
+    /// `ContentView` — the only consumer that bypassed `.alertManager(_:)` — which is why
+    /// `AlertManager`'s action fields went unused there (F5). Now the alert carries its own buttons,
+    /// so every surface goes through the same modifier.
+    ///
+    /// No "Quit" button: it dates from when a failed load meant an empty, useless window. The DB
+    /// catalog renders regardless now, so quitting isn't a remedy — offering it as the loudest
+    /// option told a non-technical user their app was broken when it wasn't.
+    private func loadFailureActions(surfacingIn surface: AlertManager) -> [AppAlert.Action] {
+        [
+            // `surface` is captured weakly: it holds the alert, which holds this action — a strong
+            // capture would be a manager retaining itself through its own presented alert.
+            AppAlert.Action("Retry") { [weak self, weak surface] in
+                Task { await self?.loadData(surfacingErrorsIn: surface) }
+            },
+            .ok
+        ]
+    }
+
     /// Launch entry point. Loads the brew-independent catalog immediately (so the UI lights up
     /// even while the annex is still installing), resolves brew via `bootstrap`, then loads the
     /// installed/outdated state once a valid brew is `.ready`. Finally kicks a silent annex
-    /// freshness check. The install sheet (shown by `ContentView` while `bootstrap` is
-    /// `.installing`) covers the app during step 2 — `hasBrokenInstall` is never set here, so
-    /// `BrokenInstallView` can't flash during a normal first-run install.
+    /// freshness check. Any non-ready outcome leaves `bootstrap.phase` broken, which is the single
+    /// surface for it — the install sheet `ContentView` shows for `.installing` also covers every
+    /// failure, so nothing else has to react here.
     func bootstrapAndLoad() async {
         Self.logger.info("Bootstrap + load started")
 
@@ -180,11 +206,10 @@ final class CaskManager {
         await bootstrap.run()
 
         if bootstrap.isBrewReady {
-            hasBrokenInstall = false
             if let catalogError {
-                loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+                alert.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: alert))
             }
-            await loadInstalledState()
+            await loadInstalledState(surfacingErrorsIn: alert)
             await bootstrap.refreshAnnexIfStale()
         } else if case .failed(let message) = bootstrap.phase {
             Self.logger.error("Bootstrap failed: \(message)")
@@ -194,10 +219,24 @@ final class CaskManager {
     }
 
     /// Explicit reload used by the ⌘R menu action, the Settings "Refresh Catalog" prompt, and the
-    /// `BrokenInstallView`/alert retry. Reloads the catalog, then — if the selected brew is valid —
-    /// the installed/outdated state; otherwise re-runs `bootstrap` to try to recover, and only
-    /// surfaces `hasBrokenInstall` if brew is genuinely unusable afterwards.
-    func loadData(forceSync: Bool = false) async {
+    /// load-failure alert's retry. Reloads the catalog, then — if the selected brew is valid — the
+    /// installed/outdated state; otherwise re-runs `bootstrap` to try to recover, leaving the
+    /// resulting `bootstrap.phase` to surface a brew that's genuinely unusable.
+    /// Returns whether the load actually completed — callers that show "this needs refreshing"
+    /// affordances must not clear them on a load that silently did nothing (the broken-brew branch
+    /// below deliberately drops its error, so the return value is the only signal).
+    ///
+    /// `surfacingErrorsIn` decides *which window* hears about a failure. It defaults to the main
+    /// window's alert, but a caller in another scene must pass that scene's own manager: alerts are
+    /// presented at a window's root, so an error raised from Settings into the main window's queue
+    /// appears behind Settings — or, if the main window is closed, is queued against nothing and
+    /// eventually dropped.
+    @discardableResult
+    func loadData(
+        forceSync: Bool = false,
+        surfacingErrorsIn errorSurface: AlertManager? = nil
+    ) async -> Bool {
+        let surface = errorSurface ?? alert
         Self.logger.info("Starting data load process (forceSync: \(forceSync))")
 
         if forceSync { isRefreshingCatalog = true }
@@ -209,26 +248,21 @@ final class CaskManager {
         let catalogError = await loadCatalog(forceSync: forceSync)
 
         if await BrewPaths.isSelectedBrewPathValid() {
-            hasBrokenInstall = false
             if let catalogError {
-                loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+                surface.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: surface))
             }
-            await loadInstalledState()
-            return
+            await loadInstalledState(surfacingErrorsIn: surface)
+            return true
         }
 
         // Selected brew is invalid — attempt recovery (detect existing / reinstall annex).
         await bootstrap.run()
 
         guard bootstrap.isBrewReady else {
-            // Brew is genuinely unusable. `bootstrap` is in `.failed`, so ContentView is
-            // already showing the setup overlay's failed state (message + Retry +
-            // Troubleshooting + "use your own Homebrew"). Don't also raise `loadAlert` (the
-            // catalog error is dropped here — the overlay owns the surface) or BrokenInstallView.
-            // `hasBrokenInstall` stays set as a fallback for the (currently unreachable)
-            // no-overlay case.
-            hasBrokenInstall = true
-
+            // Brew is genuinely unusable. `bootstrap` is now in `.failed`/`.brewMissing`, so
+            // ContentView is already showing the setup overlay (real message + Retry +
+            // Troubleshooting + "use your own Homebrew"). That phase is the single surface for a
+            // broken brew, so don't stack an alert on it — the catalog error is dropped here.
             let versionOutput = (try? await Shell.runBrewCommand(["--version"])) ?? "n/a"
             Self.logger.error(
                 """
@@ -237,21 +271,21 @@ final class CaskManager {
                 brew --version output: \(versionOutput)
                 """
             )
-            return
+            return false
         }
 
-        hasBrokenInstall = false
         // Recovered — the catalog alert is now the only possible surface, so raise it.
         if let catalogError {
-            loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+            surface.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: surface))
         }
-        await loadInstalledState()
+        await loadInstalledState(surfacingErrorsIn: surface)
+        return catalogError == nil
     }
 
     /// Stage 1: catalog (categories + taps) from the local DB — fast, no brew CLI dependency.
     ///
     /// Returns the failure (or `nil` on success) instead of surfacing it directly, so the caller
-    /// can decide *whether* to raise `loadAlert`: on launch/recovery a catalog failure often shares
+    /// can decide *whether* to raise the alert: on launch/recovery a catalog failure often shares
     /// its root cause (offline) with a brew bootstrap failure, and the setup overlay must be the
     /// single error surface — the alert can't stack on top. Every caller currently defers, so this
     /// only logs and returns the error.
@@ -274,7 +308,7 @@ final class CaskManager {
 
     /// Stage 2: installed/outdated state from the brew CLI (slow). Updates the registry reactively,
     /// so view models already on screen flip their flags without rebuilding the catalog views.
-    private func loadInstalledState() async {
+    private func loadInstalledState(surfacingErrorsIn surface: AlertManager) async {
         self.isResolvingInstalledState = true
         defer { self.isResolvingInstalledState = false }
 
@@ -305,7 +339,7 @@ final class CaskManager {
             // Installed refresh itself failed — outdated state is unknown too, so don't let
             // UpdateView claim everything is up to date.
             self.outdatedRefreshFailed = true
-            loadAlert.show(error: error, title: "Couldn't load installed apps")
+            surface.show(error: error, title: "Couldn't load installed apps", actions: loadFailureActions(surfacingIn: surface))
             Self.logger.error("Installed-state load failure. Reason: \(error.localizedDescription)")
         }
     }
@@ -321,6 +355,7 @@ final class CaskManager {
             outdatedRefreshFailed = false
         } catch {
             outdatedRefreshFailed = true
+            Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
             throw error
         }
     }

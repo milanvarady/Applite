@@ -35,6 +35,7 @@ struct AppliteAppView: View {
             if let updater {
                 Button("Check for Updates", action: updater.checkForUpdates)
                     .cardActionPill()
+                    .disabled(!updater.canCheckForUpdates)
             }
 
             Button {
@@ -55,6 +56,8 @@ struct AppliteAppView: View {
     AppliteAppView()
         .environment(
             \.updater,
-            SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil).updater
+            UpdaterViewModel(
+                updater: SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil).updater
+            )
         )
 }

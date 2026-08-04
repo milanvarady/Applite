@@ -19,7 +19,6 @@ struct UpdateView: View {
     @State var updateAllButtonRotation = 0.0
 
     @State var showingGreedyUpdateConfirm = false
-    @State var loadAlert = AlertManager()
 
     /// Filtered casks based on local search text
     var filteredCasks: [CaskViewModel] {
@@ -95,11 +94,10 @@ struct UpdateView: View {
                         Text("Applite couldn't check which of your apps are outdated. Check your Homebrew installation and try again.", comment: "Update view outdated-check-failed description")
                     } actions: {
                         AsyncButton("Retry", systemImage: "arrow.clockwise") {
-                            do {
-                                try await caskManager.refreshOutdated()
-                            } catch {
-                                loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
-                            }
+                            // No alert on failure: this empty state *is* the failure report, and a
+                            // failed retry leaves it on screen saying so. `refreshOutdated` logs and
+                            // keeps `outdatedRefreshFailed` set.
+                            try? await caskManager.refreshOutdated()
                         }
                     }
                 } else {
@@ -116,9 +114,8 @@ struct UpdateView: View {
         .navigationTitle("Update")
         .searchable(text: $searchText, placement: .toolbar)
         .toolbar {
-            UpdateToolbar(loadAlert: loadAlert)
+            UpdateToolbar()
         }
-        .alertManager(loadAlert)
         .onChange(of: isUpdatingAllActive) { _, running in
             syncUpdateAllSpin(running)
         }

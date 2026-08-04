@@ -65,8 +65,26 @@ final class CaskViewModel {
 
     /// True if this cask's short *or* full token is in `tokens`. Brew reports either form
     /// depending on the command, so membership checks must accept both.
-    func matches(anyOf tokens: Set<CaskId>) -> Bool {
-        tokens.contains(token) || tokens.contains(fullToken)
+    /// Exact identity match against names brew printed as `full_name` — `brew list --cask
+    /// --full-name`, and the same query in `reconcileBatch`.
+    ///
+    /// `full_name` is the bare token for core casks and tap-qualified otherwise, which is exactly
+    /// what `fullToken` holds (every `homebrew/cask` row has `fullToken == token`). Matching these
+    /// against the *bare* token instead would let a tap's `firefox` inherit core firefox's installed
+    /// state — harmless while the two collapsed into one view model, wrong now that `fullToken` is
+    /// the identity and both exist.
+    func matchesFullName(in names: Set<CaskId>) -> Bool {
+        names.contains(fullToken)
+    }
+
+    /// Loose match for brew output that prints **bare** tokens even for tap casks — `brew outdated
+    /// --cask -q` does, unlike `list --full-name`.
+    ///
+    /// A bare token can't distinguish two taps' `firefox`, so this is inherently ambiguous and must
+    /// only be applied to casks already known to be installed (see `markOutdated`), which narrows it
+    /// to the one cask that can actually be outdated.
+    func matchesBareToken(in names: Set<CaskId>) -> Bool {
+        names.contains(fullToken) || names.contains(token)
     }
 
     // MARK: - App Launch

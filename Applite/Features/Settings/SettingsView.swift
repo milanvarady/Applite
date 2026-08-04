@@ -30,7 +30,12 @@ public enum ColorSchemePreference: String, CaseIterable, Identifiable, Sendable 
 
 /// Settings pane
 struct SettingsView: View {
-    let updater: SPUUpdater
+    let updater: UpdaterViewModel
+
+    /// This window's alert surface. Settings is its own scene, so it can't be served by the alert
+    /// `ContentView` presents — one manager per window, bound at that window's root (F5/P3-5).
+    /// Panes that trigger work owned by `CaskManager` hand this to it as the error surface.
+    @State private var alert = AlertManager()
 
     var body: some View {
         TabView {
@@ -39,7 +44,7 @@ struct SettingsView: View {
                     Label("General", systemImage: "gearshape")
                 }
 
-            BrewSettingsView()
+            BrewSettingsView(alert: alert)
                 .tabItem {
                     Label("Brew", systemImage: "mug")
                 }
@@ -65,6 +70,7 @@ struct SettingsView: View {
                 }
         }
         .labelStyle(.titleAndIcon)
+        .alertManager(alert)
         .presentedWindowToolbarStyle(.expanded)
         .contentShape(Rectangle())
         .onTapGesture {
@@ -79,10 +85,12 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView(
-        updater: SPUStandardUpdaterController(
-            startingUpdater: false,
-            updaterDelegate: nil,
-            userDriverDelegate: nil
-        ).updater
+        updater: UpdaterViewModel(
+            updater: SPUStandardUpdaterController(
+                startingUpdater: false,
+                updaterDelegate: nil,
+                userDriverDelegate: nil
+            ).updater
+        )
     )
 }

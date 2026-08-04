@@ -20,6 +20,10 @@ struct AppliteApp: App {
 
     /// Sparkle update controller
     private let updaterController: SPUStandardUpdaterController
+
+    /// One observable bridge over the updater, shared by the menu bar, Settings and the self-card
+    /// so all three see the same live state.
+    private let updaterModel: UpdaterViewModel
     
     var selectedColorScheme: ColorScheme? {
         switch colorSchemePreference {
@@ -34,6 +38,7 @@ struct AppliteApp: App {
     
     init() {
         updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        updaterModel = UpdaterViewModel(updater: updaterController.updater)
 
         // Setup network proxy for Kingfisher
         KingfisherManager.shared.downloader.sessionConfiguration = NetworkProxyManager.getURLSessionConfiguration()
@@ -43,7 +48,7 @@ struct AppliteApp: App {
         WindowGroup {
             ContentView()
                 .environment(caskManager)
-                .environment(\.updater, updaterController.updater)
+                .environment(\.updater, updaterModel)
                 .frame(minWidth: 970, minHeight: 520)
                 .preferredColorScheme(selectedColorScheme)
                 // Give the app delegate the live manager so it can stop running
@@ -53,11 +58,11 @@ struct AppliteApp: App {
         }
         .windowResizability(.contentSize)
         .commands {
-            CommandsMenu(updaterController: updaterController, caskManager: caskManager)
+            CommandsMenu(updater: updaterModel, caskManager: caskManager)
         }
         
         Settings {
-            SettingsView(updater: updaterController.updater)
+            SettingsView(updater: updaterModel)
                 .environment(caskManager)
                 .preferredColorScheme(selectedColorScheme)
         }

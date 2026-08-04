@@ -24,21 +24,22 @@ struct CaskDatabaseService {
 
     // MARK: - Read Operations
 
-    /// Fetches a single cask by token
-    func fetchCask(token: String) async throws -> CaskRecord? {
-        try await pool().read { db in
-            try CaskRecord.fetchOne(db, key: token)
-        }
-    }
-
-    /// Fetches a single cask by full token
+    /// Fetches a single cask by its full token (the primary key).
+    ///
+    /// There is deliberately no bare-token equivalent: a bare token can match several casks across
+    /// taps, so "fetch the one for this token" is a question with no correct answer.
     func fetchCask(fullToken: String) async throws -> CaskRecord? {
         try await pool().read { db in
-            try CaskRecord.filter(Column("fullToken") == fullToken).fetchOne(db)
+            try CaskRecord.fetchOne(db, key: fullToken)
         }
     }
 
     /// Fetches casks matching a list of tokens (checks both `token` and `fullToken` columns)
+    ///
+    /// Not chunked, deliberately (P2-23): this binds 2× the token count, and the catalog itself is
+    /// ~7.7k casks, so reaching even SQLite's *stock* 32,766-variable limit would take an import
+    /// file with more tokens than there are casks in existence. Apple's build raises the limit to
+    /// 500,000 besides. Chunking here would be complexity guarding an unreachable case.
     func fetchCasks(forTokens tokens: [String]) async throws -> [CaskRecord] {
         guard !tokens.isEmpty else { return [] }
         return try await pool().read { db in
@@ -117,24 +118,25 @@ struct CaskDatabaseService {
         logger.info("Syncing \(records.count) casks to database (pruneTapCasks: \(pruneTapCasks))")
 
         try await pool().write { db in
-            // Collect all tokens from the new data
-            let newTokens = Set(records.map(\.token))
+            // Identity is `fullToken` throughout — matching on the bare token would delete *every*
+            // tap's copy of a cask because one tap dropped it.
+            let newFullTokens = Set(records.map(\.fullToken))
 
             // Delete casks that are no longer in the catalog. When tap data is untrusted
             // (`pruneTapCasks == false`), protect every non-default-tap cask from deletion.
-            let existing = try Row.fetchAll(db, sql: "SELECT token, tap FROM casks")
+            let existing = try Row.fetchAll(db, sql: "SELECT fullToken, tap FROM casks")
             let toDelete: [String] = existing.compactMap { row in
-                let token: String = row["token"]
-                if newTokens.contains(token) { return nil }
+                let fullToken: String = row["fullToken"]
+                if newFullTokens.contains(fullToken) { return nil }
                 if !pruneTapCasks {
                     let tap: String? = row["tap"]
                     if tap != "homebrew/cask" { return nil }
                 }
-                return token
+                return fullToken
             }
             if !toDelete.isEmpty {
                 try CaskRecord
-                    .filter(toDelete.contains(Column("token")))
+                    .filter(toDelete.contains(Column("fullToken")))
                     .deleteAll(db)
                 logger.info("Removed \(toDelete.count) casks no longer in catalog")
             }
@@ -206,13 +208,6 @@ struct CaskDatabaseService {
     }
 
     // MARK: - Write Operations
-
-    /// Deletes a cask by token
-    func delete(token: String) async throws {
-        try await pool().write { db in
-            _ = try CaskRecord.deleteOne(db, key: token)
-        }
-    }
 
     /// Deletes all casks
     func deleteAll() async throws {
