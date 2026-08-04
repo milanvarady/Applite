@@ -219,9 +219,19 @@ enum Shell {
                     // finished (or AsyncBytes may not observe EOF promptly). A hung loop here would
                     // freeze the cask on its install/"success" state — so it's never marked installed.
                     // Closing our read end on termination guarantees EOF.
+                    //
+                    // **Only for a pty.** Closing discards whatever the process wrote just before
+                    // exiting and is still sitting in the pipe — up to its 64 KB buffer. A plain pipe
+                    // doesn't need the help: the child's write end closes when it exits, so the
+                    // reader drains the backlog and *then* sees EOF. Forcing it here truncated any
+                    // output the reader hadn't caught up with, which is why the 161 KB tap-cask JSON
+                    // arrived 63% complete and failed to parse ("Unexpected end of file") — taps
+                    // silently never appeared.
                     task.terminationHandler = { _ in
                         processExited.withLock { $0 = true }
-                        try? fileHandle.close()
+                        if pty {
+                            try? fileHandle.close()
+                        }
                     }
 
                     try task.run()
