@@ -7338,7 +7338,7 @@
       }
     },
     "Install" : {
-      "comment" : "Button that installs an app",
+      "comment" : "Button that installs an app, and the confirm button when installing Applite's Homebrew",
       "localizations" : {
         "hu" : {
           "stringUnit" : {
@@ -9864,7 +9864,7 @@
       }
     },
     "Reinstall" : {
-      "comment" : "Brew Management view reinstall section title",
+      "comment" : "Reinstall action — one word shared by the Manage Homebrew section title, an app card's menu item, and the reinstall confirmation button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

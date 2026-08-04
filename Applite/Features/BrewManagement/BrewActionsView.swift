@@ -66,7 +66,7 @@ struct BrewActionsView: View {
                     message: "After reinstalling, all currently installed apps will be unlinked from Applite. They won't be deleted, but you won't be able to update or uninstall them via Applite."
                 )
             } header: {
-                Text("Reinstall", comment: "Brew Management view reinstall section title")
+                Text("Reinstall", comment: "Reinstall action — one word shared by the Manage Homebrew section title, an app card's menu item, and the reinstall confirmation button")
             }
         }
         .task {
@@ -130,7 +130,8 @@ struct BrewActionsView: View {
             .controlSize(.large)
             .disabled(modifyingBrew)
             .confirmationDialog(reinstallConfirmTitle, isPresented: $isPresentingReinstallConfirm) {
-                AsyncButton("Reinstall", role: .destructive) {
+                // Follows the title above: "Reinstall" under an install prompt read as a mistake.
+                AsyncButton(isAnnexBrewInstalled ? "Reinstall" : "Install", role: .destructive) {
                     withAnimation {
                         modifyingBrew = true
                     }
