@@ -43,10 +43,6 @@ final class CaskManager {
     /// True while a manual catalog refresh is running (toolbar action).
     private(set) var isRefreshingCatalog: Bool = false
 
-    /// True when the selected brew path failed validation on the last `loadData()`.
-    /// Views read this to swap in `BrokenInstallView` for the home tab.
-    private(set) var hasBrokenInstall: Bool = false
-
     /// True when the last `brew outdated` check failed (or couldn't run). `UpdateView` reads this so
     /// an empty outdated list shows "couldn't check for updates" instead of a false "all up to date"
     /// when the check never actually ran (P3-3).
@@ -91,6 +87,14 @@ final class CaskManager {
         self.dataLoader = dataLoader ?? CaskDataLoader(registry: reg)
         self.brewService = brewService ?? BrewService()
         self.categories = Self.loadInitialCategories()
+
+        // An operation that finds the brew path invalid re-resolves brew through `bootstrap` — the
+        // one owned "is brew usable" state — instead of handling a broken brew its own way (E1/F1).
+        let bootstrap = self.bootstrap
+        self.brewService.recoverBrew = {
+            await bootstrap.run()
+            return bootstrap.isBrewReady
+        }
     }
 
     /// Loads the category list (cached remote copy → bundled fallback) and returns placeholder
@@ -167,9 +171,9 @@ final class CaskManager {
     /// Launch entry point. Loads the brew-independent catalog immediately (so the UI lights up
     /// even while the annex is still installing), resolves brew via `bootstrap`, then loads the
     /// installed/outdated state once a valid brew is `.ready`. Finally kicks a silent annex
-    /// freshness check. The install sheet (shown by `ContentView` while `bootstrap` is
-    /// `.installing`) covers the app during step 2 — `hasBrokenInstall` is never set here, so
-    /// `BrokenInstallView` can't flash during a normal first-run install.
+    /// freshness check. Any non-ready outcome leaves `bootstrap.phase` broken, which is the single
+    /// surface for it — the install sheet `ContentView` shows for `.installing` also covers every
+    /// failure, so nothing else has to react here.
     func bootstrapAndLoad() async {
         Self.logger.info("Bootstrap + load started")
 
@@ -180,7 +184,6 @@ final class CaskManager {
         await bootstrap.run()
 
         if bootstrap.isBrewReady {
-            hasBrokenInstall = false
             if let catalogError {
                 loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
             }
@@ -194,9 +197,9 @@ final class CaskManager {
     }
 
     /// Explicit reload used by the ⌘R menu action, the Settings "Refresh Catalog" prompt, and the
-    /// `BrokenInstallView`/alert retry. Reloads the catalog, then — if the selected brew is valid —
-    /// the installed/outdated state; otherwise re-runs `bootstrap` to try to recover, and only
-    /// surfaces `hasBrokenInstall` if brew is genuinely unusable afterwards.
+    /// load-failure alert's retry. Reloads the catalog, then — if the selected brew is valid — the
+    /// installed/outdated state; otherwise re-runs `bootstrap` to try to recover, leaving the
+    /// resulting `bootstrap.phase` to surface a brew that's genuinely unusable.
     func loadData(forceSync: Bool = false) async {
         Self.logger.info("Starting data load process (forceSync: \(forceSync))")
 
@@ -209,7 +212,6 @@ final class CaskManager {
         let catalogError = await loadCatalog(forceSync: forceSync)
 
         if await BrewPaths.isSelectedBrewPathValid() {
-            hasBrokenInstall = false
             if let catalogError {
                 loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
             }
@@ -221,14 +223,10 @@ final class CaskManager {
         await bootstrap.run()
 
         guard bootstrap.isBrewReady else {
-            // Brew is genuinely unusable. `bootstrap` is in `.failed`, so ContentView is
-            // already showing the setup overlay's failed state (message + Retry +
-            // Troubleshooting + "use your own Homebrew"). Don't also raise `loadAlert` (the
-            // catalog error is dropped here — the overlay owns the surface) or BrokenInstallView.
-            // `hasBrokenInstall` stays set as a fallback for the (currently unreachable)
-            // no-overlay case.
-            hasBrokenInstall = true
-
+            // Brew is genuinely unusable. `bootstrap` is now in `.failed`/`.brewMissing`, so
+            // ContentView is already showing the setup overlay (real message + Retry +
+            // Troubleshooting + "use your own Homebrew"). That phase is the single surface for a
+            // broken brew, so don't stack `loadAlert` on it — the catalog error is dropped here.
             let versionOutput = (try? await Shell.runBrewCommand(["--version"])) ?? "n/a"
             Self.logger.error(
                 """
@@ -240,7 +238,6 @@ final class CaskManager {
             return
         }
 
-        hasBrokenInstall = false
         // Recovered — the catalog alert is now the only possible surface, so raise it.
         if let catalogError {
             loadAlert.show(error: catalogError, title: "Couldn't load app catalog")

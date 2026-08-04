@@ -43,6 +43,13 @@ final class BrewService {
     private(set) var activeTasks: [ActiveBrewTask] = []
     var alert = AlertManager()
 
+    /// Asks the owner (`CaskManager`) to re-resolve brew when an operation finds the selected path
+    /// invalid, returning whether brew ended up usable. Wired to `HomebrewBootstrap.run()` so this
+    /// service reports the fault into the one owned brew state instead of deciding on its own how a
+    /// broken brew should look (E1/F1). `run()` is single-flight, so a queue of ops collapses into
+    /// a single recovery pass.
+    var recoverBrew: (@MainActor () async -> Bool)?
+
     /// Progress of an in-flight bulk operation, or `nil` when none. Drives an aggregate
     /// "Installing X of N…" header (see `ActiveTasksView`).
     private(set) var batchProgress: BatchProgress?
@@ -364,13 +371,25 @@ final class BrewService {
         return task
     }
 
-    /// Validates the selected brew path before an operation runs; on failure logs and surfaces the
-    /// shared alert, returning `false`. The caller resets its own casks' progress state on `false`.
+    /// Validates the selected brew path before an operation runs. On failure it hands the fault to
+    /// `recoverBrew` rather than reacting locally: a transient probe failure re-resolves silently
+    /// and the operation proceeds, while a real one turns `bootstrap.phase` broken, which raises the
+    /// setup overlay — the single surface for an unusable brew. The caller resets its own casks'
+    /// progress state on `false`.
     private func brewPathIsValid() async -> Bool {
         guard await BrewPaths.isSelectedBrewPathValid() else {
             Self.logger.error("Couldn't start brew operation because brew path is invalid")
-            alert.show(title: "Brew path is invalid", message: BrewPaths.brokenPathOrInstallMessage)
-            return false
+
+            guard let recoverBrew else {
+                // Unwired (no owner) — fall back to the local alert so the failure isn't silent.
+                alert.show(title: "Brew path is invalid", message: BrewPaths.brokenPathOrInstallMessage)
+                return false
+            }
+
+            guard await recoverBrew() else { return false }
+
+            Self.logger.info("Brew re-resolved successfully — continuing the operation")
+            return true
         }
         return true
     }
