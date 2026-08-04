@@ -29,7 +29,10 @@ wipes Applite's data.
 
 Invoke it with the standalone interpreter explicitly, e.g. `/usr/local/bin/python3 applite_test.py …`.
 
-## How it works: two rounds + hide/unhide
+**Forgot the commands?** Run it with no arguments — `applite_test.py` prints the full
+pass in order, the partial-run flags, and every phase id per round.
+
+## How it works: rounds + hide/unhide
 
 Applite behaves differently depending on which brew it drives, so we test both:
 
@@ -37,6 +40,16 @@ Applite behaves differently depending on which brew it drives, so we test both:
   runs it without the Command Line Tools. This is the risky path.
 - **Round B — external `/opt/homebrew`.** The user's own full Homebrew (real git,
   Swift quarantine, none of the annex env). A shorter core-lifecycle re-run.
+
+Plus two rounds that stand apart from the A→B sequence:
+
+- **Round U — upgrade from v1.3.1.** Its own pass, from its own `reset`, because it
+  starts from an *old install* rather than a clean machine. Every existing user arrives
+  this way and this release moved their storage underneath them (JSON cache → GRDB,
+  onboarding removed, annex `Applite/homebrew` → `Applite/Homebrew` — a case-only
+  rename, so the same directory on a default APFS volume and a different one on a
+  case-sensitive volume). Run it once per release.
+- **Round `finalize` — self-uninstall.** Always last; it removes Applite.
 
 Installing brew + CLT takes ~10 min, so we don't do it every run. Instead:
 
@@ -75,6 +88,13 @@ $PY applite_test.py run --round finalize   # self-uninstall (LAST)
 $PY applite_test.py teardown         # re-hide prereqs, keep them cached
 ```
 
+Once per release, as a **separate pass** from its own reset:
+
+```sh
+$PY applite_test.py reset
+$PY applite_test.py run --round upgrade    # install v1.3.1 first, then the new build over it
+```
+
 Each `run` prints a PASS/FAIL/SKIP summary and appends to `Testing/applite-test.log`.
 
 ### Running part of a round
@@ -84,6 +104,8 @@ $PY applite_test.py run --round annex --only 6      # just the update phase
 $PY applite_test.py run --round annex --from 9      # phase 9 (catalog) onward
 $PY applite_test.py run --round external --only B3
 ```
+
+Phase ids per round are listed by running the script with no arguments.
 
 ### Other subcommands
 
@@ -106,7 +128,8 @@ Set at the top of `applite_test.py` (one per installer type); `preflight` re-che
 | `ZAP_CASK` | `stats` | has a `zap trash:` stanza |
 | `UPDATE_CASK` | `font-hack` | versioned, **`auto_updates: false`** — required so non-greedy `brew outdated` will report the faked-old version |
 | `WARN_CASK` | `aegisub` | **deprecated** → triggers the download warning dialog (and checks a deprecated cask still installs — deprecation stays a warning, not a hard error) |
-| `CANCEL_CASK` | `libreoffice` | large download so there's time to hit Stop mid-download (the harness clears its cache first) |
+| `CANCEL_CASK` | `libreoffice` | large download so there's time to hit Stop mid-download (the harness clears its cache first); reused for the quit-mid-install phase |
+| `FAIL_CASK` | `blackhole-2ch` | small **pkg** cask that always needs admin — cancelling its password dialog is a deterministic, offline-safe way to force a *failed* install. Must be used by no other phase, or it'd already be installed |
 | `BULK_INSTALL_CASKS` | `hiddenbar`, `mos`, `font-fira-code` | set imported in one batch (`installAll`) — proves reliable bulk install + per-cask rings + one summary (just one font: fonts are barely used, and the harness cleans their files so a fresh install works) |
 | `BULK_UPDATE_CASKS` | `hiddenbar`, `mos` | subset of the above (apps, not fonts), fake-outdated then "Update All" — need `auto_updates:false` **and a concrete version** (not `:latest`) |
 | `BULK_STOP_CASKS` | `libreoffice`, `inkscape` | two big downloads so the batch is still running when you exercise the batch Stop |
@@ -115,14 +138,39 @@ Cask metadata drifts. If `preflight` flags one (wrong artifact type, `auto_updat
 became true, no zap/caveat), swap that variable for a cask that fits the role — the
 table it prints tells you what it detected.
 
+## The tap fixture (phase 16)
+
+Phase 16 needs a third-party tap containing (a) a token that exists nowhere else and
+(b) a token that **collides with a core cask**. Rather than depend on someone's real
+tap, the harness writes one itself into `<brew prefix>/Library/Taps/applite-harness/
+homebrew-fixtures/`: no git, no network, no `brew tap`. Brew enumerates tap directories
+directly, and Applite's `brew-tap-cask-info.rb` loads them through `FromPathLoader`
+(which it un-trusts), so a plain directory of `.rb` files is enough — which also keeps
+the phase runnable on the CLT-free annex, where there is no real git.
+
+Both fixture casks point at an unreachable URL: they exist to be *listed*, never
+installed. `reset` and `teardown` remove the fixture from both prefixes; a clean annex
+reinstall (phase 20) wipes it too.
+
+It guards two regressions worth naming:
+
+- **Tap casks vanishing.** `Shell`'s stream reader used to drop the tail of a command's
+  output; `brew ruby`'s tap listing was the only thing big enough to hit it, so custom
+  taps silently disappeared from the catalog.
+- **Token collisions (P2-29).** Casks were once keyed by the bare token, so a tap's
+  `rectangle` and core `rectangle` collapsed into one row. Identity is `fullToken` now,
+  and `brew list --cask --full-name` is matched *exactly* — a bare-token match let a tap
+  cask inherit the core cask's installed state.
+
 ## Safety
 
 - The harness only ever **renames** (`sudo mv`, reversible) a system brew/CLT to
   hide/restore them. It **deletes** `/opt/homebrew` + CLT only under the explicit
   `teardown --full`.
 - Outright deletes are a fixed allowlist of Applite's own data + the annex + brew
-  caches + the specific test-cask apps — never `/opt/homebrew`, `/usr/local`,
-  `/Library/Developer`, or anything `$HOME`-wide.
+  caches + the specific test-cask apps + the harness's own tap fixture — never
+  `/opt/homebrew`, `/usr/local`, `/Library/Developer`, or anything `$HOME`-wide. The
+  fixture cleanup removes only `Library/Taps/applite-harness/`, never a real tap.
 - Hiding/unhiding needs `sudo` (you'll be prompted) and Applite to be quit.
 
 ## Caveats
@@ -134,5 +182,9 @@ table it prints tells you what it detected.
   itself pop the dialog); "CLT-free" is checked via `xcode-select -p` pointing at a
   missing dir.
 - A few things are guided visual checks, not hard assertions: cancel-mid-download
-  timing, proxy/mirror, Sparkle self-update, the get-info/terminal windows.
+  timing, proxy/mirror, the get-info/terminal windows. Sparkle's *toggle plumbing* is
+  checked (phase 17) but an actual self-update is not — that needs a signed build and a
+  real appcast.
+- The upgrade round needs you to fetch v1.3.1 from the GitHub releases page by hand; it
+  restores the CLT first, since an upgrader's machine has them.
 - Not a CI tool — it's an interactive pre-release checklist meant to be run by hand.

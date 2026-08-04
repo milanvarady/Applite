@@ -11,7 +11,9 @@ filesystem (`brew info --json=v2`, the Caskroom, /Applications), printing
 PASS / FAIL. Purely-visual outcomes (green tick cleared, no CLT popup, a dialog
 appeared) are guided y/N confirmations.
 
-See Testing/README.md for the full workflow. Short version:
+Run it with NO arguments to print the full pass in order plus every phase id — that
+cheat sheet is the answer to "what were the commands again?". See Testing/README.md for
+the reasoning behind each round. Short version:
 
     # once per VM (installs brew + CLT if missing, then hides them):
     /usr/local/bin/python3 applite_test.py provision
@@ -20,7 +22,11 @@ See Testing/README.md for the full workflow. Short version:
     /usr/local/bin/python3 applite_test.py reset            # fast fresh state
     /usr/local/bin/python3 applite_test.py run --round annex
     /usr/local/bin/python3 applite_test.py run --round external
+    /usr/local/bin/python3 applite_test.py run --round finalize
     /usr/local/bin/python3 applite_test.py teardown
+
+    # once per release, as its own pass from its own reset:
+    /usr/local/bin/python3 applite_test.py run --round upgrade
 
 IMPORTANT: run this under a STANDALONE python3 (python.org or `uv`), never
 `/usr/bin/python3` — that one is a Command Line Tools stub that pops the very
@@ -36,6 +42,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 # --------------------------------------------------------------------------- #
@@ -61,6 +68,10 @@ UPDATE_CASK = "font-hack"       # versioned, auto_updates:false (fonts never sel
 WARN_CASK = "aegisub"           # deprecated → triggers the download warning dialog
 #                                 (also checks a deprecated cask still installs, not hard-errors)
 CANCEL_CASK = "libreoffice"     # big download so there's time to hit Stop; cache cleared first
+FAIL_CASK = "blackhole-2ch"     # small pkg cask that REQUIRES admin — cancelling its password
+#                                 dialog is a deterministic, offline-safe way to force a failed
+#                                 install (phase 15). Must not be used by any other phase, or it
+#                                 would already be installed and offer no Install button.
 # Bulk (batch) test sets. Install-all runs via import; update-all via the Updates "Update All".
 BULK_INSTALL_CASKS = ["hiddenbar", "mos", "font-fira-code"]  # 2 apps + 1 font (fonts barely used)
 # Update-all targets: the two apps (versioned + auto_updates:false, so fake-outdatable) — NOT the
@@ -68,6 +79,27 @@ BULK_INSTALL_CASKS = ["hiddenbar", "mos", "font-fira-code"]  # 2 apps + 1 font (
 # the font's files (see _purge_known_casks) so a fresh install works, but keep them out of update.
 BULK_UPDATE_CASKS = ["hiddenbar", "mos"]
 BULK_STOP_CASKS = ["libreoffice", "inkscape"]  # two big downloads → time to hit the batch Stop
+
+# --- Third-party tap fixture (phase 16) --------------------------------------
+# A hand-made tap under <prefix>/Library/Taps. No git, no network, no `brew tap` — brew enumerates
+# tap directories directly, and Applite's brew-tap-cask-info.rb loads them via FromPathLoader (it
+# no-ops Brew 6's trust check), so a plain directory of .rb files is enough. Verified against a live
+# brew. This keeps the phase runnable on the CLT-free annex, where there is no real git.
+TAP_FIXTURE = "applite-harness/fixtures"        # <user>/<repo> → Taps/<user>/homebrew-<repo>
+TAP_UNIQUE_CASK = "applite-harness-cask"        # a token that exists ONLY in the tap
+TAP_COLLIDING_CASK = DMG_CASK                   # same bare token as a CORE cask (the P2-29 test)
+
+# Both fixture casks point at an unreachable URL: they exist to be *listed*, never installed.
+_TAP_CASK_TEMPLATE = '''cask "{token}" do
+  version "{version}"
+  sha256 :no_check
+  url "https://example.invalid/applite-harness.zip"
+  name "{name}"
+  desc "Applite test-harness fixture — not installable by design"
+  homepage "https://example.invalid/"
+  app "{app}.app"
+end
+'''
 
 # Paths the harness is allowed to delete outright (never a system brew/CLT).
 def _wipe_paths() -> list[Path]:
@@ -484,6 +516,92 @@ def brew_healthy() -> bool:
     return cp.returncode == 0 and "Homebrew" in cp.stdout
 
 
+def brew_processes() -> list[str]:
+    """`ps` lines for brew-owned processes still running — brew itself, its portable ruby, and the
+    curl it spawns for downloads. Matched by path so an unrelated user `curl` isn't counted.
+
+    Used by the quit-mid-install phase: SIGTERM alone left these behind (P3-10), so quitting Applite
+    during a download used to keep downloading in the background."""
+    # Deliberately narrow. Matching "anything under the brew prefix" would flag every
+    # Homebrew-installed daemon on the machine (atuin, python, …) and turn this into a
+    # false-failure generator, so match how brew actually runs instead:
+    #   · `/bin/bash <prefix>/bin/brew …`        → the wrapper
+    #   · `<prefix>/Library/Homebrew/…ruby … brew.rb` → brew proper + its portable ruby
+    #   · `/usr/bin/curl … <cache>/downloads/…`  → the download it spawns
+    # Match on the EXECUTABLE (argv[0]), not the whole command line — a shell whose arguments merely
+    # mention brew would otherwise count. brew's ruby argv is ~8 KB of -I paths, so truncate.
+    prefixes = (str(Path(BREW).parent.parent), str(APPLITE_SUPPORT / "Homebrew"), str(OPT_PREFIX))
+    cache = str(HOMEBREW_CACHE)
+    hits = []
+    for line in run(["ps", "-Ao", "pid=,command="]).stdout.splitlines():
+        parts = line.strip().split()
+        if len(parts) < 2:
+            continue
+        pid, exe, rest = parts[0], parts[1], parts[2:]
+        # `/bin/bash <prefix>/bin/brew …` (wrapper) or `<prefix>/Library/Homebrew/…/ruby …` (brew proper)
+        is_brew = ("/Library/Homebrew/" in exe and any(p in exe for p in prefixes)) or (
+            rest and rest[0].endswith("/bin/brew") and any(p in rest[0] for p in prefixes))
+        is_download = os.path.basename(exe) == "curl" and any(cache in a for a in rest)
+        if is_brew or is_download:
+            hits.append(f"{pid} {' '.join([exe, *rest])[:120]}")
+    return hits
+
+
+# --------------------------------------------------------------------------- #
+# Third-party tap fixture
+# --------------------------------------------------------------------------- #
+
+
+def taps_dir(prefix: Path | None = None) -> Path:
+    base = prefix or Path(BREW).parent.parent
+    return base / "Library/Taps"
+
+
+def tap_fixture_dir(prefix: Path | None = None) -> Path:
+    user, repo = TAP_FIXTURE.split("/")
+    return taps_dir(prefix) / user / f"homebrew-{repo}"
+
+
+def install_tap_fixture() -> bool:
+    """Write the fixture tap into the ACTIVE brew's prefix and confirm brew can resolve both casks.
+    Returns False (with a warning) if brew can't see them, so the phase skips rather than reporting
+    a bogus failure."""
+    casks = tap_fixture_dir() / "Casks"
+    try:
+        casks.mkdir(parents=True, exist_ok=True)
+        (casks / f"{TAP_UNIQUE_CASK}.rb").write_text(_TAP_CASK_TEMPLATE.format(
+            token=TAP_UNIQUE_CASK, version="1.0.0",
+            name="Applite Harness Cask", app="AppliteHarnessCask"))
+        (casks / f"{TAP_COLLIDING_CASK}.rb").write_text(_TAP_CASK_TEMPLATE.format(
+            token=TAP_COLLIDING_CASK, version="0.0.0-harness",
+            name=f"Applite Harness {TAP_COLLIDING_CASK.title()}",
+            app=f"AppliteHarness{TAP_COLLIDING_CASK.title()}"))
+    except OSError as e:
+        warn(f"could not write the tap fixture: {e}")
+        return False
+    info(f"tap fixture written to {tap_fixture_dir()}")
+    for token in (TAP_UNIQUE_CASK, TAP_COLLIDING_CASK):
+        if brew_json(f"{TAP_FIXTURE}/{token}") is None:
+            warn(f"brew can't resolve {TAP_FIXTURE}/{token} — skipping the tap phase")
+            return False
+    return True
+
+
+def remove_tap_fixture() -> None:
+    """Remove the fixture from BOTH prefixes — reset/teardown must not leave a fake tap behind."""
+    for prefix in (APPLITE_SUPPORT / "Homebrew", OPT_PREFIX):
+        repo_dir = tap_fixture_dir(prefix)
+        if not repo_dir.exists():
+            continue
+        _rm(repo_dir)
+        user_dir = repo_dir.parent
+        try:  # drop the now-empty <user> dir, but never a shared one
+            if user_dir.is_dir() and not any(user_dir.iterdir()):
+                user_dir.rmdir()
+        except OSError:
+            pass
+
+
 # --------------------------------------------------------------------------- #
 # fake_outdated
 # --------------------------------------------------------------------------- #
@@ -653,7 +771,7 @@ def unhide_prereqs() -> None:
 # reset / teardown
 # --------------------------------------------------------------------------- #
 
-TEST_CASKS = [DMG_CASK, PKG_CASK, ZAP_CASK, UPDATE_CASK, WARN_CASK, CANCEL_CASK,
+TEST_CASKS = [DMG_CASK, PKG_CASK, ZAP_CASK, UPDATE_CASK, WARN_CASK, CANCEL_CASK, FAIL_CASK,
               *BULK_INSTALL_CASKS, *BULK_STOP_CASKS]
 
 
@@ -708,7 +826,7 @@ def _rm(p: Path) -> None:
 
 def _purge_known_casks() -> None:
     """Remove the known test casks BY NAME, from the catalog — independent of brew's
-    install receipts. This is the workhorse: a clean annex reinstall (phase 11) unlinks
+    install receipts. This is the workhorse: a clean annex reinstall (phase 20) unlinks
     every previously-installed app, so `brew uninstall` can no longer see them; resolving
     each cask's .app bundles + uninstall/zap delete paths + pkg receipts from metadata
     removes them regardless. Best-effort."""
@@ -765,8 +883,9 @@ def cmd_reset(args) -> int:
         _uninstall_all_casks(ANNEX_BREW)
         _uninstall_all_casks(OPT_BREW)
         # 2) name-based purge of the known casks — catches everything the annex reinstall
-        #    (phase 11) unlinked, which brew can no longer see.
+        #    (phase 20) unlinked, which brew can no longer see.
         _purge_known_casks()
+    remove_tap_fixture()
     hide_prereqs()
     _wipe_applite_data()
     RESULTS.add(clt_free(), "machine reads CLT-free with no system brew")
@@ -783,6 +902,7 @@ def cmd_teardown(args) -> int:
         warn("--full: uninstalling all casks, then deleting Homebrew + CLT entirely.")
         _uninstall_all_casks(OPT_BREW)  # linked casks: full brew removal before nuking brew
         _purge_known_casks()            # name-based: unlinked/orphaned apps + pkg/zap
+        remove_tap_fixture()
         _wipe_applite_data()
         for path in (OPT_PREFIX, _hidden(OPT_PREFIX), CLT_PATH, _hidden(CLT_PATH)):
             if path.exists():
@@ -796,6 +916,7 @@ def cmd_teardown(args) -> int:
         _uninstall_all_casks(OPT_BREW)
         _uninstall_all_casks(ANNEX_BREW)
         _purge_known_casks()
+        remove_tap_fixture()
         _wipe_applite_data()
         hide_prereqs()
         ok("Teardown complete — brew + CLT kept hidden for the next run.")
@@ -857,6 +978,7 @@ def cmd_preflight(_args) -> int:
         (UPDATE_CASK, None, "no_auto_update"),
         (WARN_CASK, None, "warn"),
         (CANCEL_CASK, "app", None),
+        (FAIL_CASK, "pkg", None),
         *[(t, None, None) for t in BULK_INSTALL_CASKS if t not in BULK_UPDATE_CASKS],
         *[(t, None, "no_auto_update") for t in BULK_UPDATE_CASKS],
         *[(t, "app", None) for t in BULK_STOP_CASKS],
@@ -1006,7 +1128,7 @@ def phase_a9(state) -> None:
 
 
 def phase_a10(_state) -> None:
-    step("15", "Refresh Homebrew Components (annex overlay)")
+    step("19", "Refresh Homebrew Components (annex overlay)")
 
     # The annex refresh now also prunes the download cache (brew cleanup --prune=all): annex
     # users install only casks and never reuse a cached download, so the refresh reclaims it.
@@ -1031,7 +1153,7 @@ def phase_a10(_state) -> None:
 
 
 def phase_a11(_state) -> None:
-    step("16", "Reinstall Homebrew (clean annex)")
+    step("20", "Reinstall Homebrew (clean annex)")
     do_in_app("Settings → Manage Homebrew → Reinstall Homebrew; confirm and wait")
     check("annex brew healthy after reinstall", brew_healthy)
     check("brew list is empty (apps unlinked)", lambda: installed_tokens() == [])
@@ -1052,30 +1174,51 @@ def phase_a12(_state) -> None:
     confirm("Did the catalog refresh finish with no error alert?")
     do_in_app("Type a query in the search field")
     confirm("Did search return matching results?")
-    do_in_app("Open a category from the sidebar, then a Tap (if taps are enabled)")
-    confirm("Did the Category and Tap views render their apps?")
+    do_in_app("Open a category from the sidebar")
+    confirm("Did the Category view render its apps?")
+    # Sidebar/search interplay: typing stashes the selection, a sidebar tap interrupts the search,
+    # and Esc restores what you were looking at. Cheap to check, easy to regress.
+    do_in_app("With the search still active, click a sidebar item, then press Esc in the field")
+    confirm("Did the sidebar tap clear the search, and Esc restore the previous selection?")
 
 
 def phase_a13(_state) -> None:
-    step("10", "settings: missing-brew error + failure UI")
+    step("10", "settings: missing-brew error, recovery UI + per-window alerts")
 
-    # 10a — a selected NON-annex brew that's missing must surface the "Homebrew not found"
-    # overlay, and must NOT silently switch to / reinstall the annex (which would orphan the
-    # user's own installed apps). A bogus *custom* path is a non-annex selection, so it hits
-    # exactly this branch (BrewPaths.selectedBrewOption != .annex).
-    info("A bogus custom (non-annex) brew path must show the 'Homebrew not found' overlay — "
-         "Applite must NOT silently switch to or reinstall the annex.")
-    do_in_app("Settings → Brew Executable Path → Custom → a bogus path (e.g. /nope/brew); "
-              "then press ⌘R")
+    # 10a — a selected NON-annex brew that's missing must surface the setup overlay, and must NOT
+    # silently switch to / reinstall the annex (which would orphan the user's own installed apps).
+    # A bogus *custom* path is a non-annex selection, so it hits exactly this branch
+    # (BrewPaths.selectedBrewOption != .annex).
+    info("A bogus custom (non-annex) brew path must show the setup overlay — Applite must NOT "
+         "silently switch to or reinstall the annex.")
+    do_in_app("Settings → Brew Executable Path → Custom → a bogus path (e.g. /nope/brew)")
+    # P3-7: the invalid-path message in Settings now carries its own 'Try Again', because the only
+    # other way out was a menu item a non-technical user never finds. It must NOT be disabled while
+    # the path is invalid — that disabled the fix on exactly the fault it fixes.
+    confirm("Did Settings show 'Currently selected brew path is invalid' in red, with an ENABLED "
+            "'Try Again' button next to it?")
+    confirm("Did the bottom 'Refresh the app catalog to apply your changes' banner appear, with an "
+            "ENABLED 'Refresh Catalog' button?")
+    # F5/P3-5 + Finding 5: Settings owns its OWN alert surface. An error raised from here used to be
+    # queued against the main window — presenting behind Settings, or against nothing when the main
+    # window is closed. It must appear over Settings itself.
+    do_in_app("Press 'Try Again' in Settings (leave the bogus path selected)")
+    confirm("Did the failure alert appear over the SETTINGS window (not behind it, not lost)?")
+    do_in_app("Dismiss the alert, bring the MAIN window forward, and press ⌘R there")
     opt = run(["defaults", "read", BUNDLE_ID, "brewPathOption"]).stdout.strip()
     info(f"brewPathOption now = '{opt}'  (should stay 3 = custom, NOT 0 = annex; "
          "may lag until Applite flushes prefs)")
-    confirm("Did a 'Homebrew not found' overlay appear, naming the bogus path (/nope/brew)?")
+    confirm("Did the setup overlay appear in the MAIN window, naming the bogus path (/nope/brew)?")
     confirm("Did Applite NOT switch to the annex (no catalog reappearing, no install spinner)?")
+    # The same overlay must be reachable from an install attempt, not only from ⌘R.
+    do_in_app("Dismiss/ignore the overlay if possible and try to Install any app")
+    confirm("Did the install attempt also land on the setup overlay (not a silent no-op)?")
     do_in_app("Recover: Settings → Brew Executable Path → 'Applite's installation', "
-              "then press Retry on the overlay (or ⌘R)")
+              "then press 'Refresh Catalog' in the Settings banner")
     check("annex brew still healthy (never touched by the bad selection)", brew_healthy)
-    confirm("Did the overlay dismiss and the catalog reload after switching back?")
+    confirm("Did the red invalid-path message clear AND the refresh banner disappear "
+            "(it must only clear on a refresh that actually succeeded)?")
+    confirm("Did the main window's overlay dismiss and the catalog reload?")
 
     # 10b — the genuinely-broken failure UI. Brew must be UNRECOVERABLE for it to show,
     # so the annex is hidden AND the network taken offline (otherwise Applite just
@@ -1092,9 +1235,12 @@ def phase_a13(_state) -> None:
             moved = True
             info("annex temporarily hidden")
         do_in_app("In Applite press ⌘R (annex gone + no network → brew is unrecoverable)")
+        # E1: `bootstrap.phase` is now the single owner of "is brew usable" (the parallel
+        # hasBrokenInstall flag and BrokenInstallView were deleted), so a broken brew must produce
+        # exactly ONE surface — no second overlay and no alert stacked on top of it.
         confirm("Did EXACTLY ONE error surface appear — the setup-failed overlay with "
-                "message + Retry + 'use your own Homebrew' — and NO duplicate alert or "
-                "broken-install screen stacked with it?")
+                "message + Retry + 'use your own Homebrew' — and NOTHING stacked with it "
+                "(no duplicate alert, no second overlay)?")
     finally:
         if moved and stash.exists():
             # Applite's failed reinstall attempt recreates an empty `Homebrew` dir while
@@ -1230,6 +1376,115 @@ def phase_a15(_state) -> None:
     confirm("Did the app launch?")
 
 
+def phase_failed_install(_state) -> None:
+    step("15", f"failed install reports in place, not in a dialog ({FAIL_CASK})")
+    # The alert audit moved brew-op failures OFF alerts: a failed install now reports on the card
+    # itself (a red row) and stays reachable in Active Tasks until dismissed. A dialog here is a
+    # regression. Cancelling the sudo prompt is a deterministic, offline-safe way to force it —
+    # FAIL_CASK is a pkg cask that always needs admin, and is used by no other phase.
+    if cask_installed(FAIL_CASK):
+        do_in_app(f"Uninstall '{FAIL_CASK}' first (this phase needs it NOT installed)")
+    do_in_app(f"Install '{FAIL_CASK}', and press CANCEL on the password dialog when it appears")
+    confirm("Did the app card show a RED failure row inline (error text on the card itself)?")
+    confirm("Did NO error dialog/alert appear?")
+    do_in_app("Open the Active Tasks tab")
+    confirm(f"Is the failed '{FAIL_CASK}' still listed there with its error?")
+    check(f"{FAIL_CASK} is genuinely not installed", lambda: cask_absent(FAIL_CASK))
+    do_in_app("Dismiss the failed task from Active Tasks")
+    confirm("Did dismissing clear both the Active Tasks entry and the card's red row?")
+    # Retrying must reuse the one card rather than leaving two for the same cask.
+    do_in_app(f"Install '{FAIL_CASK}' again, this time entering your password")
+    check(f"{FAIL_CASK} installed on retry", lambda: cask_installed(FAIL_CASK))
+    confirm("Did the retry produce exactly ONE card (no leftover duplicate from the failure)?")
+
+
+def phase_taps(_state) -> None:
+    step("16", "third-party taps + token collision (fullToken identity)")
+    # Two regressions live here:
+    #  · Shell stream truncation silently swallowed the tail of `brew ruby`'s output, which dropped
+    #    tap casks from the catalog entirely (they were the only thing large enough to hit it).
+    #  · P2-29: casks used to be keyed by the BARE token, so a tap's `rectangle` and core
+    #    `rectangle` collapsed into one DB row / one view model. Identity is `fullToken` now, and
+    #    `brew list --cask --full-name` is matched EXACTLY — a bare-token match let a tap cask
+    #    inherit the core cask's installed state (shown in Installed/Updates, uninstall running
+    #    against a cask that isn't installed).
+    if not install_tap_fixture():
+        RESULTS.skip("tap phase (fixture not visible to brew)")
+        return
+    info(f"fixture tap '{TAP_FIXTURE}' provides: {TAP_UNIQUE_CASK} (unique) and "
+         f"{TAP_COLLIDING_CASK} (same bare token as the CORE cask)")
+
+    do_in_app("Settings → App Sources → make sure 'Include Third-Party Taps' is ON, then press "
+              "'Refresh Catalog' in the banner (or ⌘R in the main window)")
+    do_in_app(f"Search for '{TAP_UNIQUE_CASK}'")
+    confirm(f"Did '{TAP_UNIQUE_CASK}' appear, attributed to the tap '{TAP_FIXTURE}'? "
+            "(if the whole tap is missing, the tap fetch was truncated — a regression)")
+    do_in_app("Open the tap's entry in the sidebar")
+    confirm(f"Does the sidebar list the tap '{TAP_FIXTURE}' and render its 2 apps?")
+
+    # The collision test. The CORE cask must be installed and the TAP cask must not be.
+    if not cask_installed(TAP_COLLIDING_CASK):
+        do_in_app(f"Install the CORE '{TAP_COLLIDING_CASK}' (the one NOT attributed to a tap)")
+    check(f"core {TAP_COLLIDING_CASK} is installed",
+          lambda: cask_installed(TAP_COLLIDING_CASK))
+    do_in_app(f"Search for '{TAP_COLLIDING_CASK}' — you should see TWO results "
+              f"(core, and the '{TAP_FIXTURE}' one)")
+    confirm("Do BOTH results show — i.e. the tap cask didn't evict the core one (or vice versa)?")
+    confirm(f"Does ONLY the core '{TAP_COLLIDING_CASK}' show as Installed, while the tap's copy "
+            "still offers Install?")
+    do_in_app("Open the Installed tab")
+    confirm(f"Does the Installed list contain exactly ONE '{TAP_COLLIDING_CASK}' (the core one)?")
+
+    do_in_app("Settings → App Sources → turn 'Include Third-Party Taps' OFF, then 'Refresh Catalog'")
+    do_in_app(f"Search for '{TAP_UNIQUE_CASK}' again")
+    confirm("Is the tap cask now gone from the catalog (the toggle actually prunes)?")
+    confirm(f"Is the CORE '{TAP_COLLIDING_CASK}' still present and still marked Installed "
+            "(pruning taps must not touch core casks)?")
+    do_in_app("Turn 'Include Third-Party Taps' back ON and refresh once more")
+
+
+def phase_sparkle(_state) -> None:
+    step("17", "Sparkle updater is observed, not snapshotted")
+    # P3-18/P3-19: the toggles were @State copies taken in init, so they drifted whenever anything
+    # else moved them; and nothing observed canCheckForUpdates, so 'Check for Updates' stayed live
+    # during a check and repeat clicks stacked up. Both are now KVO-bridged into @Observable.
+    do_in_app("Settings → Updates → note both toggles, then flip 'Automatically check for updates'")
+    confirm("Did 'Automatically download updates' become enabled/disabled to match, immediately?")
+    do_in_app("Close the Settings window, reopen it, and go back to Updates")
+    confirm("Do both toggles still show the values you left them at (no snapshot drift)?")
+    # Sparkle persists these in the app's own defaults domain — verify independently of the UI.
+    auto = run(["defaults", "read", BUNDLE_ID, "SUEnableAutomaticChecks"]).stdout.strip()
+    info(f"SUEnableAutomaticChecks = '{auto or '(unset)'}' — should match the toggle you left set")
+    do_in_app("Restore the toggle to its original value, then press 'Check for Updates...'")
+    confirm("Did 'Check for Updates...' go DISABLED while the check ran, then re-enable?")
+
+
+def phase_quit_mid_install(_state) -> None:
+    step("18", "quit mid-install leaves no brew running")
+    # P3-10: quitting only sent SIGTERM, and brew/curl ignored it — the download kept going after
+    # Applite was gone. Quitting now escalates to SIGKILL after a deadline.
+    clear_cask_cache(CANCEL_CASK)
+    if cask_installed(CANCEL_CASK):
+        do_in_app(f"Uninstall '{CANCEL_CASK}' first (it must re-download for this test)")
+    do_in_app(f"Install '{CANCEL_CASK}' (large) and, WHILE IT DOWNLOADS, quit Applite with ⌘Q")
+    check("Applite actually quit", lambda: not applite_running())
+    # Give the SIGTERM→SIGKILL escalation its deadline before snapshotting, so a process still
+    # unwinding isn't reported as an orphan.
+    leftovers = brew_processes()
+    for _ in range(10):
+        if not leftovers:
+            break
+        time.sleep(1)
+        leftovers = brew_processes()
+    if leftovers:
+        for line in leftovers:
+            warn("  still running: " + line)
+    check("no brew/curl process left running after quit", lambda: not leftovers)
+    check(f"{CANCEL_CASK} not left half-installed", lambda: cask_absent(CANCEL_CASK))
+    do_in_app("Relaunch Applite (the remaining phases need it running)")
+    confirm("Did Applite relaunch cleanly, with no stuck spinner on that app?")
+
+
 # --------------------------------------------------------------------------- #
 # Round B phases (external /opt/homebrew)
 # --------------------------------------------------------------------------- #
@@ -1245,7 +1500,8 @@ def phase_b0(_state) -> None:
     check("/opt/homebrew brew healthy", brew_healthy)
     do_in_app("In Applite: Settings → Brew Executable Path → 'Apple Silicon' "
               "(/opt/homebrew); wait for the catalog to reload")
-    confirm("Did Applite switch to /opt/homebrew with NO BrokenInstallView?")
+    # E1 deleted BrokenInstallView: a healthy selected brew must show no overlay at all.
+    confirm("Did Applite switch to /opt/homebrew with NO setup overlay and no error?")
 
 
 def phase_b1(_state) -> None:
@@ -1289,6 +1545,85 @@ def phase_b4(state) -> None:
 
 
 # --------------------------------------------------------------------------- #
+# Upgrade round (v1.3.1 → this release)
+# --------------------------------------------------------------------------- #
+#
+# The single biggest untested path for a release: every existing user arrives this way, and this
+# release changed the storage underneath them — a JSON cache became a GRDB database, onboarding was
+# removed, and the annex moved from `Applite/homebrew` (v1.3.1) to `Applite/Homebrew`. Those two
+# differ only in case, so they are the SAME directory on a default (case-insensitive) APFS volume
+# and DIFFERENT directories on a case-sensitive one. Neither outcome has been exercised.
+#
+# Run this on its own pass, from a `reset`, BEFORE the annex round — it deliberately starts from an
+# old install rather than a clean machine.
+
+OLD_RELEASE_URL = "https://github.com/milanvarady/Applite/releases/tag/v1.3.1"
+_OLD_ANNEX_DIR = APPLITE_SUPPORT / "homebrew"   # v1.3.1's lowercase spelling
+
+
+def _case_sensitive_home() -> bool:
+    """Whether $HOME's volume distinguishes `homebrew` from `Homebrew` — decides whether an
+    upgrader's old annex is inherited or orphaned."""
+    probe = APPLITE_SUPPORT.parent / ".applite-case-probe"
+    try:
+        probe.mkdir(exist_ok=True)
+        sensitive = not (probe.parent / ".APPLITE-CASE-PROBE").exists()
+        probe.rmdir()
+        return sensitive
+    except OSError:
+        return False
+
+
+def phase_u0(_state) -> None:
+    step("U0", "install the OLD release (v1.3.1) and use it")
+    info(f"Download v1.3.1 from: {OLD_RELEASE_URL}")
+    warn("Round A's `reset` has hidden /opt/homebrew + CLT. v1.3.1 needs the Command Line Tools, "
+         "so this round restores them first — an upgrader's machine has them.")
+    unhide_prereqs()
+    check("prereqs live for the old release", prereqs_live)
+    do_in_app("Install and launch Applite v1.3.1; complete its onboarding, choosing "
+              "\"Applite's installation\" (let it install its own Homebrew)")
+    do_in_app(f"In v1.3.1, install '{DMG_CASK}' and let it finish")
+    check("v1.3.1 created its own brew tree",
+          lambda: _OLD_ANNEX_DIR.exists() or (APPLITE_SUPPORT / "Homebrew").exists())
+    check(f"{DMG_CASK} installed by the old release", lambda: cask_installed(DMG_CASK))
+    do_in_app("Quit Applite v1.3.1 and REPLACE it with the new build in /Applications")
+
+
+def phase_u1(_state) -> None:
+    step("U1", "first launch of the NEW release over the old install")
+    sensitive = _case_sensitive_home()
+    info(f"$HOME volume is case-{'SENSITIVE' if sensitive else 'insensitive'} → the old "
+         f"`Applite/homebrew` and the new `Applite/Homebrew` are "
+         f"{'DIFFERENT directories (expect a fresh annex install)' if sensitive else 'the SAME directory (the old brew is inherited)'}")
+    before = run(["defaults", "read", BUNDLE_ID, "brewPathOption"]).stdout.strip()
+    info(f"brewPathOption carried over from v1.3.1 = '{before or '(unset)'}'")
+
+    do_in_app("Launch the NEW Applite")
+    # No onboarding exists any more; an upgrader must land straight in the catalog.
+    confirm("Did it go straight to the app catalog — NO onboarding/setup wizard?")
+    confirm("Did it avoid re-installing Homebrew from scratch (no long components install), "
+            "or, on a case-sensitive volume, install the annex once and then settle?")
+    check("the new database was created",
+          lambda: (APPLITE_SUPPORT / "casks.sqlite").exists())
+    after = run(["defaults", "read", BUNDLE_ID, "brewPathOption"]).stdout.strip()
+    check(f"brewPathOption preserved across the upgrade ('{before}' → '{after}')",
+          lambda: after == before or not before)
+    do_in_app("Open the Installed tab")
+    confirm(f"Is '{DMG_CASK}' — installed by v1.3.1 — still listed as Installed?")
+    check(f"{DMG_CASK} genuinely still installed on the selected brew",
+          lambda: cask_installed(DMG_CASK))
+    if _OLD_ANNEX_DIR.exists() and sensitive:
+        warn(f"the old v1.3.1 brew is orphaned at {_OLD_ANNEX_DIR} — its casks are now "
+             "invisible to Applite. Worth a release note if this is expected.")
+    do_in_app(f"Uninstall '{DMG_CASK}' from the new Applite")
+    check("the new release can uninstall a cask the OLD one installed",
+          lambda: cask_absent(DMG_CASK))
+    do_in_app("Press ⌘R (Refresh App Catalog)")
+    confirm("Did the catalog refresh cleanly with no error alert?")
+
+
+# --------------------------------------------------------------------------- #
 # Finalize
 # --------------------------------------------------------------------------- #
 
@@ -1325,7 +1660,9 @@ ROUND_A = [
     ("9", "catalog/search", phase_a12), ("10", "settings", phase_a13),
     ("11", "bulk install", phase_a14), ("12", "bulk update", phase_bulk_update),
     ("13", "batch stop", phase_batch_stop), ("14", "launch", phase_a15),
-    ("15", "refresh brew", phase_a10), ("16", "reinstall brew", phase_a11),
+    ("15", "failed install", phase_failed_install), ("16", "taps", phase_taps),
+    ("17", "sparkle", phase_sparkle), ("18", "quit mid-install", phase_quit_mid_install),
+    ("19", "refresh brew", phase_a10), ("20", "reinstall brew", phase_a11),
 ]
 
 ROUND_B = [
@@ -1334,7 +1671,11 @@ ROUND_B = [
     ("B4", "uninstall+zap", phase_b4),
 ]
 
+ROUND_U = [("U0", "install v1.3.1", phase_u0), ("U1", "upgrade to new build", phase_u1)]
+
 FINALIZE = [("F1", "self-uninstall", phase_f1)]
+
+ROUNDS = ["annex", "external", "upgrade", "finalize"]
 
 
 def set_round(name: str) -> list[tuple]:
@@ -1345,6 +1686,11 @@ def set_round(name: str) -> list[tuple]:
     if name == "external":
         BREW = OPT_BREW
         return ROUND_B
+    if name == "upgrade":
+        # v1.3.1's brew and this release's annex are the same Application Support tree (modulo the
+        # `homebrew`/`Homebrew` case change the round exists to probe).
+        BREW = ANNEX_BREW
+        return ROUND_U
     if name == "finalize":
         BREW = OPT_BREW
         return FINALIZE
@@ -1427,8 +1773,61 @@ def _guard_interpreter() -> None:
         sys.exit("Python 3.8+ required.")
 
 
+def print_cheatsheet() -> None:
+    """What a full pass looks like, in order. Printed when the script is run with no subcommand —
+    the point is to not have to reread the README just to remember the argument order."""
+    py = sys.executable  # whatever standalone python you invoked us with — paste-ready
+    print("\n" + _c("1;35", "━━ Applite test harness — a full pass, in order ━━"))
+    steps = [
+        ("once per VM", f"{py} applite_test.py provision",
+         "install brew+CLT if missing, then hide them  → duplicate the .utm bundle here"),
+        ("1. reset", f"{py} applite_test.py reset",
+         "uninstall all casks, wipe Applite, hide prereqs  → then LAUNCH Applite"),
+        ("2. annex round", f"{py} applite_test.py run --round annex",
+         f"{len(ROUND_A)} phases, CLT-free (the risky path)"),
+        ("3. external round", f"{py} applite_test.py run --round external",
+         f"{len(ROUND_B)} phases against your own /opt/homebrew (unhides it)"),
+        ("4. finalize", f"{py} applite_test.py run --round finalize",
+         "self-uninstall — must be LAST"),
+        ("5. teardown", f"{py} applite_test.py teardown",
+         "re-hide prereqs for the next run  (--full deletes them)"),
+        ("once per release", f"{py} applite_test.py reset && "
+                             f"{py} applite_test.py run --round upgrade",
+         "v1.3.1 → new build. SEPARATE pass, from its own reset — it starts from an old install"),
+    ]
+    for label, cmd, why in steps:
+        print(f"\n  {_c('1;36', label)}")
+        print(f"    {cmd}")
+        print(f"    {_c('2', why)}")
+
+    print("\n" + _c("1;35", "  Partial runs"))
+    print(f"    {py} applite_test.py run --round annex --only 16     # one phase")
+    print(f"    {py} applite_test.py run --round annex --from 11     # this phase onward")
+
+    print("\n" + _c("1;35", "  Handy"))
+    for cmd, why in [
+        ("preflight [--round …]", "check the test casks still fit their roles (run before a pass)"),
+        ("verify [--round …]", "print brew health, installed/outdated, hide state"),
+        ("fake-outdated <token>", "rename an installed version to 0.0.1 so brew reports it outdated"),
+        ("reset --keep-apps", "fresh state without the uninstall sweep"),
+        ("teardown --full", "also delete /opt/homebrew + CLT (pristine image)"),
+    ]:
+        print(f"    applite_test.py {cmd:26} {_c('2', why)}")
+
+    print("\n" + _c("1;35", "  Phases"))
+    for name, phases in (("annex", ROUND_A), ("external", ROUND_B),
+                         ("upgrade", ROUND_U), ("finalize", FINALIZE)):
+        print(f"    {name:9} " + ", ".join(f"{pid}={title}" for pid, title, _ in phases))
+
+    print("\n" + _c("2", "  Run it on a throwaway VM, under a standalone python3 (not /usr/bin/python3)."))
+    print(_c("2", "  Details: Testing/README.md") + "\n")
+
+
 def main() -> int:
     _guard_interpreter()
+    if len(sys.argv) == 1:
+        print_cheatsheet()
+        return 0
     parser = argparse.ArgumentParser(
         prog="applite_test.py", description="Guided E2E test harness for Applite.")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -1440,7 +1839,7 @@ def main() -> int:
                          help="skip the brew-uninstall sweep (faster, leaves installed apps)")
 
     p_run = sub.add_parser("run", help="guided phased suite")
-    p_run.add_argument("--round", choices=["annex", "external", "finalize"], default="annex")
+    p_run.add_argument("--round", choices=ROUNDS, default="annex")
     p_run.add_argument("--only", help="run a single phase id (e.g. 7 or B3)")
     p_run.add_argument("--from", dest="from_", help="start from this phase id")
 
