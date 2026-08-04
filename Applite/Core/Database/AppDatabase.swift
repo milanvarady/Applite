@@ -62,21 +62,28 @@ struct AppDatabase {
         migrator.registerMigration("v1_initial") { db in
             // Main casks table
             try db.create(table: "casks") { t in
-                // Primary key - the cask token (e.g., "firefox")
-                t.primaryKey("token", .text)
+                // Primary key — the tap-qualified token (e.g. "homebrew/cask/firefox").
+                //
+                // The *bare* token is not unique and can't be the key: two taps may both ship a
+                // "firefox", which is exactly what third-party tap support invites. Keying on it
+                // meant `INSERT OR REPLACE` treated them as the same row, so whichever synced last
+                // silently evicted the other (P2-29). `fullToken` is also the identity every brew
+                // operation already uses.
+                t.primaryKey("fullToken", .text)
 
-                // Full token including tap prefix (e.g., "homebrew/cask/firefox")
-                t.column("fullToken", .text)
+                // Bare cask token (e.g. "firefox"). Not unique across taps — indexed below.
+                t.column("token", .text)
                     .notNull()
-                    .unique()
 
                 // Tap source (e.g., "homebrew/cask")
                 t.column("tap", .text)
                     .notNull()
 
-                // Display name (e.g., "Mozilla Firefox")
+                // Display name (e.g., "Mozilla Firefox"). NOCASE so SQL-side ordering is
+                // alphabetical to a human — binary collation sorts "Zoom" ahead of "aText".
                 t.column("name", .text)
                     .notNull()
+                    .collate(.nocase)
 
                 // Short description
                 t.column("descriptionText", .text)
@@ -100,6 +107,13 @@ struct AppDatabase {
                     .notNull()
                     .defaults(to: 0)
             }
+
+            // Bare-token lookups (brew CLI reconciliation, imports) no longer ride the primary key.
+            try db.create(
+                index: "idx_casks_token",
+                on: "casks",
+                columns: ["token"]
+            )
 
             // Index for filtering by tap
             try db.create(
