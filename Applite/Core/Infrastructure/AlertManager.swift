@@ -32,6 +32,12 @@ struct AppAlert: Identifiable {
 
     let id = UUID()
     let title: LocalizedStringKey
+
+    /// **Already-resolved** display text, not a lookup key. Most messages are an
+    /// `error.localizedDescription` or brew's own output, which no catalog can translate — hence
+    /// `String` rather than `LocalizedStringKey`. The cost is that a literal passed here would
+    /// never reach `Localizable.xcstrings`, so wrap literals in `String(localized:comment:)` at
+    /// the call site.
     let message: String
     let actions: [Action]
 
@@ -82,6 +88,8 @@ final class AlertManager {
     )
 
     /// Presents an alert, or queues it if one is already up.
+    ///
+    /// `message` is resolved text — pass `String(localized:comment:)` for literals, see `AppAlert.message`.
     func show(
         title: LocalizedStringKey,
         message: String = "",

@@ -28,7 +28,8 @@
           }
         }
       },
-      "shouldTranslate" : false
+      "shouldTranslate" : false,
+      "comment" : "Not user-visible: an empty fallback for an alert title that is always set before display. Leave blank."
     },
     ": " : {
       "localizations" : {
@@ -63,7 +64,8 @@
           }
         }
       },
-      "shouldTranslate" : false
+      "shouldTranslate" : false,
+      "comment" : "Separator between a bold remark title and its message, e.g. \"Warning: …\". CJK locales may prefer a fullwidth colon."
     },
     "?" : {
       "extractionState" : "stale",
@@ -511,7 +513,7 @@
       }
     },
     "%@ is part of a bulk operation" : {
-
+      "comment" : "Alert title when stopping one app that belongs to a running batch (app name)"
     },
     "%@ successfully installed!" : {
       "comment" : "Successful app install notification",
@@ -678,32 +680,176 @@
       }
     },
     "%lld apps could not be found" : {
-
+      "comment" : "Note under the import list: how many tokens in the file matched no app",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld app could not be found"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld apps could not be found"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld apps installed" : {
-      "comment" : "Bulk install success notification"
+      "comment" : "Bulk install success notification",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld app installed"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld apps installed"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld apps installed, %lld failed" : {
       "comment" : "Bulk install partial-failure notification",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld apps installed, %2$lld failed"
+            "state" : "translated",
+            "value" : "%#@arg1@, %#@arg2@"
+          },
+          "substitutions" : {
+            "arg1" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg app installed"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg apps installed"
+                    }
+                  }
+                }
+              }
+            },
+            "arg2" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg failed"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg failed"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "%lld apps updated" : {
-      "comment" : "Bulk update success notification"
+      "comment" : "Bulk update success notification",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld app updated"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld apps updated"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld apps updated, %lld failed" : {
       "comment" : "Bulk update partial-failure notification",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld apps updated, %2$lld failed"
+            "state" : "translated",
+            "value" : "%#@arg1@, %#@arg2@"
+          },
+          "substitutions" : {
+            "arg1" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg app updated"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg apps updated"
+                    }
+                  }
+                }
+              }
+            },
+            "arg2" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg failed"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg failed"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -960,7 +1106,7 @@
       }
     },
     "Advanced" : {
-
+      "comment" : "Settings section for advanced options"
     },
     "After reinstalling, all currently installed apps will be unlinked from Applite. They won't be deleted, but you won't be able to update or uninstall them via Applite." : {
       "comment" : "Brew reinstall warning",
@@ -1045,7 +1191,7 @@
       }
     },
     "All other app functions will be disabled during the refresh!" : {
-
+      "comment" : "Warning shown before refreshing Homebrew's components"
     },
     "All other app functions will be disabled during the update!" : {
       "comment" : "Brew update notice",
@@ -1387,7 +1533,7 @@
       }
     },
     "App Sources" : {
-
+      "comment" : "Settings section: which repositories apps are listed from"
     },
     "Appdir" : {
       "comment" : "Brew settings appdir section title",
@@ -1564,7 +1710,7 @@
       "comment" : "Shown when Applite can't locate an installed app's bundle to launch it"
     },
     "Applite couldn't locate %@ on disk" : {
-
+      "comment" : "Error shown when an installed app's bundle can't be found to launch it (app name)"
     },
     "Applite couldn't open %@" : {
       "comment" : "App couldn't be opened alert",
@@ -1913,7 +2059,7 @@
       }
     },
     "Auto Updates" : {
-
+      "comment" : "Cask info row: whether the app updates itself"
     },
     "Automatically check for updates" : {
       "comment" : "Applite update option checkmark",
@@ -2071,7 +2217,8 @@
           }
         }
       },
-      "shouldTranslate" : false
+      "shouldTranslate" : false,
+      "comment" : "Settings tab for Homebrew options"
     },
     "Brew Executable Path" : {
       "comment" : "Settings brew path selector",
@@ -2366,7 +2513,7 @@
       }
     },
     "Bundle Version" : {
-
+      "comment" : "Cask info row: the version reported by the app bundle itself"
     },
     "Bypasses the Apple Gatekeeper check, which can be useful if the app is from an unregistered developer. **Use it at your own risk!**" : {
       "comment" : "Brew no quarantine flag toggle description",
@@ -2534,10 +2681,10 @@
       }
     },
     "Category Sorting Options" : {
-
+      "comment" : "Accessibility label for the sort menu on a category page"
     },
     "Check for Updates" : {
-
+      "comment" : "Button that checks for a new version of Applite itself"
     },
     "Check for Updates..." : {
       "comment" : "Check for update menu bar item",
@@ -2747,13 +2894,13 @@
       }
     },
     "Copied" : {
-
+      "comment" : "Confirmation replacing the Copy button after copying"
     },
     "Copy" : {
-
+      "comment" : "Button that copies the terminal output to the clipboard"
     },
     "Couldn't Check for Updates" : {
-
+      "comment" : "Shown on the Updates tab when the check failed"
     },
     "Couldn't download app. No internet connection, or host is unreachable." : {
       "comment" : "No internet failure message",
@@ -2880,7 +3027,7 @@
       }
     },
     "Couldn't load installed apps" : {
-
+      "comment" : "Alert title when Homebrew couldn't report which apps are installed"
     },
     "Couldn't locate the Homebrew executable at %@. The installation is missing or damaged. Try running `brew doctor` in Terminal." : {
       "comment" : "Components install sheet description when the user's selected brew is missing"
@@ -2928,7 +3075,7 @@
       }
     },
     "Current app version" : {
-
+      "comment" : "Row label showing Applite's own version number"
     },
     "Current app version: %@ (%@)" : {
       "comment" : "Update settings current app version text (version, build number)",
@@ -3186,7 +3333,7 @@
       }
     },
     "Date" : {
-
+      "comment" : "Cask info row: the date an app was deprecated or disabled"
     },
     "Delete Homebrew cache" : {
       "comment" : "Applite uninstall option checkmark",
@@ -3230,10 +3377,10 @@
       }
     },
     "Deprecated" : {
-
+      "comment" : "Cask info section header: this app is no longer maintained"
     },
     "Deselect All" : {
-
+      "comment" : "Cask selection sheet: clear every checkbox"
     },
     "Developer Tools" : {
       "comment" : "App category",
@@ -3278,7 +3425,7 @@
       }
     },
     "Disabled" : {
-
+      "comment" : "Cask info section header: this app can no longer be installed"
     },
     "Discord" : {
       "comment" : "Applite discord",
@@ -3358,10 +3505,10 @@
       }
     },
     "Dismiss" : {
-
+      "comment" : "Tooltip on the button that clears a failed app's error row"
     },
     "Dismiss error" : {
-
+      "comment" : "Accessibility label for the button that clears a failed app's error row"
     },
     "Done" : {
       "comment" : "Accessibility label for the success checkmark"
@@ -3534,7 +3681,7 @@
       }
     },
     "Download URL" : {
-
+      "comment" : "Cask info row: where the app is downloaded from"
     },
     "Enabled" : {
       "comment" : "Brew mirror option enabled toggle",
@@ -3620,7 +3767,7 @@
       }
     },
     "Environment Variables" : {
-
+      "comment" : "Settings section listing environment variables passed to Homebrew"
     },
     "Error" : {
       "comment" : "Brew info value when loading fails\nCask action failed (e.g. installation failed)",
@@ -3837,7 +3984,7 @@
       "comment" : "App migration view description"
     },
     "Failed installs & updates" : {
-
+      "comment" : "Toggle: notify when an install or update fails"
     },
     "Failed to export" : {
       "comment" : "Alert message",
@@ -4292,7 +4439,7 @@
       }
     },
     "Full Token" : {
-
+      "comment" : "Cask info row: the app's tap-qualified Homebrew identifier"
     },
     "General" : {
       "comment" : "Settings tab",
@@ -4377,7 +4524,7 @@
       }
     },
     "Get Started" : {
-
+      "comment" : "Button that dismisses the setup card once Homebrew is ready"
     },
     "GitHub" : {
       "localizations" : {
@@ -4412,7 +4559,8 @@
           }
         }
       },
-      "shouldTranslate" : false
+      "shouldTranslate" : false,
+      "comment" : "Help menu link to the project's source repository. Product name — usually left untranslated."
     },
     "Greedy Upgrade" : {
       "comment" : "Brew greedy flag toggle title",
@@ -4580,7 +4728,7 @@
       }
     },
     "Homebrew cache is shared between Homebrew installations. Deleting the cache will remove the cache for all installations!" : {
-
+      "comment" : "Warning next to the delete-Homebrew-cache toggle"
     },
     "Homebrew Installation" : {
       "comment" : "Setup Applite's brew installation info view title",
@@ -4628,7 +4776,7 @@
       "comment" : "Components install sheet title when the user's selected brew is missing"
     },
     "Homebrew Updates" : {
-
+      "comment" : "Settings section: how often Applite refreshes its own Homebrew"
     },
     "Homebrew Version" : {
       "comment" : "Brew management Homebrew version card",
@@ -5055,7 +5203,7 @@
       }
     },
     "Install" : {
-
+      "comment" : "Button that installs an app"
     },
     "Install apps from a file exported by Applite — or any Brewfile." : {
       "comment" : "App Migration import card description"
@@ -5147,13 +5295,13 @@
       }
     },
     "Installation" : {
-
+      "comment" : "Cask info section header: install-related details"
     },
     "Installation Date" : {
-
+      "comment" : "Cask info row: when the app was installed"
     },
     "Installation Directory" : {
-
+      "comment" : "Text field label for a custom app install folder"
     },
     "Installation failed" : {
       "comment" : "App install alert",
@@ -5198,7 +5346,7 @@
       }
     },
     "Installation Location" : {
-
+      "comment" : "Settings section: where apps get installed"
     },
     "Installed" : {
       "comment" : "Brew dependency installed badge text",
@@ -5242,7 +5390,7 @@
       }
     },
     "Installed Version" : {
-
+      "comment" : "Cask info row: the version currently on disk"
     },
     "Installing" : {
       "comment" : "Install progress text",
@@ -5754,7 +5902,7 @@
       }
     },
     "More options" : {
-
+      "comment" : "Accessibility label for the ellipsis menu on an app card"
     },
     "Most downloaded (default)" : {
       "comment" : "Sorting option",
@@ -6187,7 +6335,7 @@
       "comment" : "Components install sheet open settings button"
     },
     "Options" : {
-
+      "comment" : "Section header for uninstall options"
     },
     "Other Flags" : {
       "comment" : "Brew settings command line flags section title",
@@ -6232,10 +6380,10 @@
       }
     },
     "Outdated" : {
-
+      "comment" : "Cask info row: whether a newer version is available"
     },
     "Part of a bulk operation" : {
-
+      "comment" : "Tooltip on a disabled stop button: this app can only be stopped with the whole batch"
     },
     "Password Managers" : {
       "comment" : "App category",
@@ -6571,10 +6719,10 @@
       }
     },
     "Re-fetches the latest Homebrew over Applite's installation. Your installed apps are kept." : {
-
+      "comment" : "Explains what Refresh Homebrew Components does"
     },
     "Reason" : {
-
+      "comment" : "Cask info row: why an app was deprecated or disabled"
     },
     "Refresh" : {
       "comment" : "Brew Management view refresh section title",
@@ -6618,19 +6766,19 @@
       }
     },
     "Refresh App Catalog" : {
-
+      "comment" : "Menu command that re-downloads the list of available apps"
     },
     "Refresh Catalog" : {
-
+      "comment" : "Button in the settings banner that reloads the app catalog"
     },
     "Refresh failed" : {
-
+      "comment" : "Alert title when refreshing Homebrew's components didn't work"
     },
     "Refresh Homebrew Components" : {
-
+      "comment" : "Button that re-downloads Applite's own Homebrew over the existing one"
     },
     "Refresh the app catalog to apply your changes" : {
-
+      "comment" : "Banner shown when a setting change needs a catalog reload"
     },
     "Reinstall" : {
       "comment" : "Brew Management view reinstall section title",
@@ -6756,7 +6904,7 @@
       }
     },
     "Reinstalling" : {
-      "comment" : "Progress text",
+      "comment" : "Reinstall progress text",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -6840,7 +6988,7 @@
       }
     },
     "Replacement" : {
-
+      "comment" : "Cask info row: the app suggested instead of a deprecated/disabled one"
     },
     "Restart Applite for changes to take effect." : {
       "comment" : "Brew settings relaunch app prompt",
@@ -7013,7 +7161,7 @@
       "comment" : "App Migration export card description"
     },
     "Saved to file" : {
-
+      "comment" : "Confirmation shown after apps are exported"
     },
     "Search Sorting Options" : {
       "localizations" : {
@@ -7053,10 +7201,11 @@
             "value" : "搜尋排序選項"
           }
         }
-      }
+      },
+      "comment" : "Accessibility label for the sort menu on the search page"
     },
     "See Active Tasks" : {
-
+      "comment" : "Alert button that takes the user to the Active Tasks tab"
     },
     "See All" : {
       "comment" : "See all apps in category button",
@@ -7100,13 +7249,13 @@
       }
     },
     "Select All" : {
-
+      "comment" : "Cask selection sheet: tick every checkbox"
     },
     "Select Apps to Export" : {
-
+      "comment" : "Title of the sheet for picking which apps to write to a file"
     },
     "Select Apps to Import" : {
-
+      "comment" : "Title of the sheet for picking which apps to install from a file"
     },
     "Select Folder" : {
       "comment" : "Appdir folder selector",
@@ -7321,7 +7470,8 @@
             "value" : "贊助"
           }
         }
-      }
+      },
+      "comment" : "Help menu link to the donation page"
     },
     "Start Using Applite" : {
       "comment" : "Onboarding finish button",
@@ -7366,19 +7516,19 @@
       }
     },
     "Stop" : {
-
+      "comment" : "Button that stops a running bulk install/update"
     },
     "Stop %lld remaining" : {
-
+      "comment" : "Destructive confirm button; the count is how many apps haven't finished yet"
     },
     "Stop download" : {
-
+      "comment" : "Tooltip on the button that cancels this app's download"
     },
     "Stop the bulk operation?" : {
-
+      "comment" : "Confirmation dialog title before stopping a bulk install/update"
     },
     "Successful installs & updates" : {
-
+      "comment" : "Toggle: notify when an install or update succeeds"
     },
     "System" : {
       "comment" : "Color mode",
@@ -7423,7 +7573,7 @@
       }
     },
     "Tap" : {
-
+      "comment" : "Cask info row: which Homebrew repository the app comes from"
     },
     "Taps" : {
       "comment" : "Brew settings tap section title",
@@ -7551,7 +7701,7 @@
       }
     },
     "Terminal Output" : {
-
+      "comment" : "Title of the window showing a failed operation's raw output"
     },
     "Terminals" : {
       "comment" : "App category",
@@ -7810,10 +7960,10 @@
       }
     },
     "This will (re)install Applite's Homebrew installation at: `~/Library/Application Support/Applite/Homebrew`" : {
-
+      "comment" : "Explains where Applite installs its own Homebrew. Keep the path in backticks unchanged."
     },
     "This will run the Homebrew uninstaller and remove Homebrew from all known locations along with every package installed. Administrator privileges may be required." : {
-
+      "comment" : "Warning next to the uninstall-Homebrew toggle"
     },
     "This will uninstall all files and cache associated with Applite." : {
       "comment" : "Uninstall applite window description",
@@ -7864,7 +8014,7 @@
       "comment" : "Batch stop redirect message"
     },
     "Token" : {
-
+      "comment" : "Cask info row: the app's short Homebrew identifier"
     },
     "Troubleshooting" : {
       "comment" : "Applite troubleshooting website link",
@@ -7908,7 +8058,7 @@
       }
     },
     "Try Again" : {
-
+      "comment" : "Button that retries loading the catalog after an invalid brew path"
     },
     "Turn off few downloads filter" : {
       "comment" : "Filter disable button",
@@ -8166,10 +8316,11 @@
             "value" : "Homebrew’i sil"
           }
         }
-      }
+      },
+      "comment" : "Toggle: also remove Homebrew when uninstalling Applite"
     },
     "Uninstalling" : {
-      "comment" : "Progress text",
+      "comment" : "Uninstall progress text",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -8463,7 +8614,7 @@
       }
     },
     "Updating" : {
-      "comment" : "Progress text",
+      "comment" : "Update progress text",
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
@@ -8724,7 +8875,7 @@
       }
     },
     "View terminal output" : {
-
+      "comment" : "Tooltip/accessibility label for the button showing a failed app's brew output"
     },
     "Virtualization" : {
       "comment" : "App category",
@@ -9099,6 +9250,48 @@
           }
         }
       }
+    },
+    "Check if file contains valid cask tokens" : {
+      "comment" : "Advice shown when an imported Brewfile/token list yielded no installable apps"
+    },
+    "Failed to decode command output as UTF-8" : {
+      "comment" : "Shell error: a command's output wasn't valid text"
+    },
+    "Failed to get home directory" : {
+      "comment" : "Shell error: the user's home folder couldn't be resolved"
+    },
+    "Failed to get system proxy settings" : {
+      "comment" : "Proxy error: macOS network settings couldn't be read"
+    },
+    "Failed to get update frequency" : {
+      "comment" : "Error shown when the catalog update interval couldn't be read"
+    },
+    "Failed to load additional info" : {
+      "comment" : "Error shown when an app's extra details couldn't be fetched"
+    },
+    "Failed to load categories" : {
+      "comment" : "Error shown when the app category list couldn't be read"
+    },
+    "Failed to run shell command.\nCommand: %@ (exit code: %d)\nOutput: %@" : {
+      "comment" : "Shell error: a command exited with an error (command, exit code, output)"
+    },
+    "No proxy host specified" : {
+      "comment" : "Proxy error: the system proxy has no host address"
+    },
+    "No proxy port specified" : {
+      "comment" : "Proxy error: the system proxy has no port number"
+    },
+    "Proxy is not enabled" : {
+      "comment" : "Proxy error: no proxy is turned on in macOS network settings"
+    },
+    "Shell command timed out after %@.\nCommand: %@" : {
+      "comment" : "Shell error: a command ran past its deadline (duration, command)"
+    },
+    "The Brew installation seems to be invalid." : {
+      "comment" : "Error shown when Applite's Homebrew is present but unusable"
+    },
+    "askpass script not found" : {
+      "comment" : "Shell error: the bundled askpass script is missing"
     }
   },
   "version" : "1.1"

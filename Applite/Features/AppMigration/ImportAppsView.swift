@@ -79,7 +79,12 @@ struct ImportAppsView: View {
             tokens = try AppMigration.readCaskFile(url: url)
         } catch {
             logger.error("Failed to import file: \(url.path(percentEncoded: false))")
-            caskManager.alert.show(title: "Imported file contains no valid apps", message: "Check if file contains valid cask tokens")
+            caskManager.alert.show(
+                title: "Imported file contains no valid apps",
+                // `message` is already-resolved text, not a key — literals must be localized here.
+                message: String(localized: "Check if file contains valid cask tokens",
+                                comment: "Advice shown when an imported Brewfile/token list yielded no installable apps")
+            )
             return
         }
 
@@ -95,7 +100,11 @@ struct ImportAppsView: View {
 
             guard !resolved.isEmpty else {
                 logger.notice("Imported file contains no valid apps: \(url.path(percentEncoded: false))")
-                caskManager.alert.show(title: "Imported file contains no valid apps", message: "Check if file contains valid cask tokens")
+                caskManager.alert.show(
+                    title: "Imported file contains no valid apps",
+                    message: String(localized: "Check if file contains valid cask tokens",
+                                    comment: "Advice shown when an imported Brewfile/token list yielded no installable apps")
+                )
                 return
             }
 

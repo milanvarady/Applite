@@ -79,7 +79,13 @@ struct CaskSelectionSheet: View {
             }
 
             Toggle(isOn: selectAllBinding) {
-                Text(allSelected ? "Deselect All" : "Select All", comment: "Cask selection sheet select-all toggle")
+                // Two calls, not `Text(cond ? "a" : "b", comment:)` — a ternary inside the literal
+                // slot loses the comment during extraction, so both keys reach translators bare.
+                if allSelected {
+                    Text("Deselect All", comment: "Cask selection sheet: clear every checkbox")
+                } else {
+                    Text("Select All", comment: "Cask selection sheet: tick every checkbox")
+                }
             }
             .toggleStyle(.checkbox)
 
