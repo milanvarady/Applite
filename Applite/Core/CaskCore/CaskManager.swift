@@ -48,9 +48,10 @@ final class CaskManager {
     /// when the check never actually ran (P3-3).
     private(set) var outdatedRefreshFailed: Bool = false
 
-    /// Alert surface for catalog load/refresh failures. Mirrors the `BrewService.alert`
-    /// pattern so views can bind directly without owning load-error state.
-    var loadAlert = AlertManager()
+    /// The main window's single alert surface — brew failures, catalog/load failures and errors
+    /// raised by views all queue here, and `ContentView` presents it once at the window root.
+    /// Windows that can't see that root (Settings, the uninstaller) own a local one instead.
+    let alert: AlertManager
 
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -67,7 +68,6 @@ final class CaskManager {
     var outdatedCount: Int { registry.outdatedCount }
     var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
     var batchProgress: BatchProgress? { brewService.batchProgress }
-    var alert: AlertManager { brewService.alert }
 
     /// One-shot navigation request from deep views (e.g. the "See Active Tasks" button on a
     /// batched app card) to the `ContentView`, which applies it to its sidebar selection and
@@ -85,7 +85,11 @@ final class CaskManager {
         let reg = registry ?? CaskViewModelRegistry()
         self.registry = reg
         self.dataLoader = dataLoader ?? CaskDataLoader(registry: reg)
-        self.brewService = brewService ?? BrewService()
+        // One alert instance for the whole window: hand it to the brew service rather than letting
+        // that layer keep a second one (an injected service brings its own — tests don't present).
+        let alert = brewService?.alert ?? AlertManager()
+        self.alert = alert
+        self.brewService = brewService ?? BrewService(alert: alert)
         self.categories = Self.loadInitialCategories()
 
         // An operation that finds the brew path invalid re-resolves brew through `bootstrap` — the
@@ -168,6 +172,22 @@ final class CaskManager {
     
     // MARK: - Data Loading
 
+    /// Buttons for a load-failure alert. These used to live in a hand-rolled `.alert` in
+    /// `ContentView` — the only consumer that bypassed `.alertManager(_:)` — which is why
+    /// `AlertManager`'s action fields went unused there (F5). Now the alert carries its own buttons,
+    /// so every surface goes through the same modifier.
+    private var loadFailureActions: [AppAlert.Action] {
+        [
+            AppAlert.Action("Retry") { [weak self] in
+                Task { await self?.loadData() }
+            },
+            AppAlert.Action("Quit", role: .destructive) {
+                NSApplication.shared.terminate(nil)
+            },
+            .ok
+        ]
+    }
+
     /// Launch entry point. Loads the brew-independent catalog immediately (so the UI lights up
     /// even while the annex is still installing), resolves brew via `bootstrap`, then loads the
     /// installed/outdated state once a valid brew is `.ready`. Finally kicks a silent annex
@@ -185,7 +205,7 @@ final class CaskManager {
 
         if bootstrap.isBrewReady {
             if let catalogError {
-                loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+                alert.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions)
             }
             await loadInstalledState()
             await bootstrap.refreshAnnexIfStale()
@@ -213,7 +233,7 @@ final class CaskManager {
 
         if await BrewPaths.isSelectedBrewPathValid() {
             if let catalogError {
-                loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+                alert.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions)
             }
             await loadInstalledState()
             return
@@ -226,7 +246,7 @@ final class CaskManager {
             // Brew is genuinely unusable. `bootstrap` is now in `.failed`/`.brewMissing`, so
             // ContentView is already showing the setup overlay (real message + Retry +
             // Troubleshooting + "use your own Homebrew"). That phase is the single surface for a
-            // broken brew, so don't stack `loadAlert` on it — the catalog error is dropped here.
+            // broken brew, so don't stack an alert on it — the catalog error is dropped here.
             let versionOutput = (try? await Shell.runBrewCommand(["--version"])) ?? "n/a"
             Self.logger.error(
                 """
@@ -240,7 +260,7 @@ final class CaskManager {
 
         // Recovered — the catalog alert is now the only possible surface, so raise it.
         if let catalogError {
-            loadAlert.show(error: catalogError, title: "Couldn't load app catalog")
+            alert.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions)
         }
         await loadInstalledState()
     }
@@ -248,7 +268,7 @@ final class CaskManager {
     /// Stage 1: catalog (categories + taps) from the local DB — fast, no brew CLI dependency.
     ///
     /// Returns the failure (or `nil` on success) instead of surfacing it directly, so the caller
-    /// can decide *whether* to raise `loadAlert`: on launch/recovery a catalog failure often shares
+    /// can decide *whether* to raise the alert: on launch/recovery a catalog failure often shares
     /// its root cause (offline) with a brew bootstrap failure, and the setup overlay must be the
     /// single error surface — the alert can't stack on top. Every caller currently defers, so this
     /// only logs and returns the error.
@@ -302,7 +322,7 @@ final class CaskManager {
             // Installed refresh itself failed — outdated state is unknown too, so don't let
             // UpdateView claim everything is up to date.
             self.outdatedRefreshFailed = true
-            loadAlert.show(error: error, title: "Couldn't load installed apps")
+            alert.show(error: error, title: "Couldn't load installed apps", actions: loadFailureActions)
             Self.logger.error("Installed-state load failure. Reason: \(error.localizedDescription)")
         }
     }

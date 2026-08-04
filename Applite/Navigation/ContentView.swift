@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import ButtonKit
 
 struct ContentView: View {
     @Environment(CaskManager.self) var caskManager
@@ -47,12 +46,14 @@ struct ContentView: View {
                 setupOverlay
             }
         }
+        // The window's one alert surface, presented once at its root: brew failures, load failures
+        // and errors raised by any view in this window queue here (F5/P3-5). Never bind this inside
+        // a repeated view — that was the bug it replaces.
+        .alertManager(caskManager.alert)
     }
 
     private var mainNavigation: some View {
-        @Bindable var caskManager = caskManager
-
-        return NavigationSplitView {
+        NavigationSplitView {
             SidebarView(selection: $selection)
                 .disabled(modifyingBrew)
                 .navigationSplitViewColumnWidth(216)
@@ -81,22 +82,6 @@ struct ContentView: View {
                 selection = requested
                 caskManager.requestedTab = nil
             }
-        }
-        // Load failure alert
-        .alert(caskManager.loadAlert.title, isPresented: $caskManager.loadAlert.isPresented) {
-            AsyncButton {
-                await caskManager.loadData()
-            } label: {
-                Label("Retry", systemImage: "arrow.clockwise")
-            }
-
-            Button("Quit", role: .destructive) {
-                NSApplication.shared.terminate(self)
-            }
-
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(caskManager.loadAlert.message)
         }
     }
 

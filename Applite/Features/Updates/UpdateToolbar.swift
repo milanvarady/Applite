@@ -10,8 +10,7 @@ import ButtonKit
 
 struct UpdateToolbar: ToolbarContent {
     @Environment(CaskManager.self) var caskManager
-    var loadAlert: AlertManager
-    
+
     var body: some ToolbarContent {
         if #available(macOS 26.0, *) {
             ToolbarItem {
@@ -52,7 +51,7 @@ struct UpdateToolbar: ToolbarContent {
             do {
                 try await caskManager.refreshOutdated()
             } catch {
-                loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
+                caskManager.alert.show(title: "Failed to refresh updates", message: error.localizedDescription)
             }
         }
     }

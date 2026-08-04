@@ -19,7 +19,6 @@ struct UpdateView: View {
     @State var updateAllButtonRotation = 0.0
 
     @State var showingGreedyUpdateConfirm = false
-    @State var loadAlert = AlertManager()
 
     /// Filtered casks based on local search text
     var filteredCasks: [CaskViewModel] {
@@ -98,7 +97,7 @@ struct UpdateView: View {
                             do {
                                 try await caskManager.refreshOutdated()
                             } catch {
-                                loadAlert.show(title: "Failed to refresh updates", message: error.localizedDescription)
+                                caskManager.alert.show(title: "Failed to refresh updates", message: error.localizedDescription)
                             }
                         }
                     }
@@ -116,9 +115,8 @@ struct UpdateView: View {
         .navigationTitle("Update")
         .searchable(text: $searchText, placement: .toolbar)
         .toolbar {
-            UpdateToolbar(loadAlert: loadAlert)
+            UpdateToolbar()
         }
-        .alertManager(loadAlert)
         .onChange(of: isUpdatingAllActive) { _, running in
             syncUpdateAllSpin(running)
         }

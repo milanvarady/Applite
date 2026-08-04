@@ -57,7 +57,6 @@ struct AppView: View {
                 view
             }
         }
-        .alertManager(caskManager.alert)
         .alert(
             "\(cask.name) is part of a bulk operation",
             isPresented: $showingBatchStopInfo

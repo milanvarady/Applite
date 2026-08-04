@@ -41,7 +41,15 @@ struct BrewStreamError: Error {
 @MainActor
 final class BrewService {
     private(set) var activeTasks: [ActiveBrewTask] = []
-    var alert = AlertManager()
+
+    /// The main window's alert surface, injected by `CaskManager` (its owner) so brew failures,
+    /// catalog failures and view-raised errors share one queue presented once at the window root —
+    /// rather than each layer keeping its own (F5/P3-5).
+    let alert: AlertManager
+
+    init(alert: AlertManager = AlertManager()) {
+        self.alert = alert
+    }
 
     /// Asks the owner (`CaskManager`) to re-resolve brew when an operation finds the selected path
     /// invalid, returning whether brew ended up usable. Wired to `HomebrewBootstrap.run()` so this

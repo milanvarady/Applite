@@ -24,7 +24,7 @@ struct AppDatabase {
     /// install, so it must not run synchronously during `CaskManager` init on the main actor — that
     /// would block first paint (P2-13). The open also no longer `fatalError`s (P2-14): a failure
     /// (corrupt WAL, full disk) now propagates through the normal async DB call path and surfaces
-    /// via `loadAlert` instead of crash-looping a non-technical user with no way out.
+    /// via the window's alert instead of crash-looping a non-technical user with no way out.
     private static let poolTask = Task.detached(priority: .userInitiated) { () throws -> DatabasePool in
         let pool = try openDatabase()
         logger.info("Database opened successfully")
