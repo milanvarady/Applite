@@ -11,6 +11,11 @@ import ButtonKit
 struct BrewSettingsView: View {
     @Environment(CaskManager.self) var caskManager
 
+    /// The Settings window's alert surface, owned by `SettingsView`. Load failures triggered from
+    /// here must be raised in *this* window — routed to the main window's alert they'd present
+    /// behind Settings, or be queued against nothing at all when the main window is closed.
+    let alert: AlertManager
+
     @AppStorage(Preferences.customUserBrewPath) var customUserBrewPath
     @AppStorage(Preferences.brewPathOption) var brewPathOption
     @AppStorage(Preferences.includeCasksFromTaps) var includeCasksFromTaps
@@ -73,7 +78,7 @@ struct BrewSettingsView: View {
                     // recovery ⌘R performs. Without this the only way out of a bad path was a menu
                     // item a non-technical user won't find (P3-7).
                     AsyncButton {
-                        await caskManager.loadData()
+                        await caskManager.loadData(surfacingErrorsIn: alert)
                         isSelectedBrewPathValid = await BrewPaths.isSelectedBrewPathValid()
                     } label: {
                         Label("Try Again", systemImage: "arrow.clockwise")
@@ -104,7 +109,7 @@ struct BrewSettingsView: View {
                     Spacer()
 
                     AsyncButton {
-                        let loaded = await caskManager.loadData(forceSync: true)
+                        let loaded = await caskManager.loadData(forceSync: true, surfacingErrorsIn: alert)
                         // Recovery may have repointed the selection (detected brew / reinstalled
                         // annex), so re-poll rather than leaving a stale ✗ next to a path that works.
                         isSelectedBrewPathValid = await BrewPaths.isSelectedBrewPathValid()

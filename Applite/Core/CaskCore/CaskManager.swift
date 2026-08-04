@@ -179,10 +179,12 @@ final class CaskManager {
     /// No "Quit" button: it dates from when a failed load meant an empty, useless window. The DB
     /// catalog renders regardless now, so quitting isn't a remedy — offering it as the loudest
     /// option told a non-technical user their app was broken when it wasn't.
-    private var loadFailureActions: [AppAlert.Action] {
+    private func loadFailureActions(surfacingIn surface: AlertManager) -> [AppAlert.Action] {
         [
-            AppAlert.Action("Retry") { [weak self] in
-                Task { await self?.loadData() }
+            // `surface` is captured weakly: it holds the alert, which holds this action — a strong
+            // capture would be a manager retaining itself through its own presented alert.
+            AppAlert.Action("Retry") { [weak self, weak surface] in
+                Task { await self?.loadData(surfacingErrorsIn: surface) }
             },
             .ok
         ]
@@ -205,9 +207,9 @@ final class CaskManager {
 
         if bootstrap.isBrewReady {
             if let catalogError {
-                alert.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions)
+                alert.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: alert))
             }
-            await loadInstalledState()
+            await loadInstalledState(surfacingErrorsIn: alert)
             await bootstrap.refreshAnnexIfStale()
         } else if case .failed(let message) = bootstrap.phase {
             Self.logger.error("Bootstrap failed: \(message)")
@@ -223,8 +225,18 @@ final class CaskManager {
     /// Returns whether the load actually completed — callers that show "this needs refreshing"
     /// affordances must not clear them on a load that silently did nothing (the broken-brew branch
     /// below deliberately drops its error, so the return value is the only signal).
+    ///
+    /// `surfacingErrorsIn` decides *which window* hears about a failure. It defaults to the main
+    /// window's alert, but a caller in another scene must pass that scene's own manager: alerts are
+    /// presented at a window's root, so an error raised from Settings into the main window's queue
+    /// appears behind Settings — or, if the main window is closed, is queued against nothing and
+    /// eventually dropped.
     @discardableResult
-    func loadData(forceSync: Bool = false) async -> Bool {
+    func loadData(
+        forceSync: Bool = false,
+        surfacingErrorsIn errorSurface: AlertManager? = nil
+    ) async -> Bool {
+        let surface = errorSurface ?? alert
         Self.logger.info("Starting data load process (forceSync: \(forceSync))")
 
         if forceSync { isRefreshingCatalog = true }
@@ -237,9 +249,9 @@ final class CaskManager {
 
         if await BrewPaths.isSelectedBrewPathValid() {
             if let catalogError {
-                alert.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions)
+                surface.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: surface))
             }
-            await loadInstalledState()
+            await loadInstalledState(surfacingErrorsIn: surface)
             return true
         }
 
@@ -264,9 +276,9 @@ final class CaskManager {
 
         // Recovered — the catalog alert is now the only possible surface, so raise it.
         if let catalogError {
-            alert.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions)
+            surface.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: surface))
         }
-        await loadInstalledState()
+        await loadInstalledState(surfacingErrorsIn: surface)
         return catalogError == nil
     }
 
@@ -296,7 +308,7 @@ final class CaskManager {
 
     /// Stage 2: installed/outdated state from the brew CLI (slow). Updates the registry reactively,
     /// so view models already on screen flip their flags without rebuilding the catalog views.
-    private func loadInstalledState() async {
+    private func loadInstalledState(surfacingErrorsIn surface: AlertManager) async {
         self.isResolvingInstalledState = true
         defer { self.isResolvingInstalledState = false }
 
@@ -327,7 +339,7 @@ final class CaskManager {
             // Installed refresh itself failed — outdated state is unknown too, so don't let
             // UpdateView claim everything is up to date.
             self.outdatedRefreshFailed = true
-            alert.show(error: error, title: "Couldn't load installed apps", actions: loadFailureActions)
+            surface.show(error: error, title: "Couldn't load installed apps", actions: loadFailureActions(surfacingIn: surface))
             Self.logger.error("Installed-state load failure. Reason: \(error.localizedDescription)")
         }
     }
