@@ -11,8 +11,6 @@ import OSLog
 
 /// Manages the SQLite database for cask storage
 struct AppDatabase {
-    static let schemaVersion = 1
-    
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: AppDatabase.self)
@@ -36,11 +34,27 @@ struct AppDatabase {
         try await poolTask.value
     }
 
+    /// ⚠️ Two rules for anyone adding a migration here:
+    ///
+    /// 1. **Never edit an applied migration's body** — GRDB identifies migrations by name and runs
+    ///    each once, so editing `v1_initial` after release is a no-op for everyone who already has
+    ///    the database. New installs would get the edited schema and existing ones would silently
+    ///    keep the old: two schemas, one app. Add a `v2_…` instead. (Until the first release ships
+    ///    this doesn't apply — nobody has the file yet, so `v1_initial` is still free to change.)
+    /// 2. **Re-create the FTS5 triggers in any migration that rebuilds `casks`.** `t.synchronize(
+    ///    withTable:)` below installs insert/update/delete triggers, and they live *only* in this
+    ///    migration. GRDB's recommended way to alter a table is drop-and-recreate, which takes the
+    ///    triggers with it — search then returns empty for upgraders, indistinguishable from "no
+    ///    matches" and invisible in testing on a fresh install. Re-run `synchronize` after any
+    ///    such rebuild. (P3-13)
     private static func migrator() -> DatabaseMigrator {
         var migrator = DatabaseMigrator()
 
         #if DEBUG
-        // Erase database on schema change during development
+        // Development only: rebuild from scratch when the schema changes, so dev iterations don't
+        // need throwaway migrations. Deliberately NOT enabled for release — the catalog is what
+        // serves an offline launch, and erasing it during an upgrade would leave an offline user
+        // with an empty app until they get network back.
         migrator.eraseDatabaseOnSchemaChange = true
         #endif
 
