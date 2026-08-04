@@ -42,15 +42,6 @@ struct BrewStreamError: Error {
 final class BrewService {
     private(set) var activeTasks: [ActiveBrewTask] = []
 
-    /// The main window's alert surface, injected by `CaskManager` (its owner) so brew failures,
-    /// catalog failures and view-raised errors share one queue presented once at the window root —
-    /// rather than each layer keeping its own (F5/P3-5).
-    let alert: AlertManager
-
-    init(alert: AlertManager = AlertManager()) {
-        self.alert = alert
-    }
-
     /// Asks the owner (`CaskManager`) to re-resolve brew when an operation finds the selected path
     /// invalid, returning whether brew ended up usable. Wired to `HomebrewBootstrap.run()` so this
     /// service reports the fault into the one owned brew state instead of deciding on its own how a
@@ -118,17 +109,17 @@ final class BrewService {
 
             if case .failure(let error) = result {
                 let completeOutput = error.output
-                var alertMessage = error.underlying.localizedDescription
+                var failureMessage = error.underlying.localizedDescription
 
                 // Show a more helpful message in specific cases
                 switch completeOutput {
                     // Network error
                 case _ where completeOutput.contains("Could not resolve host"):
-                    alertMessage = String(localized: "Couldn't download app. No internet connection, or host is unreachable.", comment: "No internet alert message")
+                    failureMessage = String(localized: "Couldn't download app. No internet connection, or host is unreachable.", comment: "No internet failure message")
                 default:
                     // Homebrew error
                     if let result = completeOutput.firstMatch(of: /Error:(.+)/) {
-                        alertMessage = String(result.1)
+                        failureMessage = String(result.1)
                     }
                 }
 
@@ -136,8 +127,8 @@ final class BrewService {
                     for: vm,
                     error: error.underlying,
                     output: completeOutput,
-                    alertTitle: String(localized: "Failed to install \(vm.name)", comment: "Install failure alert title"),
-                    alertMessage: alertMessage
+                    failureTitle: String(localized: "Failed to install \(vm.name)", comment: "Install failure notification title"),
+                    failureMessage: failureMessage
                 )
 
                 return
@@ -178,8 +169,8 @@ final class BrewService {
                     for: vm,
                     error: error,
                     output: output,
-                    alertTitle: String(localized: "Failed to uninstall \(vm.name)", comment: "Failed app install alert title"),
-                    alertMessage: error.localizedDescription
+                    failureTitle: String(localized: "Failed to uninstall \(vm.name)", comment: "Failed app install notification title"),
+                    failureMessage: error.localizedDescription
                 )
                 return
             }
@@ -215,8 +206,8 @@ final class BrewService {
                     for: vm,
                     error: error.underlying,
                     output: error.output,
-                    alertTitle: String(localized: "Failed to update \(vm.name)", comment: "Failed app update alert title"),
-                    alertMessage: error.underlying.localizedDescription
+                    failureTitle: String(localized: "Failed to update \(vm.name)", comment: "Failed app update notification title"),
+                    failureMessage: error.underlying.localizedDescription
                 )
                 return
             }
@@ -251,8 +242,8 @@ final class BrewService {
                     for: vm,
                     error: error.underlying,
                     output: error.output,
-                    alertTitle: String(localized: "Failed to reinstall \(vm.name)", comment: "Failed reinstall alert title"),
-                    alertMessage: error.underlying.localizedDescription
+                    failureTitle: String(localized: "Failed to reinstall \(vm.name)", comment: "Failed reinstall notification title"),
+                    failureMessage: error.underlying.localizedDescription
                 )
                 return
             }
@@ -388,11 +379,8 @@ final class BrewService {
         guard await BrewPaths.isSelectedBrewPathValid() else {
             Self.logger.error("Couldn't start brew operation because brew path is invalid")
 
-            guard let recoverBrew else {
-                // Unwired (no owner) — fall back to the local alert so the failure isn't silent.
-                alert.show(title: "Brew path is invalid", message: BrewPaths.brokenPathOrInstallMessage)
-                return false
-            }
+            // Unwired (no owner, i.e. not the running app) — nothing can recover it here.
+            guard let recoverBrew else { return false }
 
             guard await recoverBrew() else { return false }
 
@@ -690,7 +678,9 @@ final class BrewService {
                 : String(localized: "\(succeeded) apps updated, \(failedNames.count) failed", comment: "Bulk update partial-failure notification")
             let names = failedNames.joined(separator: ", ")
             Self.logger.error("Batch \(kind.subcommand): \(succeeded) ok, failed: \(names)")
-            alert.show(title: LocalizedStringKey(title), message: names)
+            // No alert: each failed cask keeps its own error row, and those rows stay in Active
+            // Tasks (badged) after the batch ends — a persistent, actionable list beats a modal
+            // summary the user dismisses once and can't get back.
             await sendNotification(title: title, body: names, reason: .failure)
         }
     }
@@ -788,28 +778,23 @@ final class BrewService {
         await sendNotification(title: notificationTitle, body: notificationMessage, reason: .success)
     }
 
-    /// Register failed task
+    /// Registers a failed task on the cask itself, and notifies.
+    ///
+    /// Deliberately raises no alert: the card's `.failed` row already reports this where the user is
+    /// looking, persistently, with the terminal output a modal can't show and a Dismiss button — and
+    /// the row survives in Active Tasks (badged in the sidebar) until dismissed. A modal on top of
+    /// that is a fourth surface for one event, carrying the least information of the four.
     private func showFailure(
         for vm: CaskViewModel,
         error: Error,
         output: String,
-        alertTitle: String,
-        alertMessage: String,
-        notificationTitle: String? = nil,
-        notificationMessage: String = ""
+        failureTitle: String,
+        failureMessage: String
     ) async {
-        // Log error
-        Self.logger.error("\(alertTitle)\nError: \(error.localizedDescription)\nOutput: \(output)")
+        Self.logger.error("\(failureTitle)\nError: \(error.localizedDescription)\nOutput: \(output)")
 
-        // Alert
-        alert.show(title: LocalizedStringKey(alertTitle), message: alertMessage)
-
-        // Send notification
-        let notificationTitle = notificationTitle ?? alertTitle
-
-        // Set progress state to failed
         vm.progressState = .failed(output: output)
 
-        await sendNotification(title: notificationTitle, body: notificationMessage, reason: .failure)
+        await sendNotification(title: failureTitle, body: failureMessage, reason: .failure)
     }
 }

@@ -51,7 +51,10 @@ final class CaskManager {
     /// The main window's single alert surface — brew failures, catalog/load failures and errors
     /// raised by views all queue here, and `ContentView` presents it once at the window root.
     /// Windows that can't see that root (Settings, the uninstaller) own a local one instead.
-    let alert: AlertManager
+    ///
+    /// Note what does *not* feed it: `BrewService` reports install/update failures on the cask's own
+    /// card and in Active Tasks, so it needs no alert surface at all.
+    let alert = AlertManager()
 
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -85,11 +88,7 @@ final class CaskManager {
         let reg = registry ?? CaskViewModelRegistry()
         self.registry = reg
         self.dataLoader = dataLoader ?? CaskDataLoader(registry: reg)
-        // One alert instance for the whole window: hand it to the brew service rather than letting
-        // that layer keep a second one (an injected service brings its own — tests don't present).
-        let alert = brewService?.alert ?? AlertManager()
-        self.alert = alert
-        self.brewService = brewService ?? BrewService(alert: alert)
+        self.brewService = brewService ?? BrewService()
         self.categories = Self.loadInitialCategories()
 
         // An operation that finds the brew path invalid re-resolves brew through `bootstrap` — the
@@ -176,13 +175,14 @@ final class CaskManager {
     /// `ContentView` — the only consumer that bypassed `.alertManager(_:)` — which is why
     /// `AlertManager`'s action fields went unused there (F5). Now the alert carries its own buttons,
     /// so every surface goes through the same modifier.
+    ///
+    /// No "Quit" button: it dates from when a failed load meant an empty, useless window. The DB
+    /// catalog renders regardless now, so quitting isn't a remedy — offering it as the loudest
+    /// option told a non-technical user their app was broken when it wasn't.
     private var loadFailureActions: [AppAlert.Action] {
         [
             AppAlert.Action("Retry") { [weak self] in
                 Task { await self?.loadData() }
-            },
-            AppAlert.Action("Quit", role: .destructive) {
-                NSApplication.shared.terminate(nil)
             },
             .ok
         ]
@@ -338,6 +338,7 @@ final class CaskManager {
             outdatedRefreshFailed = false
         } catch {
             outdatedRefreshFailed = true
+            Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
             throw error
         }
     }
