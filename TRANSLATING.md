@@ -16,10 +16,15 @@ must match:
 | | Register | Buttons |
 |---|---|---|
 | **hu** | formal (magázás) — *"Biztos véglegesen törli?"* | nominal: *Telepítés*, not *Telepítsd* |
-| **fr** | vouvoiement | infinitive: *Installer*. Narrow no-break space before `!` `?` `:` |
+| **fr** | vouvoiement | infinitive: *Installer*. Plain space before `!` `?` `:` `;` ¹ |
 | **ja** | です／ます | noun form; progress labels take *…中* |
 | **zh-Hans / zh-HK** | 你, not 您 (Apple's current style) | space between CJK and Latin/digits |
 | **tr** | formal *-iniz* | sentence case |
+
+¹ Typographically French wants a narrow no-break space (U+202F) there. This catalog uses a
+plain U+0020 everywhere instead, deliberately: it survives copy/paste, `grep` and diffs,
+which matters more for a file translators edit by hand than the tighter kerning does. Be
+consistent — a mix of the two is worse than either.
 
 ## Glossary
 
