@@ -6,11 +6,10 @@
 //
 
 import SwiftUI
-import Sparkle
 import ButtonKit
 
 struct CommandsMenu: Commands {
-    let updaterController: SPUStandardUpdaterController
+    let updater: UpdaterViewModel
     let caskManager: CaskManager
 
     @Environment(\.openWindow) var openWindow
@@ -33,9 +32,12 @@ struct CommandsMenu: Commands {
                 openWindow(id: "uninstall-self")
             }
 
-            Button(action: updaterController.updater.checkForUpdates) {
+            Button(action: updater.checkForUpdates) {
                 Text("Check for Updates...", comment: "Check for update menu bar item")
             }
+            // Sparkle clears this for the duration of a check; without it repeat invocations
+            // stacked up with no feedback (P3-18).
+            .disabled(!updater.canCheckForUpdates)
 
             Divider()
         }

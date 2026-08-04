@@ -30,7 +30,7 @@ public enum ColorSchemePreference: String, CaseIterable, Identifiable, Sendable 
 
 /// Settings pane
 struct SettingsView: View {
-    let updater: SPUUpdater
+    let updater: UpdaterViewModel
 
     var body: some View {
         TabView {
@@ -79,10 +79,12 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView(
-        updater: SPUStandardUpdaterController(
-            startingUpdater: false,
-            updaterDelegate: nil,
-            userDriverDelegate: nil
-        ).updater
+        updater: UpdaterViewModel(
+            updater: SPUStandardUpdaterController(
+                startingUpdater: false,
+                updaterDelegate: nil,
+                userDriverDelegate: nil
+            ).updater
+        )
     )
 }

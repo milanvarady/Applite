@@ -35,6 +35,11 @@ struct CaskDatabaseService {
     }
 
     /// Fetches casks matching a list of tokens (checks both `token` and `fullToken` columns)
+    ///
+    /// Not chunked, deliberately (P2-23): this binds 2× the token count, and the catalog itself is
+    /// ~7.7k casks, so reaching even SQLite's *stock* 32,766-variable limit would take an import
+    /// file with more tokens than there are casks in existence. Apple's build raises the limit to
+    /// 500,000 besides. Chunking here would be complexity guarding an unreachable case.
     func fetchCasks(forTokens tokens: [String]) async throws -> [CaskRecord] {
         guard !tokens.isEmpty else { return [] }
         return try await pool().read { db in
