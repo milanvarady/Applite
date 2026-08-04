@@ -208,10 +208,12 @@ enum InstalledAppLocator {
 enum AppLaunchError: LocalizedError {
     case appNotFound(name: String)
 
+    /// Reaches the user as an alert body, so it's localized.
     var errorDescription: String? {
         switch self {
         case .appNotFound(let name):
-            return String(localized: "Applite couldn't locate \(name) on disk")
+            return String(localized: "Applite couldn't locate \(name) on disk",
+                          comment: "Error shown when an installed app's bundle can't be found to launch it (app name)")
         }
     }
 }

@@ -183,16 +183,21 @@ enum NetworkProxyError: LocalizedError {
     case noProxyHost
     case noProxyPort
 
+    /// Reaches the user as an alert body, so every case is localized.
     var errorDescription: String? {
         switch self {
         case .failedToGetSystemSettings:
-            return "Failed to get system proxy settings"
+            return String(localized: "Failed to get system proxy settings",
+                          comment: "Proxy error: macOS network settings couldn't be read")
         case .proxyNotEnabled:
-            return "Proxy is not enabled"
+            return String(localized: "Proxy is not enabled",
+                          comment: "Proxy error: no proxy is turned on in macOS network settings")
         case .noProxyHost:
-            return "No proxy host specified"
+            return String(localized: "No proxy host specified",
+                          comment: "Proxy error: the system proxy has no host address")
         case .noProxyPort:
-            return "No proxy port specified"
+            return String(localized: "No proxy port specified",
+                          comment: "Proxy error: the system proxy has no port number")
         }
     }
 }

@@ -66,7 +66,7 @@ struct BrewActionsView: View {
                     message: "After reinstalling, all currently installed apps will be unlinked from Applite. They won't be deleted, but you won't be able to update or uninstall them via Applite."
                 )
             } header: {
-                Text("Reinstall", comment: "Brew Management view reinstall section title")
+                Text("Reinstall", comment: "Reinstall action — one word shared by the Manage Homebrew section title, an app card's menu item, and the reinstall confirmation button")
             }
         }
         .task {
@@ -109,6 +109,16 @@ struct BrewActionsView: View {
         }
     }
 
+    /// Two whole sentences rather than one with a `"re"` spliced in. A bare fragment can't be
+    /// translated on its own — it only works in languages that happen to build the word by
+    /// prefixing — so the Hungarian translator dropped the placeholder entirely and a reinstall
+    /// prompt ended up saying "install". The `message:` closure below already worked this way.
+    private var reinstallConfirmTitle: LocalizedStringKey {
+        isAnnexBrewInstalled
+            ? "Are you sure you want to reinstall Homebrew?"
+            : "Are you sure you want to install Homebrew?"
+    }
+
     @MainActor
     private var reinstallButton: some View {
         HStack {
@@ -119,8 +129,9 @@ struct BrewActionsView: View {
             }
             .controlSize(.large)
             .disabled(modifyingBrew)
-            .confirmationDialog("Are you sure you want to \(isAnnexBrewInstalled ? "re" : "")install Homebrew?", isPresented: $isPresentingReinstallConfirm) {
-                AsyncButton("Reinstall", role: .destructive) {
+            .confirmationDialog(reinstallConfirmTitle, isPresented: $isPresentingReinstallConfirm) {
+                // Follows the title above: "Reinstall" under an install prompt read as a mistake.
+                AsyncButton(isAnnexBrewInstalled ? "Reinstall" : "Install", role: .destructive) {
                     withAnimation {
                         modifyingBrew = true
                     }

@@ -9,11 +9,6 @@ import Foundation
 
 /// Holds the different brew directory and executable paths, provides methods to retrieve and verify the currently selected path
 struct BrewPaths {
-    /// User-facing message for a broken brew path or damaged installation. Lives here — the neutral
-    /// brew-path abstraction — so generic callers don't reach into annex-specific machinery for it
-    /// (E3).
-    static let brokenPathOrInstallMessage = "Error. Broken brew path, or damaged installation. Check brew path in settings, or try reinstalling Homebrew (Manage Homebrew->Reinstall)"
-
     /// Brew executable path options
     enum PathOption: Int, CaseIterable, Identifiable {
         /// Applite's own ("annex") brew in the Application Support folder
