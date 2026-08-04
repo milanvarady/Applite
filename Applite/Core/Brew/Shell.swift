@@ -9,34 +9,81 @@ import Foundation
 import OSLog
 import os
 
-/// Namespace for shell command execution utilities
+/// Namespace for shell command execution utilities.
+///
+/// Commands run in one of two ways:
+/// - **argv execution** (``run(_:_:pty:timeout:)`` / ``stream(_:_:pty:)`` and the brew helpers):
+///   the executable is launched directly with an argument array — there is **no `/bin/sh -c`**, so
+///   nothing in `arguments` is ever parsed by a shell. This is the *only* safe path for commands
+///   whose arguments include untrusted values (third-party cask tokens, user-entered brew/appdir
+///   paths). Even the pty variant funnels the argv through `exec "$0" "$@"`, never string-splicing.
+/// - **shell-script execution** (``runShellScript(_:pty:timeout:)`` / ``streamShellScript(_:pty:)``):
+///   runs `/bin/sh -c <script>`. Reserved for fixed, trusted script *literals* that genuinely need
+///   shell features (globs, pipes, `$HOME`, `set -o pipefail`). Never interpolate untrusted input
+///   into such a script — that reopens the injection hole the argv path exists to prevent.
 enum Shell {
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Shell")
 
-    /// Executes a shell command asynchronously
+    // MARK: - Argv execution (no shell — injection-proof)
+
+    /// Runs an executable directly with an argv array and returns its combined output.
     ///
     /// - Parameters:
-    ///   - command: The shell command to run
-    ///   - pty: Wether to use pseudo-TTY behavior or not
-    ///   - timeout: If set, the process is killed after this duration and ``ShellError/timedOut``
-    ///     is thrown. Use for commands that could hang (e.g. a login shell sourcing a broken config).
-    ///
-    /// - Returns: The output of the shell command
-    ///
-    /// Using the `pty` option can leave unwanted characters in the output, use only when necessary
+    ///   - executableURL: The program to run.
+    ///   - arguments: Argument vector, passed verbatim — no shell parsing, quoting, or word-splitting.
+    ///   - pty: Run inside a pseudo-TTY (needed for brew's live progress output).
+    ///   - timeout: If set, the process is killed after this duration and ``ShellError/timedOut`` is
+    ///     thrown. Use for commands that could hang (e.g. a `brew --version` probe against a broken path).
     @discardableResult
-    static func runAsync(_ command: String, pty: Bool = false, timeout: Duration? = nil) async throws -> String {
-        try await runProcessAsync(command, pty: pty, timeout: timeout)
+    static func run(_ executableURL: URL, _ arguments: [String], pty: Bool = false, timeout: Duration? = nil) async throws -> String {
+        try await runProcessAsync(executableURL: executableURL, arguments: arguments, pty: pty, timeout: timeout)
     }
 
-    /// Runs a command and awaits its termination handler — **never blocks a thread** on
-    /// `waitUntilExit()`. Blocking inside async code (as the old `runAsync` did) starves the
-    /// concurrency pool and stalls SwiftUI's main-run-loop updates, so all async runs go through here.
+    /// Streams an executable's output line-by-line. Argv-based; see ``run(_:_:pty:timeout:)``.
+    static func stream(_ executableURL: URL, _ arguments: [String], pty: Bool = false) -> AsyncThrowingStream<String, Error> {
+        makeStream(executableURL: executableURL, arguments: arguments, pty: pty)
+    }
+
+    // MARK: - Brew convenience
+
+    /// Runs the currently-selected `brew` with `arguments`. Argv-based, so tokens/paths are safe.
+    @discardableResult
+    static func runBrewCommand(_ arguments: [String], pty: Bool = false, timeout: Duration? = nil) async throws -> String {
+        try await run(BrewPaths.currentBrewExecutable, arguments, pty: pty, timeout: timeout)
+    }
+
+    /// Streams the currently-selected `brew` with `arguments`. Argv-based, so tokens/paths are safe.
+    static func streamBrewCommand(_ arguments: [String], pty: Bool = false) -> AsyncThrowingStream<String, Error> {
+        stream(BrewPaths.currentBrewExecutable, arguments, pty: pty)
+    }
+
+    // MARK: - Shell-script escape hatch (trusted literals only)
+
+    /// Runs `/bin/sh -c <script>`. See the type doc: **fixed, trusted literals only** — never
+    /// interpolate untrusted input (cask tokens, user paths) into `script`.
+    @discardableResult
+    static func runShellScript(_ script: String, pty: Bool = false, timeout: Duration? = nil) async throws -> String {
+        try await run(URL(fileURLWithPath: "/bin/sh"), ["-c", script], pty: pty, timeout: timeout)
+    }
+
+    /// Streams `/bin/sh -c <script>`. See ``runShellScript(_:pty:timeout:)`` for the safety contract.
+    static func streamShellScript(_ script: String, pty: Bool = false) -> AsyncThrowingStream<String, Error> {
+        stream(URL(fileURLWithPath: "/bin/sh"), ["-c", script], pty: pty)
+    }
+
+    // MARK: - Process implementation
+
+    /// Runs a process and awaits its termination handler — **never blocks a thread** on
+    /// `waitUntilExit()`. Blocking inside async code starves the concurrency pool and stalls
+    /// SwiftUI's main-run-loop updates, so all non-streaming runs go through here.
     ///
-    /// - Parameter timeout: If set, the process is killed after this duration and
-    ///   ``ShellError/timedOut`` is thrown (used for commands that could hang, e.g. a login shell).
-    private static func runProcessAsync(_ command: String, pty: Bool, timeout: Duration?) async throws -> String {
-        let (task, pipe) = try createProcess(command: command, pty: pty)
+    /// Cancelling the awaiting `Task` terminates the process (SIGTERM) so a hung brew can't wedge
+    /// the serial queue forever; a `timeout`, when set, does the same after the given duration.
+    private static func runProcessAsync(executableURL: URL, arguments: [String], pty: Bool, timeout: Duration?) async throws -> String {
+        try Task.checkCancellation()
+
+        let displayCommand = ([executableURL.path(percentEncoded: false)] + arguments).joined(separator: " ")
+        let (task, pipe) = try createProcess(executableURL: executableURL, arguments: arguments, pty: pty)
         let handle = pipe.fileHandleForReading
 
         // Drain the pipe *concurrently* (not after exit) so a large output can't fill the ~64 KB
@@ -59,67 +106,58 @@ enum Shell {
         }
         defer { watchdog?.cancel() }
 
-        return try await withCheckedThrowingContinuation { continuation in
-            task.terminationHandler = { proc in
-                handle.readabilityHandler = nil
-                // Capture any bytes buffered between the last readability callback and exit.
-                let tail = handle.availableData
-                let data = collected.withLock { buffer -> Data in
-                    if !tail.isEmpty { buffer.append(tail) }
-                    return buffer
-                }
-                let output = String(decoding: data, as: UTF8.self).cleanTerminalOutput()
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                task.terminationHandler = { proc in
+                    handle.readabilityHandler = nil
+                    // Capture any bytes buffered between the last readability callback and exit.
+                    let tail = handle.availableData
+                    let data = collected.withLock { buffer -> Data in
+                        if !tail.isEmpty { buffer.append(tail) }
+                        return buffer
+                    }
+                    let output = String(decoding: data, as: UTF8.self).cleanTerminalOutput()
 
-                // A timeout kills the process with SIGTERM (uncaught signal) — distinguish that
-                // from a normal non-zero exit.
-                if let timeout, proc.terminationReason == .uncaughtSignal, proc.terminationStatus == SIGTERM {
-                    continuation.resume(throwing: ShellError.timedOut(command: command, seconds: timeout))
-                } else if proc.terminationStatus == 0 {
-                    continuation.resume(returning: output)
-                } else {
-                    continuation.resume(throwing: ShellError.nonZeroExit(
-                        command: command,
-                        exitCode: proc.terminationStatus,
-                        output: output
-                    ))
+                    // A timeout / cancellation kills the process with SIGTERM (uncaught signal) —
+                    // distinguish that from a normal non-zero exit.
+                    if proc.terminationReason == .uncaughtSignal, proc.terminationStatus == SIGTERM {
+                        if let timeout {
+                            continuation.resume(throwing: ShellError.timedOut(command: displayCommand, seconds: timeout))
+                        } else {
+                            continuation.resume(throwing: CancellationError())
+                        }
+                    } else if proc.terminationStatus == 0 {
+                        continuation.resume(returning: output)
+                    } else {
+                        continuation.resume(throwing: ShellError.nonZeroExit(
+                            command: displayCommand,
+                            exitCode: proc.terminationStatus,
+                            output: output
+                        ))
+                    }
+                }
+
+                do {
+                    try task.run()
+                    // Cover the narrow race where cancellation arrived after the handler was
+                    // installed but before the process was running.
+                    if Task.isCancelled, task.isRunning { task.terminate() }
+                } catch {
+                    handle.readabilityHandler = nil
+                    continuation.resume(throwing: error)
                 }
             }
-
-            do {
-                try task.run()
-            } catch {
-                handle.readabilityHandler = nil
-                continuation.resume(throwing: error)
-            }
+        } onCancel: {
+            if task.isRunning { task.terminate() }
         }
     }
 
-    /// Executes a brew command asynchronously
-    ///
-    /// - Parameters:
-    ///   - command: The shell command to run
-    ///   - pty: Wether to use pseudo-TTY behavior or not
-    ///
-    /// - Returns: The output of the shell command
-    ///
-    /// Using the `pty` option can leave unwanted characters in the output, use only when necessary
-    @discardableResult
-    static func runBrewCommand(_ arguments: [String], pty: Bool = false) async throws -> String {
-        let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) \(arguments.joined(separator: " "))"
-        return try await runAsync(command)
-    }
+    /// Streams a process's output line-by-line as an ``AsyncThrowingStream``.
+    /// The consumer cancelling its task (or otherwise stopping iteration) terminates the process.
+    private static func makeStream(executableURL: URL, arguments: [String], pty: Bool) -> AsyncThrowingStream<String, Error> {
+        let displayCommand = ([executableURL.path(percentEncoded: false)] + arguments).joined(separator: " ")
 
-    /// Executes a shell command and streams the output line-by-line
-    ///
-    /// - Parameters:
-    ///   - command: The shell command to run
-    ///   - pty: Wether to use pseudo-TTY behavior or not
-    ///
-    /// - Returns: An ``AsyncThrowingStream`` that yields the output in real time
-    ///
-    /// Using the `pty` option can leave unwanted characters in the output, use only when necessary
-    static func stream(_ command: String, pty: Bool = false) -> AsyncThrowingStream<String, Error> {
-        AsyncThrowingStream { continuation in
+        return AsyncThrowingStream { continuation in
             // `stream` is called synchronously, so a plain `Task {}` here would inherit the caller's
             // actor — and callers are `@MainActor`. The reader does blocking process I/O
             // (`FileHandle.bytes`, `waitUntilExit`), which on the main actor freezes the UI for the
@@ -133,7 +171,7 @@ enum Shell {
                 let pipe: Pipe
 
                 do {
-                    (task, pipe) = try createProcess(command: command, pty: pty)
+                    (task, pipe) = try createProcess(executableURL: executableURL, arguments: arguments, pty: pty)
                 } catch {
                     continuation.finish(throwing: error)
                     return
@@ -224,7 +262,7 @@ enum Shell {
                     if task.terminationStatus != 0 {
                         continuation.finish(
                             throwing: ShellError.nonZeroExit(
-                                command: command,
+                                command: displayCommand,
                                 exitCode: task.terminationStatus,
                                 output: "n/a (streamed output)"
                             )
@@ -240,7 +278,7 @@ enum Shell {
                         task.waitUntilExit()
                         if task.terminationStatus != 0 {
                             continuation.finish(throwing: ShellError.nonZeroExit(
-                                command: command,
+                                command: displayCommand,
                                 exitCode: task.terminationStatus,
                                 output: "n/a (streamed output)"
                             ))
@@ -273,16 +311,17 @@ enum Shell {
         }
     }
 
-    /// Initializes a shell process with a given command
+    /// Builds a configured (but not yet started) ``Process`` running `executableURL` with `arguments`.
     ///
-    /// - Parameters:
-    ///   - command: The shell command to run
-    ///   - pty: Wether to use pseudo-TTY behavior or not
+    /// - Parameter pty: When `true`, the executable runs inside a pseudo-TTY via `/usr/bin/script`.
+    ///   We need this because some brew commands run in quiet mode if they detect they're not in an
+    ///   interactive environment.
     ///
-    /// - Returns: The initialized ``Process`` and ``Pipe`` object
-    ///
-    /// We need the `pty` option because some brew commands run in quiet mode if it detects its not in a interactive environment
-    private static func createProcess(command: String, pty: Bool) throws -> (Process, Pipe) {
+    /// Argv safety: even the pty path never string-splices `arguments`. It runs
+    /// `/bin/sh -c 'stty …; exec "$0" "$@"' <executable> <args…>`, where the shameless little script
+    /// is a fixed literal and the (possibly untrusted) executable + arguments arrive as positional
+    /// parameters that `exec "$0" "$@"` forwards verbatim — no shell parsing of their contents.
+    private static func createProcess(executableURL: URL, arguments: [String], pty: Bool) throws -> (Process, Pipe) {
         // Locate the bundled askpass script. Its integrity is guaranteed by the app's
         // code signature (the bundle's CodeResources seal covers every resource), so no
         // separate checksum is needed here.
@@ -361,12 +400,16 @@ enum Shell {
             // size (`stty size`) as `0 0`. Homebrew then treats the terminal width as
             // 0 and suppresses its live download progress (the byte counters and bar
             // we scrape). Forcing a sane window size first re-enables that output.
-            let ptyCommand = "stty rows 50 cols 200 2>/dev/null; \(command)"
+            //
+            // `exec "$0" "$@"` then replaces the shell with the target executable, passing its
+            // arguments verbatim — the untrusted executable path/args are positional parameters,
+            // never part of the script text, so there's nothing for the shell to (mis)interpret.
+            let sizedExec = #"stty rows 50 cols 200 2>/dev/null; exec "$0" "$@""#
             task.executableURL = URL(fileURLWithPath: "/usr/bin/script")
-            task.arguments = ["-q", "/dev/null", "/bin/sh", "-c", ptyCommand]
+            task.arguments = ["-q", "/dev/null", "/bin/sh", "-c", sizedExec, executableURL.path(percentEncoded: false)] + arguments
         } else {
-            task.executableURL = URL(fileURLWithPath: "/bin/sh")
-            task.arguments = ["-c", command]
+            task.executableURL = executableURL
+            task.arguments = arguments
         }
 
         return (task, pipe)

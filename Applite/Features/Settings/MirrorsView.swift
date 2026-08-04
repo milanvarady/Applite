@@ -45,22 +45,6 @@ struct MirrorsView: View {
         .formStyle(.grouped)
     }
 
-    struct EnvironmentInput: View {
-        let title: String
-        @Binding var text: String
-
-        var body: some View {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.caption.monospaced())
-                    .foregroundStyle(.secondary)
-                TextField(title, text: $text)
-                    .labelsHidden()
-                    .textFieldStyle(.roundedBorder)
-            }
-        }
-    }
-
     private let mirrorPresets: [MirrorPreset] = [
         .init(
             name: "USTC",

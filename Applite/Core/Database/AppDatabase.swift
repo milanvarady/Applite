@@ -18,16 +18,23 @@ struct AppDatabase {
         category: String(describing: AppDatabase.self)
     )
     
-    /// The shared database pool for the application
-    static let shared: DatabasePool = {
-        do {
-            let pool = try openDatabase()
-            logger.info("Database opened successfully")
-            return pool
-        } catch {
-            fatalError("Failed to open database: \(error)")
-        }
-    }()
+    /// The shared database pool, opened lazily and **off the main actor** on first use.
+    ///
+    /// Opening it (file open + WAL + first-run DDL migration) can be slow on a cold disk or fresh
+    /// install, so it must not run synchronously during `CaskManager` init on the main actor — that
+    /// would block first paint (P2-13). The open also no longer `fatalError`s (P2-14): a failure
+    /// (corrupt WAL, full disk) now propagates through the normal async DB call path and surfaces
+    /// via `loadAlert` instead of crash-looping a non-technical user with no way out.
+    private static let poolTask = Task.detached(priority: .userInitiated) { () throws -> DatabasePool in
+        let pool = try openDatabase()
+        logger.info("Database opened successfully")
+        return pool
+    }
+
+    /// Awaits the shared database pool, kicking off (and caching) the off-main open on first call.
+    static func pool() async throws -> DatabasePool {
+        try await poolTask.value
+    }
 
     private static func migrator() -> DatabaseMigrator {
         var migrator = DatabaseMigrator()

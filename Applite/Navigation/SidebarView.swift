@@ -19,7 +19,7 @@ struct SidebarView: View {
                 .tag(SidebarItem.home)
             
             Label("Updates", systemImage: "square.and.arrow.down")
-                .badge(caskManager.outdatedViewModels.count)
+                .badge(caskManager.outdatedCount)
                 .tag(SidebarItem.updates)
             
             Label("Installed", systemImage: "externaldrive.badge.checkmark")

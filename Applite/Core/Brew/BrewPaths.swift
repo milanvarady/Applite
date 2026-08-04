@@ -9,6 +9,11 @@ import Foundation
 
 /// Holds the different brew directory and executable paths, provides methods to retrieve and verify the currently selected path
 struct BrewPaths {
+    /// User-facing message for a broken brew path or damaged installation. Lives here — the neutral
+    /// brew-path abstraction — so generic callers (BrewService, BrokenInstallView) don't reach into
+    /// annex-specific machinery for it (E3).
+    static let brokenPathOrInstallMessage = "Error. Broken brew path, or damaged installation. Check brew path in settings, or try reinstalling Homebrew (Manage Homebrew->Reinstall)"
+
     /// Brew executable path options
     enum PathOption: Int, CaseIterable, Identifiable {
         /// Applite's own ("annex") brew in the Application Support folder
@@ -81,8 +86,10 @@ struct BrewPaths {
     ///
     /// - Returns: Whether the path is valid or not
     static func isBrewPathValid(at url: URL) async -> Bool {
-        // Check if Homebrew is returned when checking version
-        guard let output = try? await Shell.runAsync("\(url.quotedPath()) --version") else {
+        // Check if Homebrew is returned when checking version. Argv-based (the path is never
+        // spliced into a shell) and time-boxed so a hung/locked/network-mounted brew can't stall
+        // app launch — the whole bootstrap awaits this before it can leave `.checking`.
+        guard let output = try? await Shell.run(url, ["--version"], timeout: .seconds(10)) else {
             return false
         }
 
@@ -161,7 +168,7 @@ struct BrewPaths {
 
         // A login shell (`-l`) sources the user's profile, so `command -v brew` sees the PATH they
         // actually use — this is what finds brew at a non-standard prefix.
-        guard let output = try? await Shell.runAsync("zsh -lc 'command -v brew'", timeout: .seconds(5)) else {
+        guard let output = try? await Shell.run(URL(fileURLWithPath: "/bin/zsh"), ["-lc", "command -v brew"], timeout: .seconds(5)) else {
             return nil
         }
 

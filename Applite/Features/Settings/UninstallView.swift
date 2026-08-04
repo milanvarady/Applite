@@ -80,18 +80,6 @@ struct UninstallView: View {
         }
         .alertManager(uninstallAlert)
     }
-
-    private func remark(title: LocalizedStringKey, color: Color, message: LocalizedStringKey) -> Text {
-        Text(title)
-            .foregroundStyle(color)
-            .fontWeight(.bold)
-        +
-        Text(": ")
-            .foregroundStyle(color)
-            .fontWeight(.bold)
-        +
-        Text(message)
-    }
 }
 
 #Preview {

@@ -11,6 +11,11 @@ import OSLog
 
 struct ActiveBrewTask: Identifiable {
     let id = UUID()
+    /// Groups the rows belonging to the same brew operation (a batch shares one across its casks).
+    /// Eviction is scoped to this, so a finishing op only removes its *own* rows — never a
+    /// different, still-queued op's row for the same cask (which would make that card vanish and
+    /// its cancel silently no-op while brew still ran).
+    let operationID: UUID
     let viewModel: CaskViewModel
     let task: Task<Void, Never>
 }
@@ -72,25 +77,20 @@ final class BrewService {
         return runTask(for: vm) {
             Self.logger.info("Cask \"\(vm.token)\" installation started")
 
-            // Appdir argument
-            let appdirOn = UserDefaults.standard.value(for: Preferences.appdirOn)
-            let appdirPath = UserDefaults.standard.value(for: Preferences.appdirPath)
-            let appdirArgument = "--appdir=\"\(appdirPath)\""
-
             // Always --force: the Install button only shows when the cask isn't tracked as
             // installed, so force just overwrites/adopts any untracked copy already on disk instead
             // of erroring — and it's identical to a plain install when nothing is there.
-            var arguments = [vm.token, "--force"]
-            if appdirOn { arguments.append(appdirArgument) }
-
-            let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) install --cask \(arguments.joined(separator: " "))"
+            // Use `fullToken` (like every sibling op) so a tapped token that collides with a core
+            // cask installs the intended cask, not the core one.
+            var arguments = ["install", "--cask", vm.fullToken, "--force"]
+            arguments.append(contentsOf: Self.appdirArguments())
 
             // Setup progress
             vm.progressState = .busy(withTask: "")
 
             // Run install command and stream output
             let result = await self.streamBrewCommand(
-                command,
+                arguments,
                 vm: vm,
                 busyLabel: String(localized: "Installing", comment: "Install progress text")
             )
@@ -187,9 +187,7 @@ final class BrewService {
             let updateLabel = String(localized: "Updating", comment: "Update progress text")
             vm.progressState = .busy(withTask: updateLabel)
 
-            let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) upgrade --cask \(vm.fullToken)"
-
-            let result = await self.streamBrewCommand(command, vm: vm, busyLabel: updateLabel)
+            let result = await self.streamBrewCommand(["upgrade", "--cask", vm.fullToken], vm: vm, busyLabel: updateLabel)
 
             // Stopped by the user — no success/failure surface.
             if Task.isCancelled {
@@ -225,9 +223,7 @@ final class BrewService {
             let reinstallLabel = String(localized: "Reinstalling", comment: "Reinstall progress text")
             vm.progressState = .busy(withTask: reinstallLabel)
 
-            let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) reinstall --cask \(vm.fullToken)"
-
-            let result = await self.streamBrewCommand(command, vm: vm, busyLabel: reinstallLabel)
+            let result = await self.streamBrewCommand(["reinstall", "--cask", vm.fullToken], vm: vm, busyLabel: reinstallLabel)
 
             // Stopped by the user — no success/failure surface.
             if Task.isCancelled {
@@ -335,14 +331,16 @@ final class BrewService {
         vm.progressState = .busy(withTask: waitingLabel)
 
         let previous = queueTail
+        let operationID = UUID()
         let task = Task {
             await previous?.value
 
             defer {
                 // Keep a failed cask in the task list (so its error stays reachable) until the user
-                // dismisses it; remove it once it succeeds or is otherwise done.
+                // dismisses it; remove it once it succeeds or is otherwise done. Scope to THIS
+                // operation's row so a separate queued op for the same cask isn't evicted (P2-10).
                 self.activeTasks.removeAll {
-                    $0.viewModel == vm && !$0.viewModel.progressState.isFailed
+                    $0.operationID == operationID && !$0.viewModel.progressState.isFailed
                 }
             }
 
@@ -353,9 +351,7 @@ final class BrewService {
             }
 
             // Make sure brew path is valid
-            guard await BrewPaths.isSelectedBrewPathValid() else {
-                Self.logger.error("Couldn't start brew operation because brew path is invalid")
-                alert.show(title: "Brew path is invalid", message: AnnexBrewManager.brokenPathOrInstallMessage)
+            guard await self.brewPathIsValid() else {
                 vm.progressState = .idle
                 return
             }
@@ -364,8 +360,36 @@ final class BrewService {
         }
 
         queueTail = task
-        self.activeTasks.append(ActiveBrewTask(viewModel: vm, task: task))
+        self.activeTasks.append(ActiveBrewTask(operationID: operationID, viewModel: vm, task: task))
         return task
+    }
+
+    /// Validates the selected brew path before an operation runs; on failure logs and surfaces the
+    /// shared alert, returning `false`. The caller resets its own casks' progress state on `false`.
+    private func brewPathIsValid() async -> Bool {
+        guard await BrewPaths.isSelectedBrewPathValid() else {
+            Self.logger.error("Couldn't start brew operation because brew path is invalid")
+            alert.show(title: "Brew path is invalid", message: BrewPaths.brokenPathOrInstallMessage)
+            return false
+        }
+        return true
+    }
+
+    /// Runs `operation` on the serial brew queue (after any in-flight/queued op) and returns its
+    /// result. Used to sequence the read-side installed/outdated refresh with install/uninstall/
+    /// update *writes*: without this, a stage-2 `brew list`/`outdated` snapshot taken before an
+    /// install finishes can land afterwards and reconcile the just-installed cask back to "not
+    /// installed" (the F2 / P2-3 dual-writer stomp). On the queue, the refresh's snapshot is always
+    /// taken after every completed op, so it can never revert one.
+    func runSerialized<T: Sendable>(_ operation: @escaping @MainActor () async throws -> T) async throws -> T {
+        let previous = queueTail
+        let opTask = Task { @MainActor () async throws -> T in
+            await previous?.value
+            return try await operation()
+        }
+        // Chain the queue tail so later ops wait for this one; the op's own error is the caller's.
+        queueTail = Task { _ = try? await opTask.value }
+        return try await opTask.value
     }
 
     // MARK: - Bulk (batch) operations
@@ -397,15 +421,17 @@ final class BrewService {
 
         let previous = queueTail
         let handle = BatchHandle()
+        let operationID = UUID()
         let task = Task {
             await previous?.value
 
             // Now running — publish this batch so the Active Tasks "Stop" can cancel just it.
             self.runningBatch = handle
             defer {
-                // Keep failed casks in the task list until dismissed; remove the rest.
+                // Keep failed casks in the task list until dismissed; remove the rest. Scope to this
+                // batch's rows so it can't evict a separate op's row for a shared cask (P2-10).
                 self.activeTasks.removeAll {
-                    batchTokens.contains($0.viewModel.fullToken) && !$0.viewModel.progressState.isFailed
+                    $0.operationID == operationID && !$0.viewModel.progressState.isFailed
                 }
                 if self.runningBatch === handle { self.runningBatch = nil }
             }
@@ -414,9 +440,7 @@ final class BrewService {
                 for vm in vms { vm.progressState = .idle }
                 return
             }
-            guard await BrewPaths.isSelectedBrewPathValid() else {
-                Self.logger.error("Couldn't start bulk operation because brew path is invalid")
-                alert.show(title: "Brew path is invalid", message: AnnexBrewManager.brokenPathOrInstallMessage)
+            guard await self.brewPathIsValid() else {
                 for vm in vms { vm.progressState = .idle }
                 return
             }
@@ -425,7 +449,7 @@ final class BrewService {
 
         handle.task = task
         queueTail = task
-        for vm in vms { activeTasks.append(ActiveBrewTask(viewModel: vm, task: task)) }
+        for vm in vms { activeTasks.append(ActiveBrewTask(operationID: operationID, viewModel: vm, task: task)) }
     }
 
     /// Cancels the currently-running bulk operation (the whole `brew install/upgrade --cask <all>`
@@ -452,7 +476,7 @@ final class BrewService {
         }
         for key in ambiguousKeys { lookup[key] = nil }
 
-        var arguments = vms.map(\.fullToken)
+        var arguments = [kind.subcommand, "--cask"] + vms.map(\.fullToken)
         if kind == .install {
             // --force: bulk install is only used by app-list import, which commonly re-lists casks
             // that are already installed (or orphaned — e.g. a font whose files remain after brew
@@ -460,11 +484,8 @@ final class BrewService {
             // whole `brew install` batch and fail the rest. Reinstalling is low-risk and makes
             // import resilient.
             arguments.append("--force")
-            let appdirOn = UserDefaults.standard.value(for: Preferences.appdirOn)
-            let appdirPath = UserDefaults.standard.value(for: Preferences.appdirPath)
-            if appdirOn { arguments.append("--appdir=\"\(appdirPath)\"") }
+            arguments.append(contentsOf: Self.appdirArguments())
         }
-        let command = "\(BrewPaths.currentBrewExecutable.quotedPath()) \(kind.subcommand) --cask \(arguments.joined(separator: " "))"
 
         batchProgress = BatchProgress(completed: 0, total: vms.count, isUpdate: kind == .update)
         defer { batchProgress = nil }
@@ -473,7 +494,7 @@ final class BrewService {
         var completeOutput = ""
 
         do {
-            for try await line in Shell.stream(command, pty: true) {
+            for try await line in Shell.streamBrewCommand(arguments, pty: true) {
                 if Task.isCancelled { break }
                 completeOutput += line + "\n"
                 applyBatchLine(line, kind: kind, lookup: lookup, perCaskError: &perCaskError)
@@ -603,7 +624,7 @@ final class BrewService {
                 ok = false
             default:
                 // No marker seen — decide from the single brew query.
-                let listed = brewTokens.contains(vm.fullToken) || brewTokens.contains(vm.token)
+                let listed = vm.matches(anyOf: brewTokens)
                 switch kind {
                 case .install:
                     ok = listed
@@ -694,14 +715,22 @@ final class BrewService {
         return number * multiplier
     }
 
+    /// The `--appdir=<path>` argument (as a single argv element, no shell quoting) when the user
+    /// has set a custom install directory, else empty. Shared by single and bulk install.
+    private static func appdirArguments() -> [String] {
+        guard UserDefaults.standard.value(for: Preferences.appdirOn) else { return [] }
+        let appdirPath = UserDefaults.standard.value(for: Preferences.appdirPath)
+        return ["--appdir=\(appdirPath)"]
+    }
+
     /// Streams a brew command, updating `vm.progressState` from each parsed line.
     /// Returns the complete output on success, or a ``BrewStreamError`` carrying
     /// the partial output on failure.
-    private func streamBrewCommand(_ command: String, vm: CaskViewModel, busyLabel: String) async -> Result<String, BrewStreamError> {
+    private func streamBrewCommand(_ arguments: [String], vm: CaskViewModel, busyLabel: String) async -> Result<String, BrewStreamError> {
         var completeOutput = ""
 
         do {
-            for try await line in Shell.stream(command, pty: true) {
+            for try await line in Shell.streamBrewCommand(arguments, pty: true) {
                 completeOutput += line + "\n"
 
                 if let newProgress = self.parseBrewProgress(line: line, busyLabel: busyLabel) {

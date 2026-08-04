@@ -45,6 +45,7 @@ struct AppliteAppView: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Uninstall Applite")
         }
         .frame(width: AppView.dimensions.width, height: AppView.dimensions.height)
     }

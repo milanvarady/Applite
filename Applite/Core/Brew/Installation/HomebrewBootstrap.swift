@@ -74,8 +74,44 @@ final class HomebrewBootstrap {
     private static let selectedBrewRevalidationRetries = 2
     private static let selectedBrewRevalidationDelay: Duration = .milliseconds(400)
 
+    /// The in-flight bootstrap pass and the `attempt` generation it was started for. Used to make
+    /// `run()` single-flight so a second entry point (`loadData(forceSync:)` from ⌘R / Settings)
+    /// can't kick off a bootstrap concurrently with the launch one — two `installAnnex()` passes
+    /// would both `prepareAnnexDirectory(clean:)`, one wiping the tree the other extracts into.
+    @ObservationIgnored private var runTask: Task<Void, Never>?
+    @ObservationIgnored private var runningAttempt = -1
+
     /// Resolves brew, installing the annex only as a last resort. Safe to call again (Retry).
+    ///
+    /// Single-flight, generation-aware:
+    /// - A concurrent call for the *same* `attempt` (e.g. `loadData` overlapping the launch pass)
+    ///   awaits the in-flight pass instead of starting a second, concurrent one.
+    /// - A call after `attempt` was bumped (Retry / the "use my own brew" escape hatch) supersedes
+    ///   the old pass: it cancels it, waits for it to finish unwinding (so the annex directory is
+    ///   never touched by two passes at once), then starts fresh.
     func run() async {
+        if let runTask, runningAttempt == attempt {
+            await runTask.value
+            return
+        }
+
+        // A newer generation supersedes any still-running older pass.
+        runTask?.cancel()
+        await runTask?.value
+
+        let started = attempt
+        let task = Task { await self.runBootstrap() }
+        runningAttempt = started
+        runTask = task
+        await task.value
+
+        // Only clear if we're still the current pass (a newer generation may have replaced us).
+        if runningAttempt == started { runTask = nil }
+    }
+
+    /// The actual bootstrap sequence. Runs inside the `run()`-owned `Task`, so `Task.isCancelled`
+    /// here reflects `run()` cancelling it when a newer generation supersedes this pass.
+    private func runBootstrap() async {
         phase = .checking
 
         // 1. Honor a working selection first — covers existing users, custom paths, and a prior
@@ -137,7 +173,7 @@ final class HomebrewBootstrap {
         do {
             try AnnexBrewManager.prepareAnnexDirectory(clean: true)
 
-            for try await line in Shell.stream(AnnexBrewManager.annexExtractCommand(), pty: true) {
+            for try await line in Shell.streamShellScript(AnnexBrewManager.annexExtractCommand(), pty: true) {
                 statusLine = line
             }
 
@@ -145,6 +181,17 @@ final class HomebrewBootstrap {
             try Task.checkCancellation()
 
             try await AnnexBrewManager.verifyAnnexInstall()
+
+            // Don't clobber a choice the user made *while* the annex was downloading. The Settings
+            // "switch to my own brew" path doesn't bump `attempt` (so it doesn't cancel us via the
+            // check above); if they've since pointed Applite at their own, now-valid brew, honor it
+            // instead of silently switching them to the annex and orphaning their apps.
+            if BrewPaths.selectedBrewOption != .annex, await BrewPaths.isSelectedBrewPathValid() {
+                Self.logger.info("User selected their own valid brew during annex install — honoring it")
+                phase = .ready
+                return
+            }
+
             BrewPaths.selectedBrewOption = .annex
             AnnexBrewManager.stampAnnexRefreshed()
 

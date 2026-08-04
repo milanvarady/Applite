@@ -63,8 +63,11 @@ final class CaskViewModel {
     /// Warning information (deprecated, disabled, caveat)
     var warning: CaskWarning? { record.warning }
 
-    /// Whether this cask has any warning
-    var hasWarning: Bool { record.hasWarning }
+    /// True if this cask's short *or* full token is in `tokens`. Brew reports either form
+    /// depending on the command, so membership checks must accept both.
+    func matches(anyOf tokens: Set<CaskId>) -> Bool {
+        tokens.contains(token) || tokens.contains(fullToken)
+    }
 
     // MARK: - App Launch
 

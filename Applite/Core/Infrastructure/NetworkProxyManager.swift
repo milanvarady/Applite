@@ -84,8 +84,9 @@ struct NetworkProxyManager {
             throw NetworkProxyError.noProxyHost
         }
 
-        // Get proxy port
-        guard let proxyPort = switch proxyType {
+        // Get proxy port. Reject 0 (an unconfigured/invalid port) so we fall back to no proxy
+        // instead of building a proxy config that fails every request (P2-26).
+        let rawProxyPort: Int? = switch proxyType {
             case .http:
                 proxySettings[kCFNetworkProxiesHTTPPort as String] as? Int
             case .https:
@@ -93,8 +94,7 @@ struct NetworkProxyManager {
             case .socks5:
                 proxySettings[kCFNetworkProxiesSOCKSPort as String] as? Int
         }
-        // guard else
-        else {
+        guard let proxyPort = rawProxyPort, proxyPort > 0 else {
             throw NetworkProxyError.noProxyPort
         }
 

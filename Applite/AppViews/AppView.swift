@@ -158,6 +158,7 @@ struct AppView: View {
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
+        .accessibilityLabel("More options")
     }
 
     private func getInfo() async {
@@ -257,6 +258,7 @@ struct AppView: View {
             .buttonStyle(.plain)
             .frame(width: 30, height: 30)
             .help(caskManager.batchProgress != nil ? "Part of a bulk operation" : "Stop download")
+            .accessibilityLabel("Stop download")
 
         case .success:
             // Handled upstream by `showsSuccessIndicator` in `actionsView`; unreachable here.
@@ -278,6 +280,7 @@ struct AppView: View {
                 }
                 .buttonStyle(.bordered)
                 .help("View terminal output")
+                .accessibilityLabel("View terminal output")
 
                 Button {
                     caskManager.dismissFailure(cask)
@@ -286,6 +289,7 @@ struct AppView: View {
                 }
                 .buttonStyle(.bordered)
                 .help("Dismiss")
+                .accessibilityLabel("Dismiss error")
             }
 
         case .idle:

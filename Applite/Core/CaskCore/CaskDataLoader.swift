@@ -41,11 +41,19 @@ final class CaskDataLoader {
     func loadCatalogData(forceSync: Bool = false) async throws -> (categories: [CategoryLoadResult], taps: [TapLoadResult]) {
         logger.info("Starting catalog load (forceSync: \(forceSync))")
 
-        // 1. Sync database from API
-        if forceSync {
-            try await performSync()
-        } else {
-            try await syncIfNeeded()
+        // 1. Sync database from API. If a non-forced sync fails (offline / transient) but the DB
+        // already holds a catalog, fall back to that stale data instead of throwing the whole load
+        // into an all-session shimmer. A forced manual refresh still throws so the caller can tell
+        // the user the refresh didn't go through (their previously-loaded catalog stays on screen).
+        do {
+            if forceSync {
+                try await performSync()
+            } else {
+                try await syncIfNeeded()
+            }
+        } catch {
+            guard !forceSync, try await dbService.hasCasks() else { throw error }
+            logger.warning("Catalog sync failed (\(error.localizedDescription)); using existing database data")
         }
 
         // 2. Load category definitions from bundled JSON
@@ -144,6 +152,11 @@ final class CaskDataLoader {
         let (dtosResult, analyticsResult, tapDTOsResult) = try await (dtos, analytics, tapDTOs)
         await categoriesRefresh
 
+        // A `nil` tap result means the fetch failed (vs. `[]` = legitimately no tap casks / disabled).
+        // On failure, don't prune tap casks from the DB — otherwise one transient hiccup wipes every
+        // installed custom-tap cask until the next successful fetch.
+        let tapFetchFailed = tapDTOsResult == nil
+
         // Build analytics lookup
         var analyticsDict: [String: Int] = [:]
         for item in analyticsResult.items {
@@ -153,13 +166,13 @@ final class CaskDataLoader {
         }
 
         // Convert DTOs → CaskRecords with analytics
-        let allDTOs = dtosResult + tapDTOsResult
+        let allDTOs = dtosResult + (tapDTOsResult ?? [])
         let records = allDTOs.map { dto in
             CaskRecord(fromDTO: dto, downloadsIn365days: analyticsDict[dto.token] ?? 0)
         }
 
         // Sync to database. FTS5 stays in lock-step via synchronize(withTable:) triggers.
-        try await dbService.syncFromAPI(records: records)
+        try await dbService.syncFromAPI(records: records, pruneTapCasks: !tapFetchFailed)
 
         logger.info("Sync completed: \(records.count) casks")
     }
@@ -178,8 +191,12 @@ final class CaskDataLoader {
         return try await fetchJSON(from: url, as: BrewAnalytics.self)
     }
 
-    /// Fetches cask DTOs from third-party taps via brew ruby script
-    private func fetchTapDTOs() async -> [CaskDTO] {
+    /// Fetches cask DTOs from third-party taps via brew ruby script.
+    ///
+    /// Returns `nil` to signal a *failure* (script missing, brew error, unparseable output) as
+    /// distinct from `[]` (tap fetch intentionally disabled, or genuinely no tap casks). Callers
+    /// must not prune existing tap casks from the DB on `nil` — see `syncFromAPI(pruneTapCasks:)`.
+    private func fetchTapDTOs() async -> [CaskDTO]? {
         let enabled = UserDefaults.standard.value(for: Preferences.includeCasksFromTaps)
         guard enabled else {
             logger.info("Tap fetch skipped: includeCasksFromTaps is disabled")
@@ -188,32 +205,31 @@ final class CaskDataLoader {
 
         guard let scriptPath = Bundle.main.path(forResource: "brew-tap-cask-info", ofType: "rb") else {
             logger.error("Failed to locate tap info ruby script")
-            return []
+            return nil
         }
 
-        let arguments = [BrewPaths.currentBrewExecutable.quotedPath(), "ruby", scriptPath.paddedWithQuotes()]
-        let command = arguments.joined(separator: " ")
-        logger.info("Running tap fetch: \(command)")
+        logger.info("Running tap fetch: brew ruby \(scriptPath)")
 
         var shellOutput = ""
         do {
-            for try await line in Shell.stream(command) {
+            for try await line in Shell.streamBrewCommand(["ruby", scriptPath]) {
                 shellOutput += line + "\n"
             }
         } catch {
             logger.error("Failed to load tap cask info: \(error)")
+            return nil
         }
 
         logger.info("Tap script output length: \(shellOutput.count) chars")
 
         guard let match = shellOutput.firstMatch(of: /\[((.|\n|\r)*)\]/) else {
             logger.error("Tap script output did not contain a JSON array. First 500 chars: \(shellOutput.prefix(500))")
-            return []
+            return nil
         }
 
         guard let jsonData = String(match.0).data(using: .utf8) else {
             logger.error("Failed to convert tap JSON string to data")
-            return []
+            return nil
         }
 
         do {
@@ -222,7 +238,7 @@ final class CaskDataLoader {
             return dtos
         } catch {
             logger.error("Failed to decode tap DTOs from JSON: \(error)")
-            return []
+            return nil
         }
     }
 

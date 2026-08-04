@@ -32,21 +32,29 @@ struct InfoPopup: View {
     }
 
     var body: some View {
-        Image(systemName: sfSymbol)
-            .foregroundStyle(color)
-            .onHover { hover in
-                showPopover = hover
-            }
-            .buttonStyle(.plain)
-            .popover(isPresented: $showPopover) {
-                Text(text)
-                    .textSelection(.enabled)
-                    .frame(maxWidth: 400)
-                    .fixedSize(horizontal: true, vertical: true)
-                    .padding(16)
-                    .padding(.top, extraTopPadding)
-                    .padding(.bottom, extraBottomPadding)
-            }
+        // A real Button (not a bare hover-only Image) so keyboard and VoiceOver users can open the
+        // popover too; hover still opens it for mouse users. The info text is exposed as the
+        // accessibility label so assistive tech announces it without having to open the popover (F2).
+        Button {
+            showPopover.toggle()
+        } label: {
+            Image(systemName: sfSymbol)
+                .foregroundStyle(color)
+        }
+        .buttonStyle(.plain)
+        .onHover { hover in
+            showPopover = hover
+        }
+        .popover(isPresented: $showPopover) {
+            Text(text)
+                .textSelection(.enabled)
+                .frame(maxWidth: 400)
+                .fixedSize(horizontal: true, vertical: true)
+                .padding(16)
+                .padding(.top, extraTopPadding)
+                .padding(.bottom, extraBottomPadding)
+        }
+        .accessibilityLabel(Text(text))
     }
 }
 

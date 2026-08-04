@@ -16,11 +16,4 @@ enum AnnexBrewError: LocalizedError {
             return "The Brew installation seems to be invalid."
         }
     }
-
-    var failureReason: String? {
-        switch self {
-        case .invalidBrewInstallation:
-            return "brew executable is missing or invalid"
-        }
-    }
 }

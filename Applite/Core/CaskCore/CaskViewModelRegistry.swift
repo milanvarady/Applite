@@ -49,26 +49,26 @@ final class CaskViewModelRegistry {
 
     // MARK: - Bulk State Updates
 
-    /// Marks casks as installed. Tokens can be short ("firefox") or full ("homebrew/cask/firefox").
+    /// Reconciles a boolean flag across every view model against `tokens` (short or full form).
     /// Only writes when the value actually changes — every assignment to an `@Observable`
     /// property fires `didSet`, so unconditional writes would re-render every dependent view.
-    func markInstalled(tokens: Set<CaskId>) {
-        for (key, vm) in viewModelsByToken {
-            let match = tokens.contains(key) || tokens.contains(vm.fullToken)
-            if vm.isInstalled != match {
-                vm.isInstalled = match
+    private func updateFlag(_ keyPath: ReferenceWritableKeyPath<CaskViewModel, Bool>, tokens: Set<CaskId>) {
+        for vm in viewModelsByToken.values {
+            let match = vm.matches(anyOf: tokens)
+            if vm[keyPath: keyPath] != match {
+                vm[keyPath: keyPath] = match
             }
         }
     }
 
+    /// Marks casks as installed. Tokens can be short ("firefox") or full ("homebrew/cask/firefox").
+    func markInstalled(tokens: Set<CaskId>) {
+        updateFlag(\.isInstalled, tokens: tokens)
+    }
+
     /// Marks casks as outdated. Tokens can be short or full.
     func markOutdated(tokens: Set<CaskId>) {
-        for (key, vm) in viewModelsByToken {
-            let match = tokens.contains(key) || tokens.contains(vm.fullToken)
-            if vm.isOutdated != match {
-                vm.isOutdated = match
-            }
-        }
+        updateFlag(\.isOutdated, tokens: tokens)
     }
 
     // MARK: - Computed Filtered Lists
@@ -87,9 +87,14 @@ final class CaskViewModelRegistry {
             .sorted()
     }
 
-    /// All view models currently performing an operation (install, update, uninstall)
-    var busyViewModels: [CaskViewModel] {
-        viewModelsByToken.values.filter { $0.progressState != .idle }
+    /// O(n) counts that skip the O(n log n) `.sorted()` of the full list — for the always-on-screen
+    /// sidebar badge, which only needs the number, not the ordered view models (D1).
+    var installedCount: Int {
+        viewModelsByToken.values.lazy.filter(\.isInstalled).count
+    }
+
+    var outdatedCount: Int {
+        viewModelsByToken.values.lazy.filter(\.isOutdated).count
     }
 
     /// Total number of tracked view models

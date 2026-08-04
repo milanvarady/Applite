@@ -43,9 +43,14 @@ func sendNotification(title: String, body: String = "", reason: NotificationReas
         return
     }
         
-    /// Return if notifications are desabled for selected reason
-    if (!UserDefaults.standard.bool(forKey: "notificationSuccess") && reason == .success)
-        || (!UserDefaults.standard.bool(forKey: "notificationFailure") && reason == .failure) {
+    /// Return if notifications are disabled for the selected reason.
+    /// Use the typed accessors so an unwritten key falls back to its declared default
+    /// (`notificationFailure` defaults to `true`) instead of raw `bool(forKey:)` returning
+    /// `false` — which silently suppressed all failure notifications until the user first
+    /// toggled the setting on a fresh install.
+    let successEnabled = UserDefaults.standard.value(for: Preferences.notificationSuccess)
+    let failureEnabled = UserDefaults.standard.value(for: Preferences.notificationFailure)
+    if (!successEnabled && reason == .success) || (!failureEnabled && reason == .failure) {
         return
     }
 

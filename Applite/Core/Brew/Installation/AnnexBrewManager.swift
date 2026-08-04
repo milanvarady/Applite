@@ -28,9 +28,6 @@ struct AnnexBrewManager {
         category: String(describing: AnnexBrewManager.self)
     )
 
-    /// Message shown when brew path is broken
-    static let brokenPathOrInstallMessage = "Error. Broken brew path, or damaged installation. Check brew path in settings, or try reinstalling Homebrew (Manage Homebrew->Reinstall)"
-
     /// Homebrew source tarball, extracted verbatim into the annex directory.
     ///
     /// Tracks `master` (no version pin) — the same rolling source `brew update` pulls — because the
@@ -40,16 +37,17 @@ struct AnnexBrewManager {
 
     // MARK: - Annex install / refresh
 
-    /// The shell command that fetches the Homebrew tarball and unpacks it over the annex directory.
+    /// The shell command that fetches the Homebrew tarball and unpacks it into `directory`
+    /// (the annex directory by default; a staging dir for an atomic clean reinstall).
     /// Shared by the clean install, the streaming first-run install, and the freshness refresh.
-    static func annexExtractCommand() -> String {
+    static func annexExtractCommand(into directory: URL = BrewPaths.annexBrewDirectory) -> String {
         // `set -o pipefail` + `curl -fL`: without them a truncated download or an HTTP error body is
         // swallowed — the pipeline's exit status is tar's, so tar happily extracts a partial (or
         // garbage) tree and the command "succeeds" with a half-installed brew. `verifyAnnexInstall`'s
         // `brew --version` check won't catch that (it loads too little), so it only surfaces later as
         // a missing-file crash. `-f` fails on HTTP errors; pipefail propagates curl's exit through
         // the pipe. (macOS `/bin/sh` is bash, which supports `pipefail`.)
-        "set -o pipefail; curl -fL \(brewTarballURL) | tar xz --strip 1 -C \(BrewPaths.annexBrewDirectory.quotedPath())"
+        "set -o pipefail; curl -fL \(brewTarballURL) | tar xz --strip 1 -C \(directory.quotedPath())"
     }
 
     /// Ensures the annex directory exists.
@@ -70,9 +68,9 @@ struct AnnexBrewManager {
         )
     }
 
-    /// Verifies the annex brew executable actually runs and reports Homebrew.
-    static func verifyAnnexInstall() async throws {
-        guard await BrewPaths.isBrewPathValid(at: BrewPaths.annexBrewExecutable) else {
+    /// Verifies a brew executable actually runs and reports Homebrew (defaults to the annex's).
+    static func verifyAnnexInstall(at executable: URL = BrewPaths.annexBrewExecutable) async throws {
+        guard await BrewPaths.isBrewPathValid(at: executable) else {
             throw AnnexBrewError.invalidBrewInstallation
         }
     }
@@ -83,14 +81,49 @@ struct AnnexBrewManager {
         UserDefaults.standard.setValue(Date().timeIntervalSince1970, for: Preferences.annexLastRefreshDate)
     }
 
-    /// Clean install of the annex brew: wipes any existing annex, unpacks the tarball, verifies,
-    /// and selects it as the active brew. Used by the "Reinstall" action.
+    /// Clean install of the annex brew: unpacks the tarball into a staging dir, verifies it, and
+    /// only then atomically swaps it into place. Used by the "Reinstall" action.
+    ///
+    /// Staging-then-swap (P3-2): the old, working install is never touched until a fresh tree has
+    /// been fully downloaded, extracted, and verified. A failure at any point (network drop, disk
+    /// full, quit mid-extract) leaves the existing Homebrew intact instead of destroying it — the
+    /// previous "wipe first, then download" order turned any transient failure into a dead install.
     static func installAnnexClean() async throws {
         Self.logger.info("Clean annex Homebrew install started")
 
-        try prepareAnnexDirectory(clean: true)
-        try await Shell.runAsync(annexExtractCommand())
-        try await verifyAnnexInstall()
+        let fm = FileManager.default
+        let finalDir = BrewPaths.annexBrewDirectory
+        let parent = finalDir.deletingLastPathComponent()
+        let stagingDir = parent.appending(path: "Homebrew.staging", directoryHint: .isDirectory)
+        let backupDir = parent.appending(path: "Homebrew.old", directoryHint: .isDirectory)
+
+        // 1. Extract into a clean staging dir and verify it — all before touching the live install.
+        try? fm.removeItem(at: stagingDir)
+        try fm.createDirectory(at: stagingDir, withIntermediateDirectories: true)
+        do {
+            try await Shell.runShellScript(annexExtractCommand(into: stagingDir))
+            try await verifyAnnexInstall(at: stagingDir.appendingPathComponent("bin/brew"))
+        } catch {
+            try? fm.removeItem(at: stagingDir)   // leave the existing install untouched
+            throw error
+        }
+
+        // 2. Swap in the verified tree via fast same-volume renames; the only non-atomic gap is
+        //    between two renames (sub-millisecond), and a failure there is rolled back.
+        try? fm.removeItem(at: backupDir)
+        if fm.fileExists(atPath: finalDir.path) {
+            try fm.moveItem(at: finalDir, to: backupDir)
+        }
+        do {
+            try fm.moveItem(at: stagingDir, to: finalDir)
+        } catch {
+            // Restore the previous install if the swap-in failed.
+            if fm.fileExists(atPath: backupDir.path) {
+                try? fm.moveItem(at: backupDir, to: finalDir)
+            }
+            throw error
+        }
+        try? fm.removeItem(at: backupDir)   // discard the old tree once the new one is in place
 
         BrewPaths.selectedBrewOption = .annex
         stampAnnexRefreshed()
@@ -107,13 +140,24 @@ struct AnnexBrewManager {
         }
 
         Self.logger.info("Refreshing annex Homebrew (non-destructive overlay)")
-        try prepareAnnexDirectory(clean: false)
-        try await Shell.runAsync(annexExtractCommand())
-        try await verifyAnnexInstall()
-        stampAnnexRefreshed()
-        Self.logger.info("Annex Homebrew refresh done")
 
+        var refreshError: Error?
+        do {
+            try prepareAnnexDirectory(clean: false)
+            try await Shell.runShellScript(annexExtractCommand())
+            try await verifyAnnexInstall()
+            stampAnnexRefreshed()
+            Self.logger.info("Annex Homebrew refresh done")
+        } catch {
+            refreshError = error
+        }
+
+        // Prune regardless of the refresh outcome. This was the *only* prune site and it ran only on
+        // full success, so repeated refresh failures + continued installs grew HOMEBREW_CACHE without
+        // bound (P3-9). Best-effort: it logs and moves on if brew is unusable.
         await pruneAnnexCache()
+
+        if let refreshError { throw refreshError }
     }
 
     /// Best-effort `brew cleanup --prune=all` on the annex's periodic refresh tick.

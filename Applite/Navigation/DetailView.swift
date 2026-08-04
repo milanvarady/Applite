@@ -49,21 +49,3 @@ struct DetailView: View {
         }
     }
 }
-
-struct BrokenInstallView: View {
-    @Environment(CaskManager.self) var caskManager
-
-    var body: some View {
-        VStack(alignment: .center) {
-            Text(AnnexBrewManager.brokenPathOrInstallMessage)
-
-            AsyncButton {
-                await caskManager.loadData()
-            } label: {
-                Label("Retry load", systemImage: "arrow.clockwise.circle")
-            }
-            .controlSize(.large)
-        }
-        .frame(maxWidth: 600)
-    }
-}
