@@ -82,6 +82,12 @@ enum Shell {
     /// `BrewService.cancelAllAndWait`.
     static let terminationGrace: Duration = .seconds(1)
 
+    /// How long a stream's pipe must stay *silent* after the process exits before we force EOF by
+    /// closing our read end. Idle-based rather than a fixed delay, so a slow drain is never cut off —
+    /// see the read loop in ``makeStream(executableURL:arguments:pty:)``.
+    private static let eofIdleTimeout: Duration = .milliseconds(750)
+    private static let eofIdlePollInterval: Duration = .milliseconds(150)
+
     /// Asks the process to stop, and makes sure it does.
     ///
     /// SIGTERM first so brew can unwind normally, then SIGKILL if it's still alive after
@@ -214,25 +220,67 @@ enum Shell {
                 do {
                     let fileHandle = pipe.fileHandleForReading
 
-                    // Force the read loop to end once the process exits. `fileHandle.bytes` blocks
-                    // until the pty reaches EOF, but a `script`-wrapped pty can linger after brew has
-                    // finished (or AsyncBytes may not observe EOF promptly). A hung loop here would
-                    // freeze the cask on its install/"success" state — so it's never marked installed.
-                    // Closing our read end on termination guarantees EOF.
-                    //
-                    // **Only for a pty.** Closing discards whatever the process wrote just before
-                    // exiting and is still sitting in the pipe — up to its 64 KB buffer. A plain pipe
-                    // doesn't need the help: the child's write end closes when it exits, so the
-                    // reader drains the backlog and *then* sees EOF. Forcing it here truncated any
-                    // output the reader hadn't caught up with, which is why the 161 KB tap-cask JSON
-                    // arrived 63% complete and failed to parse ("Unexpected end of file") — taps
-                    // silently never appeared.
-                    task.terminationHandler = { _ in
-                        processExited.withLock { $0 = true }
-                        if pty {
-                            try? fileHandle.close()
+                    // Read in chunks via `readabilityHandler` rather than `fileHandle.bytes`.
+                    // AsyncBytes hands over one byte at a time, which is slow enough that a fast
+                    // writer builds a backlog in the pipe — and the handler reports EOF as an empty
+                    // read, which is what lets the drain below end on its own.
+                    let (chunks, chunkFeed) = AsyncStream<Data>.makeStream()
+
+                    // When bytes last arrived, and whether the pipe has reached EOF. The watchdog
+                    // below uses these to tell "still draining" apart from "the writer is gone but
+                    // our read never ended".
+                    let clock = ContinuousClock()
+                    let lastRead = OSAllocatedUnfairLock<ContinuousClock.Instant>(initialState: clock.now)
+                    let reachedEOF = OSAllocatedUnfairLock<Bool>(initialState: false)
+
+                    fileHandle.readabilityHandler = { handle in
+                        let data = handle.availableData
+                        lastRead.withLock { $0 = clock.now }
+                        if data.isEmpty {
+                            handle.readabilityHandler = nil
+                            reachedEOF.withLock { $0 = true }
+                            chunkFeed.finish()
+                        } else {
+                            chunkFeed.yield(data)
                         }
                     }
+
+                    // Do NOT close the read end the moment the process exits. Whatever it wrote just
+                    // before exiting is still sitting in the pipe, and closing discards it: that
+                    // truncated the 161 KB tap-cask JSON to 63% (it failed to parse, so taps silently
+                    // never appeared), and on the pty path it can cut brew's trailing "successfully
+                    // installed" marker — turning a successful install into a reported failure.
+                    //
+                    // The close still has to exist, because a `script`-wrapped pty can linger after
+                    // brew finishes and leave the read hanging, which would strand a cask on its
+                    // install state forever. So wait for the pipe to go *quiet* instead: once nothing
+                    // has arrived for `eofIdleTimeout`, force EOF. Idle-based, not a fixed delay, so
+                    // a drain that's still making progress is never cut off no matter how big it is.
+                    task.terminationHandler = { _ in
+                        processExited.withLock { $0 = true }
+
+                        Task.detached {
+                            while !reachedEOF.withLock({ $0 }) {
+                                try? await Task.sleep(for: eofIdlePollInterval)
+                                if reachedEOF.withLock({ $0 }) { return }
+                                let idle = lastRead.withLock { clock.now - $0 }
+                                if idle >= eofIdleTimeout {
+                                    // End the stream *here*, don't just close the handle: closing it
+                                    // stops `readabilityHandler` from firing rather than delivering a
+                                    // final empty read, so waiting for the handler to report EOF would
+                                    // hang the read loop forever — a worse failure than the truncation
+                                    // this whole watchdog exists to avoid.
+                                    fileHandle.readabilityHandler = nil
+                                    reachedEOF.withLock { $0 = true }
+                                    try? fileHandle.close()
+                                    chunkFeed.finish()
+                                    return
+                                }
+                            }
+                        }
+                    }
+
+                    defer { fileHandle.readabilityHandler = nil }
 
                     try task.run()
 
@@ -254,42 +302,46 @@ enum Shell {
                         }
                     }
 
-                    for try await byte in fileHandle.bytes {
-                        if inEscape {
-                            if !escapeIsCSI {
-                                // First byte after ESC determines the escape type.
-                                escapeIsCSI = (byte == UInt8(ascii: "["))
-                                // A non-CSI escape (ESC + one char) ends immediately; drop it.
-                                if !escapeIsCSI { inEscape = false }
+                    // Same frame state machine as before, now fed from chunks instead of
+                    // one-byte-at-a-time AsyncBytes.
+                    for await chunk in chunks {
+                        for byte in chunk {
+                            if inEscape {
+                                if !escapeIsCSI {
+                                    // First byte after ESC determines the escape type.
+                                    escapeIsCSI = (byte == UInt8(ascii: "["))
+                                    // A non-CSI escape (ESC + one char) ends immediately; drop it.
+                                    if !escapeIsCSI { inEscape = false }
+                                    continue
+                                }
+
+                                // Inside a CSI sequence — runs until a final byte (0x40...0x7E).
+                                if (0x40...0x7E).contains(byte) {
+                                    inEscape = false
+                                    escapeIsCSI = false
+
+                                    // Cursor-repositioning finals mark an in-place redraw → frame boundary.
+                                    switch byte {
+                                    case UInt8(ascii: "A"), UInt8(ascii: "B"), UInt8(ascii: "E"),
+                                         UInt8(ascii: "F"), UInt8(ascii: "G"), UInt8(ascii: "H"),
+                                         UInt8(ascii: "d"):
+                                        flushFrame()
+                                    default:
+                                        break   // color / clear / cursor-visibility — strip and continue
+                                    }
+                                }
                                 continue
                             }
 
-                            // Inside a CSI sequence — runs until a final byte (0x40...0x7E).
-                            if (0x40...0x7E).contains(byte) {
-                                inEscape = false
+                            switch byte {
+                            case 0x1B:              // ESC — start of an escape sequence (stripped)
+                                inEscape = true
                                 escapeIsCSI = false
-
-                                // Cursor-repositioning finals mark an in-place redraw → frame boundary.
-                                switch byte {
-                                case UInt8(ascii: "A"), UInt8(ascii: "B"), UInt8(ascii: "E"),
-                                     UInt8(ascii: "F"), UInt8(ascii: "G"), UInt8(ascii: "H"),
-                                     UInt8(ascii: "d"):
-                                    flushFrame()
-                                default:
-                                    break   // color / clear / cursor-visibility — strip and continue
-                                }
+                            case 0x0A, 0x0D:        // \n or \r — frame boundary
+                                flushFrame()
+                            default:
+                                frame.append(byte)
                             }
-                            continue
-                        }
-
-                        switch byte {
-                        case 0x1B:              // ESC — start of an escape sequence (stripped)
-                            inEscape = true
-                            escapeIsCSI = false
-                        case 0x0A, 0x0D:        // \n or \r — frame boundary
-                            flushFrame()
-                        default:
-                            frame.append(byte)
                         }
                     }
 
