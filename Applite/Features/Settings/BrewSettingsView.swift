@@ -104,10 +104,15 @@ struct BrewSettingsView: View {
                     Spacer()
 
                     AsyncButton {
-                        await caskManager.loadData(forceSync: true)
+                        let loaded = await caskManager.loadData(forceSync: true)
                         // Recovery may have repointed the selection (detected brew / reinstalled
                         // annex), so re-poll rather than leaving a stale ✗ next to a path that works.
                         isSelectedBrewPathValid = await BrewPaths.isSelectedBrewPathValid()
+                        // Only retire the banner if the refresh actually happened. With a broken
+                        // brew this button is (correctly) still enabled, but `loadData` drops its
+                        // error on that path — clearing the baselines anyway made the prompt vanish
+                        // as though the change had been applied when nothing was fetched.
+                        guard loaded else { return }
                         previousBrewOption = brewPathOption
                         previousIncludeCasksFromTaps = includeCasksFromTaps
                     } label: {

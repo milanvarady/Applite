@@ -270,9 +270,16 @@ enum Shell {
                                     // final empty read, so waiting for the handler to report EOF would
                                     // hang the read loop forever — a worse failure than the truncation
                                     // this whole watchdog exists to avoid.
+                                    //
+                                    // And deliberately do NOT close the descriptor here. An already
+                                    // dispatched `readabilityHandler` can be inside `availableData`
+                                    // at this exact moment, and that raises an ObjC
+                                    // `NSFileHandleOperationException` on a closed descriptor —
+                                    // uncatchable from Swift, i.e. a crash. Clearing the handler and
+                                    // finishing the stream is enough to release the read loop; the
+                                    // descriptor closes with the `Pipe` when it deallocs.
                                     fileHandle.readabilityHandler = nil
                                     reachedEOF.withLock { $0 = true }
-                                    try? fileHandle.close()
                                     chunkFeed.finish()
                                     return
                                 }

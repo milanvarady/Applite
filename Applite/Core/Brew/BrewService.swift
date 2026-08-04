@@ -652,8 +652,12 @@ final class BrewService {
             case .failed:
                 ok = false
             default:
-                // No marker seen — decide from the single brew query.
-                let listed = vm.matches(anyOf: brewTokens)
+                // No marker seen — decide from the single brew query. `list --full-name` is an
+                // exact identity match; `outdated -q` prints bare tokens, so it stays loose but can
+                // only mean *this* cask when it's the installed one.
+                let listed = kind == .install
+                    ? vm.matchesFullName(in: brewTokens)
+                    : (vm.isInstalled && vm.matchesBareToken(in: brewTokens))
                 switch kind {
                 case .install:
                     ok = listed

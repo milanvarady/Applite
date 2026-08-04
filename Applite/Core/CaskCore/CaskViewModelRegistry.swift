@@ -41,26 +41,33 @@ final class CaskViewModelRegistry {
 
     // MARK: - Bulk State Updates
 
-    /// Reconciles a boolean flag across every view model against `tokens` (short or full form).
+    /// Reconciles a boolean flag across every view model using `isMatch`.
     /// Only writes when the value actually changes — every assignment to an `@Observable`
     /// property fires `didSet`, so unconditional writes would re-render every dependent view.
-    private func updateFlag(_ keyPath: ReferenceWritableKeyPath<CaskViewModel, Bool>, tokens: Set<CaskId>) {
+    private func updateFlag(
+        _ keyPath: ReferenceWritableKeyPath<CaskViewModel, Bool>,
+        isMatch: (CaskViewModel) -> Bool
+    ) {
         for vm in viewModelsByFullToken.values {
-            let match = vm.matches(anyOf: tokens)
+            let match = isMatch(vm)
             if vm[keyPath: keyPath] != match {
                 vm[keyPath: keyPath] = match
             }
         }
     }
 
-    /// Marks casks as installed. Tokens can be short ("firefox") or full ("homebrew/cask/firefox").
+    /// Marks casks as installed from `brew list --cask --full-name`, which prints each cask's
+    /// `full_name` — so this is an exact `fullToken` match.
     func markInstalled(tokens: Set<CaskId>) {
-        updateFlag(\.isInstalled, tokens: tokens)
+        updateFlag(\.isInstalled) { $0.matchesFullName(in: tokens) }
     }
 
-    /// Marks casks as outdated. Tokens can be short or full.
+    /// Marks casks as outdated from `brew outdated --cask -q`, which prints **bare** tokens even for
+    /// tap casks. That's ambiguous across taps, so it's gated on `isInstalled`: only one of two
+    /// same-token casks can be the installed one, and installed state is reconciled first (see
+    /// `CaskManager.loadInstalledState`, which awaits `refreshInstalled` before `refreshOutdated`).
     func markOutdated(tokens: Set<CaskId>) {
-        updateFlag(\.isOutdated, tokens: tokens)
+        updateFlag(\.isOutdated) { $0.isInstalled && $0.matchesBareToken(in: tokens) }
     }
 
     // MARK: - Computed Filtered Lists

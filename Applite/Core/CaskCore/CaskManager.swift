@@ -220,7 +220,11 @@ final class CaskManager {
     /// load-failure alert's retry. Reloads the catalog, then — if the selected brew is valid — the
     /// installed/outdated state; otherwise re-runs `bootstrap` to try to recover, leaving the
     /// resulting `bootstrap.phase` to surface a brew that's genuinely unusable.
-    func loadData(forceSync: Bool = false) async {
+    /// Returns whether the load actually completed — callers that show "this needs refreshing"
+    /// affordances must not clear them on a load that silently did nothing (the broken-brew branch
+    /// below deliberately drops its error, so the return value is the only signal).
+    @discardableResult
+    func loadData(forceSync: Bool = false) async -> Bool {
         Self.logger.info("Starting data load process (forceSync: \(forceSync))")
 
         if forceSync { isRefreshingCatalog = true }
@@ -236,7 +240,7 @@ final class CaskManager {
                 alert.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions)
             }
             await loadInstalledState()
-            return
+            return true
         }
 
         // Selected brew is invalid — attempt recovery (detect existing / reinstall annex).
@@ -255,7 +259,7 @@ final class CaskManager {
                 brew --version output: \(versionOutput)
                 """
             )
-            return
+            return false
         }
 
         // Recovered — the catalog alert is now the only possible surface, so raise it.
@@ -263,6 +267,7 @@ final class CaskManager {
             alert.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions)
         }
         await loadInstalledState()
+        return catalogError == nil
     }
 
     /// Stage 1: catalog (categories + taps) from the local DB — fast, no brew CLI dependency.
