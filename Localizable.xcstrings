@@ -1557,6 +1557,9 @@
     "Applite can use the system network proxy, but only one protocol (HTTP, HTTPS, or SOCKS5). Select your preferred method." : {
       "comment" : "Proxy settings description"
     },
+    "Applite couldn't check which of your apps are outdated. Check your Homebrew installation and try again." : {
+      "comment" : "Update view outdated-check-failed description"
+    },
     "Applite couldn't find %@ on your Mac. It may be installed under a different name — try opening it from Spotlight (⌘ Space) or your Applications folder." : {
       "comment" : "Shown when Applite can't locate an installed app's bundle to launch it"
     },
@@ -2748,6 +2751,9 @@
     "Copy" : {
 
     },
+    "Couldn't Check for Updates" : {
+
+    },
     "Couldn't download app. No internet connection, or host is unreachable." : {
       "comment" : "No internet alert message",
       "localizations" : {
@@ -3351,6 +3357,9 @@
       }
     },
     "Dismiss" : {
+
+    },
+    "Dismiss error" : {
 
     },
     "Done" : {
@@ -5275,9 +5284,6 @@
         }
       }
     },
-    "Installing %lld apps…" : {
-
-    },
     "Installing %lld of %lld…" : {
       "comment" : "Bulk install progress header",
       "localizations" : {
@@ -5745,6 +5751,9 @@
           }
         }
       }
+    },
+    "More options" : {
+
     },
     "Most downloaded (default)" : {
       "comment" : "Sorting option",
@@ -6955,6 +6964,7 @@
     },
     "Retry load" : {
       "comment" : "Load failed alert button",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
