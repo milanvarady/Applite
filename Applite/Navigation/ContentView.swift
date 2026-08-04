@@ -56,7 +56,7 @@ struct ContentView: View {
         NavigationSplitView {
             SidebarView(selection: $selection)
                 .disabled(modifyingBrew)
-                .navigationSplitViewColumnWidth(216)
+                .navigationSplitViewColumnWidth(min: 200, ideal: 216)
         } detail: {
             if !searchInput.isEmpty {
                 SearchView(query: $searchInput)
