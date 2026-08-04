@@ -286,23 +286,37 @@ final class BrewService {
         activeTasks.removeAll { $0.viewModel == vm }
     }
 
-    /// Cancels every active task and waits for them to unwind (terminating their
-    /// brew processes via `Shell.stream`'s onTermination), bounded by a timeout so
-    /// quitting can never block indefinitely. Used by the quit-confirmation flow.
+    /// Cancels every active task and waits for them to unwind (terminating their brew processes via
+    /// `Shell.stream`'s onTermination), bounded by a timeout so quitting can never block
+    /// indefinitely. Used by the quit path.
+    ///
+    /// The timeout is derived from `Shell.terminationGrace` rather than being its own magic number,
+    /// and must stay **longer** than it: SIGTERM goes out immediately but the SIGKILL that catches a
+    /// process ignoring it only lands one grace period later. A wait shorter than the grace would
+    /// return first, the app would exit, and the very process we escalated for would be reparented
+    /// to launchd still running — the P3-10 leak, just with extra steps.
     func cancelAllAndWait() async {
         let tasks = activeTasks.map(\.task)
         for task in tasks { task.cancel() }
 
-        await withTaskGroup(of: Void.self) { group in
+        let deadline = Shell.terminationGrace + .seconds(1)
+        let unwoundCleanly = await withTaskGroup(of: Bool.self) { group in
             group.addTask {
                 for task in tasks { await task.value }
+                return true
             }
             group.addTask {
-                try? await Task.sleep(for: .seconds(2))
+                try? await Task.sleep(for: deadline)
+                return false
             }
             // Return as soon as either all tasks finished unwinding or the timeout fired.
-            await group.next()
+            let first = await group.next() ?? false
             group.cancelAll()
+            return first
+        }
+
+        if !unwoundCleanly {
+            Self.logger.error("Quit: \(tasks.count) brew task(s) did not unwind within \(deadline); processes were SIGKILLed")
         }
     }
 

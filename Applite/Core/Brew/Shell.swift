@@ -73,6 +73,32 @@ enum Shell {
 
     // MARK: - Process implementation
 
+    /// How long a process gets to honor SIGTERM before it is killed outright.
+    ///
+    /// `terminate()` is a *request*, not a guarantee: a brew wedged in a syscall — or a `script`
+    /// wrapper whose child ignored the pty hangup — can outlive it. That matters most at quit, where
+    /// the survivor is reparented to launchd and keeps running with no Applite left to stop it
+    /// (P3-10). Anything that waits for a clean unwind must allow **more** than this — see
+    /// `BrewService.cancelAllAndWait`.
+    static let terminationGrace: Duration = .seconds(1)
+
+    /// Asks the process to stop, and makes sure it does.
+    ///
+    /// SIGTERM first so brew can unwind normally, then SIGKILL if it's still alive after
+    /// ``terminationGrace``. The liveness re-check reads `isRunning` rather than trusting the cached
+    /// pid, so a pid recycled by the OS after the process was reaped can never be signalled.
+    static func terminateThenKill(_ process: Process) {
+        guard process.isRunning else { return }
+        process.terminate()
+
+        let pid = process.processIdentifier
+        Task.detached {
+            try? await Task.sleep(for: terminationGrace)
+            guard process.isRunning else { return }
+            kill(pid, SIGKILL)
+        }
+    }
+
     /// Runs a process and awaits its termination handler — **never blocks a thread** on
     /// `waitUntilExit()`. Blocking inside async code starves the concurrency pool and stalls
     /// SwiftUI's main-run-loop updates, so all non-streaming runs go through here.
@@ -101,7 +127,7 @@ enum Shell {
         let watchdog: Task<Void, Never>? = timeout.map { duration in
             Task {
                 try? await Task.sleep(for: duration)
-                if task.isRunning { task.terminate() }
+                terminateThenKill(task)
             }
         }
         defer { watchdog?.cancel() }
@@ -118,9 +144,11 @@ enum Shell {
                     }
                     let output = String(decoding: data, as: UTF8.self).cleanTerminalOutput()
 
-                    // A timeout / cancellation kills the process with SIGTERM (uncaught signal) —
-                    // distinguish that from a normal non-zero exit.
-                    if proc.terminationReason == .uncaughtSignal, proc.terminationStatus == SIGTERM {
+                    // A timeout / cancellation kills the process with SIGTERM, escalating to
+                    // SIGKILL if it ignores that (see `terminateThenKill`) — distinguish both from
+                    // a normal non-zero exit.
+                    if proc.terminationReason == .uncaughtSignal,
+                       proc.terminationStatus == SIGTERM || proc.terminationStatus == SIGKILL {
                         if let timeout {
                             continuation.resume(throwing: ShellError.timedOut(command: displayCommand, seconds: timeout))
                         } else {
@@ -141,14 +169,14 @@ enum Shell {
                     try task.run()
                     // Cover the narrow race where cancellation arrived after the handler was
                     // installed but before the process was running.
-                    if Task.isCancelled, task.isRunning { task.terminate() }
+                    if Task.isCancelled { terminateThenKill(task) }
                 } catch {
                     handle.readabilityHandler = nil
                     continuation.resume(throwing: error)
                 }
             }
         } onCancel: {
-            if task.isRunning { task.terminate() }
+            terminateThenKill(task)
         }
     }
 
@@ -305,7 +333,7 @@ enum Shell {
             continuation.onTermination = { _ in
                 reader.cancel()
                 processHolder.withLock { proc in
-                    if proc?.isRunning == true { proc?.terminate() }
+                    if let proc { terminateThenKill(proc) }
                 }
             }
         }
