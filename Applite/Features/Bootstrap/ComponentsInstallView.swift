@@ -143,14 +143,19 @@ struct ComponentsInstallView: View {
         }
     }
 
-    /// Shown under the main content: a note that the user can switch to their own Homebrew, with a
-    /// shortcut into Settings (where the brew-path selector lives).
+    /// Shown under the main content: a note about the brew-path selector in Settings, with a
+    /// shortcut to it.
+    ///
+    /// The wording has to follow the phase. In `.brewMissing` the user is *already* pointed at their
+    /// own Homebrew and it's gone — "already have Homebrew? switch to it" tells them to do the thing
+    /// they did, and names the one option that isn't the problem. What's actionable there is
+    /// repointing Applite or letting it install its own (P3-8).
     private var ownBrewNote: some View {
         HStack(spacing: 8) {
             Image(systemName: "info.circle")
                 .foregroundStyle(.secondary)
 
-            Text("Already have Homebrew? You can switch to it anytime in Settings.", comment: "Components install sheet own-brew note")
+            ownBrewNoteText
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -160,6 +165,15 @@ struct ComponentsInstallView: View {
             SettingsLink {
                 Text("Open Settings", comment: "Components install sheet open settings button")
             }
+        }
+    }
+
+    private var ownBrewNoteText: Text {
+        switch phase {
+        case .brewMissing:
+            Text("Moved your Homebrew, or want Applite to use its own instead? Change it in Settings.", comment: "Components install sheet note when the user's selected brew is missing")
+        default:
+            Text("Already have Homebrew? You can switch to it anytime in Settings.", comment: "Components install sheet own-brew note")
         }
     }
 }
