@@ -613,7 +613,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ Başarıyla kuruldu!"
+            "value" : "%@ başarıyla yüklendi!"
           }
         },
         "zh-Hans" : {
@@ -654,7 +654,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ Başarıyla yeniden kuruldu"
+            "value" : "%@ başarıyla yeniden yüklendi"
           }
         },
         "zh-Hans" : {
@@ -683,7 +683,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ sikeresen törölve!"
+            "value" : "%@ sikeresen eltávolítva"
           }
         },
         "ja" : {
@@ -730,7 +730,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@は正常に更新されました"
+            "value" : "%@ をアップデートしました"
           }
         },
         "tr" : {
@@ -890,7 +890,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld uygulama kuruldu"
+            "value" : "%lld uygulama yüklendi"
           }
         }
       }
@@ -1021,7 +1021,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld uygulama kuruldu, %lld başarısız"
+            "value" : "%lld uygulama yüklendi, %lld başarısız"
           }
         }
       }
@@ -1388,7 +1388,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "yeni Homebrew kurulumu `~/Library/Application Support/Applite` dizinine kurulacak"
+            "value" : "Yeni bir Homebrew yüklemesi `~/Library/Application Support/Applite` dizinine yapılacak"
           }
         },
         "zh-Hans" : {
@@ -1535,7 +1535,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Speciális"
+            "value" : "Haladó"
           }
         },
         "fr" : {
@@ -1565,7 +1565,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gelişmiş"
+            "value" : "İleri Düzey"
           }
         }
       }
@@ -1588,7 +1588,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "再インストール後、現在インストールされている全てのアプリは Appliteからリンク解除されます\nこれらは削除されませんが、Applite経由で更新又はアンインストールする事は出来ません"
+            "value" : "再インストール後、現在インストールされているすべてのアプリは Applite からリンク解除されます。\nこれらは削除されませんが、Applite からアップデートやアンインストールはできなくなります。"
           }
         },
         "tr" : {
@@ -1635,7 +1635,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Şu anda tüm kurulu uygulamalar Applite bağlantısını kaybeder"
+            "value" : "Şu anda yüklü olan tüm uygulamaların Applite bağlantısı kesilecek."
           }
         },
         "zh-Hans" : {
@@ -2429,7 +2429,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applite hangi uygulamalarınızın güncel olmadığını denetleyemedi. Homebrew kurulumunuzu kontrol edip tekrar deneyin."
+            "value" : "Applite hangi uygulamalarınızın güncel olmadığını denetleyemedi. Homebrew yüklemenizi kontrol edip tekrar deneyin."
           }
         }
       }
@@ -2470,7 +2470,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applite, Mac'inizde %@ uygulamasını bulamadı. Farklı bir adla kurulmuş olabilir — Spotlight (⌘ Boşluk) veya Uygulamalar klasörünüzden açmayı deneyin."
+            "value" : "Applite, Mac'inizde %@ uygulamasını bulamadı. Farklı bir adla yüklenmiş olabilir — Spotlight (⌘ Boşluk) veya Uygulamalar klasörünüzden açmayı deneyin."
           }
         }
       }
@@ -2593,7 +2593,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applite, uygulamaları kurmak için kullandığı motor olan Homebrew'i indiriyor. Bu yalnızca bir kez olur ve birkaç saniye sürer."
+            "value" : "Applite, uygulamaları yüklemek için kullandığı motor olan Homebrew'i indiriyor. Bu yalnızca bir kez olur ve birkaç saniye sürer."
           }
         }
       }
@@ -2634,7 +2634,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applite, uygulamalarınızı arka planda kuran ve güncel tutan ücretsiz ve açık kaynaklı bir araç olan [Homebrew](https://brew.sh/) tarafından desteklenmektedir. Onu kurmanıza veya doğrudan kullanmanıza gerek yok — Applite her şeyi sizin için halleder."
+            "value" : "Applite, uygulamalarınızı arka planda yükleyen ve güncel tutan ücretsiz ve açık kaynaklı bir araç olan [Homebrew](https://brew.sh/) tarafından desteklenmektedir. Onu kurmanıza veya doğrudan kullanmanıza gerek yok — Applite her şeyi sizin için halleder."
           }
         }
       }
@@ -2716,7 +2716,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applite, kendi Homebrew'ini düzenli olarak yeniden indirerek güncel tutar. Kurulu uygulamalarınız korunur."
+            "value" : "Applite, kendi Homebrew'ini düzenli olarak yeniden indirerek güncel tutar. Yüklü uygulamalarınız korunur."
           }
         }
       }
@@ -2787,7 +2787,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applite Kurulumu"
+            "value" : "Applite yüklemesi"
           }
         },
         "zh-Hans" : {
@@ -2840,7 +2840,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tamamlanan uygulamalar kurulu kalır, kalanlar iptal edilir."
+            "value" : "Tamamlanan uygulamalar yüklü kalır, kalanlar iptal edilir."
           }
         }
       }
@@ -2869,7 +2869,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uygulama kurulu"
+            "value" : "Yüklü uygulama"
           }
         },
         "zh-Hans" : {
@@ -3024,7 +3024,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Biztos véglegesen törli az Applite-ot?"
+            "value" : "Biztos véglegesen eltávolítja az Applite-ot?"
           }
         },
         "ja" : {
@@ -3640,7 +3640,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mégse"
+            "value" : "Mégsem"
           }
         },
         "ja" : {
@@ -3728,7 +3728,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "カテゴリー"
+            "value" : "カテゴリ"
           }
         },
         "tr" : {
@@ -3969,7 +3969,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tovább"
+            "value" : "Folytatás"
           }
         },
         "ja" : {
@@ -3981,7 +3981,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Devam et"
+            "value" : "Sürdür"
           }
         },
         "zh-Hans" : {
@@ -4070,7 +4070,7 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已拷貝"
+            "value" : "已複製"
           }
         },
         "tr" : {
@@ -4111,7 +4111,7 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "拷貝"
+            "value" : "複製"
           }
         },
         "tr" : {
@@ -4323,7 +4323,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kurulu uygulamalar yüklenemedi"
+            "value" : "Yüklü uygulamalar listelenemedi"
           }
         }
       }
@@ -4364,7 +4364,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew çalıştırılabilir dosyası %@ konumunda bulunamadı. Kurulum eksik veya bozuk. Terminal'de `brew doctor` komutunu çalıştırmayı deneyin."
+            "value" : "Homebrew çalıştırılabilir dosyası %@ konumunda bulunamadı. Yükleme eksik veya bozuk. Terminal'de `brew doctor` komutunu çalıştırmayı deneyin."
           }
         }
       }
@@ -4848,7 +4848,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "すべて選択解除"
+            "value" : "すべてを選択解除"
           }
         },
         "zh-Hans" : {
@@ -4866,7 +4866,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seçimi kaldır"
+            "value" : "Seçimi Kaldır"
           }
         }
       }
@@ -4949,7 +4949,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Devre dışı"
+            "value" : "Etkin değil"
           }
         }
       }
@@ -5037,13 +5037,13 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elvetés"
+            "value" : "Bezárás"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ignorer"
+            "value" : "Fermer"
           }
         },
         "ja" : {
@@ -5067,7 +5067,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yoksay"
+            "value" : "Kapat"
           }
         }
       }
@@ -5078,13 +5078,13 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hibaüzenet elvetése"
+            "value" : "Hibaüzenet bezárása"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ignorer l'erreur"
+            "value" : "Fermer l'erreur"
           }
         },
         "ja" : {
@@ -5108,7 +5108,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hatayı yoksay"
+            "value" : "Hatayı kapat"
           }
         }
       }
@@ -5149,7 +5149,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tamamlandı"
+            "value" : "Bitti"
           }
         }
       }
@@ -5368,13 +5368,13 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activé"
+            "value" : "Activée"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktív"
+            "value" : "Bekapcsolva"
           }
         },
         "ja" : {
@@ -5545,13 +5545,13 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "エクスポート"
+            "value" : "書き出す"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dışarı aktar"
+            "value" : "Dışa Aktar"
           }
         },
         "zh-Hans" : {
@@ -5771,7 +5771,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kurulu uygulamalarınızı bir dosyaya aktarın, sonra başka bir Mac'te içe aktararak hepsini yeniden kurun — yeni bir makineyi kurmanın kolay yolu."
+            "value" : "Yüklü uygulamalarınızı bir dosyaya aktarın, sonra başka bir Mac'te içe aktararak hepsini yeniden yükleyin — yeni bir makineyi kurmanın kolay yolu."
           }
         }
       }
@@ -5812,7 +5812,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Başarısız kurulum ve güncellemeler"
+            "value" : "Başarısız yükleme ve güncellemeler"
           }
         }
       }
@@ -5835,7 +5835,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "エクスポートに失敗しました"
+            "value" : "書き出しに失敗しました"
           }
         },
         "tr" : {
@@ -5917,7 +5917,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "インポートに失敗しました"
+            "value" : "読み込みに失敗しました"
           }
         },
         "tr" : {
@@ -5964,7 +5964,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ kurulamadı"
+            "value" : "%@ yüklenemedi"
           }
         },
         "zh-Hans" : {
@@ -6046,7 +6046,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ Tekrar kurulamadı"
+            "value" : "%@ yeniden yüklenemedi"
           }
         },
         "zh-Hans" : {
@@ -6075,7 +6075,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Törlés sikertelen"
+            "value" : "Az eltávolítás sikertelen"
           }
         },
         "ja" : {
@@ -6087,7 +6087,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaldırılamadı"
+            "value" : "Yükleme kaldırılamadı"
           }
         },
         "zh-Hans" : {
@@ -6116,7 +6116,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ törlése sikertelen"
+            "value" : "%@ eltávolítása sikertelen"
           }
         },
         "ja" : {
@@ -6576,7 +6576,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Devre dışı uygulamaları gizle"
+            "value" : "Etkin olmayan uygulamaları gizle"
           }
         },
         "zh-Hans" : {
@@ -6670,7 +6670,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew önbelleği, Homebrew kurulumları arasında paylaşılır. Önbelleği silmek tüm kurulumların önbelleğini kaldırır!"
+            "value" : "Homebrew önbelleği, Homebrew yüklemeleri arasında paylaşılır. Önbelleği silmek tüm yüklemelerin önbelleğini kaldırır!"
           }
         }
       }
@@ -6983,13 +6983,13 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "インポート"
+            "value" : "読み込む"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "İçe aktar"
+            "value" : "İçe Aktar"
           }
         },
         "zh-Hans" : {
@@ -7107,7 +7107,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "インポートされたファイルに有効なアプリが含まれていません"
+            "value" : "読み込んだファイルに有効なアプリが含まれていません"
           }
         },
         "tr" : {
@@ -7373,7 +7373,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kur"
+            "value" : "Yükle"
           }
         }
       }
@@ -7414,7 +7414,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applite tarafından dışa aktarılan bir dosyadan — veya herhangi bir Brewfile'dan — uygulama kurun."
+            "value" : "Applite tarafından dışa aktarılan bir dosyadan — veya herhangi bir Brewfile'dan — uygulama yükleyin."
           }
         }
       }
@@ -7455,7 +7455,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uygulamaları /Applications yerine seçtiğiniz bir klasöre kurar. (Homebrew: `--appdir`)"
+            "value" : "Uygulamaları /Applications yerine seçtiğiniz bir klasöre yükler. (Homebrew: `--appdir`)"
           }
         }
       }
@@ -7484,7 +7484,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ayrı bir Homebrew kurulumu yap"
+            "value" : "Ayrı Homebrew yükle"
           }
         },
         "zh-Hans" : {
@@ -7579,7 +7579,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kurulum"
+            "value" : "Yükleme"
           }
         }
       }
@@ -7620,7 +7620,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kurulum tarihi"
+            "value" : "Yükleme tarihi"
           }
         }
       }
@@ -7661,7 +7661,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kurulum dizini"
+            "value" : "Yükleme dizini"
           }
         }
       }
@@ -7744,7 +7744,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kurulum konumu"
+            "value" : "Yükleme konumu"
           }
         }
       }
@@ -7755,7 +7755,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installé"
+            "value" : "Installée"
           }
         },
         "hu" : {
@@ -7773,7 +7773,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kuruldu"
+            "value" : "Yüklü"
           }
         },
         "zh-Hans" : {
@@ -7826,7 +7826,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kurulu sürüm"
+            "value" : "Yüklü sürüm"
           }
         }
       }
@@ -7855,7 +7855,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kuruluyor"
+            "value" : "Yükleniyor"
           }
         },
         "zh-Hans" : {
@@ -7914,7 +7914,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld / %lld kuruluyor…"
+            "value" : "%lld / %lld yükleniyor…"
           }
         }
       }
@@ -8784,7 +8784,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kurulu değil"
+            "value" : "Yüklü değil"
           }
         }
       }
@@ -9571,7 +9571,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En son Homebrew'i Applite'ın kurulumunun üzerine yeniden indirir. Kurulu uygulamalarınız korunur."
+            "value" : "En son Homebrew'i Applite'ın yüklemesinin üzerine yeniden indirir. Yüklü uygulamalarınız korunur."
           }
         }
       }
@@ -9887,7 +9887,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tekrar kur"
+            "value" : "Yeniden Yükle"
           }
         },
         "zh-Hans" : {
@@ -9928,7 +9928,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tekrar kurulum başarılamadı"
+            "value" : "Yeniden yükleme başarısız oldu"
           }
         },
         "zh-Hans" : {
@@ -9969,7 +9969,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew’i tekrar kur"
+            "value" : "Homebrew'i yeniden yükle"
           }
         },
         "zh-Hans" : {
@@ -10011,7 +10011,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tekrar kuruluyor"
+            "value" : "Yeniden yükleniyor"
           }
         },
         "zh-Hans" : {
@@ -10177,7 +10177,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tekrar dene"
+            "value" : "Yeniden Dene"
           }
         },
         "zh-Hans" : {
@@ -10189,7 +10189,7 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "重試"
+            "value" : "再試"
           }
         }
       }
@@ -10501,7 +10501,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "すべて選択"
+            "value" : "すべてを選択"
           }
         },
         "zh-Hans" : {
@@ -10519,7 +10519,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tümünü seç"
+            "value" : "Tümünü Seç"
           }
         }
       }
@@ -11190,7 +11190,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Başarılı kurulum ve güncellemeler"
+            "value" : "Başarılı yükleme ve güncellemeler"
           }
         }
       }
@@ -11522,7 +11522,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applite'ın ihtiyaç duyduğu bileşenler kuruldu. Hemen uygulama indirmeye başlayabilirsiniz."
+            "value" : "Applite'ın ihtiyaç duyduğu bileşenler yüklendi. Hemen uygulama indirmeye başlayabilirsiniz."
           }
         }
       }
@@ -11812,7 +11812,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu, Applite'ın Homebrew kurulumunu şu konuma (yeniden) kuracak: `~/Library/Application Support/Applite/Homebrew`"
+            "value" : "Bu, Applite'ın Homebrew yüklemesini şu konuma (yeniden) yükleyecek: `~/Library/Application Support/Applite/Homebrew`"
           }
         }
       }
@@ -11853,7 +11853,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu işlem Homebrew kaldırıcısını çalıştırır ve Homebrew'i bilinen tüm konumlardan, kurulu tüm paketlerle birlikte kaldırır. Yönetici ayrıcalıkları gerekebilir."
+            "value" : "Bu işlem Homebrew kaldırıcısını çalıştırır ve Homebrew'i bilinen tüm konumlardan, yüklü tüm paketlerle birlikte kaldırır. Yönetici ayrıcalıkları gerekebilir."
           }
         }
       }
@@ -11906,7 +11906,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ez törli az Applite-ot a hozzá tartozó összes fájllal és gyorsítótárral együtt."
+            "value" : "Ez eltávolítja az Applite-ot a hozzá tartozó összes fájllal és gyorsítótárral együtt."
           }
         },
         "fr" : {
@@ -12070,7 +12070,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Újra"
+            "value" : "Újrapróbálkozás"
           }
         },
         "fr" : {
@@ -12082,7 +12082,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "再試行"
+            "value" : "やり直す"
           }
         },
         "zh-Hans" : {
@@ -12094,13 +12094,13 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "重試"
+            "value" : "再試"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tekrar dene"
+            "value" : "Yeniden Dene"
           }
         }
       }
@@ -12159,7 +12159,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Törlés"
+            "value" : "Eltávolítás"
           }
         },
         "ja" : {
@@ -12171,7 +12171,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaldır"
+            "value" : "Yüklemeyi Kaldır"
           }
         },
         "zh-Hans" : {
@@ -12200,7 +12200,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Törlés app adatokkal együtt"
+            "value" : "Eltávolítás az app adataival együtt"
           }
         },
         "ja" : {
@@ -12212,7 +12212,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaldır ve uygulama verilerini sil"
+            "value" : "Yüklemeyi kaldır ve uygulama verilerini sil"
           }
         },
         "zh-Hans" : {
@@ -12241,7 +12241,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applite törlése"
+            "value" : "Az Applite eltávolítása"
           }
         },
         "ja" : {
@@ -12324,7 +12324,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Az Applite törlése..."
+            "value" : "Az Applite eltávolítása..."
           }
         },
         "ja" : {
@@ -12364,7 +12364,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A Homebrew törlése"
+            "value" : "A Homebrew eltávolítása"
           }
         },
         "fr" : {
@@ -12407,7 +12407,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Törlés"
+            "value" : "Eltávolítás"
           }
         },
         "ja" : {
@@ -12454,7 +12454,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "更新"
+            "value" : "アップデート"
           }
         },
         "tr" : {
@@ -12495,7 +12495,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "全て更新"
+            "value" : "すべてアップデート"
           }
         },
         "tr" : {
@@ -12531,13 +12531,13 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Frissítse és törölje az alkalmazásait. Nincsenek többé hátramaradt fájlok a törölt alkalmazások után."
+            "value" : "Frissítse és távolítsa el az alkalmazásait. Nincsenek többé hátramaradt fájlok a törölt alkalmazások után."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アプリの更新やアンインストールをします。削除したアプリのファイルは残りません"
+            "value" : "アプリのアップデートとアンインストールができます。削除したアプリのファイルは残りません。"
           }
         },
         "tr" : {
@@ -12839,7 +12839,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Özel kurulum dizini"
+            "value" : "Özel yükleme dizini kullan"
           }
         },
         "zh-Hans" : {
@@ -12952,7 +12952,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eszközök"
+            "value" : "Segédprogramok"
           }
         },
         "ja" : {
@@ -12964,7 +12964,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yardımcı programlar"
+            "value" : "İzlenceler"
           }
         },
         "zh-Hans" : {
@@ -12976,7 +12976,7 @@
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "公用程式"
+            "value" : "工具程式"
           }
         }
       }
@@ -13142,7 +13142,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kurulu uygulamaların yüklenmesi bekleniyor…"
+            "value" : "Yüklü uygulamaların listelenmesi bekleniyor…"
           }
         }
       }
@@ -13194,13 +13194,13 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Attention"
+            "value" : "Avertissement"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Figyelem"
+            "value" : "Figyelmeztetés"
           }
         },
         "ja" : {
@@ -14042,7 +14042,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew kurulumu geçersiz görünüyor."
+            "value" : "Homebrew yüklemesi geçersiz görünüyor."
           }
         }
       }
@@ -14123,7 +14123,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew'i kurmak istediğinizden emin misiniz?"
+            "value" : "Homebrew'i yüklemek istediğinizden emin misiniz?"
           }
         }
       },
@@ -14164,7 +14164,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew'i yeniden kurmak istediğinizden emin misiniz?"
+            "value" : "Homebrew'i yeniden yüklemek istediğinizden emin misiniz?"
           }
         }
       },

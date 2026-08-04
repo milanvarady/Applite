@@ -37,15 +37,15 @@ reason, and "I'd have said it differently" isn't one.
 | Update | Frissítés | Mettre à jour | アップデート | 更新 | 更新 | Güncelle |
 | Refresh | Frissítés | Actualiser | 更新 | 刷新 | 重新整理 | Yenile |
 | Download | Letöltés | Télécharger | ダウンロード | 下载 | 下載 | İndir |
-| Import | Importálás | Importer | 読み込む | 导入 | 輸入 | İçe Aktar |
-| Export | Exportálás | Exporter | 書き出す | 导出 | 輸出 | Dışa Aktar |
+| Import | Importálás | Importer | 読み込む | 导入 | 匯入 ² | İçe Aktar |
+| Export | Exportálás | Exporter | 書き出す | 导出 | 匯出 ² | Dışa Aktar |
 | Open | Megnyitás | Ouvrir | 開く | 打开 | 開啟 | Aç |
 | Copy | Másolás | Copier | コピー | 拷贝 | 複製 | Kopyala |
 | Delete | Törlés | Supprimer | 削除 | 删除 | 刪除 | Sil |
 | Remove | Eltávolítás | Supprimer | 削除 | 移除 | 移除 | Kaldır |
 | Stop | Leállítás | Arrêter | 停止 | 停止 | 停止 | Durdur |
 | Cancel | Mégsem | Annuler | キャンセル | 取消 | 取消 | Vazgeç |
-| Retry | Újra ² | Réessayer | 再試行 | 重试 | 再試 | Yeniden Dene |
+| Retry | Újra | Réessayer | 再試行 | 重试 | 再試 | Yeniden Dene |
 | Try Again | Újrapróbálkozás | Réessayer | やり直す | 重试 | 再試 | Yeniden Dene |
 | Continue | Folytatás | Continuer | 続ける | 继续 | 繼續 | Sürdür |
 | Select All | Összes kijelölése | Tout sélectionner | すべてを選択 | 全选 | 全選 | Tümünü Seç |
@@ -109,8 +109,9 @@ needs the term to survive translation.
 ## Deviations from Apple, and why
 
 1. **Reinstall** — Apple ships no "Reinstall" string; each language is derived from its Install form.
-2. **Retry (hu)** — Apple's *Újrapróbálkozás* (15 characters) is used inline beside a red error in a
-   narrow Settings row. *Újra* is Apple's own rendering of **Retry** elsewhere and fits.
+2. **Import / Export (zh-HK)** — Apple uses 輸入 / 輸出. Applite also has an **Output** string, which
+   is 輸出, so adopting Apple's export term would make Export and Output the same word in the same
+   app. 匯入 / 匯出 keeps them apart and is standard in Traditional Chinese software.
 3. **Deselect All (hu)** — Apple's most frequent form is *Összes kijelölésének törlése*; this sits
    next to a checkbox in a sheet, so the shorter *Kijelölés megszüntetése* (also Apple's, less
    frequent) is used.
