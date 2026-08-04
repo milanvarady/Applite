@@ -1035,6 +1035,12 @@ def phase_a11(_state) -> None:
     do_in_app("Settings → Manage Homebrew → Reinstall Homebrew; confirm and wait")
     check("annex brew healthy after reinstall", brew_healthy)
     check("brew list is empty (apps unlinked)", lambda: installed_tokens() == [])
+    # P3-2: reinstall now downloads+verifies into Homebrew.staging, then swaps via Homebrew.old,
+    # removing both on success (so a failed download can't destroy the working install). A clean
+    # reinstall must leave neither temp dir behind.
+    check("no leftover staging/backup dirs after reinstall",
+          lambda: not (APPLITE_SUPPORT / "Homebrew.staging").exists()
+              and not (APPLITE_SUPPORT / "Homebrew.old").exists())
     confirm("Are the app bundles still on disk (unlinked, not deleted)?")
 
 
@@ -1144,7 +1150,12 @@ def phase_a14(_state) -> None:
     do_in_app(f"App Migration → Import → pick {import_path}")
     confirm(f"Did the import selection sheet show ALL {len(BULK_INSTALL_CASKS)} apps on the "
             "FIRST attempt? (regression: it used to list 0 the first time.)")
-    do_in_app("Leave every app checked, press Install, and let the batch run to completion")
+    do_in_app("Leave every app checked, press Install")
+    # Import now navigates straight to Active Tasks (P3-4): the old migration screen faked a green
+    # "Installing N apps…" before anything ran and couldn't surface batch failures. It now sends you
+    # to where each app's real progress and per-app failures actually show.
+    confirm("Did Applite switch to the Active Tasks tab automatically after pressing Install?")
+    do_in_app("Watch the batch run to completion on the Active Tasks tab")
     confirm(f"Did each of the {len(BULK_INSTALL_CASKS)} cards show its OWN download ring "
             "(not just a spinner) during the download phase?")
     confirm("Did the Active Tasks header count up (\"Installing X of N…\")?")
@@ -1201,12 +1212,13 @@ def phase_batch_stop(state) -> None:
     stop_path.write_text("\n".join(BULK_STOP_CASKS) + "\n")
     do_in_app(f"App Migration → Import → pick {stop_path} ({', '.join(BULK_STOP_CASKS)}); in the "
               "selection sheet leave both checked and press Install — big downloads, keep it running")
+    # Import lands on Active Tasks automatically now (P3-4), so the cards are already in front of you.
+    confirm("Did Applite switch to the Active Tasks tab automatically after pressing Install?")
 
-    do_in_app("While it downloads, click the STOP button on ONE app card")
+    do_in_app("On the Active Tasks tab, while it downloads, click the STOP button on ONE app card")
     confirm("Did an alert appear (\"…is part of a bulk operation\") with a 'See Active Tasks' "
             "button — instead of silently cancelling everything?")
-    do_in_app("Press 'See Active Tasks'")
-    confirm("Did it switch to the Active Tasks tab?")
+    do_in_app("Dismiss the alert (you're already on the Active Tasks tab)")
     do_in_app("Press the 'Stop' button in the Active Tasks header, then confirm")
     check("brew still healthy after batch stop (no orphaned process)", brew_healthy)
     confirm("Did the cards reset (no stuck spinners) after stopping?")
