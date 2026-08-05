@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	    Export options for the Developer ID (outside the App Store) release build.
+
+	    signingStyle is `manual` on purpose. Applite is not sandboxed and its only
+	    entitlement is com.apple.security.cs.disable-library-validation, which is a
+	    hardened-runtime exception rather than a com.apple.developer.* capability, so
+	    no provisioning profile is involved. `automatic` would make Xcode reach out to
+	    the network mid-release to mint a Developer ID profile it does not need — a
+	    2FA prompt or an expired account token would then fail the build.
+
+	    If -exportArchive ever complains about a missing profile, switch signingStyle
+	    to `automatic` and add -allowProvisioningUpdates to the export invocation in
+	    release.sh. That is the one documented fallback.
+	-->
+	<key>method</key>
+	<string>developer-id</string>
+
+	<key>destination</key>
+	<string>export</string>
+
+	<key>teamID</key>
+	<string>9CLTNBW4Z3</string>
+
+	<key>signingStyle</key>
+	<string>manual</string>
+
+	<key>signingCertificate</key>
+	<string>Developer ID Application</string>
+
+	<!-- Smaller download; symbols stay in the dSYMs we archive alongside the DMG. -->
+	<key>stripSwiftSymbols</key>
+	<true/>
+</dict>
+</plist>
