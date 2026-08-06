@@ -103,8 +103,8 @@ signing is deterministic. By hand that is:
 |---|---|
 | `preflight` | Credentials, toolchain, clean tree, appcast validity |
 | `bump` | `MARKETING_VERSION` + `CURRENT_PROJECT_VERSION`, committed locally, not pushed |
-| `notes-draft` | Writes `changelog-raw.md` and a seeded `release-notes.md` |
-| **`notes-gate`** | Stops until you delete the draft sentinel line |
+| `notes-draft` | Writes `changelog-raw.md` plus seeded `release-notes.md` and `website-notes.md` |
+| **`notes-gate`** | Stops until you delete the draft sentinel from both notes files |
 | `archive` | Clean release build, a few minutes |
 | `export` | Re-signs to Developer ID via `ExportOptions.plist` |
 | `verify-app` | Signature, hardened runtime, timestamp, universal, versions read back |
@@ -112,7 +112,7 @@ signing is deterministic. By hand that is:
 | `dmg` | Draws the background, runs `create-dmg`, re-checks the ticket inside the image |
 | `notarize-dmg` | Signs the DMG with a secure timestamp, notarizes, staples |
 | `sign-update` | Sparkle signature + byte length |
-| `notes-website` | Converts your notes into the aerolite Swift snippet |
+| `notes-website` | Converts `website-notes.md` into the aerolite Swift snippet |
 | `github-release` | Pushes `main`, creates the release, uploads `Applite.dmg` |
 | `appcast` | Inserts one `<item>` and shows you the diff |
 | **`site-gate`** | Stops until the notes page is live on aerolite.dev |
@@ -121,15 +121,21 @@ signing is deterministic. By hand that is:
 
 ### The two gates
 
-**`notes-gate`.** Skim `build/release/v<version>/notes/changelog-raw.md`, then write
-`release-notes.md`. That one file becomes both the GitHub release body *and* — after conversion —
-the aerolite page, so keep the `### New Features` / `### Improvements` / `### Fixes` /
-`### Known Issues` headings. Delete any section you don't need; empty ones are dropped. Delete the
-`APPLITE-RELEASE-NOTES-DRAFT` comment when you're done.
+**`notes-gate`.** Skim `changelog-raw.md`, then write **two** files. The gate holds until the
+`APPLITE-RELEASE-NOTES-DRAFT` comment is gone from both.
 
-The two audiences differ on purpose. GitHub gets everything including codebase changes; the website
-gets only what a user would notice, in plain language. Write the website version and let the raw
-changelog cover the rest.
+| File | Goes to | Shape |
+|---|---|---|
+| `release-notes.md` | The GitHub release body, verbatim | Everything that changed, in full |
+| `website-notes.md` | The Sparkle update panel and aerolite.dev | ~5 one-line bullets, no jargon |
+
+They are separate on purpose. The Sparkle panel is a small window someone skims mid-update — it
+needs a glance at the headline changes, not a changelog. GitHub is where the detail belongs, and
+nobody reading it minds length.
+
+Both use the same headings (`### New Features` / `### Improvements` / `### Fixes` /
+`### Known Issues`) because both are parsed the same way; keep them. Delete any section you don't
+need — empty ones are dropped, and the model's initialiser defaults them to `[]`.
 
 **`site-gate`.** Paste `notes/AppliteReleaseModel.swift.txt` into aerolite's
 `Sources/App/PageModels/AppliteReleases/AppliteReleases.swift`, push, and deploy (ssh to the VPS,

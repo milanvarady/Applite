@@ -232,13 +232,11 @@ step_notes_draft() {
         printf '\n'
     } > "$notes/changelog-raw.md"
 
-    # The file you actually edit. It becomes the GitHub release body verbatim and
-    # the source for the website snippet, so the headings are load-bearing.
+    # The GitHub release body, verbatim. Everything that changed.
     if [[ ! -f "$notes/release-notes.md" ]]; then
         cat > "$notes/release-notes.md" <<EOF
 <!-- APPLITE-RELEASE-NOTES-DRAFT: delete THIS LINE when the notes are final -->
-<!-- Reference: changelog-raw.md -->
-<!-- These headings are parsed into the aerolite snippet — keep them as they are. -->
+<!-- The GitHub release body. Reference: changelog-raw.md -->
 <!-- Delete any section you don't need; empty ones are dropped automatically. -->
 
 ### New Features
@@ -259,25 +257,60 @@ step_notes_draft() {
 EOF
     fi
 
+    # The Sparkle update panel and the aerolite page. Deliberately a separate file:
+    # the panel is a small window someone skims mid-update, so it needs a filtered
+    # handful of one-liners rather than the full release body.
+    if [[ ! -f "$notes/website-notes.md" ]]; then
+        cat > "$notes/website-notes.md" <<EOF
+<!-- APPLITE-RELEASE-NOTES-DRAFT: delete THIS LINE when the notes are final -->
+<!-- Shown in the Sparkle update window and on aerolite.dev. -->
+<!-- Keep it to a glance: ~5 bullets, one line each, no jargon. -->
+<!-- These headings are parsed into the aerolite snippet — keep them as they are. -->
+
+### New Features
+
+-
+
+### Improvements
+
+-
+EOF
+    fi
+
     ok "drafts written to $notes"
 }
 
 # ============================================================== step: notes-gate
 step_notes_gate() {
-    local f; f="$(notes_dir "$VERSION")/release-notes.md"
+    local notes full short pending=()
+    notes="$(notes_dir "$VERSION")"
+    full="$notes/release-notes.md"
+    short="$notes/website-notes.md"
+
     # grep exits 2 on a missing file, which an `if` reads as "no sentinel found"
     # — i.e. the gate would wave through notes that don't exist at all.
-    [[ -f "$f" ]] || die "no release notes at $f — run: $0 notes $VERSION"
-    if grep -q 'APPLITE-RELEASE-NOTES-DRAFT' "$f"; then
+    for f in "$full" "$short"; do
+        [[ -f "$f" ]] || die "no notes at $f — run: $0 notes $VERSION"
+        grep -q 'APPLITE-RELEASE-NOTES-DRAFT' "$f" && pending+=("$f")
+    done
+
+    if (( ${#pending[@]} )); then
         cat <<EOF
 
   The release notes are still a draft.
 
-    1. Skim   $(notes_dir "$VERSION")/changelog-raw.md
-    2. Write  $f
-       (this becomes the GitHub release body AND the aerolite page)
-    3. Delete the APPLITE-RELEASE-NOTES-DRAFT line at the top
-    4. Run the same command again:
+    1. Skim   $notes/changelog-raw.md
+
+    2. Write  $full
+       The GitHub release body. Everything that changed, in full.
+
+    3. Write  $short
+       The Sparkle update panel and the aerolite page. A handful of one-line
+       bullets — this is a glance, not a changelog.
+
+    4. Delete the APPLITE-RELEASE-NOTES-DRAFT line from each:
+$(printf '         %s\n' "${pending[@]}")
+    5. Run the same command again:
          Scripts/Release/release.sh run $VERSION
 
 EOF
@@ -485,7 +518,10 @@ step_notes_website() {
     date="$(LC_ALL=C date '+%Y.%m.%d.')"
     (( CRITICAL )) && flags=(--critical)
 
-    python3 "$HERE/notes_to_swift.py" "$notes/release-notes.md" \
+    # website-notes.md, not release-notes.md: the Sparkle panel is a small window a
+    # user skims mid-update, so it gets the short filtered set. The full notes stay
+    # on the GitHub release.
+    python3 "$HERE/notes_to_swift.py" "$notes/website-notes.md" \
         --version "$VERSION" --date "$date" \
         ${flags[@]+"${flags[@]}"} > "$out"
     ok "website snippet → $out"
