@@ -126,7 +126,7 @@ signing is deterministic. By hand that is:
 
 | File | Goes to | Shape |
 |---|---|---|
-| `release-notes.md` | The GitHub release body, verbatim | Everything that changed, in full |
+| `release-notes.md` | The GitHub release body | Everything that changed, in full |
 | `website-notes.md` | The Sparkle update panel and aerolite.dev | ~5 one-line bullets, no jargon |
 
 They are separate on purpose. The Sparkle panel is a small window someone skims mid-update — it
@@ -136,6 +136,14 @@ nobody reading it minds length.
 Both use the same headings (`### New Features` / `### Improvements` / `### Fixes` /
 `### Known Issues`) because both are parsed the same way; keep them. Delete any section you don't
 need — empty ones are dropped, and the model's initialiser defaults them to `[]`.
+
+`github-release` appends a compare link to the body it uploads:
+
+    **Full changelog**: https://github.com/milanvarady/Applite/compare/v1.3.1...v1.4.0
+
+so every commit in the range stays one click away without a third document to maintain. It is
+assembled into `build/release/v<version>/github-release-body.md`, never appended to
+`release-notes.md`, so re-running the step can't stack duplicate links onto your source.
 
 **`site-gate`.** Paste `notes/AppliteReleaseModel.swift.txt` into aerolite's
 `Sources/App/PageModels/AppliteReleases/AppliteReleases.swift`, push, and deploy (ssh to the VPS,

@@ -529,13 +529,29 @@ step_notes_website() {
 
 # ========================================================== step: github-release
 step_github_release() {
-    local sha url
+    local sha url body prev
     # Last line of defence before anything leaves this machine: ask the artifact
     # itself, not the bookkeeping. A DMG left over from a --skip-notarize
     # rehearsal has no ticket, and Gatekeeper would refuse it on every user's Mac.
     if (( ! DRY_RUN )); then
         xcrun stapler validate "$DMG" >/dev/null 2>&1 \
             || die "$DMG is not notarized/stapled — rebuild with --from export before publishing"
+    fi
+
+    # The release body is the curated notes plus a compare link, so every commit in
+    # the range stays one click away without anyone maintaining a third document.
+    # Built into build/ rather than appended to the notes file, so re-running this
+    # step can't stack duplicate links onto the source.
+    body="$BUILD/github-release-body.md"
+    prev="$(var_get prev_tag)"
+    [[ -n "$prev" ]] || prev="$(git -C "$REPO_ROOT" describe --tags --abbrev=0 --match 'v[0-9]*' HEAD 2>/dev/null || true)"
+    cp "$(notes_dir "$VERSION")/release-notes.md" "$body"
+    if [[ -n "$prev" ]]; then
+        printf '\n**Full changelog**: https://github.com/%s/compare/%s...v%s\n' \
+            "$GH_REPO" "$prev" "$VERSION" >> "$body"
+        ok "release body: notes + compare link ($prev...v$VERSION)"
+    else
+        warn "no previous tag found — release body has no compare link"
     fi
 
     run_pub git -C "$REPO_ROOT" push origin main
@@ -547,7 +563,7 @@ step_github_release() {
         --repo "$GH_REPO" \
         --target "$sha" \
         --title "$VERSION" \
-        --notes-file "$(notes_dir "$VERSION")/release-notes.md"
+        --notes-file "$body"
 
     var_set enclosure "$url"
     if (( DRY_RUN )); then
