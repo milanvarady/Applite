@@ -121,12 +121,15 @@ let headLength: CGFloat = 21
 let headHalfHeight: CGFloat = 13
 let shaftWidth: CGFloat = 6.5
 
-// The shaft is a horizontal bar, so a rounded rect gives the same result as a
-// round-capped stroke while staying a fillable path we can clip to.
+// The shaft is a rounded rect, but its right end deliberately runs *past* the
+// triangle's base and under the head. Ending it flush at the base would show the
+// rounded cap curving inward just before the head — the shaft would visibly
+// narrow, then meet a wide triangle. The head is far taller than the shaft where
+// the cap lands, so the curve is completely hidden.
 let shaft = NSBezierPath(
     roundedRect: NSRect(x: arrowStartX,
                         y: arrowY - shaftWidth / 2,
-                        width: (arrowEndX - headLength + 1) - arrowStartX,
+                        width: (arrowEndX - headLength + shaftWidth) - arrowStartX,
                         height: shaftWidth),
     xRadius: shaftWidth / 2, yRadius: shaftWidth / 2)
 
@@ -136,19 +139,11 @@ head.line(to: CGPoint(x: arrowEndX - headLength, y: arrowY + headHalfHeight))
 head.line(to: CGPoint(x: arrowEndX - headLength, y: arrowY - headHalfHeight))
 head.close()
 
-// Clip to the arrow, then paint the brand gradient through it, so the arrow
-// picks up the same violet→pink run as the app icon.
-cg.saveGState()
-let arrowShape = NSBezierPath()
-arrowShape.append(shaft)
-arrowShape.append(head)
-arrowShape.addClip()
-NSGradient(colors: [brandViolet.withAlphaComponent(0.85),
-                    brandPink.withAlphaComponent(0.85)])?
-    .draw(in: NSRect(x: arrowStartX, y: arrowY - headHalfHeight,
-                     width: arrowEndX - arrowStartX, height: headHalfHeight * 2),
-          angle: 0)
-cg.restoreGState()
+// The same grey as the caption. A brand gradient here read as decoration in its
+// own right, competing with the two icons the arrow exists to point between.
+captionColor.setFill()
+shaft.fill()
+head.fill()
 
 // MARK: - Caption
 
