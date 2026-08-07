@@ -67,8 +67,7 @@ Comparison drawn in August 2026; check the projects themselves for current state
 
 ## Screenshots
 
-![Discover Page Screenshot](https://github.com/user-attachments/assets/d6861ab4-d9ce-40de-982b-8940fc1d1fbf)
-![Productivity Category Screenshot](https://github.com/user-attachments/assets/e17846e0-bdbf-4ac3-b922-572ffe69acc2)
+![Discover Page Screenshot](https://github.com/user-attachments/assets/ab537076-0813-4db7-bff4-b7784f3631ce)
 
 ## Download
 
