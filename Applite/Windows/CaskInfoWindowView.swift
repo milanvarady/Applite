@@ -10,12 +10,24 @@ import SwiftUI
 struct CaskInfoWindowView: View {
     let info: CaskAdditionalInfo
 
+    /// Filled in by a live request to the download host; Homebrew itself has no size to give.
+    @State private var downloadSize: DownloadSize = .loading
+
+    private enum DownloadSize {
+        case loading
+        case known(Int64)
+        /// The host wouldn't say — a mirror selector, or an archive built on the fly.
+        case unavailable
+    }
+
     var body: some View {
         Form {
             Section {
                 infoRow("Token", info.token)
                 infoRow("Full Token", info.full_token)
                 infoRow("Tap", info.tap)
+
+                downloadSizeRow
 
                 linkRow("Homepage", url: info.homepage)
 
@@ -78,6 +90,34 @@ struct CaskInfoWindowView: View {
         .formStyle(.grouped)
         .navigationTitle(info.token)
         .frame(width: 460, height: 520)
+        .task(id: info.url) {
+            downloadSize = .loading
+
+            if let bytes = await DownloadSizeProbe.size(of: info.url) {
+                downloadSize = .known(bytes)
+            } else {
+                downloadSize = .unavailable
+            }
+        }
+    }
+
+    /// The size of the artifact this Mac would actually download — `info.url` comes from
+    /// `brew info`, which has already resolved the cask's `variations` for the running macOS
+    /// version and architecture. Absent until the probe answers, and dropped entirely if it
+    /// can't, so the form never shows a size that might be wrong.
+    @ViewBuilder
+    private var downloadSizeRow: some View {
+        switch downloadSize {
+        case .loading:
+            LabeledContent("Download Size") {
+                ProgressView()
+                    .controlSize(.small)
+            }
+        case .known(let bytes):
+            infoRow("Download Size", bytes.formatted(.byteCount(style: .file)))
+        case .unavailable:
+            EmptyView()
+        }
     }
 
     private func infoRow(_ title: LocalizedStringKey, _ value: String) -> some View {
