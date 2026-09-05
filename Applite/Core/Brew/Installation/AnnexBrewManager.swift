@@ -77,6 +77,29 @@ struct AnnexBrewManager {
         )
     }
 
+    /// Whether the annex tree holds apps the user installed — that is, a non-empty `Caskroom`.
+    ///
+    /// Gates the in-place repair in `HomebrewBootstrap.runBootstrap`. `Caskroom` lives *inside* the
+    /// annex directory (`~/Library/Application Support/Applite/Homebrew`), so the clean install's
+    /// `prepareAnnexDirectory(clean: true)` takes it with the rest of the tree; when there is
+    /// something in it, repairing over the top is worth a try first.
+    ///
+    /// When there is nothing to preserve the clean install is the better answer anyway: it also
+    /// clears away any half-extracted leftovers, which an overlay extract would leave behind.
+    static func annexHasInstalledApps() -> Bool {
+        let caskroom = BrewPaths.annexBrewDirectory
+            .appending(path: "Caskroom", directoryHint: .isDirectory)
+
+        guard let entries = try? FileManager.default.contentsOfDirectory(
+            atPath: caskroom.path(percentEncoded: false)
+        ) else {
+            return false
+        }
+
+        // Ignore dotfiles so a stray .DS_Store doesn't read as "the user has apps installed".
+        return entries.contains { !$0.hasPrefix(".") }
+    }
+
     /// Verifies a brew executable actually runs and reports Homebrew (defaults to the annex's).
     static func verifyAnnexInstall(at executable: URL = BrewPaths.annexBrewExecutable) async throws {
         guard await BrewPaths.isBrewPathValid(at: executable) else {

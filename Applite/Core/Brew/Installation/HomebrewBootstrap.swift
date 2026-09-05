@@ -173,8 +173,81 @@ final class HomebrewBootstrap {
             return
         }
 
+        // 3b. An annex tree is on disk but its brew won't run, and it still holds apps the user
+        //     installed. Re-extract the tarball *over* it — the same non-destructive overlay the
+        //     periodic refresh uses — rather than dropping through to step 4, whose `clean: true`
+        //     deletes the entire annex directory and with it `Caskroom` and `Cellar`. That would
+        //     bring brew back working but knowing about none of the user's apps: the `.app` files
+        //     survive in the applications folder while Applite's Installed list goes empty and
+        //     updates and uninstalls stop working for every one of them.
+        //
+        //     This is the recovery path for the 2026-09-04 `master`-branch breakage (see
+        //     `AnnexBrewManager.brewTarballURL`). The refresh overlaid a three-file stub onto a
+        //     working tree, so only `bin/brew` is damaged — the rest of Homebrew is still there,
+        //     and re-extracting is enough to make it run again.
+        if AnnexBrewManager.annexHasInstalledApps() {
+            if await repairAnnex() { return }
+            // Cancelled by Retry or the escape hatch: leave the tree alone and let the superseding
+            // pass decide. Falling through would hand it to `installAnnex`, which wipes the
+            // directory *before* it checks for cancellation.
+            if Task.isCancelled { return }
+        }
+
         // 4. No brew anywhere → install Applite's own annex (CLT-free).
         await installAnnex()
+    }
+
+    /// Repairs a broken annex in place, keeping everything the user has installed.
+    ///
+    /// Extracts the tarball over the existing tree, so brew's own program files are replaced while
+    /// the runtime directories (`Caskroom`, `Cellar`, `var`, cache) are left untouched, then
+    /// verifies the result. Returns `true` when it produced a working brew (or when the user
+    /// switched to their own brew while it ran), `false` when the caller should fall back to the
+    /// destructive clean install — which loses the Caskroom, but at least leaves a usable Homebrew.
+    ///
+    /// Unlike `installAnnex` this ends in `.ready`, not `.installed`: the user didn't ask to install
+    /// anything, so there's no success card worth making them dismiss.
+    private func repairAnnex() async -> Bool {
+        Self.logger.info("Annex brew is invalid but has installed apps — repairing in place")
+        phase = .installing
+        statusLine = ""
+
+        do {
+            try AnnexBrewManager.prepareAnnexDirectory(clean: false)
+
+            for try await line in Shell.streamShellScript(AnnexBrewManager.annexExtractCommand(), pty: true) {
+                statusLine = line
+            }
+
+            try Task.checkCancellation()
+            try await AnnexBrewManager.verifyAnnexInstall()
+        } catch {
+            if Task.isCancelled { return false }
+            Self.logger.error("In-place annex repair failed: \(error.localizedDescription)")
+            return false
+        }
+
+        // Same guard as `installAnnex`: don't override a brew the user pointed Applite at while the
+        // repair was downloading.
+        if BrewPaths.selectedBrewOption != .annex, await BrewPaths.isSelectedBrewPathValid() {
+            Self.logger.info("User selected their own valid brew during the repair — honoring it")
+            phase = .ready
+            return true
+        }
+
+        BrewPaths.selectedBrewOption = .annex
+        AnnexBrewManager.stampAnnexRefreshed()
+
+        // Prime Ruby for the same reason `installAnnex` does. The overlay extract replaces
+        // `Library/Homebrew/vendor/bundle` (though not the runtime-installed portable Ruby, which
+        // isn't in the tarball), so a brew whose version moved can still run its one-time gem
+        // setup on the next command — and that takes a lock the data load's concurrent
+        // installed/outdated queries would collide on.
+        await primeRuby()
+
+        Self.logger.info("Annex Homebrew repaired in place — installed apps preserved")
+        phase = .ready
+        return true
     }
 
     /// Streams the annex tarball install, surfacing progress lines to the overlay.
