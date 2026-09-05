@@ -30,10 +30,19 @@ struct AnnexBrewManager {
 
     /// Homebrew source tarball, extracted verbatim into the annex directory.
     ///
-    /// Tracks `master` (no version pin) — the same rolling source `brew update` pulls — because the
+    /// Tracks `main` (no version pin) — the same rolling source `brew update` pulls — because the
     /// annex is no longer patched: brew 6.0.10+ handles CLT-free cask installs natively (see the
     /// `AnnexBrewManager` header and `Shell`). The periodic refresh keeps this current.
-    static let brewTarballURL = "https://github.com/Homebrew/brew/tarball/master"
+    ///
+    /// **Must be `main`, not `master`.** Homebrew made `main` its default branch and on 2026-09-04
+    /// (PR #23733) reduced `master` to a three-file stub: a `bin/brew` that prints "Homebrew's
+    /// master branch is no longer supported" and exits 1 for every command except `brew update`.
+    /// That stub's migration path is `git fetch` + `git checkout` against a real clone, which the
+    /// annex can never satisfy — it is a tarball extraction with no `.git` at all — so there is no
+    /// in-place recovery from pointing at `master`. It broke both paths at once: a clean install
+    /// extracted 3 files and failed `verifyAnnexInstall`, and the non-destructive refresh overlaid
+    /// the stub's `bin/brew` onto a working tree and bricked it.
+    static let brewTarballURL = "https://github.com/Homebrew/brew/tarball/main"
 
     // MARK: - Annex install / refresh
 
