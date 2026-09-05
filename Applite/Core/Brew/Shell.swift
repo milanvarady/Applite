@@ -445,6 +445,14 @@ enum Shell {
             // would pop the macOS CLT install dialog. Applite keeps the annex fresh by
             // re-fetching the tarball instead (see AnnexBrewManager.refreshAnnexBrew).
             "HOMEBREW_NO_AUTO_UPDATE": "1",
+            // …but HOMEBREW_NO_AUTO_UPDATE disables two things, not one: the git self-update above
+            // *and* the lightweight JSON API metadata refresh. Without the API refresh brew never
+            // re-downloads the cask catalog, so `brew outdated --cask` compares installed versions
+            // against a permanently frozen cache and reports nothing outdated, forever (issue #159).
+            // This re-enables only the API refresh, leaving the git self-update disabled. Brew
+            // throttles it to one check per HOMEBREW_API_AUTO_UPDATE_SECS (450s), so it is safe to
+            // set on every command.
+            "HOMEBREW_FORCE_API_AUTO_UPDATE": "1",
             // Pin brew to the system curl (always present on macOS, works without CLT) so it
             // never probes for a Homebrew-installed curl. Cask downloads and the portable-ruby
             // fetch both go through this. Combined with API mode (HOMEBREW_NO_INSTALL_FROM_API
