@@ -158,6 +158,51 @@ final class HomebrewBootstrap {
             return
         }
 
+        // 1c. Past 1b the selected option is always `.annex`, so if we got here the annex brew
+        //     won't run. When its tree still holds apps the user installed, repair it before
+        //     considering anything else: re-extract the tarball *over* it, the same
+        //     non-destructive overlay the periodic refresh uses, replacing brew's own program
+        //     files and leaving `Caskroom`, `Cellar` and `var` alone.
+        //
+        //     This has to come before step 2, not after step 3. Step 2's detect-and-switch would
+        //     silently move an annex user with a broken annex onto their own `/opt/homebrew`,
+        //     which orphans every app in the annex Caskroom — the same "don't switch a user away
+        //     from the brew their apps live in" rule step 1b already applies to custom paths. And
+        //     step 4's `clean: true` deletes the annex directory outright, Caskroom included.
+        //     Either way brew comes back working and knowing about none of the user's apps: the
+        //     `.app` files sit in the applications folder while Applite's Installed list is empty
+        //     and updates and uninstalls quietly stop working for all of them.
+        //
+        //     This is the recovery path for the 2026-09-04 `master`-branch breakage (see
+        //     `AnnexBrewManager.brewTarballURL`). The refresh overlaid a three-file stub onto a
+        //     working tree, so only `bin/brew` is damaged — the rest of Homebrew is still there,
+        //     and re-extracting is enough to make it run again.
+        //
+        //     A first run has no annex tree, so `annexHasInstalledApps()` is false and step 2
+        //     still gets its usual chance to adopt an existing Homebrew.
+        if AnnexBrewManager.annexHasInstalledApps() {
+            switch await repairAnnex() {
+            case .repaired:
+                return
+
+            case .cancelled:
+                // Superseded by Retry or the escape hatch. Leave the tree and the phase alone and
+                // let the newer pass decide.
+                return
+
+            case .failed(let error):
+                // Deliberately do *not* fall through to steps 2–4. The likeliest reason a repair
+                // fails is the reason it was needed — no network — and the clean install at step 4
+                // would then delete the Caskroom and fail at the same `curl`, leaving the user with
+                // no brew *and* no record of the apps they had. Surface it instead: the overlay
+                // offers Retry, Troubleshooting and the own-brew escape hatch, and a deliberate
+                // wipe-and-reinstall is still available from Settings.
+                Self.logger.error("Annex repair failed, keeping the tree intact: \(error.localizedDescription)")
+                phase = .failed(Self.setupFailureMessage(for: error))
+                return
+            }
+        }
+
         // 2. Detect an existing brew anywhere (arch defaults, then PATH).
         if let detected = await BrewPaths.detectHomebrew(setPathOption: true) {
             Self.logger.info("Detected existing brew (\(String(describing: detected))) — ready")
@@ -173,41 +218,34 @@ final class HomebrewBootstrap {
             return
         }
 
-        // 3b. An annex tree is on disk but its brew won't run, and it still holds apps the user
-        //     installed. Re-extract the tarball *over* it — the same non-destructive overlay the
-        //     periodic refresh uses — rather than dropping through to step 4, whose `clean: true`
-        //     deletes the entire annex directory and with it `Caskroom` and `Cellar`. That would
-        //     bring brew back working but knowing about none of the user's apps: the `.app` files
-        //     survive in the applications folder while Applite's Installed list goes empty and
-        //     updates and uninstalls stop working for every one of them.
-        //
-        //     This is the recovery path for the 2026-09-04 `master`-branch breakage (see
-        //     `AnnexBrewManager.brewTarballURL`). The refresh overlaid a three-file stub onto a
-        //     working tree, so only `bin/brew` is damaged — the rest of Homebrew is still there,
-        //     and re-extracting is enough to make it run again.
-        if AnnexBrewManager.annexHasInstalledApps() {
-            if await repairAnnex() { return }
-            // Cancelled by Retry or the escape hatch: leave the tree alone and let the superseding
-            // pass decide. Falling through would hand it to `installAnnex`, which wipes the
-            // directory *before* it checks for cancellation.
-            if Task.isCancelled { return }
-        }
-
         // 4. No brew anywhere → install Applite's own annex (CLT-free).
         await installAnnex()
+    }
+
+    /// The outcome of an in-place annex repair. Carries the error rather than collapsing to a
+    /// `Bool`, because the caller has to *report* a failure — it must not quietly fall back to the
+    /// destructive clean install, which would delete the Caskroom the repair exists to protect.
+    private enum RepairOutcome {
+        /// Brew is usable again. `phase` has already been set.
+        case repaired
+        /// Superseded by Retry or the escape hatch. `phase` is untouched; the newer pass owns it.
+        case cancelled
+        /// The repair could not produce a working brew. The tree is left exactly as it was.
+        case failed(Error)
     }
 
     /// Repairs a broken annex in place, keeping everything the user has installed.
     ///
     /// Extracts the tarball over the existing tree, so brew's own program files are replaced while
     /// the runtime directories (`Caskroom`, `Cellar`, `var`, cache) are left untouched, then
-    /// verifies the result. Returns `true` when it produced a working brew (or when the user
-    /// switched to their own brew while it ran), `false` when the caller should fall back to the
-    /// destructive clean install — which loses the Caskroom, but at least leaves a usable Homebrew.
+    /// verifies the result.
+    ///
+    /// Nothing here is destructive: on any failure the tree is exactly as it was, which is what
+    /// lets the caller surface the error and offer Retry instead of escalating to a wipe.
     ///
     /// Unlike `installAnnex` this ends in `.ready`, not `.installed`: the user didn't ask to install
     /// anything, so there's no success card worth making them dismiss.
-    private func repairAnnex() async -> Bool {
+    private func repairAnnex() async -> RepairOutcome {
         Self.logger.info("Annex brew is invalid but has installed apps — repairing in place")
         phase = .installing
         statusLine = ""
@@ -222,9 +260,8 @@ final class HomebrewBootstrap {
             try Task.checkCancellation()
             try await AnnexBrewManager.verifyAnnexInstall()
         } catch {
-            if Task.isCancelled { return false }
-            Self.logger.error("In-place annex repair failed: \(error.localizedDescription)")
-            return false
+            if Task.isCancelled { return .cancelled }
+            return .failed(error)
         }
 
         // Same guard as `installAnnex`: don't override a brew the user pointed Applite at while the
@@ -232,7 +269,7 @@ final class HomebrewBootstrap {
         if BrewPaths.selectedBrewOption != .annex, await BrewPaths.isSelectedBrewPathValid() {
             Self.logger.info("User selected their own valid brew during the repair — honoring it")
             phase = .ready
-            return true
+            return .repaired
         }
 
         BrewPaths.selectedBrewOption = .annex
@@ -247,7 +284,7 @@ final class HomebrewBootstrap {
 
         Self.logger.info("Annex Homebrew repaired in place — installed apps preserved")
         phase = .ready
-        return true
+        return .repaired
     }
 
     /// Streams the annex tarball install, surfacing progress lines to the overlay.

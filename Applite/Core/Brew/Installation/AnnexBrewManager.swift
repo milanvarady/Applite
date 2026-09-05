@@ -20,8 +20,9 @@ import OSLog
 /// dev-tools check and the `xcrun -find` fallback went away in 6.0.10, and the FFI
 /// quarantine/xattr/trash helpers (which need no Swift) became the default for all users in 6.0.12
 /// (PR #23061), replacing the old `HOMEBREW_DEVELOPER`-gated path. So the annex is now an
-/// unpatched, plain extraction that tracks `master` — kept current by the periodic refresh (see
-/// `refreshAnnexBrew`), the same rolling source `brew update` pulls.
+/// unpatched, plain extraction that tracks `main` — kept current by the periodic refresh (see
+/// `refreshAnnexBrew`), the same rolling source `brew update` pulls. It must be `main` and not
+/// `master`; see `brewTarballURL` for what happens otherwise.
 struct AnnexBrewManager {
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
