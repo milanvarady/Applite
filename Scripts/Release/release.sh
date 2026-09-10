@@ -5,7 +5,7 @@
 #     Scripts/Release/release.sh run 1.4.0
 #
 # The pipeline stops twice, at the two places that need a human: writing the
-# release notes, and deploying them to aerolite.dev. Both are conditions rather
+# release notes, and publishing them to applite.app. Both are conditions rather
 # than prompts — do the thing, then run the exact same command again and it picks
 # up where it left off. See Scripts/Release/README.md.
 
@@ -257,15 +257,16 @@ step_notes_draft() {
 EOF
     fi
 
-    # The Sparkle update panel and the aerolite page. Deliberately a separate file:
+    # The Sparkle update panel and applite.app. Deliberately a separate file:
     # the panel is a small window someone skims mid-update, so it needs a filtered
     # handful of one-liners rather than the full release body.
     if [[ ! -f "$notes/website-notes.md" ]]; then
         cat > "$notes/website-notes.md" <<EOF
 <!-- APPLITE-RELEASE-NOTES-DRAFT: delete THIS LINE when the notes are final -->
-<!-- Shown in the Sparkle update window and on aerolite.dev. -->
+<!-- Shown in the Sparkle update window and on applite.app. This file ships verbatim: -->
+<!-- whatever is written here is what gets published, bold lead-ins included. -->
 <!-- Keep it to a glance: ~5 bullets, one line each, no jargon. -->
-<!-- These headings are parsed into the aerolite snippet — keep them as they are. -->
+<!-- These headings are parsed into the published page. Keep them as they are. -->
 
 ### New Features
 
@@ -305,8 +306,8 @@ step_notes_gate() {
        The GitHub release body. Everything that changed, in full.
 
     3. Write  $short
-       The Sparkle update panel and the aerolite page. A handful of one-line
-       bullets — this is a glance, not a changelog.
+       The Sparkle update panel and applite.app. A handful of one-line
+       bullets. This is a glance, not a changelog.
 
     4. Delete the APPLITE-RELEASE-NOTES-DRAFT line from each:
 $(printf '         %s\n' "${pending[@]}")
