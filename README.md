@@ -71,7 +71,8 @@ Comparison drawn in August 2026; check the projects themselves for current state
 
 ## Download
 
-[Download DMG](https://github.com/milanvarady/applite/releases/latest/download/Applite.dmg)
+[applite.app](https://applite.app) or a direct
+[DMG download](https://github.com/milanvarady/Applite/releases/latest/download/Applite.dmg)
 
 or
 
@@ -101,11 +102,12 @@ If you object to AI-assisted code on principle, that's a legitimate position and
 
 ## Contact
 
-If you have any questions, feel free to e-mail me: [milan@aerolite.dev](mailto:milan@aerolite.dev)
+If you have any questions, feel free to e-mail me: [milan@milanvarady.dev](mailto:milan@milanvarady.dev)
 
 Or join the [Official Discord Server](https://discord.gg/MpDMH9cPbK).
 
-FAQ on the [official website](https://aerolite.dev/applite/FAQ.html).
+The [FAQ](https://applite.app/faq) and [Troubleshooting](https://applite.app/troubleshooting) pages
+answer most questions.
 
 ## Roadmap
 
