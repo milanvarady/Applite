@@ -1,13 +1,10 @@
-# These are supported funding model platforms
-
+# Shown as the Sponsor button on this repo.
+#
+# GitHub Sponsors first: GitHub covers the processing, so a personal sponsorship arrives whole.
+# Ko-fi is the fallback for the many Applite users who have no GitHub account.
+#
+# PayPal was removed: it took roughly 10% of a EUR 5 donation, where Ko-fi settles through Stripe
+# for about half that. Older builds of Applite still open the PayPal link from the Help menu and
+# cannot be changed, so that account should stay open even though nothing points at it here.
 github: milanvarady
-patreon: # Replace with a single Patreon username
-open_collective: # Replace with a single Open Collective username
-ko_fi: # Replace with a single Ko-fi username
-tidelift: # Replace with a single Tidelift platform-name/package-name e.g., npm/babel
-community_bridge: # Replace with a single Community Bridge project-name e.g., cloud-foundry
-liberapay: # Replace with a single Liberapay username
-issuehunt: # Replace with a single IssueHunt username
-otechie: # Replace with a single Otechie username
-lfx_crowdfunding: # Replace with a single LFX Crowdfunding project-name e.g., cloud-foundry
-custom: ["https://www.paypal.com/donate/?hosted_button_id=ZMDZSRG9CRY2Y"]
+ko_fi: milanvarady
