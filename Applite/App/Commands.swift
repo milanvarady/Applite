@@ -46,11 +46,11 @@ struct CommandsMenu: Commands {
         
         
         CommandGroup(replacing: .help) {
-            Link("Website", destination: URL(string: "https://aerolite.dev/applite")!)
-            Link("Troubleshooting", destination: URL(string: "https://aerolite.dev/applite/troubleshooting.html")!)
+            Link("Website", destination: URL(string: "https://applite.app")!)
+            Link("Troubleshooting", destination: URL(string: "https://applite.app/troubleshooting")!)
             Link("GitHub", destination: URL(string: "https://github.com/milanvarady/Applite")!)
             Link("Discord", destination: URL(string: "https://discord.gg/MpDMH9cPbK")!)
-            Link("Sponsor", destination: URL(string: "https://www.paypal.com/donate/?hosted_button_id=ZMDZSRG9CRY2Y")!)
+            Link("Sponsor", destination: URL(string: "https://applite.app/#support")!)
         }
     }
 }

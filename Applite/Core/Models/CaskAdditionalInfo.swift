@@ -36,7 +36,7 @@ struct CaskAdditionalInfo: Codable, Hashable {
         token: "applite",
         full_token: "applite",
         tap: "homebrew/cask",
-        homepage: URL(string: "https://aerolite.dev/applite")!,
+        homepage: URL(string: "https://applite.app")!,
         url: URL(string: "https://github.com/milanvarady/Applite/releases/download/v1.2.5/Applite.dmg")!,
         installed: "1.2.5",
         bundle_version: "1.2.5",

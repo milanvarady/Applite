@@ -117,7 +117,7 @@ final class CaskViewModel {
             tap: "homebrew/cask",
             name: "Test",
             descriptionText: "Test application",
-            homepageURL: "https://aerolite.dev/",
+            homepageURL: "https://applite.app",
             pkgInstaller: false,
             warningType: nil,
             warningDate: nil,

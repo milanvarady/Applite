@@ -25,7 +25,7 @@ struct ComponentsInstallView: View {
 
     @Environment(\.openURL) private var openURL
 
-    private let troubleshootingURL = URL(string: "https://aerolite.dev/applite/troubleshooting.html")!
+    private let troubleshootingURL = URL(string: "https://applite.app/troubleshooting")!
 
     var body: some View {
         VStack(spacing: 16) {
