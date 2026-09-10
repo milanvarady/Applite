@@ -511,20 +511,27 @@ step_sign_update() {
 
 # =========================================================== step: notes-website
 step_notes_website() {
-    local notes out date
+    local notes date out
     local flags=()
     notes="$(notes_dir "$VERSION")"
-    out="$notes/AppliteReleaseModel.swift.txt"
-    date="$(LC_ALL=C date '+%Y.%m.%d.')"
+    date="$(LC_ALL=C date '+%Y-%m-%d')"
     (( CRITICAL )) && flags=(--critical)
+
+    if [[ ! -d "$SITE_NOTES_DIR" ]]; then
+        die "site repo not found at $SITE_REPO — clone it, or set SITE_REPO"
+    fi
 
     # website-notes.md, not release-notes.md: the Sparkle panel is a small window a
     # user skims mid-update, so it gets the short filtered set. The full notes stay
     # on the GitHub release.
-    python3 "$HERE/notes_to_swift.py" "$notes/website-notes.md" \
+    #
+    # This writes straight into the site repo. It is not committed here: pushing another
+    # repository as a side effect of a release would be a surprise, and the diff is worth
+    # a human glance before it is published.
+    out="$(python3 "$HERE/notes_to_markdown.py" "$notes/website-notes.md" \
         --version "$VERSION" --date "$date" \
-        ${flags[@]+"${flags[@]}"} > "$out"
-    ok "website snippet → $out"
+        ${flags[@]+"${flags[@]}"} --out "$SITE_NOTES_DIR")"
+    ok "release notes → $out"
 }
 
 # ========================================================== step: github-release
@@ -614,13 +621,14 @@ step_appcast() {
 
 # =============================================================== step: site-gate
 step_site_gate() {
-    local url="$NOTES_URL_BASE/$VERSION.html"
+    local url="$NOTES_URL_BASE/$VERSION"
     if (( DRY_RUN )); then
         warn "dry run — not waiting for $url"
         return
     fi
-    # The Vapor route 404s on a missing dictionary key, so a 200 proves the entry
-    # is live on the deployed instance, not merely that the site is up.
+    # A miss is a real 404, never a redirect: the site has no fallback route under
+    # /releases/, and its worker confirms a page exists before redirecting to it. So a
+    # 200 here proves this version's page is live, not merely that the site is up.
     if curl -fsS -o /dev/null "$url"; then
         ok "release notes are live at $url"
         return
@@ -629,10 +637,11 @@ step_site_gate() {
 
   The release notes page is not live yet.
 
-    1. Paste  $(notes_dir "$VERSION")/AppliteReleaseModel.swift.txt
-       into   ~/GitHub/aerolite/Sources/App/PageModels/AppliteReleases/AppliteReleases.swift
-    2. Commit and push aerolite
-    3. Deploy it (ssh to the VPS, git pull, docker compose up -d --build)
+    1. Check the page that step notes-website wrote:
+         $SITE_NOTES_DIR/$VERSION.md
+    2. Commit and push it:
+         cd $SITE_REPO && git add -A && git commit -m "Release notes for $VERSION" && git push
+    3. Cloudflare rebuilds on push; it takes a minute or two.
     4. Run the same command again:
          Scripts/Release/release.sh run $VERSION
 

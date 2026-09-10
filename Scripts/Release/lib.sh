@@ -9,7 +9,15 @@ SIGN_IDENTITY="Developer ID Application: Milán Várady (${TEAM_ID})"
 NOTARY_PROFILE="${APPLITE_NOTARY_PROFILE:-applite-notary}"
 GH_REPO="milanvarady/Applite"
 PAGES_APPCAST="https://milanvarady.github.io/Applite/appcast.xml"
-NOTES_URL_BASE="https://aerolite.dev/applite/releases"
+# applite.app, not aerolite.dev: the site moved and aerolite is now only a redirector.
+# No .html — the site serves extensionless URLs. Both halves matter to step_site_gate, which
+# curls without -L, so a redirect would count as success and let a release publish against a
+# page that does not exist.
+NOTES_URL_BASE="https://applite.app/releases"
+
+# Where the release-notes markdown is written. Override if the site is checked out elsewhere.
+SITE_REPO="${SITE_REPO:-$HOME/GitHub/applite-site}"
+SITE_NOTES_DIR="$SITE_REPO/src/content/releases"
 ARCHIVE_ROOT="${APPLITE_ARCHIVE_ROOT:-$HOME/Documents/Applite/versions}"
 
 RELEASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
