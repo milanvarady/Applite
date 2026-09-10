@@ -5,9 +5,9 @@ Everything mechanical about shipping a release, in one command:
     Scripts/Release/release.sh run 1.4.0
 
 It builds, signs, notarizes, packages, publishes the GitHub release, and updates the Sparkle
-appcast. It stops twice — once for you to write the release notes, once for you to deploy them to
-aerolite.dev — and both stops are *conditions*, not prompts: do the thing, run the same command
-again, and it carries on from where it stopped.
+appcast. It stops twice, once for you to write the release notes and once for you to publish them
+to applite.app, and both stops are *conditions* rather than prompts: do the thing, run the same
+command again, and it carries on from where it stopped.
 
 | Command | What it does |
 |---|---|
@@ -112,10 +112,10 @@ signing is deterministic. By hand that is:
 | `dmg` | Draws the background, runs `create-dmg`, re-checks the ticket inside the image |
 | `notarize-dmg` | Signs the DMG with a secure timestamp, notarizes, staples |
 | `sign-update` | Sparkle signature + byte length |
-| `notes-website` | Converts `website-notes.md` into the aerolite Swift snippet |
+| `notes-website` | Writes `website-notes.md` into `applite-site` as the release-notes page |
 | `github-release` | Pushes `main`, creates the release, uploads `Applite.dmg` |
 | `appcast` | Inserts one `<item>` and shows you the diff |
-| **`site-gate`** | Stops until the notes page is live on aerolite.dev |
+| **`site-gate`** | Stops until the notes page is live on applite.app |
 | `publish-appcast` | Commits and pushes `appcast.xml`, then waits for Pages |
 | `archive-artifacts` | Copies app, DMG and dSYMs to `~/Documents/Applite/versions/` |
 
@@ -127,7 +127,7 @@ signing is deterministic. By hand that is:
 | File | Goes to | Shape |
 |---|---|---|
 | `release-notes.md` | The GitHub release body | Everything that changed, in full |
-| `website-notes.md` | The Sparkle update panel and aerolite.dev | ~5 one-line bullets, no jargon |
+| `website-notes.md` | The Sparkle update panel and applite.app | ~5 one-line bullets, no jargon |
 
 They are separate on purpose. The Sparkle panel is a small window someone skims mid-update — it
 needs a glance at the headline changes, not a changelog. GitHub is where the detail belongs, and
@@ -145,11 +145,14 @@ so every commit in the range stays one click away without a third document to ma
 assembled into `build/release/v<version>/github-release-body.md`, never appended to
 `release-notes.md`, so re-running the step can't stack duplicate links onto your source.
 
-**`site-gate`.** Paste `notes/AppliteReleaseModel.swift.txt` into aerolite's
-`Sources/App/PageModels/AppliteReleases/AppliteReleases.swift`, push, and deploy (ssh to the VPS,
-`git pull`, `docker compose up -d --build`). The gate polls the real URL, and the Vapor route 404s
-on a missing dictionary key — so a 200 proves the entry is live on the deployed instance, not just
-that the site is up.
+**`site-gate`.** The `notes-website` step has already written
+`~/GitHub/applite-site/src/content/releases/<version>.md`. Read it, commit it, push it; Cloudflare
+rebuilds in a minute or two. The gate then curls the real URL, and a miss there is a genuine 404
+rather than a redirect, so a 200 proves this version's page is live and not merely that the site
+is up.
+
+`website-notes.md` ships verbatim. Whatever is in it is what gets published, bold lead-ins
+included, so write the copy you want readers to see rather than a summary to be reworked later.
 
 ### Resuming
 
@@ -196,7 +199,7 @@ uploaded by mistake.
       export/Applite.app           the signed, stapled app
       dmgbg/                       generated background, 1x + 2x + combined TIFF
       Applite.dmg                  the artifact
-      notes/                       changelog draft, release notes, aerolite snippet
+      notes/                       changelog draft, release notes, website notes
 
     ~/Documents/Applite/versions/v1.4.0/    app, DMG and dSYMs, kept after the release
 
