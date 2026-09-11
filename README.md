@@ -1,13 +1,10 @@
-[![License](https://img.shields.io/github/license/milanvarady/Applite)](LICENSE.txt)
-[![Latest release](https://img.shields.io/github/v/release/milanvarady/Applite)](https://github.com/milanvarady/Applite/releases/latest)
-[![All releases](https://img.shields.io/github/downloads/milanvarady/Applite/total)](https://github.com/milanvarady/Applite/releases)
-[![Contributors](https://img.shields.io/github/contributors/milanvarady/Applite)](https://github.com/milanvarady/Applite/graphs/contributors)
-![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/milanvarady/Applite/latest)
-
-
 # Applite
 
 A native macOS app store for software that isn't on the App Store, backed by [Homebrew Cask](https://github.com/Homebrew/homebrew-cask).
+
+[![Latest release](https://img.shields.io/github/v/release/milanvarady/Applite?style=flat-square)](https://github.com/milanvarady/Applite/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/milanvarady/Applite/total?style=flat-square)](https://github.com/milanvarady/Applite/releases)
+[![License](https://img.shields.io/github/license/milanvarady/Applite?style=flat-square)](LICENSE.txt)
 
 ## Table of Contents
 
@@ -67,7 +64,11 @@ Comparison drawn in August 2026; check the projects themselves for current state
 
 ## Screenshots
 
-![Discover Page Screenshot](https://github.com/user-attachments/assets/ab537076-0813-4db7-bff4-b7784f3631ce)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/milanvarady/Applite/main/docs/screenshots/discover-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/milanvarady/Applite/main/docs/screenshots/discover-light.png">
+  <img alt="Applite Discover page" src="https://raw.githubusercontent.com/milanvarady/Applite/main/docs/screenshots/discover-light.png">
+</picture>
 
 ## Download
 
