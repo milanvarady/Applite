@@ -138,12 +138,12 @@ final class CaskManager {
     // MARK: - Brew Operation Forwarding
 
     func install(_ cask: CaskViewModel) {
-        guard canModifyApps() else { return }
+        guard canModifyApps(allowDuringRefresh: true) else { return }
         brewService.install(cask)
     }
 
-    private func canModifyApps() -> Bool {
-        guard !isResolvingInstalledState else {
+    private func canModifyApps(allowDuringRefresh: Bool = false) -> Bool {
+        guard allowDuringRefresh || !isResolvingInstalledState else {
             alert.show(title: "Homebrew action unavailable", message: String(localized: "Wait for installed apps to finish refreshing."))
             return false
         }
@@ -390,7 +390,7 @@ final class CaskManager {
     }
 
     func installAll(_ casks: [CaskViewModel]) {
-        guard canModifyApps() else { return }
+        guard canModifyApps(allowDuringRefresh: true) else { return }
         brewService.installAll(casks)
     }
 
