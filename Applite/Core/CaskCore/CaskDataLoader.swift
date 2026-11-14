@@ -18,6 +18,7 @@ final class CaskDataLoader {
     private let installedService: InstalledCaskService
     private var externalScanGeneration = 0
     private var installedRefreshGeneration = 0
+    private var receiptConfiguration: BrewOperationConfiguration?
     private var externalScanTask: Task<[CaskId: URL], Error>?
 
     private let logger = Logger(
@@ -126,6 +127,7 @@ final class CaskDataLoader {
         guard generation == installedRefreshGeneration else { throw CancellationError() }
         _ = registry.viewModels(for: records)
         registry.markInstalled(tokens: tokens)
+        receiptConfiguration = configuration
 
         let scanGeneration = externalScanGeneration &+ 1
         do {
@@ -146,6 +148,16 @@ final class CaskDataLoader {
         externalScanGeneration &+= 1
         externalScanTask?.cancel()
         externalScanTask = nil
+    }
+
+    func hasReceiptSnapshot(for configuration: BrewOperationConfiguration) -> Bool {
+        receiptConfiguration == configuration
+    }
+
+    func invalidateInstalledReceipts() {
+        installedRefreshGeneration &+= 1
+        receiptConfiguration = nil
+        invalidateExternalInstallations()
     }
 
     func refreshExternalInstallations(

@@ -524,6 +524,7 @@ enum ExternalInstallTests {
               while [ -f "$fixture_dir/pause-list" ]; do sleep 0.01; done
             fi
             if [ -f "$fixture_dir/receipts" ]; then cat "$fixture_dir/receipts"; fi ;;
+          outdated) exit 0 ;;
           info)
             token="${4##*/}"
             bundle="External.app"
@@ -659,6 +660,27 @@ enum ExternalInstallTests {
         try fm.removeItem(at: notificationStarted)
         try fm.removeItem(at: arguments)
         try fm.removeItem(at: prefix.appendingPathComponent("receipts"))
+        let profileReceipts = prefix.appendingPathComponent("receipts")
+        try externalRecord.fullToken.write(to: profileReceipts, atomically: true, encoding: .utf8)
+        try await loader.refreshInstalled()
+        precondition(vm.isInstalled)
+        let alternateBrew = root.appendingPathComponent("Alternate Homebrew/bin/brew")
+        try fm.createDirectory(at: alternateBrew.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try fixture.write(to: alternateBrew, atomically: true, encoding: .utf8)
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: alternateBrew.path)
+        defaults.setValue(alternateBrew.path, for: Preferences.customUserBrewPath)
+        manager.applyExternalAppDetectionSetting(debounce: true)
+        precondition(!vm.isInstalled, "Changing Homebrew must immediately invalidate old receipt flags")
+        let receiptDeadline = Date().addingTimeInterval(5)
+        while vm.externalAppURL != app && Date() < receiptDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        _ = try await service.runSerialized { true }
+        precondition(!vm.isInstalled && vm.externalAppURL == app && !manager.outdatedRefreshFailed,
+                     "External scans and update state must use receipts from the selected Homebrew")
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+        try fm.removeItem(at: profileReceipts)
+        try await loader.refreshInstalled()
         try await loader.refreshExternalInstallations { _, _, _ in [:] }
         precondition(registry.count == 2, "Empty scans must not materialize the entire catalog")
         let scanGate = ScanGate()
