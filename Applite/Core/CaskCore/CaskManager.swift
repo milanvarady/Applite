@@ -195,13 +195,15 @@ final class CaskManager {
     func confirmAdoption(_ cask: CaskViewModel) {
         guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
               UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
-              cask.isInstalledExternally, !(cask.warning?.isDisabled ?? false) else { return }
+              cask.isInstalledExternally, let selectedURL = cask.externalAppURL,
+              !(cask.warning?.isDisabled ?? false) else { return }
         let configuration = BrewOperationConfiguration.current
         let generation = adoptionConsentGeneration
         let validateConsent: @MainActor () throws -> Void = { [weak self] in
             guard let self, self.adoptionConsentGeneration == generation,
                   UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
-                  UserDefaults.standard.value(for: Preferences.offerHomebrewManagement) else {
+                  UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
+                  cask.externalAppURL == selectedURL else {
                 throw CaskAdoptionError.confirmationExpired
             }
             try configuration.validateCurrent()
@@ -214,6 +216,18 @@ final class CaskManager {
             return "'" + argument.replacingOccurrences(of: "'", with: "'\\''") + "'"
         }.joined(separator: " ")
         var message = String(localized: "This will reinstall the app via Homebrew so future updates can be managed here.")
+        if let appDirectory = configuration.applicationDirectories.first {
+            let existingPath = selectedURL.standardizedFileURL.path
+            let directoryPath = appDirectory.standardizedFileURL.path
+            func isInside(_ app: URL, directory: URL) -> Bool {
+                let path = directory.standardizedFileURL.path
+                return app.standardizedFileURL.path.hasPrefix(path.hasSuffix("/") ? path : path + "/")
+            }
+            if !isInside(selectedURL, directory: appDirectory)
+                && !isInside(selectedURL.resolvingSymlinksInPath(), directory: appDirectory.resolvingSymlinksInPath()) {
+                message += "\n\n" + String(localized: "Existing app: \(existingPath)\nHomebrew app directory: \(directoryPath)\nThe existing copy is outside the Homebrew app directory and will remain unmanaged; Homebrew will install a separate copy.")
+            }
+        }
         message += "\n\n\(preview)"
         if let warning = cask.warning {
             let detail: String
