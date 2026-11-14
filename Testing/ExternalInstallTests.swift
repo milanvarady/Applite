@@ -520,6 +520,11 @@ enum ExternalInstallTests {
               touch "$fixture_dir/stream-started"
               while [ -f "$fixture_dir/pause-stream" ]; do sleep 0.01; done
             fi
+            if [ -f "$fixture_dir/track-stream-finish" ]; then
+              echo "stream continued"
+              sleep 0.2
+              touch "$fixture_dir/stream-finished"
+            fi
             for token in "$@"; do
               case "$token" in install|--cask|--force|--appdir=*) continue ;; esac
               printf '%s\\n' "$token" >> "$fixture_dir/receipts"
@@ -717,6 +722,7 @@ enum ExternalInstallTests {
             registry.markInstalled(tokens: [])
             let flag = prefix.appendingPathComponent(mode == "stream" ? "pause-stream" : "pause-reconciliation")
             try Data().write(to: flag)
+            if mode == "stream" { try Data().write(to: prefix.appendingPathComponent("track-stream-finish")) }
             if mode == "reconciliation" { try Data().write(to: prefix.appendingPathComponent("no-markers")) }
             service.installAll([missing])
             let started = prefix.appendingPathComponent(mode == "stream" ? "stream-started" : "list-started")
@@ -731,8 +737,11 @@ enum ExternalInstallTests {
             precondition(!missing.isInstalled && missing.progressState.isFailed,
                          "Obsolete batch \(mode) results must not update receipt state after a Homebrew switch")
             if mode == "stream", case .failed(let output) = missing.progressState {
+                precondition(fm.fileExists(atPath: prefix.appendingPathComponent("stream-finished").path),
+                             "Changing configuration must not terminate an in-flight Homebrew process")
                 precondition(output.contains("successfully installed"),
                              "Stale streamed results must retain command output")
+                try fm.removeItem(at: prefix.appendingPathComponent("track-stream-finish"))
             }
             defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
             if fm.fileExists(atPath: flag.path) { try fm.removeItem(at: flag) }
