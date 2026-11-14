@@ -1984,6 +1984,15 @@ enum ExternalInstallTests {
         }
         let stable = record("identity-shared")
         let beta = record("identity-shared@beta")
+        let recordedOnly = try ExternalAppDetector.installations(
+            catalog: [stable], managedTokens: [stable.fullToken], directories: [],
+            recordedAppURLs: [stable.fullToken: [systemApp, userApp, systemApp]]
+        )
+        precondition(recordedOnly.multipleCopyTokens.contains(stable.fullToken)
+                     && recordedOnly.bundleURLs[stable.fullToken] == systemApp.resolvingSymlinksInPath().standardizedFileURL
+                     && recordedOnly.additionalInstallations[stable.fullToken]?.map(\.url)
+                        == [userApp.resolvingSymlinksInPath().standardizedFileURL],
+                     "Recorded bundles outside scan roots must appear once per physical copy")
         let aliasDirectory = root.appendingPathComponent("Identity Alias Apps")
         try fm.createDirectory(at: aliasDirectory, withIntermediateDirectories: true)
         try fm.createSymbolicLink(at: aliasDirectory.appendingPathComponent("Shared.app"), withDestinationURL: systemApp)

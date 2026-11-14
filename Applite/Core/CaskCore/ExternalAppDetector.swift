@@ -55,7 +55,7 @@ enum ExternalAppDetector {
                 displayName: record.name,
                 directories: directories
             ) + artCraft.matchingAppURLs(bundleNames: record.appBundleNames, displayName: record.name)
-            matchesByToken.append((record, matching))
+            matchesByToken.append((record, matching + recorded))
             if hasMultipleCopies(matching + recorded) {
                 found.multipleCopyTokens.insert(record.fullToken)
             }
@@ -107,7 +107,6 @@ enum ExternalAppDetector {
             guard found.multipleCopyTokens.contains(record.fullToken) else { continue }
             for url in matching {
                 let sameArtifact = matching.filter { $0.lastPathComponent == url.lastPathComponent }
-                    + (recordedAppURLs[record.fullToken] ?? []).filter { $0.lastPathComponent == url.lastPathComponent }
                 guard hasMultipleCopies(sameArtifact) else {
                     continue
                 }
