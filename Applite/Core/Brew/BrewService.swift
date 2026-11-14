@@ -99,6 +99,7 @@ final class BrewService {
         _ vm: CaskViewModel,
         arguments: [String]? = nil,
         confirmedConfiguration: BrewOperationConfiguration? = nil,
+        adoptionConsent: BrewAdoptionConsent? = nil,
         reconcile: (@MainActor () async throws -> Void)? = nil
     ) -> Task<Void, Never> {
         let configuration = confirmedConfiguration ?? .current
@@ -106,27 +107,17 @@ final class BrewService {
             Self.logger.info("Cask \"\(vm.token)\" installation started")
 
             do {
-                try configuration.validateCurrent()
-                let bundleNames = vm.appBundleNames
-                let name = vm.name
-                let appURL = await Task.detached {
-                    ExternalAppDetector.appURL(
-                        bundleNames: bundleNames, displayName: name,
-                        directories: configuration.applicationDirectories
-                    )
-                }.value
+                try self.validateAdoption(
+                    configuration: configuration, confirmedConfiguration: confirmedConfiguration,
+                    consent: adoptionConsent
+                )
+                let external = try await self.externalInstallations(in: [vm], configuration: configuration)
                 try Task.checkCancellation()
-                try configuration.validateCurrent()
-                if confirmedConfiguration != nil {
-                    guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
-                          UserDefaults.standard.value(for: Preferences.offerHomebrewManagement) else {
-                        throw CaskAdoptionError.confirmationRequired
-                    }
-                }
-                if !vm.isInstalled, appURL != nil || vm.isInstalledExternally {
+                if let appURL = external[vm.fullToken] {
                     guard confirmedConfiguration != nil else {
-                        if UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
-                           let appURL { vm.externalAppURL = appURL }
+                        if UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) {
+                            vm.externalAppURL = appURL
+                        }
                         throw CaskAdoptionError.confirmationRequired
                     }
                 }
@@ -146,6 +137,20 @@ final class BrewService {
 
             // Setup progress
             vm.progressState = .busy(withTask: "")
+
+            do {
+                try self.validateAdoption(
+                    configuration: configuration, confirmedConfiguration: confirmedConfiguration,
+                    consent: adoptionConsent
+                )
+            } catch {
+                await self.showFailure(
+                    for: vm, error: error, output: error.localizedDescription,
+                    failureTitle: String(localized: "Couldn't start app installation"),
+                    failureMessage: error.localizedDescription
+                )
+                return
+            }
 
             // Run install command and stream output
             let result = await self.streamBrewCommand(
@@ -192,10 +197,12 @@ final class BrewService {
                 return
             }
 
+            vm.progressState = .busy(withTask: String(localized: "Refreshing installed apps..."))
             do {
                 try configuration.validateCurrent()
                 if let reconcile {
                     try await reconcile()
+                    try configuration.validateCurrent()
                 } else {
                     vm.isInstalled = true
                 }
@@ -432,6 +439,61 @@ final class BrewService {
     }
 
     // MARK: - Helper Functions
+
+    private func validateAdoption(
+        configuration: BrewOperationConfiguration, confirmedConfiguration: BrewOperationConfiguration?,
+        consent: BrewAdoptionConsent?
+    ) throws {
+        try configuration.validateCurrent()
+        if confirmedConfiguration != nil {
+            guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+                  UserDefaults.standard.value(for: Preferences.offerHomebrewManagement) else {
+                throw CaskAdoptionError.confirmationExpired
+            }
+            try consent?.validate()
+        }
+    }
+
+    private func externalInstallations(
+        in vms: [CaskViewModel], configuration: BrewOperationConfiguration,
+        bundleNames: [CaskId: [String]] = [:]
+    ) async throws -> [CaskId: URL] {
+        let managed = try await InstalledCaskService().getInstalledCasks(configuration: configuration)
+        let candidates = vms.map {
+            (token: $0.fullToken, name: $0.name, bundles: bundleNames[$0.fullToken] ?? $0.appBundleNames,
+             knownURL: $0.externalAppURL)
+        }
+        let task = Task.detached {
+            var found: [CaskId: URL] = [:]
+            for candidate in candidates where !managed.contains(candidate.token) {
+                try Task.checkCancellation()
+                let detected = ExternalAppDetector.appURL(
+                    bundleNames: candidate.bundles, displayName: candidate.name,
+                    directories: configuration.applicationDirectories
+                )
+                if let detected {
+                    found[candidate.token] = detected
+                } else if let known = candidate.knownURL {
+                    do {
+                        if try known.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
+                            found[candidate.token] = known
+                        }
+                    } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                        continue
+                    }
+                }
+            }
+            return found
+        }
+        let found = try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
+        }
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
+        return found
+    }
 
     /// Enqueues a single-cask brew operation on the serial queue and tracks it. Returns the
     /// task. The op waits for any earlier queued op to finish (only one brew process at a time);
@@ -723,11 +785,19 @@ final class BrewService {
                 return
             }
             guard !supported.isEmpty else { return }
+            var unconfirmed: [CaskId: URL] = [:]
             do {
+                if kind == .install {
+                    unconfirmed = try await self.externalInstallations(in: supported, configuration: configuration)
+                }
                 try await self.refreshOwnership(for: supported, configuration: configuration)
             } catch {
                 for vm in supported {
-                    await self.reportManagementBlock(for: vm, error: error)
+                    if Task.isCancelled {
+                        vm.progressState = .idle
+                    } else {
+                        await self.reportManagementBlock(for: vm, error: error)
+                    }
                 }
                 return
             }
@@ -741,6 +811,13 @@ final class BrewService {
                 if let protection = vm.managementProtection {
                     let error = protection.source.blockError
                     vm.isOutdated = false
+                    vm.progressState = .failed(output: error.localizedDescription)
+                    blocked.append((vm, error))
+                } else if let url = unconfirmed[vm.fullToken] {
+                    if UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) {
+                        vm.externalAppURL = url
+                    }
+                    let error = CaskAdoptionError.confirmationRequired
                     vm.progressState = .failed(output: error.localizedDescription)
                     blocked.append((vm, error))
                 } else {
@@ -770,6 +847,23 @@ final class BrewService {
     private func runBatchOperation(
         _ vms: [CaskViewModel], kind: BatchKind, configuration: BrewOperationConfiguration
     ) async {
+        do {
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
+        } catch {
+            for vm in vms {
+                if Task.isCancelled {
+                    vm.progressState = .idle
+                } else {
+                    await self.showFailure(
+                        for: vm, error: error, output: error.localizedDescription,
+                        failureTitle: String(localized: "Couldn't start app installation"),
+                        failureMessage: error.localizedDescription
+                    )
+                }
+            }
+            return
+        }
         // token AND fullToken → vm, so brew's per-cask output lines (which name either) can be
         // routed to a card. If two casks in the batch share a key (e.g. a core cask and a tap cask
         // with the same bare token), drop that key so it can't mis-route — those fall to reconcile.

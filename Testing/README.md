@@ -8,9 +8,16 @@ last metadata request to verify the first entry is rechecked. Recorded old-appdi
 targets, managed-receipt aliases, separate bundles, and immediate single/bulk
 Installed projection reconciliation use isolated filesystem fixtures.
 
+Hidden-self fixtures ensure an external Applite bundle contributes neither a row
+nor a badge. A paused reconciliation also verifies the real operation remains busy
+in the status summary until post-install ownership refresh completes.
+
 Review-race fixtures also cover an Install before initial detection, configuration
 changes before confirmation/queued execution, retained stdout/stderr after a failed
 reconciliation, and a paused scan completing after detection is disabled/re-enabled.
+Upstream-review fixtures additionally cover bulk external exclusion and mixed batches,
+disabled/re-enabled consent, stale receipt snapshots, busy reconciliation, debounced
+path edits, and cancellation of superseded scan work.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including
@@ -277,6 +284,10 @@ preference domain hides the card, opting in shows exactly one self-card only in
 Installed, and opting out hides it again without changing the other app cards.
 
 ## Non-destructive favicon tests
+
+Proxy fixtures cover a cached failure and a paused old request after route changes.
+Redirected error/non-HTML responses and exact-cutoff unclosed script/style/comment
+prefixes verify the fallback origin and ignored-region boundaries.
 
 Review fixtures cover head-like text inside scripts/styles/comments, target-only
 base elements, numeric/named character references and decoded scheme rejection.

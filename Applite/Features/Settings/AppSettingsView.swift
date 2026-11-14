@@ -52,7 +52,7 @@ struct AppSettingsView: View {
             caskManager.applyAppManagementSettings(surfacingErrorsIn: alert)
         }
         .onChange(of: [String(appdirOn), appdirPath]) { _, _ in
-            caskManager.applyExternalAppDetectionSetting(surfacingErrorsIn: alert)
+            caskManager.applyExternalAppDetectionSetting(debounce: true, surfacingErrorsIn: alert)
         }
     }
 

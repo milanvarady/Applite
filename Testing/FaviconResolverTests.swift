@@ -1,22 +1,52 @@
 import Foundation
 import ImageIO
 
+private final class FaviconResponseGate: @unchecked Sendable {
+    private let lock = NSLock()
+    private var released = false
+    private var callbacks: [@Sendable () -> Void] = []
+
+    func submit(_ callback: @escaping @Sendable () -> Void) {
+        lock.lock()
+        if released {
+            lock.unlock()
+            callback()
+        } else {
+            callbacks.append(callback)
+            lock.unlock()
+        }
+    }
+
+    func release() {
+        lock.lock()
+        released = true
+        let pending = callbacks
+        callbacks = []
+        lock.unlock()
+        pending.forEach { $0() }
+    }
+}
+
 private final class FaviconFixtures: @unchecked Sendable {
-    struct Response {
+    struct Response: Sendable {
         let body: Data
         let mime: String
         let status: Int
         let finalURL: URL?
+        let gate: FaviconResponseGate?
     }
 
     private let lock = NSLock()
     private var responses: [URL: Response] = [:]
     private var requests: [URL: Int] = [:]
 
-    func set(_ url: URL, html: String, mime: String = "text/html", status: Int = 200, finalURL: URL? = nil) {
+    func set(
+        _ url: URL, html: String, mime: String = "text/html", status: Int = 200,
+        finalURL: URL? = nil, gate: FaviconResponseGate? = nil
+    ) {
         lock.lock()
         defer { lock.unlock() }
-        responses[url] = Response(body: Data(html.utf8), mime: mime, status: status, finalURL: finalURL)
+        responses[url] = Response(body: Data(html.utf8), mime: mime, status: status, finalURL: finalURL, gate: gate)
     }
 
     func take(_ url: URL) -> Response? {
@@ -48,9 +78,16 @@ private final class FaviconURLProtocol: URLProtocol, @unchecked Sendable {
             client?.urlProtocol(self, didFailWithError: URLError(.cannotConnectToHost))
             return
         }
-        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-        client?.urlProtocol(self, didLoad: fixture.body)
-        client?.urlProtocolDidFinishLoading(self)
+        let complete: @Sendable () -> Void = { [self] in
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: fixture.body)
+            client?.urlProtocolDidFinishLoading(self)
+        }
+        if let gate = fixture.gate {
+            gate.submit(complete)
+        } else {
+            complete()
+        }
     }
 
     override func stopLoading() {}
@@ -125,6 +162,44 @@ enum FaviconResolverTests {
         precondition(results.0.first?.absoluteString == "https://new.example.invalid/releases/latest/logo.png")
         _ = await resolver.candidates(for: page, configuration: configuration)
         precondition(FaviconURLProtocol.fixtures.count(page) == 1, "Concurrent and cached callers must share discovery")
+        let httpProxy = URLSessionConfiguration.ephemeral
+        httpProxy.protocolClasses = [FaviconURLProtocol.self]
+        httpProxy.connectionProxyDictionary = ["HTTPEnable": 1, "HTTPProxy": "127.0.0.1", "HTTPPort": 8079]
+        let socksProxy = URLSessionConfiguration.ephemeral
+        socksProxy.protocolClasses = [FaviconURLProtocol.self]
+        socksProxy.connectionProxyDictionary = ["SOCKSEnable": 1, "SOCKSProxy": "127.0.0.1", "SOCKSPort": 1089]
+        let changedProxy = URL(string: "https://proxy.example.invalid/app")!
+        FaviconURLProtocol.fixtures.set(changedProxy, html: "", status: 503)
+        let oldProxyResult = await resolver.candidates(for: changedProxy, configuration: httpProxy)
+        precondition(oldProxyResult.map(\.path) == ["/favicon.ico"])
+        FaviconURLProtocol.fixtures.set(changedProxy, html: "<link rel=icon href=/assets/recovered.png>")
+        let newProxyResult = await resolver.candidates(for: changedProxy, configuration: socksProxy)
+        precondition(newProxyResult.first?.path == "/assets/recovered.png"
+                     && FaviconURLProtocol.fixtures.count(changedProxy) == 2,
+                     "A failed proxy result must not poison discovery after the effective proxy changes")
+        let pendingURL = URL(string: "https://pending-proxy.example.invalid/app")!
+        let gate = FaviconResponseGate()
+        FaviconURLProtocol.fixtures.set(pendingURL, html: "", status: 503, gate: gate)
+        let oldRequest = Task { await resolver.candidates(for: pendingURL, configuration: httpProxy) }
+        let oldDeadline = Date().addingTimeInterval(2)
+        while FaviconURLProtocol.fixtures.count(pendingURL) == 0 && Date() < oldDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(FaviconURLProtocol.fixtures.count(pendingURL) == 1)
+        FaviconURLProtocol.fixtures.set(pendingURL, html: "<link rel=icon href=/assets/new-route.png>")
+        let newRequest = Task { await resolver.candidates(for: pendingURL, configuration: socksProxy) }
+        let newDeadline = Date().addingTimeInterval(2)
+        while FaviconURLProtocol.fixtures.count(pendingURL) < 2 && Date() < newDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        gate.release()
+        let oldURLs = await oldRequest.value
+        let newURLs = await newRequest.value
+        precondition(oldURLs.map(\.path) == ["/favicon.ico"] && newURLs.first?.path == "/assets/new-route.png",
+                     "A new proxy lookup must not join an in-flight old route")
+        let retainedNewURLs = await resolver.candidates(for: pendingURL, configuration: socksProxy)
+        precondition(retainedNewURLs == newURLs && FaviconURLProtocol.fixtures.count(pendingURL) == 2,
+                     "An old route finishing last must not overwrite the new route's cached candidates")
 
         for (path, mime, status) in [
             ("missing", "text/html", 404), ("not-html", "application/octet-stream", 200)
@@ -133,6 +208,13 @@ enum FaviconResolverTests {
             FaviconURLProtocol.fixtures.set(url, html: "<link rel=icon href=/wrong.png>", mime: mime, status: status)
             let urls = await resolver.candidates(for: url, configuration: configuration)
             precondition(urls.map(\.path) == ["/favicon.ico"])
+            let redirectedURL = URL(string: "https://example.invalid/redirected-\(path)")!
+            FaviconURLProtocol.fixtures.set(
+                redirectedURL, html: "", mime: mime, status: status, finalURL: redirected
+            )
+            let redirectedFallback = await resolver.candidates(for: redirectedURL, configuration: configuration)
+            precondition(redirectedFallback.map(\.absoluteString) == ["https://new.example.invalid/favicon.ico"],
+                         "An unusable redirected response must still use the final origin's root favicon")
         }
         let offline = URL(string: "https://offline.example.invalid/app")!
         let offlineURLs = await resolver.candidates(for: offline, configuration: configuration)
@@ -143,6 +225,19 @@ enum FaviconResolverTests {
         FaviconURLProtocol.fixtures.set(huge, html: prefix + "<link rel=icon href=/beyond-limit.png>")
         let bounded = await resolver.candidates(for: huge, configuration: configuration)
         precondition(bounded.map(\.path) == ["/favicon.ico"], "Do not parse bytes beyond the HTML budget")
+        for (name, opening, closing) in [
+            ("script", "<script>", "</script>"), ("style", "<style>", "</style>"), ("comment", "<!--", "-->")
+        ] {
+            let url = URL(string: "https://example.invalid/cutoff-\(name)")!
+            let head = "<head><link rel=icon href=real.png>" + opening
+                + "<base href=https://ignored.example.invalid/><link rel=icon href=/fake.png>"
+            let padding = String(repeating: "x", count: FaviconResolver.maximumHTMLBytes - head.utf8.count)
+            FaviconURLProtocol.fixtures.set(url, html: head + padding + closing + "</head>")
+            let urls = await resolver.candidates(for: url, configuration: configuration)
+            precondition(urls.map(\.absoluteString) == [
+                "https://example.invalid/real.png", "https://example.invalid/favicon.ico"
+            ], "A byte-budget cutoff inside \(name) must not expose literal metadata text")
+        }
         let invalid = URL(string: "ftp://example.invalid/app")!
         let invalidURLs = await resolver.candidates(for: invalid, configuration: configuration)
         precondition(invalidURLs.isEmpty && FaviconURLProtocol.fixtures.count(invalid) == 0)

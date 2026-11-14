@@ -173,6 +173,10 @@ still block writes even when all source overrides have been enabled.
 
 ## App icons
 
+Discovery caches and in-flight requests are isolated by effective proxy settings.
+Unusable redirected pages use the final site's root favicon, and truncated comments,
+scripts, or styles never expose their literal link/base text as metadata.
+
 Favicon downloads pick up proxy preference changes without restarting Applite.
 Discovery ignores comments/script/style contents before finding the head boundary,
 uses the first base element with an href, and decodes numeric/named URL references.
@@ -201,6 +205,12 @@ Swift and SwiftUI, targeting macOS 14 so `@Observable` and `NavigationSplitView`
 Architecture notes are in [CLAUDE.md](CLAUDE.md).
 
 ### Externally installed apps
+
+Bulk imports skip apps already present outside the selected Homebrew; use the
+single-app management confirmation instead. Disabling either management prerequisite
+permanently invalidates open/queued confirmations until a new confirmation is made.
+Receipt refreshes are bound to their selected Homebrew configuration and cannot
+publish after it changes. Path edits debounce detection; superseded scans are canceled.
 
 Install rechecks the expected app bundle before running, so an unfinished detection
 scan cannot silently turn Install into Homebrew adoption. Adoption confirmation is

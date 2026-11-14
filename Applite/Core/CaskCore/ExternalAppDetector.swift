@@ -39,6 +39,7 @@ enum ExternalAppDetector {
         var claimed: Set<URL> = []
         var found = ScanResult()
         for record in ordered {
+            try Task.checkCancellation()
             let recorded = recordedAppURLs[record.fullToken] ?? []
             guard let url = recorded.first ?? appURL(
                 bundleNames: record.appBundleNames,
@@ -113,12 +114,26 @@ enum ExternalAppDetector {
         }
         var appURLs: [ProtectedAppInstallation.Source: URL] = [:]
         for url in candidates {
+            try Task.checkCancellation()
             if appURLs[.intune] == nil, try intune.isManagedApp(at: url) { appURLs[.intune] = url }
             if appURLs[.appStore] == nil, hasAppStoreReceipt(at: url) { appURLs[.appStore] = url }
             if appURLs[.setapp] == nil, try isSetappApp(at: url) { appURLs[.setapp] = url }
             if appURLs[.artCraft] == nil, artCraft.isManagedApp(at: url) { appURLs[.artCraft] = url }
         }
         return ProtectedAppInstallation(appURLs: appURLs)
+    }
+
+    nonisolated static func scan(
+        catalog: [CaskRecord], directories: [URL], managedTokens: Set<CaskId>
+    ) async throws -> [CaskId: URL] {
+        let task = Task.detached {
+            try installations(catalog: catalog, managedTokens: managedTokens, directories: directories).externalAppURLs
+        }
+        return try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
+        }
     }
 
     /// Unlike launch resolution, detection never looks in the Caskroom or LaunchServices:

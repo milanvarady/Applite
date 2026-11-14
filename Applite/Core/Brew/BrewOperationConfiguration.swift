@@ -1,5 +1,9 @@
 import Foundation
 
+struct BrewAdoptionConsent {
+    let validate: @MainActor () throws -> Void
+}
+
 struct BrewOperationConfiguration: Equatable, Sendable {
     let executable: URL
     let appdirArguments: [String]
