@@ -5,6 +5,9 @@
 Review-race fixtures also cover an Install before initial detection, configuration
 changes before confirmation/queued execution, retained stdout/stderr after a failed
 reconciliation, and a paused scan completing after detection is disabled/re-enabled.
+Upstream-review fixtures additionally cover bulk external exclusion and mixed batches,
+disabled/re-enabled consent, stale receipt snapshots, busy reconciliation, debounced
+path edits, and cancellation of superseded scan work.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including

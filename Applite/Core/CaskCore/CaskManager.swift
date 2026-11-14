@@ -21,6 +21,8 @@ final class CaskManager {
     private let dataLoader: CaskDataLoader
     private let registry: CaskViewModelRegistry
     private let brewService: BrewService
+    private var adoptionConsentGeneration = 0
+    private var detectionSettingTask: Task<Void, Never>?
 
     /// Resolves brew on launch (detect existing / install annex) without onboarding or CLT.
     /// `ContentView` observes `bootstrap.phase` to show the install sheet.
@@ -127,16 +129,28 @@ final class CaskManager {
         brewService.install(cask)
     }
 
-    func applyExternalAppDetectionSetting(surfacingErrorsIn errorSurface: AlertManager? = nil) {
+    func invalidateAdoptionConsent() {
+        adoptionConsentGeneration &+= 1
+    }
+
+    func applyExternalAppDetectionSetting(
+        debounce: Bool = false, surfacingErrorsIn errorSurface: AlertManager? = nil
+    ) {
+        invalidateAdoptionConsent()
+        detectionSettingTask?.cancel()
         dataLoader.invalidateExternalInstallations()
         guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
             registry.markExternalInstallations(appURLs: [:])
             return
         }
         let surface = errorSurface ?? alert
-        Task {
+        detectionSettingTask = Task {
             do {
+                if debounce { try await Task.sleep(for: .milliseconds(300)) }
+                try Task.checkCancellation()
                 try await dataLoader.refreshExternalInstallations()
+            } catch is CancellationError {
+                return
             } catch {
                 Self.logger.error("External app detection failed: \(error.localizedDescription)")
                 surface.show(error: error, title: "Couldn't detect externally installed apps")
@@ -149,6 +163,15 @@ final class CaskManager {
               UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
               cask.isInstalledExternally, !(cask.warning?.isDisabled ?? false) else { return }
         let configuration = BrewOperationConfiguration.current
+        let generation = adoptionConsentGeneration
+        let validateConsent: @MainActor () throws -> Void = { [weak self] in
+            guard let self, self.adoptionConsentGeneration == generation,
+                  UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+                  UserDefaults.standard.value(for: Preferences.offerHomebrewManagement) else {
+                throw CaskAdoptionError.confirmationExpired
+            }
+            try configuration.validateCurrent()
+        }
         let arguments = BrewService.installArguments(fullToken: cask.fullToken, configuration: configuration)
         let preview = (["brew"] + arguments).map { argument in
             if argument.range(of: #"^[A-Za-z0-9_./@=+-]+$"#, options: .regularExpression) != nil {
@@ -180,13 +203,16 @@ final class CaskManager {
                           UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
                           cask.isInstalledExternally else { return }
                     do {
-                        try configuration.validateCurrent()
+                        try validateConsent()
                     } catch {
-                        self.alert.show(error: error, title: "Homebrew configuration changed")
+                        self.alert.show(error: error, title: "Couldn't confirm Homebrew management")
                         return
                     }
-                    self.brewService.install(cask, arguments: arguments, confirmedConfiguration: configuration) {
-                        try await self.dataLoader.refreshInstalled()
+                    self.brewService.install(
+                        cask, arguments: arguments, confirmedConfiguration: configuration,
+                        adoptionConsent: BrewAdoptionConsent(validate: validateConsent)
+                    ) {
+                        try await self.dataLoader.refreshInstalled(configuration: configuration)
                         guard cask.isInstalled else {
                             throw CaskAdoptionError.notManaged
                         }

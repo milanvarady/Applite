@@ -17,6 +17,8 @@ final class CaskDataLoader {
     private let registry: CaskViewModelRegistry
     private let installedService: InstalledCaskService
     private var externalScanGeneration = 0
+    private var installedRefreshGeneration = 0
+    private var externalScanTask: Task<[CaskId: URL], Error>?
 
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -111,25 +113,32 @@ final class CaskDataLoader {
 
     /// Re-queries brew CLI for installed casks, ensures view models exist for each,
     /// and marks them installed in the registry.
-    func refreshInstalled() async throws {
-        let tokens = try await installedService.getInstalledCasks()
+    func refreshInstalled(configuration: BrewOperationConfiguration = .current) async throws {
+        installedRefreshGeneration &+= 1
+        let generation = installedRefreshGeneration
+        let tokens = try await installedService.getInstalledCasks(configuration: configuration)
         let records = try await dbService.fetchCasks(forTokens: Array(tokens))
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
+        guard generation == installedRefreshGeneration else { throw CancellationError() }
         _ = registry.viewModels(for: records)
         registry.markInstalled(tokens: tokens)
 
-        try await refreshExternalInstallations()
+        try await refreshExternalInstallations(configuration: configuration)
     }
 
     func invalidateExternalInstallations() {
         externalScanGeneration &+= 1
+        externalScanTask?.cancel()
+        externalScanTask = nil
     }
 
     func refreshExternalInstallations(
-        scan: @Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL] = ExternalAppDetector.scan
+        configuration: BrewOperationConfiguration = .current,
+        scan: @escaping @Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL] = ExternalAppDetector.scan
     ) async throws {
         invalidateExternalInstallations()
         let generation = externalScanGeneration
-        let configuration = BrewOperationConfiguration.current
         guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
             registry.markExternalInstallations(appURLs: [:])
             return
@@ -137,8 +146,18 @@ final class CaskDataLoader {
 
         // Scan the full catalog, not just curated/search results, so totals include unbrowsed apps.
         let catalog = try await dbService.fetchAllCasks()
+        try Task.checkCancellation()
+        guard generation == externalScanGeneration, configuration == .current,
+              UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else { return }
         let tokens = Set(registry.installedViewModels.map(\.fullToken))
-        let appURLs = try await scan(catalog, configuration.applicationDirectories, tokens)
+        let task = Task.detached { try await scan(catalog, configuration.applicationDirectories, tokens) }
+        externalScanTask = task
+        defer { if generation == externalScanGeneration { externalScanTask = nil } }
+        let appURLs = try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
+        }
         guard !Task.isCancelled, generation == externalScanGeneration,
               configuration == .current else { return }
         // A Settings toggle may have changed while the off-main scan was running.
@@ -152,9 +171,11 @@ final class CaskDataLoader {
 
     /// Re-queries brew CLI for outdated casks, ensures view models exist for each,
     /// and marks them outdated in the registry.
-    func refreshOutdated() async throws {
-        let tokens = try await installedService.getOutdatedCasks()
+    func refreshOutdated(configuration: BrewOperationConfiguration = .current) async throws {
+        let tokens = try await installedService.getOutdatedCasks(configuration: configuration)
         let records = try await dbService.fetchCasks(forTokens: Array(tokens))
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
         _ = registry.viewModels(for: records)
         registry.markOutdated(tokens: tokens)
     }

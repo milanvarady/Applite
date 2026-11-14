@@ -66,7 +66,10 @@ struct BrewSettingsView: View {
             caskManager.applyExternalAppDetectionSetting(surfacingErrorsIn: alert)
         }
         .onChange(of: [String(brewPathOption), customUserBrewPath, String(appdirOn), appdirPath]) { _, _ in
-            caskManager.applyExternalAppDetectionSetting(surfacingErrorsIn: alert)
+            caskManager.applyExternalAppDetectionSetting(debounce: true, surfacingErrorsIn: alert)
+        }
+        .onChange(of: offerHomebrewManagement) { _, _ in
+            caskManager.invalidateAdoptionConsent()
         }
     }
 
