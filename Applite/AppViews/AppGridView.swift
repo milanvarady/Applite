@@ -15,6 +15,7 @@ import SwiftUI
 struct AppGridView: View {
     let casks: [CaskViewModel]
     var appRole: AppRole
+    var includeSelf = false
 
     @AppStorage(Preferences.showAppliteInInstalledList) private var showAppliteInInstalledList
 
@@ -25,7 +26,7 @@ struct AppGridView: View {
     var body: some View {
         // Filter out self; done once per body pass rather than as a per-row
         // conditional inside ForEach (which wraps every row in _ConditionalContent).
-        let displayedCasks = casks.filter { !$0.isApplite }
+        let displayedCasks = casks.filter { includeSelf || !$0.isApplite }
 
         ScrollView {
             LazyVGrid(columns: columns, spacing: 20) {
