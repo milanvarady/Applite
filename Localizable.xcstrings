@@ -2421,7 +2421,8 @@
             "value" : "Otomatik güncelleme"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Automatically check for updates" : {
       "comment" : "Applite update option checkmark",
@@ -6012,7 +6013,8 @@
             "value" : "Yükleme tarihi"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Installation Directory" : {
       "comment" : "Text field label for a custom app install folder",
@@ -11359,15 +11361,21 @@
     "Tasks: %lld active, %lld failed" : {},
     "View running, queued, and failed tasks" : {},
     "Working on %@..." : {},
-    "Available Version" : {},
-    "Loading app details..." : {},
+    "Available Version" : {
+      "extractionState" : "stale"
+    },
+    "Loading app details..." : {
+      "extractionState" : "stale"
+    },
     "Show app details" : {},
     "Show details for %@" : {},
     "Version History" : {},
     "Include apps installed outside Homebrew in Installed. Turning this off does not change your apps." : {},
     "No installed apps found." : {},
     "App Location" : {},
-    "Couldn't load app details" : {},
+    "Couldn't load app details" : {
+      "extractionState" : "stale"
+    },
     "Management" : {},
     "Not managed by Homebrew" : {},
     "Unknown" : {},
@@ -11442,6 +11450,33 @@
     "This allows Homebrew to replace apps detected as managed by %@. Only enable this if you are authorized. Licenses, settings, and updates may be affected, and the original manager may reinstall the app. This does not remove device enrollment, organizational policies, or licensing requirements. Exact, enabled Homebrew casks are still required." : {},
     "Detected Management Sources" : {},
     "Tracked by Homebrew" : {},
+    "Bundle Identifier" : {},
+    "Couldn't load Homebrew details" : {},
+    "Couldn't read installed app information" : {},
+    "Declared Category" : {},
+    "Developer Website" : {},
+    "Homebrew Available Version" : {},
+    "Homebrew Cask Auto-Update Flag" : {},
+    "Homebrew Catalog" : {},
+    "Homebrew Installation Date" : {},
+    "Information is read from the installed app. Its signing identity is not verified." : {},
+    "Installed App Information" : {},
+    "Languages" : {},
+    "Loading Homebrew details..." : {},
+    "Minimum macOS Version" : {},
+    "Reading installed app information..." : {},
+    "Signing Identity" : {},
+    "Signing Identity (unverified)" : {},
+    "Some Languages Unavailable" : {},
+    "The installed app bundle could not be located." : {},
+    "Unavailable (OSStatus %d)" : {},
+    "Bundle Information" : {},
+    "Bundle Name" : {},
+    "Copyright" : {},
+    "Development Language" : {},
+    "Installed Version (Homebrew)" : {},
+    "Tracked by" : {},
+    "Tracked by: %@" : {},
     "Couldn't start app installation" : {},
     "Homebrew configuration changed" : {},
     "Homebrew or the app installation directory changed. Review the current settings and confirm the command again." : {},

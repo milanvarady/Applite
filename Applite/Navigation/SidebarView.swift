@@ -10,50 +10,73 @@ import SwiftUI
 struct SidebarView: View {
     @Environment(CaskManager.self) var caskManager
     @Binding var selection: SidebarItem?
+    let onActivate: (SidebarItem) -> Void
     
     var body: some View {
         List(selection: $selection) {
             Divider()
             
-            Label("Discover", systemImage: "star")
-                .tag(SidebarItem.home)
+            sidebarItem(.home) {
+                Label("Discover", systemImage: "star")
+            }
             
-            Label("Updates", systemImage: "square.and.arrow.down")
-                .badge(caskManager.outdatedCount)
-                .tag(SidebarItem.updates)
+            sidebarItem(.updates) {
+                Label("Updates", systemImage: "square.and.arrow.down")
+            }
+            .badge(caskManager.outdatedCount)
             
-            Label("Installed", systemImage: "externaldrive.badge.checkmark")
-                .badge(caskManager.locallyInstalledCount)
-                .tag(SidebarItem.installed)
+            sidebarItem(.installed) {
+                Label("Installed", systemImage: "externaldrive.badge.checkmark")
+            }
+            .badge(caskManager.locallyInstalledCount)
             
-            Label("Active Tasks", systemImage: "gearshape")
-                .badge(caskManager.activeTasks.count)
-                .tag(SidebarItem.activeTasks)
+            sidebarItem(.activeTasks) {
+                Label("Active Tasks", systemImage: "gearshape")
+            }
+            .badge(caskManager.activeTasks.count)
             
-            Label("App Migration", systemImage: "square.and.arrow.up.on.square")
-                .tag(SidebarItem.appMigration)
+            sidebarItem(.appMigration) {
+                Label("App Migration", systemImage: "square.and.arrow.up.on.square")
+            }
             
             Section("Categories") {
                 ForEach(caskManager.categories) { category in
-                    Label(category.localizedName, systemImage: category.sfSymbol)
-                        .tag(SidebarItem.appCategory(id: category.id))
+                    sidebarItem(.appCategory(id: category.id)) {
+                        Label(category.localizedName, systemImage: category.sfSymbol)
+                    }
                 }
             }
             
             if !caskManager.taps.isEmpty {
                 Section("Taps") {
                     ForEach(caskManager.taps) { tap in
-                        Label(tap.title, systemImage: "spigot")
-                            .tag(SidebarItem.tap(tap: tap))
-                            .truncationMode(.head)
+                        sidebarItem(.tap(tap: tap)) {
+                            Label(tap.title, systemImage: "spigot")
+                                .truncationMode(.head)
+                        }
                     }
                 }
             }
             
             Section("Homebrew") {
-                Label("Manage Homebrew", systemImage: "mug")
-                    .tag(SidebarItem.brew)
+                sidebarItem(.brew) {
+                    Label("Manage Homebrew", systemImage: "mug")
+                }
             }
         }
+    }
+
+    private func sidebarItem<Content: View>(
+        _ item: SidebarItem, @ViewBuilder label: () -> Content
+    ) -> some View {
+        Button {
+            onActivate(item)
+        } label: {
+            label()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .tag(item)
     }
 }

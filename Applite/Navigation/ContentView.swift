@@ -30,22 +30,25 @@ struct ContentView: View {
         // `bootstrap` directly for the streamed status line — safe because it's composited in the
         // ZStack below rather than layered over the split view's representable (see that comment).
 
-        // The setup card is a sibling layer in this top-level ZStack — NOT an `.overlay` modifier
+        // The setup card is a sibling layer in the navigation ZStack — NOT an `.overlay` modifier
         // on the NavigationSplitView. On macOS the split view is backed by an AppKit NSSplitView
         // (a representable); content layered over it via `.overlay`/`.sheet` only repainted on a
         // forced layout pass (window drag), so the status line stalled. As a plain SwiftUI sibling
         // here it lives in SwiftUI's own layout tree and repaints on every change, while still
         // covering the whole window (sidebar + detail).
-        ZStack {
-            mainNavigation
+        // Reserve actual layout space for the footer; the AppKit-backed split view can
+        // otherwise extend underneath a safe-area inset.
+        VStack(spacing: 0) {
+            ZStack {
+                mainNavigation
+                    .padding(.bottom, 16)
 
-            // `bootstrap.phase` owns brew readiness. This overlay handles setup and broken outcomes;
-            // the footer only reports the same phase and gates its own actions.
-            if caskManager.bootstrap.needsSetupOverlay {
-                setupOverlay
+                // `bootstrap.phase` owns brew readiness. This overlay handles setup and broken outcomes;
+                // the footer only reports the same phase and gates its own actions.
+                if caskManager.bootstrap.needsSetupOverlay {
+                    setupOverlay
+                }
             }
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
             AppStatusBar()
                 .disabled(modifyingBrew)
         }
@@ -58,7 +61,7 @@ struct ContentView: View {
     private var mainNavigation: some View {
         @Bindable var manager = caskManager
         return NavigationSplitView {
-            SidebarView(selection: $selection)
+            SidebarView(selection: $selection, onActivate: navigateFromSidebar)
                 .disabled(modifyingBrew)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 216)
         } detail: {
@@ -114,6 +117,13 @@ struct ContentView: View {
 
     // MARK: - Search
 
+    private func navigateFromSidebar(_ item: SidebarItem) {
+        SidebarNavigation.activate(
+            item, selection: &selection, searchInput: &searchInput,
+            selectedAppDetails: &caskManager.selectedAppDetails
+        )
+    }
+
     private func handleSearchInputChange(_ newValue: String) {
         caskManager.selectedAppDetails = nil
         // Limit search characters
@@ -143,6 +153,18 @@ struct ContentView: View {
         if newValue != nil, !searchInput.isEmpty {
             searchInput = ""
         }
+    }
+}
+
+enum SidebarNavigation {
+    @MainActor
+    static func activate(
+        _ item: SidebarItem, selection: inout SidebarItem?, searchInput: inout String,
+        selectedAppDetails: inout CaskViewModel?
+    ) {
+        selectedAppDetails = nil
+        searchInput = ""
+        selection = item
     }
 }
 

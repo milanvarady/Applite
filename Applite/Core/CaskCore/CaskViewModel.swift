@@ -56,6 +56,11 @@ final class CaskViewModel {
 
     var isInstalledExternally: Bool { installationState == .externalInstalled }
     var isLocallyInstalled: Bool { isInstalled || isInstalledExternally }
+    var installedManagementSourceName: String? {
+        guard isLocallyInstalled else { return nil }
+        if let source = protectedAppInstallation?.source { return source.name }
+        return isInstalled ? String(localized: "Homebrew") : String(localized: "Unknown")
+    }
     var isApplite: Bool { record.isApplite }
 
     /// Whether the cask has an update available
@@ -63,6 +68,7 @@ final class CaskViewModel {
 
     /// Progress state when installing, updating, or uninstalling
     var progressState: CaskProgressState = .idle
+    private(set) var metadataRevision = 0
 
     // MARK: - Initialization
 
@@ -77,6 +83,10 @@ final class CaskViewModel {
     /// Updates the underlying record (e.g. after a database sync)
     func updateRecord(_ newRecord: CaskRecord) {
         self.record = newRecord
+    }
+
+    func recordSuccessfulOperation() {
+        metadataRevision &+= 1
     }
 
     // MARK: - Computed Properties (forwarding from record)

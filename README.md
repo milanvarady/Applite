@@ -105,7 +105,8 @@ It remains disabled while a check is in progress.
 official GitHub release notes in your browser and remains available during checks.
 
 The main window has a persistent bottom status bar with a **Refresh App Catalog**
-button and a shortcut to **Active Tasks**. It shows startup/setup, catalog refresh,
+button and a shortcut to **Active Tasks**. Main panes and the sidebar keep space
+above the bar, including at the end of scrollable app details. It shows startup/setup, catalog refresh,
 installed-app checks, queued/running installs, updates, uninstalls, and failed tasks.
 Failed tasks remain available for inspection but do not leave a spinner running.
 Downloads show Homebrew's real percentage; bulk installs/updates show completed
@@ -118,11 +119,30 @@ own busy status instead of Ready or an old failure.
 App names stay in their human-readable form. Clicking a name or description, or
 choosing **Get Info**, opens a details page inside the main window, not a popup.
 The name and description show a pointing-hand cursor on hover.
-Native Back navigation returns to the previous list or search. The page shows the
+Native Back navigation returns to the previous list or search. Clicking any
+sidebar item, including the selected one, returns to that item's main page.
+The page shows the
 app's full name, description, available version, installation details, source,
 links, download size when available, and deprecation/disablement information.
-Detected apps also show their bundle location and non-Homebrew management status.
-Loading and retryable errors stay on the page; Homebrew tokens remain selectable.
+Installed app details read the local bundle's release/build versions, name, identifier,
+optional information and copyright notice, minimum macOS version, declared category,
+languages and signing identity when available. The identity is not verified.
+These fields are kept separate from
+Homebrew's available version and cask metadata; the existing description and
+website link come from the catalog. No AI or additional metadata service receives
+the installed-app inventory. Installed apps show their detected primary manager
+near the app name and under Installation; Unknown means no source was detected.
+Detected apps also show their bundle location and all detected management sources.
+Update status is Unknown for externally managed apps or
+when Homebrew cannot determine the installed version or update status.
+Homebrew's `latest` placeholder is not treated as a concrete version.
+Self-updating casks also show Unknown, since their installed app can change
+independently of the Homebrew record. Local information remains visible if the
+Homebrew lookup fails; errors are retryable.
+Local and Homebrew retries are independent: retrying one source leaves the other
+source's successful details visible. Successful single and bulk operations refresh
+details even when the app remains installed.
+Homebrew tokens remain selectable.
 Cmd-click continues to open the app's website instead of the details page.
 
 **Include Self-Updating Apps** is configured in **Settings > Apps > Homebrew Management**, not duplicated in the

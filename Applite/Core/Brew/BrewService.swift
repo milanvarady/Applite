@@ -256,15 +256,14 @@ final class BrewService {
                 return
             }
 
+            vm.isInstalled = false
+            vm.installedBundleURL = nil
             await self.showSuccess(
                 for: vm,
                 logMessage: "Successfully uninstalled \(vm.fullToken)",
                 notificationTitle: String(localized: "\(vm.name) successfully uninstalled", comment: "Successful app uninstall notification")
             )
 
-            // Update state
-            vm.isInstalled = false
-            vm.installedBundleURL = nil
         }
     }
 
@@ -296,14 +295,13 @@ final class BrewService {
                 return
             }
 
+            vm.isOutdated = false
             await self.showSuccess(
                 for: vm,
                 logMessage: "Successfully updated \(vm.token)",
                 notificationTitle: String(localized: "\(vm.name) successfully updated", comment: "Successful app update notification")
             )
 
-            // Update state
-            vm.isOutdated = false
         }
     }
 
@@ -978,6 +976,10 @@ final class BrewService {
             }
         }
 
+        for vm in vms where !vm.progressState.isFailed {
+            vm.recordSuccessfulOperation()
+        }
+
         // Distinct static keys per operation (don't splice a localized verb into another
         // localized string — that yields a dynamic key that can't be translated).
         let successTitle = kind == .install
@@ -1079,6 +1081,7 @@ final class BrewService {
     ) async {
         Self.logger.info("\(logMessage)")
 
+        vm.recordSuccessfulOperation()
         // Show success for 2 seconds
         vm.progressState = .success
         try? await Task.sleep(for: .seconds(2))

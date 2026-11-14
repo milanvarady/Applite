@@ -64,6 +64,14 @@ previews, successful single/bulk/reinstall operations, blocked mixed batches,
 revocation before queued execution and during a paused metadata read, suspended
 saved choices when either prerequisite is off, and continued Homebrew-eligibility
 and unreadable-inventory blocking.
+Installed-details fixtures check fresh release/build metadata, languages, malformed
+and missing plists, beta versions, and Unknown update status for external/protected
+apps, self-updaters, placeholders, and missing Homebrew version or status. They also check managed current and
+outdated outcomes and preserve local version information when Homebrew is unavailable.
+Sidebar-navigation cases cover repeated activation, switching items, and leaving
+search for every sidebar destination type, including categories and taps.
+Management-source cases check the displayed primary source for Homebrew, Intune,
+App Store, Setapp, ArtCraft, unknown external apps, competing sources, and overrides.
 
 ```sh
 xcodebuild -quiet -project Applite.xcodeproj -scheme Applite -configuration Debug \
@@ -71,6 +79,26 @@ xcodebuild -quiet -project Applite.xcodeproj -scheme Applite -configuration Debu
   CODE_SIGNING_ALLOWED=NO build
 bash Testing/run-external-install-tests.sh /tmp/applite-build
 ```
+
+For a read-only visual check, open details for a known external or protected app
+and compare its installed version/build and location with its bundle's Info.plist.
+The installed status and Installation section should identify its detected primary
+manager, such as Microsoft Intune; an unrecognized external source should be Unknown.
+Homebrew receipt status and any additional detected sources remain separate.
+Retry a failed Homebrew lookup while local facts are loaded, and retry a local
+metadata error while Homebrew details are loaded: the unaffected source must stay
+visible and must not reload. Successful single and bulk update/reinstall fixtures
+advance metadata revisions and replace bundle versions without changing Installed.
+Outdated must say Unknown even if the Homebrew catalog has a different version.
+Check a Homebrew-managed app, an uninstalled app, and a Homebrew lookup failure:
+local information should remain available independently of the lookup. The signing
+identity is an unverified claim, not a publisher or security guarantee.
+
+Open app details from Installed, then click Installed again: the details page
+must close and the Installed list return with its sort/filter choices intact.
+Repeat from Discover, Updates, a category, and a tap; clicking another sidebar
+item or clicking one during search must still navigate to that item. Check
+keyboard sidebar selection and badge counts as well.
 
 For an explicitly requested, read-only check on an Intune-managed Mac, append
 `--live-intune`. It uses the production inventory reader and matches existing
@@ -234,6 +262,12 @@ Active Tasks, clearing any active search. In a disposable test environment, chec
 install/update/uninstall labels, real download percentages, bulk completed counts,
 and failures that show a warning rather than an endless spinner. Opening Tasks or
 refreshing the catalog must not cancel an ongoing operation.
+
+Scroll app details to the bottom and confirm the last section's rounded corners
+and content remain visible above the status bar with a gap. Check the same boundary
+in Discover, Installed, Updates, search, categories, taps, Active Tasks, App Migration,
+and Manage Homebrew, including a small window. The sidebar must remain scrollable
+and the status bar must stay visible and actionable.
 
 Click an app's name and description in Discover, search, Installed, and Updates.
 Both must open the same in-window details page as the ellipsis/right-click Get Info

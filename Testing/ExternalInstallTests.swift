@@ -26,6 +26,7 @@ enum ExternalInstallTests {
         let root = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         try fm.createDirectory(at: root, withIntermediateDirectories: true)
         defer { try! fm.removeItem(at: root) }
+        try testInstalledAppMetadata(root: root)
 
         let systemApps = root.appendingPathComponent("Applications", isDirectory: true)
         let userApps = root.appendingPathComponent("User Applications", isDirectory: true)
@@ -183,6 +184,51 @@ enum ExternalInstallTests {
 
         let registry = CaskViewModelRegistry()
         let vm = registry.viewModel(for: record)
+        let sourceVM = CaskViewModel(record: record)
+        precondition(sourceVM.installedManagementSourceName == nil)
+        sourceVM.externalAppURL = helper
+        precondition(sourceVM.installedManagementSourceName == String(localized: "Unknown"))
+        sourceVM.isInstalled = true
+        precondition(sourceVM.installedManagementSourceName == String(localized: "Homebrew"))
+        for source in ProtectedAppInstallation.Source.allCases {
+            sourceVM.protectedAppInstallation = ProtectedAppInstallation(url: helper, source: source)
+            sourceVM.managementSourceOverrides = [source]
+            precondition(sourceVM.installedManagementSourceName == source.name,
+                         "Detected ownership must remain visible with a Homebrew receipt or an override")
+        }
+        sourceVM.protectedAppInstallation = ProtectedAppInstallation(appURLs: [
+            .appStore: helper, .intune: helper, .setapp: helper, .artCraft: helper
+        ])
+        precondition(sourceVM.installedManagementSourceName == ProtectedAppInstallation.Source.intune.name,
+                     "The highest-priority detected source must be shown")
+        sourceVM.isInstalled = false
+        sourceVM.externalAppURL = helper
+        precondition(sourceVM.installedManagementSourceName == ProtectedAppInstallation.Source.intune.name)
+        sourceVM.externalAppURL = nil
+        precondition(sourceVM.installedManagementSourceName == nil)
+        let sidebarItems: [SidebarItem] = [
+            .home, .updates, .installed, .activeTasks, .appMigration, .brew,
+            .appCategory(id: "games"), .tap(tap: TapLoadResult(id: "example/tap", casks: [vm]))
+        ]
+        for item in sidebarItems {
+            var selection: SidebarItem? = item
+            var search = ""
+            var details: CaskViewModel? = vm
+            SidebarNavigation.activate(item, selection: &selection, searchInput: &search, selectedAppDetails: &details)
+            precondition(selection == item && details == nil && search.isEmpty,
+                         "Reactivating a selected sidebar item must close details")
+            selection = item == .home ? .installed : .home
+            details = vm
+            SidebarNavigation.activate(item, selection: &selection, searchInput: &search, selectedAppDetails: &details)
+            precondition(selection == item && details == nil,
+                         "Switching sidebar items must close the previous details")
+            selection = nil
+            search = "fixture"
+            details = vm
+            SidebarNavigation.activate(item, selection: &selection, searchInput: &search, selectedAppDetails: &details)
+            precondition(selection == item && details == nil && search.isEmpty,
+                         "Sidebar activation during search must open the selected root")
+        }
         let tapRecord = CaskRecord(
             token: record.token, fullToken: "example/tap/sample", tap: "example/tap",
             name: record.name, descriptionText: "", homepageURL: nil, pkgInstaller: false,
@@ -377,6 +423,9 @@ enum ExternalInstallTests {
             echo "fixture uninstalled" ;;
           upgrade|reinstall)
             printf '%s\\n' "$@" > "$fixture_dir/arguments"
+            if [ -f "$fixture_dir/review-bundle-plist" ]; then
+              /usr/bin/plutil -replace CFBundleShortVersionString -string "$(cat "$fixture_dir/review-bundle-version")" "$(cat "$fixture_dir/review-bundle-plist")"
+            fi
             echo "fixture was successfully upgraded!" ;;
           *) echo "Unexpected command" >&2; exit 2 ;;
         esac
@@ -444,6 +493,130 @@ enum ExternalInstallTests {
             try checkLiveArtCraftInventory()
         }
         print("PASS: default-off source overrides, enable consent, retained ownership, remaining-source guards, queued/metadata-time revocation, exact enabled Homebrew-cask eligibility, unsupported/failed verification guards, Intune/App Store/Setapp/ArtCraft precedence and queued/bulk write protection, Installed sorting/source/update/search filters, bundle/channel deduplication, managed ownership, self-exclusion, unified Installed totals, detection/settings guards, migration/FTS, and adoption success/failure")
+    }
+
+    @MainActor
+    private static func testInstalledAppMetadata(root: URL) throws {
+        let fm = FileManager.default
+        let app = root.appendingPathComponent("Metadata Fixture.app")
+        let contents = app.appendingPathComponent("Contents")
+        let resources = contents.appendingPathComponent("Resources")
+        try fm.createDirectory(at: resources.appendingPathComponent("en.lproj"), withIntermediateDirectories: true)
+        try fm.createDirectory(at: resources.appendingPathComponent("Base.lproj"), withIntermediateDirectories: true)
+        let plistURL = contents.appendingPathComponent("Info.plist")
+        func writePlist(_ values: [String: Any]) throws {
+            try PropertyListSerialization.data(fromPropertyList: values, format: .xml, options: 0).write(to: plistURL)
+        }
+        try writePlist([
+            "CFBundleShortVersionString": "8.12.46-26.BETA",
+            "CFBundleVersion": "8046",
+            "CFBundleDisplayName": "Fixture Beta",
+            "CFBundleIdentifier": "org.example.fixture",
+            "CFBundleGetInfoString": "Fixture app information",
+            "NSHumanReadableCopyright": "Fixture notice",
+            "CFBundleDevelopmentRegion": "en",
+            "LSMinimumSystemVersion": "12.0",
+            "LSApplicationCategoryType": "public.app-category.productivity",
+            "CFBundleLocalizations": ["fr", "en"]
+        ])
+        let metadata = try InstalledAppMetadata.read(at: app)
+        precondition(metadata.appURL == app)
+        precondition(metadata.version == "8.12.46-26.BETA" && metadata.build == "8046")
+        precondition(metadata.bundleIdentifier == "org.example.fixture")
+        precondition(metadata.displayName == "Fixture Beta" && metadata.bundleInformation == "Fixture app information")
+        precondition(metadata.copyrightNotice == "Fixture notice" && metadata.developmentRegion == "en")
+        precondition(metadata.minimumSystemVersion == "12.0" && metadata.category == "public.app-category.productivity")
+        precondition(metadata.localizations == ["en", "fr"])
+
+        func brew(
+            installed: String?, outdated: Bool?, available: String? = "8.12.44", autoUpdates: Bool? = false
+        ) throws -> CaskAdditionalInfo {
+            let data = try JSONEncoder().encode(CaskAdditionalInfo.dummy)
+            guard var json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                throw CocoaError(.coderReadCorrupt)
+            }
+            json["installed"] = installed
+            json["outdated"] = outdated
+            json["version"] = available
+            json["auto_updates"] = autoUpdates
+            return try JSONDecoder().decode(CaskAdditionalInfo.self, from: JSONSerialization.data(withJSONObject: json))
+        }
+        let current = try brew(installed: "8.12.44", outdated: false)
+        let outdated = try brew(installed: "8.12.44", outdated: true)
+        let missingVersion = try brew(installed: nil, outdated: false)
+        let missingStatus = try brew(installed: "8.12.44", outdated: nil)
+        let latestInstalled = try brew(installed: "latest", outdated: false)
+        let latestAvailable = try brew(installed: "8.12.44", outdated: false, available: "latest")
+        let selfUpdating = try brew(installed: "8.12.44", outdated: false, autoUpdates: true)
+        let unknownAutoUpdates = try brew(installed: "8.12.44", outdated: false, autoUpdates: nil)
+
+        precondition(InstalledAppDetails.version(
+            isLocallyInstalled: true, isHomebrewManaged: false, hasOtherOwner: false, metadata: metadata, brew: current
+        ) == .known("8.12.46-26.BETA"), "The installed beta version must come from its own bundle")
+        precondition(InstalledAppDetails.version(
+            isLocallyInstalled: true, isHomebrewManaged: false, hasOtherOwner: false, metadata: metadata, brew: nil
+        ) == .known("8.12.46-26.BETA"), "A failed Homebrew lookup must not hide local information")
+        precondition(InstalledAppDetails.version(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: true, metadata: metadata, brew: current
+        ) == .known("8.12.46-26.BETA"))
+        precondition(InstalledAppDetails.version(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: nil, brew: current
+        ) == .known("8.12.44"))
+        precondition(InstalledAppDetails.version(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: true, metadata: nil, brew: current
+        ) == .unknown)
+        precondition(InstalledAppDetails.version(
+            isLocallyInstalled: false, isHomebrewManaged: false, hasOtherOwner: false, metadata: nil, brew: current
+        ) == .notInstalled)
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: false, hasOtherOwner: false, brew: current
+        ) == .unknown, "Homebrew cannot determine update status for an external beta")
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: true, brew: current
+        ) == .unknown, "A protected distribution must not inherit another receipt's status")
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: missingVersion
+        ) == .unknown, "An outdated=false response without an installed version is not evidence")
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: missingStatus
+        ) == .unknown)
+        for info in [latestInstalled, latestAvailable, selfUpdating, unknownAutoUpdates] {
+            precondition(InstalledAppDetails.updateStatus(
+                isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: info
+            ) == .unknown, "Placeholder versions or self-updating apps cannot establish update status")
+        }
+        precondition(InstalledAppDetails.version(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: nil, brew: latestInstalled
+        ) == .unknown)
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: nil
+        ) == .unknown)
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: current
+        ) == .current)
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: outdated
+        ) == .outdated)
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: false, isHomebrewManaged: false, hasOtherOwner: false, brew: nil
+        ) == .notApplicable)
+
+        try writePlist(["CFBundleShortVersionString": "  ", "CFBundleVersion": "2"])
+        let updated = try InstalledAppMetadata.read(at: app)
+        precondition(updated.version == nil && updated.build == "2", "Bundle metadata must not be cached")
+        precondition(InstalledAppDetails.version(
+            isLocallyInstalled: true, isHomebrewManaged: false, hasOtherOwner: false, metadata: updated, brew: current
+        ) == .unknown, "A build number is not an installed release version")
+        try Data("invalid plist".utf8).write(to: plistURL)
+        do {
+            _ = try InstalledAppMetadata.read(at: app)
+            preconditionFailure("Malformed plists must report an error")
+        } catch { }
+        try fm.removeItem(at: plistURL)
+        do {
+            _ = try InstalledAppMetadata.read(at: app)
+            preconditionFailure("Missing plists must report an error")
+        } catch { }
     }
 
     @MainActor
@@ -1757,8 +1930,10 @@ enum ExternalInstallTests {
         let managed = adoption.viewModel(for: alias)
         adoption.markExternalInstallations(appURLs: [stable.fullToken: shared], bundleURLs: scan.bundleURLs)
         let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
+        let beforeInstall = managed.metadataRevision
         await service.install(managed, confirmedConfiguration: .current).value
         precondition(managed.isInstalled && !managed.progressState.isFailed && external.isInstalledExternally)
+        precondition(managed.metadataRevision == beforeInstall + 1)
         precondition(adoption.locallyInstalledViewModels == [managed] && adoption.locallyInstalledCount == 1,
                      "A single alias install must immediately replace the external row in the projection")
         adoption.markInstalled(tokens: [])
@@ -1769,8 +1944,49 @@ enum ExternalInstallTests {
         service.installAll([managed])
         _ = try await service.runSerialized { true }
         precondition(managed.isInstalled && !managed.progressState.isFailed)
+        precondition(managed.metadataRevision == beforeInstall + 2)
         precondition(adoption.locallyInstalledViewModels == [managed] && adoption.locallyInstalledCount == 1,
                      "Bulk reconciliation must immediately collapse the old external alias row")
+        let plist = shared.appendingPathComponent("Contents/Info.plist")
+        try fm.createDirectory(at: plist.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try PropertyListSerialization.data(
+            fromPropertyList: ["CFBundleIdentifier": "org.fixture.metadata-refresh", "CFBundleShortVersionString": "1.0"],
+            format: .xml, options: 0
+        ).write(to: plist)
+        let plistMarker = root.appendingPathComponent("review-bundle-plist")
+        let versionMarker = root.appendingPathComponent("review-bundle-version")
+        try plist.path.write(to: plistMarker, atomically: true, encoding: .utf8)
+        defer {
+            try! fm.removeItem(at: plistMarker)
+            try! fm.removeItem(at: versionMarker)
+        }
+        for (index, version) in ["2.0", "3.0", "4.0"].enumerated() {
+            try version.write(to: versionMarker, atomically: true, encoding: .utf8)
+            let revision = managed.metadataRevision
+            if index == 0 {
+                managed.isOutdated = true
+                await service.update(managed).value
+            } else if index == 1 {
+                service.reinstall(managed)
+                _ = try await service.runSerialized { true }
+            } else {
+                service.updateAll([managed])
+                _ = try await service.runSerialized { true }
+            }
+            let metadata = try InstalledAppMetadata.read(at: shared)
+            precondition(!managed.progressState.isFailed && managed.metadataRevision == revision + 1 && metadata.version == version,
+                         "Successful update/reinstall/bulk operations must invalidate details and expose fresh bundle versions")
+        }
+        let revision = managed.metadataRevision
+        let failedMetadata = root.appendingPathComponent("info-fail")
+        try Data().write(to: failedMetadata)
+        await service.update(managed).value
+        precondition(managed.progressState.isFailed && managed.metadataRevision == revision,
+                     "A rejected operation must not masquerade as a successful metadata refresh")
+        try fm.removeItem(at: failedMetadata)
+        service.uninstall(managed)
+        _ = try await service.runSerialized { true }
+        precondition(!managed.isInstalled && managed.metadataRevision == revision + 1)
     }
 
     @MainActor
