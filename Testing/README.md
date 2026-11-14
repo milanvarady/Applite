@@ -22,6 +22,7 @@ that a running Homebrew process is allowed to finish after a configuration chang
 Additional cases cover single-install profile changes, retained stale-batch output,
 blocked imports with stale receipt flags, outdated-state clearing, and empty scans
 without materializing unrelated catalog records.
+A delayed external scan cannot overwrite a newer existing catalog record.
 Legacy records with missing artifact names query the selected Homebrew before single
 and bulk installs; tests cover renamed external bundles, missing live artifacts, and
 an install with verified non-conflicting targets.
