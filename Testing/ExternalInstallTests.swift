@@ -65,6 +65,23 @@ enum ExternalInstallTests {
         let dto = try JSONDecoder().decode(CaskDTO.self, from: Data(json.utf8))
         let record = CaskRecord(fromDTO: dto)
         precondition(record.appBundleNames == ["Renamed App.app", "Helper.app"])
+        let nestedJSON = """
+        {"app":["Payload/Source.app",{"target":"Suite/Renamed.app"}]}
+        """
+        let nested = try JSONDecoder().decode(CaskArtifact.self, from: Data(nestedJSON.utf8))
+        precondition(nested.bundleName == "Suite/Renamed.app")
+        let sourceOnly = try JSONDecoder().decode(CaskArtifact.self, from: Data(#"{"app":["Payload/Source.app"]}"#.utf8))
+        precondition(sourceOnly.bundleName == "Source.app")
+        for unsafe in ["../Escape.app", "/Applications/Escape.app", "Suite/../Escape.app", "Suite//Escape.app"] {
+            let unsafeJSON = try JSONSerialization.data(withJSONObject: ["app": ["Source.app", ["target": unsafe]]])
+            let artifact = try JSONDecoder().decode(CaskArtifact.self, from: unsafeJSON)
+            precondition(artifact.bundleName == nil, "Unsafe app target paths must fail verification")
+        }
+        let nestedApp = customApps.appendingPathComponent("Suite/Renamed.app", isDirectory: true)
+        try fm.createDirectory(at: nestedApp, withIntermediateDirectories: true)
+        precondition(ExternalAppDetector.appURL(
+            bundleNames: [nested.bundleName!], displayName: "Unrelated", directories: directories
+        ) == nestedApp, "Safe nested destination paths must be detected in the configured app directory")
         precondition(ExternalAppDetector.appURL(
             bundleNames: record.appBundleNames, displayName: record.name, directories: directories
         ) == nil)
@@ -110,6 +127,19 @@ enum ExternalInstallTests {
                 VALUES ('legacy', 'legacy', 'homebrew/cask', 'Legacy', 'Legacy app');
                 INSERT INTO metadata (key, value) VALUES ('lastSyncDate', '2026-01-01');
                 """)
+        }
+        let v2Database = try DatabaseQueue()
+        try AppDatabase.migrator().migrate(v2Database, upTo: "v2_appBundleNames")
+        try await v2Database.write { db in
+            try record.insert(db)
+            try db.execute(sql: "INSERT INTO metadata (key, value) VALUES ('lastSyncDate', '2026-01-01')")
+        }
+        try AppDatabase.migrator().migrate(v2Database)
+        try await v2Database.read { db in
+            let migrated = try CaskRecord.fetchOne(db, key: record.fullToken)
+            let lastSync = try String.fetchOne(db, sql: "SELECT value FROM metadata WHERE key = 'lastSyncDate'")
+            precondition(migrated?.appBundleNames == [] && lastSync == nil,
+                         "Legacy basenames must be reverified until the catalog is refreshed")
         }
         try AppDatabase.migrator().migrate(dbQueue)
         try await dbQueue.write { db in
@@ -622,6 +652,12 @@ enum ExternalInstallTests {
                      "Recovery must not change a confirmed adoption's previewed configuration")
         service.recoverBrew = nil
         try fm.removeItem(at: prefix.appendingPathComponent("receipts"))
+        let nestedTarget = apps.appendingPathComponent("Suite/Renamed.app")
+        try fm.createDirectory(at: nestedTarget, withIntermediateDirectories: true)
+        let nestedVM = CaskViewModel(record: record("nested-target", bundle: "Suite/Renamed.app"))
+        await service.install(nestedVM).value
+        precondition(nestedVM.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "Unconfirmed installation must not overwrite an existing nested app target")
         var notices: [String] = []
         let notificationService = BrewService(notify: { title, _, _ in notices.append(title) })
         let blockedA = CaskViewModel(record: record("blocked-a", bundle: "External.app"))
