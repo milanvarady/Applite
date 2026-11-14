@@ -32,6 +32,9 @@ and bulk installs; tests cover renamed external bundles, missing live artifacts,
 an install with verified non-conflicting targets.
 Nested relative app targets are detected without allowing traversal or absolute targets;
 the catalog migration invalidates older basename-only metadata for re-verification.
+Managed sibling fixtures resolve recorded source links, including casks absent from
+the catalog, and verify that aliases are excluded while separate copies remain visible.
+Single and bulk installs reject managed target conflicts or unverifiable ownership.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including
