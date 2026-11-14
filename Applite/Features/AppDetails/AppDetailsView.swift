@@ -146,7 +146,7 @@ struct AppDetailsView: View {
 
     private var localKey: [String] {
         configurationKey + [cask.fullToken, String(cask.isInstalled), cask.externalAppURL?.path ?? "",
-         cask.protectedAppInstallation?.url.path ?? "", cask.installedBundleURL?.path ?? "",
+         cask.displayedProtection?.url.path ?? "", cask.installedBundleURL?.path ?? "",
          String(cask.metadataRevision), String(caskManager.successfulCatalogRefreshRevision), String(localRetryCount)]
     }
 
@@ -165,7 +165,7 @@ struct AppDetailsView: View {
         Section {
             let version = InstalledAppDetails.version(
                 isLocallyInstalled: cask.isLocallyInstalled, isHomebrewManaged: cask.isInstalled,
-                hasOtherOwner: cask.protectedAppInstallation != nil, metadata: localInfo, brew: brewInfo
+                hasOtherOwner: cask.displayedProtection != nil, metadata: localInfo, brew: brewInfo
             )
             switch version {
             case .known(let value):
@@ -183,7 +183,7 @@ struct AppDetailsView: View {
             if let source = cask.installedManagementSourceName {
                 infoRow("Tracked by", source)
             }
-            if let protection = cask.protectedAppInstallation {
+            if let protection = cask.displayedProtection {
                 let sources = ProtectedAppInstallation.Source.allCases.filter { protection.appURLs[$0] != nil }
                 infoRow("Detected Management Sources", sources.map(\.name).joined(separator: ", "))
                 infoRow("Tracked by Homebrew", yesNo(cask.isInstalled))
@@ -204,7 +204,7 @@ struct AppDetailsView: View {
             if cask.isLocallyInstalled {
                 switch InstalledAppDetails.updateStatus(
                     isLocallyInstalled: true, isHomebrewManaged: cask.isInstalled,
-                    hasOtherOwner: cask.protectedAppInstallation != nil, brew: brewInfo
+                    hasOtherOwner: cask.displayedProtection != nil, brew: brewInfo
                 ) {
                 case .outdated: infoRow("Outdated", yesNo(true))
                 case .current: infoRow("Outdated", yesNo(false))
@@ -212,7 +212,7 @@ struct AppDetailsView: View {
                 case .notApplicable: EmptyView()
                 }
             }
-            if cask.isInstalled, cask.protectedAppInstallation == nil, let date = brewInfo?.installed_time {
+            if cask.isInstalled, cask.displayedProtection == nil, let date = brewInfo?.installed_time {
                 infoRow("Homebrew Installation Date", dateFormatter.string(from: date))
             }
         } header: {

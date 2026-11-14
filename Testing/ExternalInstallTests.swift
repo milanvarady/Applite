@@ -506,7 +506,7 @@ enum ExternalInstallTests {
         try await testOutdatedRefreshLifetime(root: root, loader: loader, registry: registry, service: service)
         try await testUpstreamConsentAndRefresh(root: root)
         try await testLiveArtifactOwnershipAndCatalogResult(root: root)
-        try testDistinctInstallationIdentities(root: root)
+        try await testDistinctInstallationIdentities(root: root)
         try await testManagedIdentityWithDetectionDisabled(root: root)
         if CommandLine.arguments.contains("--live-intune") {
             try checkLiveIntuneInventory()
@@ -1392,7 +1392,8 @@ enum ExternalInstallTests {
         defaults.setValue(false, for: Preferences.detectExternallyInstalledApps)
         let imported = CaskViewModel(record: stable)
         await service.install(imported).value
-        precondition(imported.isArtCraftManaged && !imported.isInstalled)
+        precondition(imported.protectedAppInstallation?.source == .artCraft && !imported.isInstalled,
+                     "Ownership evidence from any matching copy must still block Homebrew changes")
 
         for invalid in ["not JSON", "{\"apps\":[]}", "{\"apps\":{\"bad\":{\"kind\":\"Dmg\",\"path\":\"relative.app\"}}}",
                         "{\"apps\":{\"bad\":{\"kind\":\"Unknown\",\"path\":\"/Applications/Future.app\"}}}"] {
@@ -2266,7 +2267,7 @@ enum ExternalInstallTests {
     }
 
     @MainActor
-    private static func testDistinctInstallationIdentities(root: URL) throws {
+    private static func testDistinctInstallationIdentities(root: URL) async throws {
         let fm = FileManager.default
         let system = root.appendingPathComponent("Identity System Apps")
         let user = root.appendingPathComponent("Identity User Apps")
@@ -2284,6 +2285,86 @@ enum ExternalInstallTests {
         }
         let stable = record("identity-shared")
         let beta = record("identity-shared@beta")
+        let aliasDirectory = root.appendingPathComponent("Identity Alias Apps")
+        try fm.createDirectory(at: aliasDirectory, withIntermediateDirectories: true)
+        try fm.createSymbolicLink(at: aliasDirectory.appendingPathComponent("Shared.app"), withDestinationURL: systemApp)
+        let aliasScan = try ExternalAppDetector.installations(
+            catalog: [stable], managedTokens: [], directories: [system, aliasDirectory]
+        )
+        precondition(aliasScan.additionalInstallations.isEmpty && aliasScan.multipleCopyTokens.isEmpty,
+                     "Two paths to the same canonical bundle must not produce separate copies")
+        let single = try ExternalAppDetector.installations(
+            catalog: [stable], managedTokens: [], directories: [system, user]
+        )
+        let oneCaskRegistry = CaskViewModelRegistry()
+        let primary = oneCaskRegistry.viewModel(for: stable)
+        oneCaskRegistry.markExternalInstallations(
+            appURLs: single.externalAppURLs, bundleURLs: single.bundleURLs,
+            copies: single.additionalInstallations, multipleCopyTokens: single.multipleCopyTokens
+        )
+        let rows = oneCaskRegistry.locallyInstalledViewModels
+        precondition(rows.count == 2 && oneCaskRegistry.locallyInstalledCount == 2
+                     && oneCaskRegistry.externalInstalledCount == 2
+                     && Set(rows.map(\.cardIdentity)).count == 2,
+                     "One cask with two physical copies must produce two distinct external rows and counts")
+        precondition(Set(rows.compactMap { $0.selectedInstallationURL?.path }) == [systemApp.path, userApp.path],
+                     "Each copy must open and describe its own path")
+        precondition(primary.hasMultipleInstalledCopies
+                     && rows.allSatisfy { $0.homebrewManagementBlockReason != nil },
+                     "Ambiguous copies must not offer a Homebrew operation targeting another path")
+        let copy = rows.first { $0.isAdditionalInstalledCopy }!
+        let blockedService = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
+        await blockedService.install(copy, confirmedConfiguration: .current).value
+        precondition(copy.progressState.isFailed, "A per-copy Homebrew action must fail closed even when invoked directly")
+        try fm.removeItem(at: userApp)
+        let remaining = try ExternalAppDetector.installations(
+            catalog: [stable], managedTokens: [], directories: [system, user]
+        )
+        oneCaskRegistry.markExternalInstallations(
+            appURLs: remaining.externalAppURLs, bundleURLs: remaining.bundleURLs,
+            copies: remaining.additionalInstallations, multipleCopyTokens: remaining.multipleCopyTokens
+        )
+        precondition(oneCaskRegistry.locallyInstalledCount == 1 && !primary.hasMultipleInstalledCopies
+                     && !copy.isLocallyInstalled,
+                     "A removed copy must disappear and release the ambiguity block on refresh")
+        try fm.createDirectory(at: userApp, withIntermediateDirectories: true)
+        let userReceipt = userApp.appendingPathComponent("Contents/_MASReceipt/receipt")
+        try fm.createDirectory(at: userReceipt.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data().write(to: userReceipt)
+        let mixedSources = try ExternalAppDetector.installations(
+            catalog: [stable], managedTokens: [], directories: [system, user]
+        )
+        oneCaskRegistry.markExternalInstallations(
+            appURLs: mixedSources.externalAppURLs, appStoreAppURLs: mixedSources.appStoreAppURLs,
+            bundleURLs: mixedSources.bundleURLs, copies: mixedSources.additionalInstallations,
+            multipleCopyTokens: mixedSources.multipleCopyTokens,
+            selectedCopyProtection: mixedSources.selectedCopyProtection
+        )
+        let sourceRows = oneCaskRegistry.locallyInstalledViewModels
+        let appStoreRows = InstalledListOptions(source: .appStore).apply(to: sourceRows)
+        let otherRows = InstalledListOptions(source: .other).apply(to: sourceRows)
+        precondition(appStoreRows.count == 1 && appStoreRows[0].selectedInstallationURL?.path == userApp.path
+                     && otherRows.count == 1 && otherRows[0].selectedInstallationURL?.path == systemApp.path,
+                     "Ownership filtering must classify each physical copy, not another copy's source")
+        precondition(appStoreRows[0].installedManagementSourceName == ProtectedAppInstallation.Source.appStore.name
+                     && otherRows[0].installedManagementSourceName == String(localized: "Unknown"),
+                     "Details must describe the selected copy's source rather than another copy's protection")
+        try fm.removeItem(at: userReceipt)
+        let oneManaged = try ExternalAppDetector.installations(
+            catalog: [stable], managedTokens: [stable.fullToken], directories: [system, user],
+            recordedAppURLs: [stable.fullToken: [systemApp]]
+        )
+        oneCaskRegistry.markInstalled(tokens: [stable.fullToken])
+        oneCaskRegistry.markExternalInstallations(
+            appURLs: oneManaged.externalAppURLs, bundleURLs: oneManaged.bundleURLs,
+            copies: oneManaged.additionalInstallations, multipleCopyTokens: oneManaged.multipleCopyTokens,
+            selectedCopyProtection: oneManaged.selectedCopyProtection
+        )
+        let managedRows = oneCaskRegistry.locallyInstalledViewModels
+        precondition(managedRows.count == 2 && managedRows.filter(\.isInstalled).count == 1
+                     && managedRows.filter(\.isInstalledExternally).count == 1
+                     && oneCaskRegistry.externalInstalledCount == 1,
+                     "A Homebrew receipt must not make a separate unrecorded copy managed")
         let external = try ExternalAppDetector.installations(
             catalog: [stable, beta], managedTokens: [], directories: [system, user]
         )
@@ -2644,7 +2725,11 @@ enum ExternalInstallTests {
             token="${4##*/}"
             bundle="External.app"
             if [ "$token" = "review-missing" ]; then bundle="Missing.app"; fi
-            if [ "$token" = "legacy-missing-artifacts" ]; then bundle="Legacy.app"; fi
+            if [ "$token" = "legacy-safe" ]; then bundle="Safe.app"; fi
+            if [ -f "$fixture_dir/missing-artifacts" ]; then
+              printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","deprecated":false,"disabled":false}]}' "$token" "$4"
+              exit 0
+            fi
             printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["%s"]}],"deprecated":false,"disabled":false}]}' "$token" "$4" "$bundle" ;;
           install)
             printf '%s\\n' "$@" > "$fixture_dir/arguments"
@@ -2720,10 +2805,33 @@ enum ExternalInstallTests {
         var legacyRecord = record("legacy-missing-artifacts", bundle: "")
         legacyRecord.appBundleNames = []
         let legacy = CaskViewModel(record: legacyRecord)
-        await service.install(legacy).value
+        for enabled in [false, true] {
+            defaults.setValue(enabled, for: Preferences.detectExternallyInstalledApps)
+            defaults.setValue(enabled, for: Preferences.offerHomebrewManagement)
+            await service.install(legacy).value
+            precondition(legacy.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                         "Live artifacts must block a renamed external bundle even with legacy cached metadata")
+            service.installAll([legacy])
+            _ = try await service.runSerialized { true }
+            precondition(legacy.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                         "Bulk install must also use live artifacts for a legacy catalog")
+        }
+        try Data().write(to: prefix.appendingPathComponent("missing-artifacts"))
+        var safeRecord = record("legacy-safe", bundle: "")
+        safeRecord.appBundleNames = []
+        let safe = CaskViewModel(record: safeRecord)
+        await service.install(safe).value
+        precondition(safe.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "Missing live artifacts must fail closed")
+        service.installAll([safe])
+        _ = try await service.runSerialized { true }
+        precondition(safe.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "Missing live artifacts must fail closed for bulk installs")
+        try fm.removeItem(at: prefix.appendingPathComponent("missing-artifacts"))
+        await service.install(safe).value
         let normalArguments = try String(contentsOf: arguments, encoding: .utf8)
         precondition(!normalArguments.split(whereSeparator: \.isNewline).contains("--force"),
-                     "A normal install with an incomplete legacy catalog must not use force")
+                     "A verified normal install with an incomplete legacy catalog must not use force")
         try fm.removeItem(at: arguments)
         await service.install(legacy, arguments: ["install", "--cask", legacy.fullToken, "--force"]).value
         precondition(legacy.progressState.isFailed && !fm.fileExists(atPath: arguments.path),

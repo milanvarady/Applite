@@ -55,6 +55,14 @@ struct IconAndDescriptionView: View {
                     Text("Installed")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                    if cask.hasMultipleInstalledCopies || cask.isAdditionalInstalledCopy,
+                       let url = cask.selectedInstallationURL {
+                        Text(url.deletingLastPathComponent().path)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .help(url.path)
+                    }
                 }
             }
 

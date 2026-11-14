@@ -35,6 +35,12 @@ receipt query, asserting that neither stale result changes installed state.
 Additional cases cover single-install profile changes, retained stale-batch output,
 blocked imports with stale receipt flags, outdated-state clearing, and empty scans
 without materializing unrelated catalog records.
+Legacy records with missing artifact names query the selected Homebrew before single
+and bulk installs; tests cover renamed external bundles, missing live artifacts, and
+an install with verified non-conflicting targets.
+One cask with multiple copies of the same bundle is tested for path-specific rows,
+counts, selected URLs, per-copy source filters, receipt ownership, removal on refresh,
+and blocked Homebrew actions while the target is ambiguous.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including

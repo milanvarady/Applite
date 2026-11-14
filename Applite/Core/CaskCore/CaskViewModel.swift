@@ -14,8 +14,7 @@ import OSLog
 final class CaskViewModel {
     /// Immutable identity token, used for nonisolated protocol conformances
     nonisolated private let _token: String
-    /// Immutable identity full token, used for nonisolated protocol conformances
-    nonisolated private let _fullToken: String
+    nonisolated private let _identity: String
 
     /// Cask information from database
     private var record: CaskRecord
@@ -33,13 +32,19 @@ final class CaskViewModel {
     var externalAppURL: URL?
     var installedBundleURL: URL?
     var protectedAppInstallation: ProtectedAppInstallation?
-    var appStoreAppURL: URL? {
-        protectedAppInstallation?.source == .appStore ? protectedAppInstallation?.url : nil
+    var selectedCopyProtection: ProtectedAppInstallation?
+    var hasMultipleInstalledCopies = false
+    let isAdditionalInstalledCopy: Bool
+    var displayedProtection: ProtectedAppInstallation? {
+        hasMultipleInstalledCopies && !isAdditionalInstalledCopy ? selectedCopyProtection : protectedAppInstallation
     }
-    var isAppStoreManaged: Bool { protectedAppInstallation?.source == .appStore }
-    var isIntuneManaged: Bool { protectedAppInstallation?.source == .intune }
-    var isSetappManaged: Bool { protectedAppInstallation?.source == .setapp }
-    var isArtCraftManaged: Bool { protectedAppInstallation?.source == .artCraft }
+    var appStoreAppURL: URL? {
+        displayedProtection?.source == .appStore ? displayedProtection?.url : nil
+    }
+    var isAppStoreManaged: Bool { displayedProtection?.source == .appStore }
+    var isIntuneManaged: Bool { displayedProtection?.source == .intune }
+    var isSetappManaged: Bool { displayedProtection?.source == .setapp }
+    var isArtCraftManaged: Bool { displayedProtection?.source == .artCraft }
     var managementSourceOverrides = ProtectedAppInstallation.Source.enabledOverrides()
     var managementProtection: ProtectedAppInstallation? {
         protectedAppInstallation?.excluding(managementSourceOverrides)
@@ -47,6 +52,9 @@ final class CaskViewModel {
     var isManagementProtected: Bool { managementProtection != nil }
     var homebrewManagementError: String?
     var homebrewManagementBlockReason: String? {
+        if hasMultipleInstalledCopies || isAdditionalInstalledCopy {
+            return CaskAdoptionError.multipleInstallations.localizedDescription
+        }
         if warning?.isDisabled == true { return CaskAdoptionError.homebrewDisabled.localizedDescription }
         return homebrewManagementError
     }
@@ -59,7 +67,7 @@ final class CaskViewModel {
     var isLocallyInstalled: Bool { isInstalled || isInstalledExternally }
     var installedManagementSourceName: String? {
         guard isLocallyInstalled else { return nil }
-        if let source = protectedAppInstallation?.source { return source.name }
+        if let source = displayedProtection?.source { return source.name }
         return isInstalled ? String(localized: "Homebrew") : String(localized: "Unknown")
     }
     var isApplite: Bool { record.isApplite }
@@ -73,9 +81,10 @@ final class CaskViewModel {
 
     // MARK: - Initialization
 
-    init(record: CaskRecord, isInstalled: Bool = false, isOutdated: Bool = false) {
+    init(record: CaskRecord, isInstalled: Bool = false, isOutdated: Bool = false, copyURL: URL? = nil) {
         self._token = record.token
-        self._fullToken = record.fullToken
+        self._identity = copyURL.map { "\(record.fullToken)\u{0}\($0.path)" } ?? record.fullToken
+        self.isAdditionalInstalledCopy = copyURL != nil
         self.record = record
         self.isInstalled = isInstalled
         self.isOutdated = isOutdated
@@ -88,6 +97,10 @@ final class CaskViewModel {
 
     func recordSuccessfulOperation() {
         metadataRevision &+= 1
+    }
+
+    func installedCopy(at url: URL) -> CaskViewModel {
+        CaskViewModel(record: record, copyURL: url)
     }
 
     // MARK: - Computed Properties (forwarding from record)
@@ -136,6 +149,12 @@ final class CaskViewModel {
 
     var selectedInstallationURL: URL? {
         installedBundleURL ?? externalAppURL ?? protectedAppInstallation?.url
+    }
+
+    var cardIdentity: String {
+        guard hasMultipleInstalledCopies || isAdditionalInstalledCopy,
+              let url = selectedInstallationURL else { return id }
+        return "\(fullToken)\u{0}\(url.resolvingSymlinksInPath().standardizedFileURL.path)"
     }
 
     func launchApp() async throws {
@@ -205,7 +224,7 @@ extension CaskViewModel {
 // MARK: - Identifiable
 extension CaskViewModel: Identifiable {
     nonisolated var id: String {
-        _fullToken
+        _identity
     }
 }
 

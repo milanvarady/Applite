@@ -641,18 +641,28 @@ final class BrewService {
                         if try known.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true { existingKnown = known }
                     } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile { }
                 }
-                let url = recorded.first ?? existingKnown ?? ExternalAppDetector.appURL(
+                let matching = ExternalAppDetector.appURLs(
                     bundleNames: candidate.bundles, displayName: candidate.name,
                     directories: configuration.applicationDirectories
-                )
-                return (protection, url?.resolvingSymlinksInPath().standardizedFileURL)
+                ) + artCraft.matchingAppURLs(bundleNames: candidate.bundles, displayName: candidate.name) + recorded
+                let multipleCopies = ExternalAppDetector.hasMultipleCopies(matching)
+                let url = (multipleCopies ? existingKnown : nil) ?? recorded.first ?? existingKnown ?? matching.first
+                let selectedProtection: ProtectedAppInstallation? = if multipleCopies, let url {
+                    try ExternalAppDetector.protection(at: url, intune: inventory, artCraft: artCraft)
+                } else {
+                    nil
+                }
+                return (protection, url?.resolvingSymlinksInPath().standardizedFileURL,
+                        multipleCopies, selectedProtection)
             }
         }.value
         try Task.checkCancellation()
         try configuration.validateCurrent()
-        for (vm, (protection, url)) in zip(vms, evidence) {
+        for (vm, (protection, url, multipleCopies, selectedProtection)) in zip(vms, evidence) {
             vm.protectedAppInstallation = protection
             vm.installedBundleURL = url
+            vm.hasMultipleInstalledCopies = multipleCopies
+            vm.selectedCopyProtection = selectedProtection
         }
     }
 
@@ -662,6 +672,10 @@ final class BrewService {
         artCraftInventory: ArtCraftAppDetector.Snapshot? = nil,
         appBundleNames: [String]? = nil
     ) async -> Bool {
+        if vm.isAdditionalInstalledCopy {
+            await reportManagementBlock(for: vm, error: CaskAdoptionError.multipleInstallations)
+            return true
+        }
         do {
             try await refreshOwnership(
                 for: [vm], configuration: configuration,
@@ -681,10 +695,17 @@ final class BrewService {
 
     private func blockKnownProtectedManagement(of vm: CaskViewModel) async -> Bool {
         vm.managementSourceOverrides = ProtectedAppInstallation.Source.enabledOverrides()
-        guard let protection = vm.managementProtection else { return false }
-        vm.isOutdated = false
-        await reportManagementBlock(for: vm, error: protection.source.blockError)
-        return true
+        if let protection = vm.managementProtection {
+            vm.isOutdated = false
+            await reportManagementBlock(for: vm, error: protection.source.blockError)
+            return true
+        }
+        if vm.hasMultipleInstalledCopies || vm.isAdditionalInstalledCopy {
+            vm.isOutdated = false
+            await reportManagementBlock(for: vm, error: CaskAdoptionError.multipleInstallations)
+            return true
+        }
+        return false
     }
 
     private func reportManagementBlock(for vm: CaskViewModel, error: Error) async {
@@ -702,7 +723,10 @@ final class BrewService {
             if vm.warning?.isDisabled == true { throw CaskAdoptionError.homebrewDisabled }
             let info = try await getAdditionalInfoForCask(vm, configuration: configuration)
             if info.disabled { throw CaskAdoptionError.homebrewDisabled }
-            guard let artifacts = info.artifacts else { throw CaskAdoptionError.installationTargetsUnavailable }
+            guard let artifacts = info.artifacts,
+                  artifacts.allSatisfy({ $0.app == nil || $0.bundleName != nil }) else {
+                throw CaskAdoptionError.installationTargetsUnavailable
+            }
             if Task.isCancelled {
                 vm.progressState = .idle
                 return nil
@@ -885,6 +909,11 @@ final class BrewService {
                 vm.managementSourceOverrides = overrides
                 if let protection = vm.managementProtection {
                     let error = protection.source.blockError
+                    vm.isOutdated = false
+                    vm.progressState = .failed(output: error.localizedDescription)
+                    blocked.append((vm, error))
+                } else if vm.hasMultipleInstalledCopies || vm.isAdditionalInstalledCopy {
+                    let error = CaskAdoptionError.multipleInstallations
                     vm.isOutdated = false
                     vm.progressState = .failed(output: error.localizedDescription)
                     blocked.append((vm, error))

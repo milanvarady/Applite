@@ -53,12 +53,12 @@ struct InstalledListOptions {
         return casks.filter { cask in
             let matchesSource = switch source {
             case .all: true
-            case .homebrew: cask.isInstalled && !cask.isManagementProtected
+            case .homebrew: cask.isInstalled && cask.displayedProtection?.excluding(cask.managementSourceOverrides) == nil
             case .intune: cask.isIntuneManaged
             case .appStore: cask.isAppStoreManaged
             case .setapp: cask.isSetappManaged
             case .artCraft: cask.isArtCraftManaged
-            case .other: cask.isInstalledExternally && cask.protectedAppInstallation == nil
+            case .other: cask.isInstalledExternally && cask.displayedProtection == nil
             }
             return matchesSource
                 && (!updatesOnly || cask.isOutdated)
@@ -72,7 +72,7 @@ struct InstalledListOptions {
             if comparison != .orderedSame {
                 return comparison == (sortOrder == .zToA ? .orderedDescending : .orderedAscending)
             }
-            return lhs.fullToken < rhs.fullToken
+            return lhs.id < rhs.id
         }
     }
 }

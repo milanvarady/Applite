@@ -124,12 +124,14 @@ struct AppView: View {
             } label: {
                 Label("Uninstall", systemImage: "trash")
             }
+            .disabled(cask.hasMultipleInstalledCopies || cask.isAdditionalInstalledCopy)
 
             Button(role: .destructive) {
                 caskManager.uninstall(cask, zap: true)
             } label: {
                 Label("Uninstall & delete app data", systemImage: "trash.fill")
             }
+            .disabled(cask.hasMultipleInstalledCopies || cask.isAdditionalInstalledCopy)
         } else {
             if cask.isInstalledExternally || cask.isManagementProtected {
                 OpenButton(cask: cask)
@@ -201,7 +203,13 @@ struct AppView: View {
 
     @ViewBuilder
     private var mainButtons: some View {
-        if let protection = cask.managementProtection {
+        if cask.hasMultipleInstalledCopies || cask.isAdditionalInstalledCopy {
+            OpenButton(cask: cask)
+                .help(CaskAdoptionError.multipleInstallations.localizedDescription)
+            if showsOptionsMenu {
+                optionsMenuButton
+            }
+        } else if let protection = cask.managementProtection {
             Button(protection.source.displayName) { }
                 .cardActionPill()
                 .frame(maxWidth: 140)

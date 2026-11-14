@@ -20,6 +20,7 @@ import OSLog
 final class CaskViewModelRegistry {
     /// All live view models keyed by cask full token
     private var viewModelsByFullToken: [CaskId: CaskViewModel] = [:]
+    private var additionalCopies: [String: CaskViewModel] = [:]
 
     // MARK: - Lookup & Creation
 
@@ -27,6 +28,9 @@ final class CaskViewModelRegistry {
     func viewModel(for record: CaskRecord) -> CaskViewModel {
         if let existing = viewModelsByFullToken[record.fullToken] {
             existing.updateRecord(record)
+            for copy in additionalCopies.values where copy.fullToken == record.fullToken {
+                copy.updateRecord(record)
+            }
             return existing
         }
         let vm = CaskViewModel(record: record)
@@ -65,10 +69,15 @@ final class CaskViewModelRegistry {
     func markExternalInstallations(
         appURLs: [CaskId: URL], appStoreAppURLs: [CaskId: URL] = [:],
         intuneAppURLs: [CaskId: URL] = [:], setappAppURLs: [CaskId: URL] = [:],
-        artCraftAppURLs: [CaskId: URL] = [:], bundleURLs: [CaskId: URL]? = nil
+        artCraftAppURLs: [CaskId: URL] = [:], bundleURLs: [CaskId: URL]? = nil,
+        copies: [CaskId: [ExternalAppDetector.AdditionalInstallation]] = [:],
+        multipleCopyTokens: Set<CaskId> = [],
+        selectedCopyProtection: [CaskId: ProtectedAppInstallation] = [:]
     ) {
         applyManagementSourceOverrides()
         for vm in viewModelsByFullToken.values {
+            vm.hasMultipleInstalledCopies = multipleCopyTokens.contains(vm.fullToken)
+            vm.selectedCopyProtection = selectedCopyProtection[vm.fullToken]
             let urls: [ProtectedAppInstallation.Source: URL?] = [
                 .intune: intuneAppURLs[vm.fullToken], .appStore: appStoreAppURLs[vm.fullToken],
                 .setapp: setappAppURLs[vm.fullToken], .artCraft: artCraftAppURLs[vm.fullToken]
@@ -88,6 +97,26 @@ final class CaskViewModelRegistry {
                 vm.externalAppURL = url
             }
         }
+        var currentCopies: [String: CaskViewModel] = [:]
+        for (token, installations) in copies {
+            guard let primary = viewModelsByFullToken[token] else { continue }
+            for installation in installations {
+                let newCopy = primary.installedCopy(at: installation.url)
+                let copy = additionalCopies[newCopy.id] ?? newCopy
+                copy.externalAppURL = installation.url
+                copy.installedBundleURL = installation.url
+                copy.protectedAppInstallation = installation.protection
+                copy.managementSourceOverrides = ProtectedAppInstallation.Source.enabledOverrides()
+                copy.hasMultipleInstalledCopies = true
+                currentCopies[copy.id] = copy
+            }
+        }
+        for (id, copy) in additionalCopies where currentCopies[id] == nil {
+            copy.externalAppURL = nil
+            copy.installedBundleURL = nil
+            copy.protectedAppInstallation = nil
+        }
+        additionalCopies = currentCopies
     }
 
     func updateManagedBundleURLs(_ urls: [CaskId: URL]) {
@@ -107,6 +136,12 @@ final class CaskViewModelRegistry {
             }
             if vm.isManagementProtected && vm.isOutdated { vm.isOutdated = false }
         }
+        for vm in additionalCopies.values {
+            if vm.managementSourceOverrides != overrides {
+                vm.managementSourceOverrides = overrides
+                changed = true
+            }
+        }
         return changed
     }
 
@@ -115,6 +150,16 @@ final class CaskViewModelRegistry {
         for vm in viewModelsByFullToken.values where vm.externalAppURL != nil {
             vm.externalAppURL = nil
         }
+        for vm in viewModelsByFullToken.values {
+            vm.hasMultipleInstalledCopies = false
+            vm.selectedCopyProtection = nil
+        }
+        for copy in additionalCopies.values {
+            copy.externalAppURL = nil
+            copy.installedBundleURL = nil
+            copy.protectedAppInstallation = nil
+        }
+        additionalCopies.removeAll()
     }
 
     func clearHomebrewManagementErrors() {
@@ -138,7 +183,8 @@ final class CaskViewModelRegistry {
 
     private var locallyInstalledProjection: [CaskViewModel] {
         var byBundle: [String: CaskViewModel] = [:]
-        for vm in viewModelsByFullToken.values where vm.isLocallyInstalled && !vm.isApplite {
+        for vm in Array(viewModelsByFullToken.values) + Array(additionalCopies.values)
+            where vm.isLocallyInstalled && !vm.isApplite {
             let url = vm.installedBundleURL ?? vm.externalAppURL ?? vm.protectedAppInstallation?.url
             let identity = url.map { "bundle:\($0.standardizedFileURL.path)" } ?? "cask:\(vm.fullToken)"
             if let existing = byBundle[identity] {
@@ -177,11 +223,13 @@ final class CaskViewModelRegistry {
     }
 
     var externalInstalledViewModels: [CaskViewModel] {
-        viewModelsByFullToken.values.filter(\.isInstalledExternally).sorted()
+        (Array(viewModelsByFullToken.values) + Array(additionalCopies.values))
+            .filter(\.isInstalledExternally).sorted()
     }
 
     var externalInstalledCount: Int {
         viewModelsByFullToken.values.lazy.filter(\.isInstalledExternally).count
+            + additionalCopies.values.lazy.filter(\.isInstalledExternally).count
     }
 
     /// O(n) counts that skip the O(n log n) `.sorted()` of the full list — for the always-on-screen
