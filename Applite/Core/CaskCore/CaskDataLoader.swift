@@ -184,6 +184,7 @@ final class CaskDataLoader {
         try Task.checkCancellation()
         guard generation == externalScanGeneration, configuration == .current,
               UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) == detectionEnabled else { return }
+        registry.updateExistingViewModels(for: records)
         let tokens = Set(registry.installedViewModels.map(\.fullToken))
         let catalog = detectionEnabled ? records : records.filter { tokens.contains($0.fullToken) }
         let loadIntuneInventory = self.loadIntuneInventory
