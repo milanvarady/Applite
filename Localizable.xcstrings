@@ -11456,7 +11456,8 @@
     "Homebrew action unavailable" : {},
     "Refresh installed apps before performing Homebrew actions." : {},
     "Wait for installed apps to finish refreshing." : {},
-    "Multiple copies of this app were detected. Homebrew changes are unavailable until the installation target is unambiguous." : {}
+    "Multiple copies of this app were detected. Homebrew changes are unavailable until the installation target is unambiguous." : {},
+    "Couldn't scan app management sources" : {}
   },
   "version" : "1.1"
 }

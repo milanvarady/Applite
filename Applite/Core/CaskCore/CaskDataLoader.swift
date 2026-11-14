@@ -123,7 +123,8 @@ final class CaskDataLoader {
     /// and marks them installed in the registry.
     func refreshInstalled(
         configuration: BrewOperationConfiguration = .current,
-        scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil
+        scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil,
+        onOwnershipScanFailure: ((Error) -> Void)? = nil
     ) async throws {
         installedRefreshGeneration &+= 1
         let generation = installedRefreshGeneration
@@ -144,6 +145,12 @@ final class CaskDataLoader {
             guard generation == installedRefreshGeneration else { throw CancellationError() }
             guard externalScanGeneration != scanGeneration else { throw CancellationError() }
             // A replacement disk scan does not invalidate successfully refreshed receipts.
+        } catch {
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
+            guard generation == installedRefreshGeneration else { throw CancellationError() }
+            guard let onOwnershipScanFailure else { throw error }
+            onOwnershipScanFailure(error)
         }
         try Task.checkCancellation()
         try configuration.validateCurrent()

@@ -13,6 +13,8 @@ without reading external ownership inventories. A paused profile switch verifies
 immediate receipt invalidation, blocked actions, and fresh uninstall receipt checks.
 Invalid partial brew paths do not raise a modal alert or unblock writes, and changing
 configuration closes stale details.
+An unavailable ownership inventory is reported separately while receipt and outdated
+queries finish; Homebrew writes still fail closed.
 
 Review-race cases pause single and bulk metadata requests before adding App Store,
 Setapp or Intune evidence or changing Homebrew. A two-entry batch also pauses its

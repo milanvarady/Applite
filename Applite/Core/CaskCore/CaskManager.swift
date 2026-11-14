@@ -553,6 +553,7 @@ final class CaskManager {
         installedStateResolutionCount += 1
         defer { installedStateResolutionCount -= 1 }
         let generation = homebrewConfigurationGeneration
+        var ownershipScanError: Error?
 
         do {
             // Run the refresh on the serial brew queue so its `brew list`/`outdated` snapshot can't
@@ -564,7 +565,9 @@ final class CaskManager {
             // that lock fail with "already locked". Bootstrap primes Ruby up front, but keep these
             // ordered as a second line of defense.
             try await brewService.runSerialized {
-                try await self.dataLoader.refreshInstalled(configuration: configuration)
+                try await self.dataLoader.refreshInstalled(configuration: configuration, onOwnershipScanFailure: { error in
+                    ownershipScanError = error
+                })
                 guard generation == self.homebrewConfigurationGeneration else {
                     throw CaskAdoptionError.configurationChanged
                 }
@@ -583,6 +586,10 @@ final class CaskManager {
                     self.outdatedRefreshFailed = true
                     Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
                 }
+            }
+            if let ownershipScanError {
+                Self.logger.error("App ownership scan failed: \(ownershipScanError.localizedDescription)")
+                surface.show(error: ownershipScanError, title: "Couldn't scan app management sources")
             }
             Self.logger.info("Installed/outdated state loaded successfully!")
         } catch CaskAdoptionError.configurationChanged {
