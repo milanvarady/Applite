@@ -464,6 +464,11 @@ enum ExternalInstallTests {
             token="${4##*/}"
             bundle="External.app"
             if [ "$token" = "review-missing" ]; then bundle="Missing.app"; fi
+            if [ "$token" = "legacy-safe" ]; then bundle="Safe.app"; fi
+            if [ -f "$fixture_dir/missing-artifacts" ]; then
+              printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask"}]}' "$token" "$4"
+              exit 0
+            fi
             printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["%s"]}],"deprecated":false,"disabled":false}]}' "$token" "$4" "$bundle" ;;
           install)
             printf '%s\\n' "$@" > "$fixture_dir/arguments"
@@ -591,10 +596,33 @@ enum ExternalInstallTests {
         var legacyRecord = record("legacy-missing-artifacts", bundle: "")
         legacyRecord.appBundleNames = []
         let legacy = CaskViewModel(record: legacyRecord)
-        await service.install(legacy).value
+        for enabled in [false, true] {
+            defaults.setValue(enabled, for: Preferences.detectExternallyInstalledApps)
+            defaults.setValue(enabled, for: Preferences.offerHomebrewManagement)
+            await service.install(legacy).value
+            precondition(legacy.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                         "Live artifacts must block a renamed external bundle even with legacy cached metadata")
+            service.installAll([legacy])
+            _ = try await service.runSerialized { true }
+            precondition(legacy.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                         "Bulk install must also use live artifacts for a legacy catalog")
+        }
+        try Data().write(to: prefix.appendingPathComponent("missing-artifacts"))
+        var safeRecord = record("legacy-safe", bundle: "")
+        safeRecord.appBundleNames = []
+        let safe = CaskViewModel(record: safeRecord)
+        await service.install(safe).value
+        precondition(safe.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "Missing live artifacts must fail closed")
+        service.installAll([safe])
+        _ = try await service.runSerialized { true }
+        precondition(safe.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "Missing live artifacts must fail closed for bulk installs")
+        try fm.removeItem(at: prefix.appendingPathComponent("missing-artifacts"))
+        await service.install(safe).value
         let normalArguments = try String(contentsOf: arguments, encoding: .utf8)
         precondition(!normalArguments.split(whereSeparator: \.isNewline).contains("--force"),
-                     "A normal install with an incomplete legacy catalog must not use force")
+                     "A verified normal install with an incomplete legacy catalog must not use force")
         try fm.removeItem(at: arguments)
         await service.install(legacy, arguments: ["install", "--cask", legacy.fullToken, "--force"]).value
         precondition(legacy.progressState.isFailed && !fm.fileExists(atPath: arguments.path),

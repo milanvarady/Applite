@@ -11338,7 +11338,8 @@
     "This app is already installed. Enable Homebrew management and confirm the current command before reinstalling it." : {},
     "Couldn't confirm Homebrew management" : {},
     "Refreshing installed apps..." : {},
-    "This Homebrew management confirmation expired. Review and confirm the current command again." : {}
+    "This Homebrew management confirmation expired. Review and confirm the current command again." : {},
+    "Couldn't verify this cask's installation targets. Homebrew changes are blocked. Refresh the app catalog and try again." : {}
   },
   "version" : "1.1"
 }

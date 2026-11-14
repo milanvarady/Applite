@@ -105,7 +105,10 @@ final class BrewService {
                     configuration: configuration, confirmedConfiguration: confirmedConfiguration,
                     consent: adoptionConsent
                 )
-                let external = try await self.externalInstallations(in: [vm], configuration: configuration)
+                let bundleNames = try await self.verifiedLegacyInstallationTargets(in: [vm], configuration: configuration)
+                let external = try await self.externalInstallations(
+                    in: [vm], configuration: configuration, bundleNames: bundleNames
+                )
                 try Task.checkCancellation()
                 if let appURL = external[vm.fullToken] {
                     guard confirmedConfiguration != nil else {
@@ -457,6 +460,38 @@ final class BrewService {
         }
     }
 
+    private struct LegacyTargetResponse: Decodable {
+        struct Cask: Decodable {
+            let token: String
+            let full_token: String
+            let tap: String
+            let artifacts: [CaskArtifact]?
+        }
+        let casks: [Cask]
+    }
+
+    private func verifiedLegacyInstallationTargets(
+        in vms: [CaskViewModel], configuration: BrewOperationConfiguration
+    ) async throws -> [CaskId: [String]] {
+        var result: [CaskId: [String]] = [:]
+        for vm in vms where vm.appBundleNames.isEmpty {
+            let json = try await Shell.run(
+                configuration.executable, ["info", "--json=v2", "--cask", vm.fullToken], timeout: .seconds(30)
+            )
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
+            let response = try JSONDecoder().decode(LegacyTargetResponse.self, from: Data(json.utf8))
+            guard response.casks.count == 1, let cask = response.casks.first,
+                  cask.token == vm.token, cask.full_token == vm.fullToken, cask.tap == vm.tap,
+                  let artifacts = cask.artifacts,
+                  artifacts.allSatisfy({ $0.app == nil || $0.bundleName != nil }) else {
+                throw CaskAdoptionError.installationTargetsUnavailable
+            }
+            result[vm.fullToken] = artifacts.compactMap(\.bundleName)
+        }
+        return result
+    }
+
     private func externalInstallations(
         in vms: [CaskViewModel], configuration: BrewOperationConfiguration,
         bundleNames: [CaskId: [String]] = [:]
@@ -635,7 +670,10 @@ final class BrewService {
             var blocked: [CaskViewModel] = []
             if kind == .install {
                 do {
-                    let external = try await self.externalInstallations(in: vms, configuration: configuration)
+                    let bundleNames = try await self.verifiedLegacyInstallationTargets(in: vms, configuration: configuration)
+                    let external = try await self.externalInstallations(
+                        in: vms, configuration: configuration, bundleNames: bundleNames
+                    )
                     allowed = vms.filter { external[$0.fullToken] == nil }
                     blocked = vms.filter { external[$0.fullToken] != nil }
                     for vm in blocked {
