@@ -146,7 +146,7 @@ final class CaskManager {
         let configuration = BrewOperationConfiguration.current
         let detectionEnabled = UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps)
         let hasReceipts = dataLoader.hasReceiptSnapshot(for: configuration)
-        let needsReceipts = !hasReceipts || receiptRefreshPending
+        let needsReceipts = detectionEnabled || !hasReceipts || receiptRefreshPending
         if !detectionEnabled {
             registry.markExternalInstallations(appURLs: [:])
         }
@@ -183,7 +183,10 @@ final class CaskManager {
                     try await brewService.runSerialized {
                         guard generation == self.detectionSettingGeneration else { throw CancellationError() }
                         try configuration.validateCurrent()
-                        try await self.dataLoader.refreshInstalled(configuration: configuration)
+                        try await self.dataLoader.refreshInstalled(configuration: configuration, onExternalScanFailure: { error in
+                            Self.logger.error("External app detection failed: \(error.localizedDescription)")
+                            surface.show(error: error, title: "Couldn't detect externally installed apps")
+                        })
                         do {
                             try await self.dataLoader.refreshOutdated(configuration: configuration)
                             self.outdatedRefreshFailed = false
@@ -335,8 +338,12 @@ final class CaskManager {
 
     // MARK: - Search Forwarding
 
-    func search(query: String, externalOnly: Bool = false) async throws -> [CaskViewModel] {
-        try await dataLoader.search(query: query, externalOnly: externalOnly)
+    func search(query: String) async throws -> [CaskViewModel] {
+        try await dataLoader.search(query: query)
+    }
+
+    func searchExternalTokens(query: String) async throws -> [CaskId] {
+        try await dataLoader.searchExternalTokens(query: query)
     }
     
     // MARK: - Data Loading
@@ -492,19 +499,31 @@ final class CaskManager {
             // that lock fail with "already locked". Bootstrap primes Ruby up front, but keep these
             // ordered as a second line of defense.
             try await brewService.runSerialized {
-                try await self.dataLoader.refreshInstalled()
+                let configuration = BrewOperationConfiguration.current
+                try await self.dataLoader.refreshInstalled(configuration: configuration, onExternalScanFailure: { error in
+                    Self.logger.error("External app detection failed: \(error.localizedDescription)")
+                    surface.show(error: error, title: "Couldn't detect externally installed apps")
+                })
                 // Outdated is a nested best-effort step: if it fails, keep the (good) installed state
                 // and just flag the failure, so UpdateView shows "couldn't check" instead of a false
                 // "all up to date" (P3-3).
                 do {
-                    try await self.dataLoader.refreshOutdated()
+                    try await self.dataLoader.refreshOutdated(configuration: configuration)
                     self.outdatedRefreshFailed = false
+                } catch is CancellationError {
+                    throw CancellationError()
+                } catch CaskAdoptionError.configurationChanged {
+                    throw CaskAdoptionError.configurationChanged
                 } catch {
                     self.outdatedRefreshFailed = true
                     Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
                 }
             }
             Self.logger.info("Installed/outdated state loaded successfully!")
+        } catch is CancellationError {
+            return
+        } catch CaskAdoptionError.configurationChanged {
+            return
         } catch {
             // Installed refresh itself failed — outdated state is unknown too, so don't let
             // UpdateView claim everything is up to date.

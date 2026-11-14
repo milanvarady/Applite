@@ -17,6 +17,7 @@ struct SearchView: View {
     @Environment(CaskManager.self) private var caskManager
 
     @State private var results: [CaskViewModel] = []
+    @State private var externalTokens: [CaskId] = []
     @State private var isSearching = false
     @State private var externalOnly = false
     @AppStorage(Preferences.detectExternallyInstalledApps) private var detectExternallyInstalledApps
@@ -74,12 +75,21 @@ struct SearchView: View {
             defer { isSearching = false }
 
             do {
-                results = try await caskManager.search(query: query, externalOnly: externalOnly)
+                if externalOnly {
+                    let tokens = try await caskManager.searchExternalTokens(query: query)
+                    try Task.checkCancellation()
+                    externalTokens = tokens
+                } else {
+                    let matches = try await caskManager.search(query: query)
+                    try Task.checkCancellation()
+                    results = matches
+                }
             } catch is CancellationError {
                 return
             } catch {
                 Self.logger.error("Search failed: \(error.localizedDescription)")
                 results = []
+                externalTokens = []
             }
         }
     }
@@ -87,7 +97,10 @@ struct SearchView: View {
     private var displayedResults: [CaskViewModel] {
         var filtered = results
         if externalOnly {
-            filtered.removeAll { !$0.isInstalledExternally }
+            let externalByToken = Dictionary(
+                uniqueKeysWithValues: caskManager.externalInstalledViewModels.map { ($0.fullToken, $0) }
+            )
+            filtered = externalTokens.compactMap { externalByToken[$0] }
         }
         if hideUnpopularApps {
             filtered.removeAll { $0.downloadsIn365days <= 500 }
