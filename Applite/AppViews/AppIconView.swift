@@ -14,6 +14,7 @@ struct AppIconView: View {
     @State private var iconFailed = false
     @State private var faviconURLs: [URL] = []
     @State private var faviconFailed = false
+    @State private var faviconDownloader: ImageDownloader?
     @Environment(\.displayScale) private var displayScale
     @AppStorage(Preferences.networkProxyEnabled) private var proxyEnabled
     @AppStorage(Preferences.preferredProxyType) private var preferredProxyType
@@ -48,12 +49,12 @@ struct AppIconView: View {
     var body: some View {
         Group {
             if iconFailed {
-                if let url = faviconURLs.first, !faviconFailed {
+                if let url = faviconURLs.first, let faviconDownloader, !faviconFailed {
                     KFImage.url(url, cacheKey: "website-favicon-\(url.absoluteString)")
                         .alternativeSources(faviconURLs.dropFirst().map {
                             .network(KF.ImageResource(downloadURL: $0, cacheKey: "website-favicon-\($0.absoluteString)"))
                         })
-                        .downloader(Self.faviconDownloader(configuration: Self.websiteConfiguration()))
+                        .downloader(faviconDownloader)
                         .setProcessor(DownsamplingImageProcessor(size: CGSize(width: size * displayScale, height: size * displayScale)))
                         .resizable()
                         .placeholder { monogram }
@@ -86,8 +87,13 @@ struct AppIconView: View {
         .frame(width: size, height: size)
         .task(id: [iconFailed ? homepageURL?.absoluteString ?? "" : ""] + proxyPreferenceID) {
             guard iconFailed, let homepageURL else { return }
-            let urls = await FaviconResolver.shared.candidates(for: homepageURL, configuration: Self.websiteConfiguration())
+            faviconURLs = []
+            faviconDownloader = nil
+            let configuration = Self.websiteConfiguration()
+            let downloader = Self.faviconDownloader(configuration: configuration)
+            let urls = await FaviconResolver.shared.candidates(for: homepageURL, configuration: configuration)
             guard !Task.isCancelled else { return }
+            faviconDownloader = downloader
             faviconURLs = urls
             faviconFailed = false
         }
