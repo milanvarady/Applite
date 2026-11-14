@@ -24,6 +24,7 @@ final class CaskManager {
     private let catalogLoad: @MainActor (Bool) async throws -> (categories: [CategoryLoadResult], taps: [TapLoadResult])
     private var adoptionConsentGeneration = 0
     private var detectionSettingTask: Task<Void, Never>?
+    private var brewConfigurationTask: Task<Void, Never>?
 
     /// Resolves brew on launch (detect existing / install annex) without onboarding or CLT.
     /// `ContentView` observes `bootstrap.phase` to show the install sheet.
@@ -41,7 +42,8 @@ final class CaskManager {
 
     /// True while brew CLI is being queried for installed/outdated state.
     /// Catalog (categories/taps) is independent and lights up before this flips false.
-    private(set) var isResolvingInstalledState: Bool = false
+    private var installedStateResolutionCount = 0
+    var isResolvingInstalledState: Bool { installedStateResolutionCount > 0 }
 
     /// True while a manual catalog refresh is running (toolbar action).
     private(set) var isRefreshingCatalog: Bool = false
@@ -133,7 +135,40 @@ final class CaskManager {
     // MARK: - Brew Operation Forwarding
 
     func install(_ cask: CaskViewModel) {
+        guard canModifyApps() else { return }
         brewService.install(cask)
+    }
+
+    private func canModifyApps() -> Bool {
+        guard !isResolvingInstalledState else {
+            alert.show(title: "Homebrew action unavailable", message: "Wait for installed apps to finish refreshing.")
+            return false
+        }
+        return true
+    }
+
+    func selectedHomebrewDidChange(surfacingErrorsIn surface: AlertManager) {
+        invalidateAdoptionConsent()
+        detectionSettingTask?.cancel()
+        brewConfigurationTask?.cancel()
+        dataLoader.invalidateExternalInstallations()
+        registry.markInstalled(tokens: [])
+        registry.markOutdated(tokens: [])
+        installedStateResolutionCount += 1
+        let configuration = BrewOperationConfiguration.current
+        brewConfigurationTask = Task {
+            defer { installedStateResolutionCount -= 1 }
+            do {
+                try await Task.sleep(for: .milliseconds(300))
+                try Task.checkCancellation()
+            } catch is CancellationError {
+                return
+            } catch {
+                surface.show(error: error, title: "Couldn't load installed apps")
+                return
+            }
+            await loadInstalledState(surfacingErrorsIn: surface, configuration: configuration)
+        }
     }
 
     func applyAppManagementSettings(surfacingErrorsIn surface: AlertManager) {
@@ -217,6 +252,7 @@ final class CaskManager {
     }
 
     func confirmAdoption(_ cask: CaskViewModel) {
+        guard canModifyApps() else { return }
         cask.managementSourceOverrides = ProtectedAppInstallation.Source.enabledOverrides()
         guard !cask.isManagementProtected else {
             Self.logger.info("Homebrew adoption blocked for externally managed app \(cask.fullToken)")
@@ -307,14 +343,17 @@ final class CaskManager {
     }
 
     func uninstall(_ cask: CaskViewModel, zap: Bool = false) {
+        guard canModifyApps() else { return }
         brewService.uninstall(cask, zap: zap)
     }
 
     func update(_ cask: CaskViewModel) {
+        guard canModifyApps() else { return }
         brewService.update(cask)
     }
 
     func reinstall(_ cask: CaskViewModel) {
+        guard canModifyApps() else { return }
         brewService.reinstall(cask)
     }
 
@@ -335,10 +374,12 @@ final class CaskManager {
     }
 
     func installAll(_ casks: [CaskViewModel]) {
+        guard canModifyApps() else { return }
         brewService.installAll(casks)
     }
 
     func updateAll(_ casks: [CaskViewModel]) {
+        guard canModifyApps() else { return }
         brewService.updateAll(casks)
     }
 
@@ -491,9 +532,11 @@ final class CaskManager {
 
     /// Stage 2: installed/outdated state from the brew CLI (slow). Updates the registry reactively,
     /// so view models already on screen flip their flags without rebuilding the catalog views.
-    private func loadInstalledState(surfacingErrorsIn surface: AlertManager) async {
-        self.isResolvingInstalledState = true
-        defer { self.isResolvingInstalledState = false }
+    private func loadInstalledState(
+        surfacingErrorsIn surface: AlertManager, configuration: BrewOperationConfiguration = .current
+    ) async {
+        installedStateResolutionCount += 1
+        defer { installedStateResolutionCount -= 1 }
 
         do {
             // Run the refresh on the serial brew queue so its `brew list`/`outdated` snapshot can't
@@ -505,19 +548,27 @@ final class CaskManager {
             // that lock fail with "already locked". Bootstrap primes Ruby up front, but keep these
             // ordered as a second line of defense.
             try await brewService.runSerialized {
-                try await self.dataLoader.refreshInstalled()
+                try await self.dataLoader.refreshInstalled(configuration: configuration)
                 // Outdated is a nested best-effort step: if it fails, keep the (good) installed state
                 // and just flag the failure, so UpdateView shows "couldn't check" instead of a false
                 // "all up to date" (P3-3).
                 do {
-                    try await self.dataLoader.refreshOutdated()
+                    try await self.dataLoader.refreshOutdated(configuration: configuration)
                     self.outdatedRefreshFailed = false
+                } catch CaskAdoptionError.configurationChanged {
+                    throw CaskAdoptionError.configurationChanged
+                } catch is CancellationError {
+                    throw CancellationError()
                 } catch {
                     self.outdatedRefreshFailed = true
                     Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
                 }
             }
             Self.logger.info("Installed/outdated state loaded successfully!")
+        } catch CaskAdoptionError.configurationChanged {
+            Self.logger.info("Discarded installed-state refresh for a previous Homebrew configuration")
+        } catch is CancellationError {
+            Self.logger.info("Installed-state refresh was cancelled")
         } catch {
             // Installed refresh itself failed — outdated state is unknown too, so don't let
             // UpdateView claim everything is up to date.

@@ -135,7 +135,9 @@ struct AppDetailsView: View {
                 let sources = ProtectedAppInstallation.Source.allCases.filter { protection.appURLs[$0] != nil }
                 infoRow("Detected Management Sources", sources.map(\.name).joined(separator: ", "))
                 infoRow("Tracked by Homebrew", yesNo(cask.isInstalled))
-                infoRow("App Location", protection.url.path)
+                if let appURL = cask.selectedInstallationURL {
+                    infoRow("App Location", appURL.path)
+                }
                 let overridden = sources.filter { cask.managementSourceOverrides.contains($0) }
                 if !overridden.isEmpty {
                     infoRow("Source Overrides", overridden.map(\.name).joined(separator: ", "))

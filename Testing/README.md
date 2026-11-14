@@ -7,6 +7,10 @@ during the final ownership await, and reject incomplete target metadata. Injecte
 catalog failure/success verifies refresh-baseline results without network requests.
 Identity fixtures cover two roots sharing a bundle filename and distinct recorded
 targets protected conservatively by a third store-managed copy.
+The selected row's URL remains distinct from protection evidence. With external
+detection disabled, managed aliases still collapse by their recorded bundle path
+without reading external ownership inventories. A paused profile switch verifies
+immediate receipt invalidation, blocked actions, and fresh uninstall receipt checks.
 
 Review-race cases pause single and bulk metadata requests before adding App Store,
 Setapp or Intune evidence or changing Homebrew. A two-entry batch also pauses its

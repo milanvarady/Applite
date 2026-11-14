@@ -254,6 +254,19 @@ final class BrewService {
     func uninstall(_ vm: CaskViewModel, zap: Bool = false) {
         runTask(for: vm, requiresSupportedCask: false) { configuration, _ in
             vm.progressState = .busy(withTask: String(localized: "Uninstalling", comment: "Uninstall progress text"))
+            do {
+                let receipts = try await InstalledCaskService().getInstalledCasks(configuration: configuration)
+                try Task.checkCancellation()
+                try configuration.validateCurrent()
+                guard vm.matchesFullName(in: receipts) else { throw CaskAdoptionError.notHomebrewManaged }
+            } catch {
+                if Task.isCancelled {
+                    vm.progressState = .idle
+                } else {
+                    await self.reportManagementBlock(for: vm, error: error)
+                }
+                return
+            }
 
             // Always --force: a cask whose files are partly
             // gone — app manually trashed, an orphaned font, a half-finished install — otherwise
@@ -269,6 +282,7 @@ final class BrewService {
 
             do {
                 output = try await Shell.run(configuration.executable, arguments)
+                try configuration.validateCurrent()
             } catch {
                 await self.showFailure(
                     for: vm,
@@ -287,6 +301,7 @@ final class BrewService {
             )
 
             // Update state
+            guard configuration == .current else { return }
             vm.isInstalled = false
             vm.installedBundleURL = nil
         }
@@ -320,6 +335,10 @@ final class BrewService {
                 return
             }
 
+            guard configuration == .current else {
+                await self.reportManagementBlock(for: vm, error: CaskAdoptionError.configurationChanged)
+                return
+            }
             await self.showSuccess(
                 for: vm,
                 logMessage: "Successfully updated \(vm.token)",
@@ -327,6 +346,7 @@ final class BrewService {
             )
 
             // Update state
+            guard configuration == .current else { return }
             vm.isOutdated = false
         }
     }
@@ -358,6 +378,10 @@ final class BrewService {
                 return
             }
 
+            guard configuration == .current else {
+                await self.reportManagementBlock(for: vm, error: CaskAdoptionError.configurationChanged)
+                return
+            }
             await self.showSuccess(
                 for: vm,
                 logMessage: "Successfully reinstalled \(vm.fullToken)",

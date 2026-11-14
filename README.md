@@ -214,6 +214,12 @@ Disabling either management prerequisite
 permanently invalidates open/queued confirmations until a new confirmation is made.
 Receipt refreshes are bound to their selected Homebrew configuration and cannot
 publish after it changes. Path edits debounce detection; superseded scans are canceled.
+Changing Homebrew or its app directory immediately clears old receipt ownership and
+blocks Homebrew actions while a serialized refresh runs. Uninstall also checks the
+selected Homebrew's current receipt before issuing a removal command. When external
+detection is disabled, recorded Homebrew bundle identities still deduplicate Installed
+rows. A row's selected bundle is used for Open and App Location; evidence from a
+different protected copy continues to protect Homebrew actions.
 
 Install rechecks the expected app bundle before running, so an unfinished detection
 scan cannot silently turn Install into Homebrew adoption. Adoption confirmation is

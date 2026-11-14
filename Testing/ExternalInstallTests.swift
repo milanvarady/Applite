@@ -457,6 +457,7 @@ enum ExternalInstallTests {
         try await testUpstreamConsentAndRefresh(root: root)
         try await testLiveArtifactOwnershipAndCatalogResult(root: root)
         try testDistinctInstallationIdentities(root: root)
+        try await testManagedIdentityWithDetectionDisabled(root: root)
         if CommandLine.arguments.contains("--live-intune") {
             try checkLiveIntuneInventory()
         }
@@ -1263,6 +1264,8 @@ enum ExternalInstallTests {
 
         // Retired casks can still be removed, but only when Homebrew actually owns the installation.
         try Data().write(to: infoFailure)
+        let managedTokens = root.appendingPathComponent("managed-tokens")
+        try vm.fullToken.write(to: managedTokens, atomically: true, encoding: .utf8)
         service.uninstall(vm)
         _ = try await service.runSerialized { true }
         precondition(!vm.isInstalled && !vm.progressState.isFailed)
@@ -1273,6 +1276,7 @@ enum ExternalInstallTests {
         precondition(vm.progressState.isFailed)
         let afterUnmanagedRemoval = try String(contentsOf: argumentsURL, encoding: .utf8)
         precondition(afterUnmanagedRemoval == removal)
+        try fm.removeItem(at: managedTokens)
         try fm.removeItem(at: infoFailure)
         registry.clearHomebrewManagementErrors()
         precondition(vm.homebrewManagementBlockReason == nil && disabled.homebrewManagementBlockReason != nil)
@@ -1981,6 +1985,110 @@ enum ExternalInstallTests {
         )
         precondition(registry.installedCount == 2 && registry.locallyInstalledCount == 2,
                      "Distinct recorded bundles must remain separate rows and counts despite shared protection")
+        for vm in registry.locallyInstalledViewModels {
+            precondition(vm.selectedInstallationURL?.path == managed.bundleURLs[vm.fullToken]?.path
+                         && vm.selectedInstallationURL?.path != protected.path,
+                         "Launching or displaying a row must use its selected bundle, not other protection evidence")
+        }
+    }
+
+    @MainActor
+    private static func testManagedIdentityWithDetectionDisabled(root: URL) async throws {
+        let defaults = UserDefaults.standard
+        let previousBrew = defaults.value(for: Preferences.customUserBrewPath)
+        let previousDetection = defaults.value(for: Preferences.detectExternallyInstalledApps)
+        defer {
+            defaults.setValue(previousBrew, for: Preferences.customUserBrewPath)
+            defaults.setValue(previousDetection, for: Preferences.detectExternallyInstalledApps)
+        }
+        let fm = FileManager.default
+        let prefix = root.appendingPathComponent("Disabled Detection Receipts")
+        let brew = prefix.appendingPathComponent("bin/brew")
+        let app = prefix.appendingPathComponent("Apps/Shared.app")
+        try fm.createDirectory(at: brew.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try fm.createDirectory(at: app, withIntermediateDirectories: true)
+        try "#!/bin/sh\nif [ \"$1\" = list ]; then printf 'stable\\nbeta\\n'; fi\n".write(
+            to: brew, atomically: true, encoding: .utf8
+        )
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: brew.path)
+        for token in ["stable", "beta"] {
+            let directory = prefix.appendingPathComponent("Caskroom/\(token)/1")
+            try fm.createDirectory(at: directory, withIntermediateDirectories: true)
+            try fm.createSymbolicLink(at: directory.appendingPathComponent("Shared.app"), withDestinationURL: app)
+        }
+        func record(_ token: String) -> CaskRecord {
+            CaskRecord(
+                token: token, fullToken: token, tap: "homebrew/cask", name: "Shared",
+                descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: ["Shared.app"]
+            )
+        }
+        let pool = try DatabasePool(path: prefix.appendingPathComponent("catalog.sqlite").path)
+        try AppDatabase.migrator().migrate(pool)
+        let stable = record("stable")
+        let beta = record("beta")
+        try await pool.write { db in
+            try stable.insert(db)
+            try beta.insert(db)
+        }
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+        defaults.setValue(false, for: Preferences.detectExternallyInstalledApps)
+        let registry = CaskViewModelRegistry()
+        let loader = CaskDataLoader(
+            dbService: CaskDatabaseService(databasePool: pool), registry: registry,
+            intuneInventory: { throw CaskAdoptionError.intuneInventoryUnavailable },
+            artCraftInventory: { .empty }
+        )
+        try await loader.refreshInstalled()
+        precondition(registry.installedCount == 2 && registry.locallyInstalledCount == 1
+                     && registry.externalInstalledCount == 0,
+                     "Managed aliases must deduplicate from recorded bundle identity even when external detection is disabled")
+        let secondPrefix = root.appendingPathComponent("Second Homebrew Receipts")
+        let secondBrew = secondPrefix.appendingPathComponent("bin/brew")
+        try fm.createDirectory(at: secondBrew.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let secondFixture = """
+        #!/bin/sh
+        prefix="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+        case "$1" in
+          --version) echo "Homebrew fixture" ;;
+          list)
+            touch "$prefix/list-started"
+            while [ -f "$prefix/pause-list" ]; do sleep 0.01; done ;;
+          outdated) : ;;
+          uninstall) touch "$prefix/uninstall-started" ;;
+        esac
+        """
+        try secondFixture.write(to: secondBrew, atomically: true, encoding: .utf8)
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: secondBrew.path)
+        let pause = secondPrefix.appendingPathComponent("pause-list")
+        try Data().write(to: pause)
+        let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
+        let manager = CaskManager(dataLoader: loader, registry: registry, brewService: service)
+        let vm = registry.viewModel(for: stable)
+        defaults.setValue(secondBrew.path, for: Preferences.customUserBrewPath)
+        manager.selectedHomebrewDidChange(surfacingErrorsIn: manager.alert)
+        precondition(!vm.isInstalled && manager.isResolvingInstalledState,
+                     "Switching Homebrew must immediately invalidate stale receipt ownership")
+        manager.uninstall(vm)
+        precondition(!fm.fileExists(atPath: secondPrefix.appendingPathComponent("uninstall-started").path))
+        let started = secondPrefix.appendingPathComponent("list-started")
+        let deadline = Date().addingTimeInterval(5)
+        while !fm.fileExists(atPath: started.path) && Date() < deadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(fm.fileExists(atPath: started.path))
+        try fm.removeItem(at: pause)
+        let finish = Date().addingTimeInterval(5)
+        while manager.isResolvingInstalledState && Date() < finish {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(!manager.isResolvingInstalledState && !vm.isInstalled)
+        vm.isInstalled = true
+        service.uninstall(vm)
+        _ = try await service.runSerialized { true }
+        precondition(vm.progressState.isFailed && !fm.fileExists(atPath: secondPrefix.appendingPathComponent("uninstall-started").path),
+                     "A stale cached flag must never authorize uninstall when the selected Homebrew has no receipt")
     }
 
     @MainActor
@@ -2175,6 +2283,7 @@ enum ExternalInstallTests {
             token="${4##*/}"
             bundle="External.app"
             if [ "$token" = "review-missing" ]; then bundle="Missing.app"; fi
+            if [ "$token" = "legacy-missing-artifacts" ]; then bundle="Legacy.app"; fi
             printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["%s"]}],"deprecated":false,"disabled":false}]}' "$token" "$4" "$bundle" ;;
           install)
             printf '%s\\n' "$@" > "$fixture_dir/arguments"

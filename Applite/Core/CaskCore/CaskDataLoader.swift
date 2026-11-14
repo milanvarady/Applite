@@ -123,7 +123,7 @@ final class CaskDataLoader {
     /// and marks them installed in the registry.
     func refreshInstalled(
         configuration: BrewOperationConfiguration = .current,
-        scan: @escaping @Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL] = ExternalAppDetector.scan
+        scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil
     ) async throws {
         installedRefreshGeneration &+= 1
         let generation = installedRefreshGeneration
@@ -162,20 +162,37 @@ final class CaskDataLoader {
     ) async throws {
         invalidateExternalInstallations()
         let generation = externalScanGeneration
-        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
+        let detectionEnabled = UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps)
+        if !detectionEnabled {
             registry.clearExternalInstallations()
-            return
         }
 
         // Scan the full catalog, not just curated/search results, so totals include unbrowsed apps.
-        let catalog = try await dbService.fetchAllCasks()
+        let records = try await dbService.fetchAllCasks()
         try Task.checkCancellation()
         guard generation == externalScanGeneration, configuration == .current,
-              UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else { return }
+              UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) == detectionEnabled else { return }
         let tokens = Set(registry.installedViewModels.map(\.fullToken))
+        let catalog = detectionEnabled ? records : records.filter { tokens.contains($0.fullToken) }
         let loadIntuneInventory = self.loadIntuneInventory
         let loadArtCraftInventory = self.loadArtCraftInventory
         let task = Task.detached {
+            if !detectionEnabled {
+                var bundleURLs: [CaskId: URL] = [:]
+                for record in catalog {
+                    try Task.checkCancellation()
+                    let recorded = try InstalledAppLocator.recordedAppURLs(
+                        token: record.token, executable: configuration.executable
+                    )
+                    if let url = recorded.first ?? ExternalAppDetector.appURL(
+                        bundleNames: record.appBundleNames, displayName: record.name,
+                        directories: configuration.applicationDirectories
+                    ) {
+                        bundleURLs[record.fullToken] = url.resolvingSymlinksInPath().standardizedFileURL
+                    }
+                }
+                return ExternalAppDetector.ScanResult(bundleURLs: bundleURLs)
+            }
             if let scan {
                 return ExternalAppDetector.ScanResult(
                     externalAppURLs: try await scan(catalog, configuration.applicationDirectories, tokens)
@@ -209,11 +226,12 @@ final class CaskDataLoader {
         guard !Task.isCancelled, generation == externalScanGeneration,
               configuration == .current else { return }
         // A Settings toggle may have changed while the off-main scan was running.
-        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
-            registry.clearExternalInstallations()
+        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) == detectionEnabled else { return }
+        _ = registry.viewModels(for: catalog)
+        if !detectionEnabled {
+            registry.updateManagedBundleURLs(result.bundleURLs)
             return
         }
-        _ = registry.viewModels(for: catalog)
         registry.markExternalInstallations(
             appURLs: result.externalAppURLs, appStoreAppURLs: result.appStoreAppURLs,
             intuneAppURLs: result.intuneAppURLs, setappAppURLs: result.setappAppURLs,
