@@ -1,5 +1,9 @@
 # Applite test harness
 
+Receipt-refresh fixtures preserve managed state across app-directory edits and
+verify busy-state lifetime and reconciliation after consent or detection changes.
+Ruby-only cask metadata is resolved using receipt artifacts.
+
 ## Non-destructive external-install regression tests
 
 Creating a missing custom app directory must not change its captured Homebrew configuration.
