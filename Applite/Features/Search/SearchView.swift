@@ -18,8 +18,7 @@ struct SearchView: View {
 
     @State private var results: [CaskViewModel] = []
     @State private var isSearching = false
-    @State private var externalOnly = false
-    @AppStorage(Preferences.detectExternallyInstalledApps) private var detectExternallyInstalledApps
+    @State private var installedOnly = false
 
     @AppStorage(Preferences.searchSortOption) private var sortBy
     @AppStorage(Preferences.hideUnpopularApps) private var hideUnpopularApps
@@ -35,9 +34,9 @@ struct SearchView: View {
         let displayed = displayedResults
         return Group {
             if displayed.isEmpty && !isSearching {
-                if externalOnly {
+                if installedOnly {
                     ContentUnavailableView(
-                        "No externally installed apps detected.",
+                        "No installed apps found.",
                         systemImage: "app.badge.checkmark"
                     )
                 } else {
@@ -56,14 +55,11 @@ struct SearchView: View {
         }
         .toolbar {
             SortingOptionsToolbar(
-                externalOnly: $externalOnly,
-                externalCount: caskManager.externalInstalledCount
+                installedOnly: $installedOnly,
+                installedCount: caskManager.locallyInstalledCount
             )
         }
-        .onChange(of: detectExternallyInstalledApps) { _, enabled in
-            if !enabled { externalOnly = false }
-        }
-        .task(id: [query, externalOnly ? "external" : "all"]) {
+        .task(id: [query, installedOnly ? "installed" : "all"]) {
             // Debounce: wait for the user to stop typing before hitting FTS5.
             // .task(id:) cancels the previous task on each query change, so the
             // sleep is the debounce window.
@@ -74,7 +70,7 @@ struct SearchView: View {
             defer { isSearching = false }
 
             do {
-                results = try await caskManager.search(query: query, externalOnly: externalOnly)
+                results = try await caskManager.search(query: query, installedOnly: installedOnly)
             } catch is CancellationError {
                 return
             } catch {
@@ -86,8 +82,9 @@ struct SearchView: View {
 
     private var displayedResults: [CaskViewModel] {
         var filtered = results
-        if externalOnly {
-            filtered.removeAll { !$0.isInstalledExternally }
+        if installedOnly {
+            let installed = Set(caskManager.locallyInstalledViewModels.map(\.fullToken))
+            filtered.removeAll { !installed.contains($0.fullToken) }
         }
         if hideUnpopularApps {
             filtered.removeAll { $0.downloadsIn365days <= 500 }

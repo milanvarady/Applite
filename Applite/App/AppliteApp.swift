@@ -81,10 +81,6 @@ struct AppliteApp: App {
         }
         .defaultSize(width: 600, height: 400)
 
-        WindowGroup("Cask Info", for: CaskAdditionalInfo.self) { $info in
-            CaskInfoWindowView(info: info ?? .dummy)
-        }
-        .windowResizability(.contentSize)
     }
 
     private static func enforceSingleInstance() {

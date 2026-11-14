@@ -1760,7 +1760,8 @@
             "value" : "Uygulama kaynakları"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Appearance" : {
       "comment" : "Appearnace settings title",
@@ -2868,7 +2869,8 @@
             "value" : "Cask 資訊"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Categories" : {
       "comment" : "Sidebar section name",
@@ -4619,7 +4621,8 @@
             "value" : "收集 cask 資訊失敗"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Failed to import" : {
       "comment" : "Alert message",
@@ -11309,8 +11312,12 @@
     },
     "Couldn't refresh installed apps" : {},
     "Homebrew finished installing, but the app is not listed as managed. Refresh the app catalog to check again." : {},
-    "Installed externally" : {},
-    "No externally installed apps detected." : {},
+    "Installed externally" : {
+      "extractionState" : "stale"
+    },
+    "No externally installed apps detected." : {
+      "extractionState" : "stale"
+    },
     "Reinstall with Homebrew so this app is tracked and updated by Homebrew." : {},
     "This will reinstall the app via Homebrew cask so updates are tracked by Homebrew." : {
       "extractionState" : "stale"
@@ -11320,7 +11327,9 @@
     "Find apps installed outside Homebrew and offer to adopt them. Turning this off hides external app status and filters without changing your apps." : {
       "extractionState" : "stale"
     },
-    "Find apps installed outside Homebrew. Turning this off hides external app status and filters without changing your apps." : {},
+    "Find apps installed outside Homebrew. Turning this off hides external app status and filters without changing your apps." : {
+      "extractionState" : "stale"
+    },
     "Manage this app with Homebrew?" : {},
     "Manage with Homebrew" : {},
     "Offer Manage with Homebrew" : {},
@@ -11329,7 +11338,9 @@
     },
     "This will reinstall the app via Homebrew so future updates can be managed here." : {},
     "Requires external app detection." : {},
-    "Show \"Manage with Homebrew\" on external app cards. Reinstalls require confirmation." : {},
+    "Show \"Manage with Homebrew\" on external app cards. Reinstalls require confirmation." : {
+      "extractionState" : "stale"
+    },
     "Applite is already running, but its window couldn't be opened. Select Applite in the Dock." : {},
     "Applite is already starting. Please try again in a moment." : {},
     "Couldn't start Applite" : {},
@@ -11352,6 +11363,85 @@
     "Loading app details..." : {},
     "Show app details" : {},
     "Show details for %@" : {},
+    "Version History" : {},
+    "Include apps installed outside Homebrew in Installed. Turning this off does not change your apps." : {},
+    "No installed apps found." : {},
+    "App Location" : {},
+    "Couldn't load app details" : {},
+    "Management" : {},
+    "Not managed by Homebrew" : {},
+    "Unknown" : {},
+    "All installed apps" : {},
+    "App Source" : {},
+    "Homebrew-managed" : {},
+    "Most downloaded" : {},
+    "No matching installed apps" : {},
+    "Other installed apps" : {},
+    "Reset Sorting and Filters" : {},
+    "Show All Installed Apps" : {},
+    "Showing %lld of %lld apps" : {},
+    "Sort & Filter" : {},
+    "Sort and filter installed apps" : {},
+    "Try another search or reset your filters." : {},
+    "Updates available only" : {},
+    "Z to A" : {},
+    "App Store-managed" : {},
+    "Homebrew action blocked" : {},
+    "Show \"Manage with Homebrew\" on external app cards, except App Store-managed apps. Reinstalls require confirmation." : {
+      "extractionState" : "stale"
+    },
+    "This app is managed by the App Store. Use the App Store for updates; Homebrew management is disabled." : {},
+    "Couldn't verify Intune app ownership. Homebrew changes are blocked. Sync Company Portal and try again, or contact your IT administrator." : {},
+    "Intune-managed" : {},
+    "Show \"Manage with Homebrew\" on external app cards, except apps managed by the App Store or Microsoft Intune. Reinstalls require confirmation." : {
+      "extractionState" : "stale"
+    },
+    "Your organization manages this app through Microsoft Intune (Company Portal). Use Company Portal or contact your IT administrator; Homebrew management is disabled." : {},
+    "Setapp-managed" : {},
+    "Show \"Manage with Homebrew\" on external app cards, except apps managed by the App Store, Microsoft Intune, or Setapp. Reinstalls require confirmation." : {
+      "extractionState" : "stale"
+    },
+    "This app is managed by Setapp. Use Setapp for updates; Homebrew management is disabled." : {},
+    "ArtCraft-managed" : {},
+    "Couldn't verify ArtCraft Launcher app ownership. Homebrew changes are blocked. Check ArtCraft Launcher and try again." : {},
+    "Show \"Manage with Homebrew\" on external app cards, except apps managed by the App Store, Microsoft Intune, Setapp, or ArtCraft Launcher. Reinstalls require confirmation." : {
+      "extractionState" : "stale"
+    },
+    "This app is managed by ArtCraft Launcher. Use ArtCraft Launcher for updates; Homebrew management is disabled." : {},
+    "Homebrew has disabled this cask. Applite cannot install, adopt, update, or reinstall it." : {},
+    "Homebrew management unavailable" : {},
+    "Homebrew unavailable" : {},
+    "Install with Homebrew" : {},
+    "Reinstall with Homebrew" : {},
+    "This app is not available as an exact cask in the selected Homebrew. Applite cannot manage it. Refresh the app catalog to check again." : {},
+    "This app is not installed through the selected Homebrew. Applite cannot uninstall it." : {},
+    "Update with Homebrew" : {},
+    "Advanced: App Management Source Overrides" : {},
+    "Apple App Store" : {},
+    "Apps" : {},
+    "ArtCraft Launcher" : {},
+    "Couldn't refresh app updates" : {},
+    "Enable Override" : {},
+    "Enable external app detection and Offer Manage with Homebrew before enabling source overrides." : {},
+    "Homebrew Management" : {},
+    "Homebrew management disabled" : {},
+    "Installed App Detection" : {},
+    "Managing external apps and all source overrides are off by default. Existing Homebrew-managed apps keep their normal controls." : {},
+    "Microsoft Intune (Company Portal)" : {},
+    "Override %@ protection?" : {},
+    "Override Apple App Store protection" : {},
+    "Override ArtCraft Launcher protection" : {},
+    "Override Microsoft Intune protection" : {},
+    "Override Setapp protection" : {},
+    "Requires external app detection and Offer Manage with Homebrew. Overrides only lift Applite's protection for the selected source. They do not remove device enrollment, organizational policies, or licensing requirements. Replacing an app may affect its license and settings; the original manager may reinstall it. Every detected source must be overridden. Disable Offer Manage with Homebrew to suspend all overrides without forgetting your choices. Running operations are not undone." : {},
+    "Setapp" : {},
+    "Show management actions for external apps with an exact, enabled Homebrew cask. Reinstalling requires confirmation. Other app sources remain protected unless explicitly overridden below." : {},
+    "Source Overrides" : {},
+    "Source protection is overridden for %@. Replacing this app can affect its license, settings, and updates. Its original manager may reinstall it or remove access." : {},
+    "The override was not enabled because Homebrew management or external app detection was turned off." : {},
+    "This allows Homebrew to replace apps detected as managed by %@. Only enable this if you are authorized. Licenses, settings, and updates may be affected, and the original manager may reinstall the app. This does not remove device enrollment, organizational policies, or licensing requirements. Exact, enabled Homebrew casks are still required." : {},
+    "Detected Management Sources" : {},
+    "Tracked by Homebrew" : {},
     "Couldn't start app installation" : {},
     "Homebrew configuration changed" : {},
     "Homebrew or the app installation directory changed. Review the current settings and confirm the command again." : {},

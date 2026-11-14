@@ -23,10 +23,61 @@ enum InstalledAppLocator {
 
     nonisolated static var applicationDirectories: [URL] {
         let configured = appDirectory
-        return [configured] + [
+        let standard = [
             URL.applicationDirectory,
             FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications", isDirectory: true)
-        ].filter { $0 != configured }
+        ]
+        return [configured] + (standard + standard.map {
+            $0.appendingPathComponent("Setapp", isDirectory: true)
+        }).filter { $0 != configured }
+    }
+
+    nonisolated static func bundleIdentifier(at appURL: URL) throws -> String? {
+        let data: Data
+        do {
+            data = try Data(contentsOf: appURL.appendingPathComponent("Contents/Info.plist"))
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            return nil
+        }
+        return try PropertyListDecoder().decode(BundleInfo.self, from: data).CFBundleIdentifier
+    }
+
+    private struct BundleInfo: Decodable {
+        let CFBundleIdentifier: String?
+    }
+
+    nonisolated static func recordedAppURLs(token: String, executable: URL) throws -> [URL] {
+        guard !token.isEmpty, token != ".", token != "..",
+              (token as NSString).lastPathComponent == token else {
+            throw CaskAdoptionError.homebrewUnavailable
+        }
+        let caskroom = executable.deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Caskroom").appendingPathComponent(token)
+        let fm = FileManager.default
+        let versions: [URL]
+        do {
+            versions = try fm.contentsOfDirectory(
+                at: caskroom, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles]
+            )
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            return []
+        }
+        var result: Set<URL> = []
+        for version in versions.sorted(by: { $0.lastPathComponent > $1.lastPathComponent }) {
+            guard try version.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true else { continue }
+            let entries = try fm.contentsOfDirectory(at: version, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+            for entry in entries where entry.pathExtension == "app" {
+                let resolved = entry.resolvingSymlinksInPath().standardizedFileURL
+                do {
+                    if try resolved.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
+                        result.insert(resolved)
+                    }
+                } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                    continue
+                }
+            }
+        }
+        return result.sorted { $0.path < $1.path }
     }
 
     /// Resolves the URL of the installed app for a cask.

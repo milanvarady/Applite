@@ -66,6 +66,8 @@ final class CaskManager {
     // MARK: - Convenience Forwarding
 
     var installedViewModels: [CaskViewModel] { registry.installedViewModels }
+    var locallyInstalledViewModels: [CaskViewModel] { registry.locallyInstalledViewModels }
+    var locallyInstalledCount: Int { registry.locallyInstalledCount }
     var outdatedViewModels: [CaskViewModel] { registry.outdatedViewModels }
     /// Sort-free counts for sidebar badges (see registry) — avoids sorting the whole registry just
     /// to render a number.
@@ -81,6 +83,7 @@ final class CaskManager {
     /// resets this to nil. Lives here because `CaskManager` is the shared environment object
     /// every card already holds, so no extra wiring is needed.
     var requestedTab: SidebarItem?
+    var selectedAppDetails: CaskViewModel?
 
     // MARK: - Init
 
@@ -127,10 +130,60 @@ final class CaskManager {
         brewService.install(cask)
     }
 
+    func applyAppManagementSettings(surfacingErrorsIn surface: AlertManager) {
+        guard registry.applyManagementSourceOverrides() else { return }
+        guard bootstrap.isBrewReady else { return }
+        Task {
+            do {
+                try await refreshOutdated()
+            } catch {
+                surface.show(error: error, title: "Couldn't refresh app updates")
+            }
+        }
+    }
+
+    func requestManagementSourceOverride(
+        _ source: ProtectedAppInstallation.Source, enabled: Bool, surfacingErrorsIn surface: AlertManager
+    ) {
+        if !enabled {
+            UserDefaults.standard.setValue(false, for: source.overridePreference)
+            applyAppManagementSettings(surfacingErrorsIn: surface)
+            return
+        }
+        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+              UserDefaults.standard.value(for: Preferences.offerHomebrewManagement) else {
+            surface.show(
+                title: "Homebrew management disabled",
+                message: String(localized: "Enable external app detection and Offer Manage with Homebrew before enabling source overrides.")
+            )
+            return
+        }
+        surface.show(
+            title: "Override \(source.name) protection?",
+            message: String(localized: "This allows Homebrew to replace apps detected as managed by \(source.name). Only enable this if you are authorized. Licenses, settings, and updates may be affected, and the original manager may reinstall the app. This does not remove device enrollment, organizational policies, or licensing requirements. Exact, enabled Homebrew casks are still required."),
+            actions: [
+                AppAlert.Action("Enable Override", role: .destructive) { [weak self, weak surface] in
+                    guard let self, let surface else { return }
+                    guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+                          UserDefaults.standard.value(for: Preferences.offerHomebrewManagement) else {
+                        surface.show(
+                            title: "Homebrew management disabled",
+                            message: String(localized: "The override was not enabled because Homebrew management or external app detection was turned off.")
+                        )
+                        return
+                    }
+                    UserDefaults.standard.setValue(true, for: source.overridePreference)
+                    self.applyAppManagementSettings(surfacingErrorsIn: surface)
+                },
+                AppAlert.Action("Cancel", role: .cancel)
+            ]
+        )
+    }
+
     func applyExternalAppDetectionSetting(surfacingErrorsIn errorSurface: AlertManager? = nil) {
         dataLoader.invalidateExternalInstallations()
         guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
-            registry.markExternalInstallations(appURLs: [:])
+            registry.clearExternalInstallations()
             return
         }
         let surface = errorSurface ?? alert
@@ -145,6 +198,16 @@ final class CaskManager {
     }
 
     func confirmAdoption(_ cask: CaskViewModel) {
+        cask.managementSourceOverrides = ProtectedAppInstallation.Source.enabledOverrides()
+        guard !cask.isManagementProtected else {
+            Self.logger.info("Homebrew adoption blocked for externally managed app \(cask.fullToken)")
+            return
+        }
+        if let reason = cask.homebrewManagementBlockReason {
+            Self.logger.info("Homebrew adoption blocked for unsupported cask \(cask.fullToken)")
+            alert.show(title: "Homebrew management unavailable", message: reason)
+            return
+        }
         guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
               UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
               cask.isInstalledExternally, !(cask.warning?.isDisabled ?? false) else { return }
@@ -158,6 +221,11 @@ final class CaskManager {
         }.joined(separator: " ")
         var message = String(localized: "This will reinstall the app via Homebrew so future updates can be managed here.")
         message += "\n\n\(preview)"
+        if let protection = cask.protectedAppInstallation {
+            let sources = ProtectedAppInstallation.Source.allCases
+                .filter { protection.appURLs[$0] != nil }.map(\.name).joined(separator: ", ")
+            message += "\n\n" + String(localized: "Source protection is overridden for \(sources). Replacing this app can affect its license, settings, and updates. Its original manager may reinstall it or remove access.")
+        }
         if let warning = cask.warning {
             let detail: String
             switch warning {
@@ -179,6 +247,16 @@ final class CaskManager {
                           UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
                           UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
                           cask.isInstalledExternally else { return }
+                    cask.managementSourceOverrides = ProtectedAppInstallation.Source.enabledOverrides()
+                    guard !cask.isManagementProtected else {
+                        Self.logger.info("Pending Homebrew adoption blocked for externally managed app \(cask.fullToken)")
+                        return
+                    }
+                    if let reason = cask.homebrewManagementBlockReason {
+                        Self.logger.info("Pending Homebrew adoption blocked for unsupported cask \(cask.fullToken)")
+                        self.alert.show(title: "Homebrew management unavailable", message: reason)
+                        return
+                    }
                     do {
                         try configuration.validateCurrent()
                     } catch {
@@ -239,8 +317,8 @@ final class CaskManager {
 
     // MARK: - Search Forwarding
 
-    func search(query: String, externalOnly: Bool = false) async throws -> [CaskViewModel] {
-        try await dataLoader.search(query: query, externalOnly: externalOnly)
+    func search(query: String, installedOnly: Bool = false) async throws -> [CaskViewModel] {
+        try await dataLoader.search(query: query, installedOnly: installedOnly)
     }
     
     // MARK: - Data Loading

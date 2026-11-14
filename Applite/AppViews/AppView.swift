@@ -27,8 +27,6 @@ struct AppView: View {
     @AppStorage(Preferences.detectExternallyInstalledApps) private var detectExternallyInstalledApps
     @AppStorage(Preferences.offerHomebrewManagement) private var offerHomebrewManagement
 
-    @State private var isLoadingInfo = false
-
     // Alerts
     @State var failureAlertMessage = ""
     @State var showingFailureAlert = false
@@ -47,7 +45,7 @@ struct AppView: View {
 
     var body: some View {
         HStack {
-            IconAndDescriptionView(cask: cask, isLoadingDetails: isLoadingInfo, showDetails: showInfo)
+            IconAndDescriptionView(cask: cask, showDetails: showInfo)
             IconsAndWarnings(cask: cask)
             actionsView
         }
@@ -108,7 +106,7 @@ struct AppView: View {
     /// right-click context menu. Items depend on whether the app is installed.
     @ViewBuilder
     private var optionsMenuContent: some View {
-        if cask.isInstalled {
+        if cask.isInstalled && !cask.isManagementProtected {
             getInfoButton
 
             Button {
@@ -116,6 +114,8 @@ struct AppView: View {
             } label: {
                 Label("Reinstall", systemImage: "arrow.2.squarepath")
             }
+            .disabled(cask.homebrewManagementBlockReason != nil)
+            .help(cask.homebrewManagementBlockReason ?? String(localized: "Reinstall with Homebrew"))
 
             Divider()
 
@@ -131,7 +131,7 @@ struct AppView: View {
                 Label("Uninstall & delete app data", systemImage: "trash.fill")
             }
         } else {
-            if cask.isInstalledExternally {
+            if cask.isInstalledExternally || cask.isManagementProtected {
                 OpenButton(cask: cask)
             }
 
@@ -149,7 +149,6 @@ struct AppView: View {
         Button(action: showInfo) {
             Label("Get Info", systemImage: "info")
         }
-        .disabled(isLoadingInfo)
     }
 
     /// Ellipsis button that opens the "more options" menu (native dropdown).
@@ -168,21 +167,7 @@ struct AppView: View {
     }
 
     private func showInfo() {
-        guard !isLoadingInfo else { return }
-        isLoadingInfo = true
-        Task {
-            defer { isLoadingInfo = false }
-            await getInfo()
-        }
-    }
-
-    private func getInfo() async {
-        do {
-            let info = try await caskManager.getAdditionalInfoForCask(cask)
-            openWindow(value: info)
-        } catch {
-            caskManager.alert.show(error: error, title: "Failed to gather cask info")
-        }
+        caskManager.selectedAppDetails = cask
     }
 
     @ViewBuilder
@@ -216,31 +201,52 @@ struct AppView: View {
 
     @ViewBuilder
     private var mainButtons: some View {
-        switch role {
-        case .installAndManage, .installed:
-            if cask.isInstalled {
-                OpenButton(cask: cask)
-            } else if cask.isInstalledExternally {
-                if detectExternallyInstalledApps && offerHomebrewManagement {
-                    Button("Manage with Homebrew") {
-                        caskManager.confirmAdoption(cask)
-                    }
-                    .cardActionPill()
-                    .frame(maxWidth: 140)
-                    .disabled(cask.warning?.isDisabled ?? false)
-                    .help("Reinstall with Homebrew so this app is tracked and updated by Homebrew.")
-                } else {
-                    OpenButton(cask: cask)
-                }
-            } else {
-                DownloadButton(cask: cask)
+        if let protection = cask.managementProtection {
+            Button(protection.source.displayName) { }
+                .cardActionPill()
+                .frame(maxWidth: 140)
+                .disabled(true)
+                .saturation(0)
+                .help(protection.source.blockError.localizedDescription)
+            if showsOptionsMenu {
+                optionsMenuButton
             }
+        } else if let reason = cask.homebrewManagementBlockReason, !cask.isInstalled || role == .update {
+            Button("Homebrew unavailable") { }
+                .cardActionPill()
+                .frame(maxWidth: 140)
+                .disabled(true)
+                .saturation(0)
+                .help(reason)
+            if showsOptionsMenu {
+                optionsMenuButton
+            }
+        } else {
+            switch role {
+            case .installAndManage, .installed:
+                if cask.isInstalled {
+                    OpenButton(cask: cask)
+                } else if cask.isInstalledExternally {
+                    if detectExternallyInstalledApps && offerHomebrewManagement {
+                        Button("Manage with Homebrew") {
+                            caskManager.confirmAdoption(cask)
+                        }
+                        .cardActionPill()
+                        .frame(maxWidth: 140)
+                        .disabled(cask.homebrewManagementBlockReason != nil)
+                        .help("Reinstall with Homebrew so this app is tracked and updated by Homebrew.")
+                    } else {
+                        OpenButton(cask: cask)
+                    }
+                } else {
+                    DownloadButton(cask: cask)
+                }
 
-            optionsMenuButton
+                optionsMenuButton
 
-        case .update:
-            UpdateButton(cask: cask)
-
+            case .update:
+                UpdateButton(cask: cask)
+            }
         }
     }
 

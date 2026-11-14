@@ -4,7 +4,7 @@ import Observation
 @Observable
 final class SettingsNavigation {
     enum Pane: Hashable {
-        case general, brew, updates, proxy, mirrors, uninstall
+        case general, apps, brew, updates, proxy, mirrors, uninstall
     }
 
     var selection: Pane = .general

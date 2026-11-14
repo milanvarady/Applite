@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(CaskManager.self) var caskManager
-    @AppStorage(Preferences.detectExternallyInstalledApps) private var detectExternallyInstalledApps
 
     /// Currently selected sidebar item. Optional so the selection can be cleared
     /// while a search is active, so a sidebar tap can interrupt the search instead
@@ -57,18 +56,27 @@ struct ContentView: View {
     }
 
     private var mainNavigation: some View {
-        NavigationSplitView {
+        @Bindable var manager = caskManager
+        return NavigationSplitView {
             SidebarView(selection: $selection)
                 .disabled(modifyingBrew)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 216)
         } detail: {
-            if !searchInput.isEmpty {
-                SearchView(query: $searchInput)
-            } else if selection != nil {
-                DetailView(
-                    selection: $selection,
-                    modifyingBrew: $modifyingBrew
-                )
+            NavigationStack {
+                Group {
+                    if !searchInput.isEmpty {
+                        SearchView(query: $searchInput)
+                    } else if selection != nil {
+                        DetailView(
+                            selection: $selection,
+                            modifyingBrew: $modifyingBrew
+                        )
+                    }
+                }
+                .navigationDestination(item: $manager.selectedAppDetails) { cask in
+                    AppDetailsView(cask: cask)
+                        .id(cask.id)
+                }
             }
         }
         // Re-runs on launch and whenever the install sheet's Retry / "use my own brew" escape
@@ -79,14 +87,10 @@ struct ContentView: View {
         .searchable(text: $searchInput, placement: .sidebar)
         .onChange(of: searchInput) { _, newValue in handleSearchInputChange(newValue) }
         .onChange(of: selection) { _, newValue in handleSelectionChange(newValue) }
-        .onChange(of: detectExternallyInstalledApps) { _, enabled in
-            guard !enabled else { return }
-            if lastSelection == .externalInstalled { lastSelection = .home }
-            if selection == .externalInstalled { selection = .home }
-        }
         // A deep view (e.g. "See Active Tasks" on a batched card) requested a tab — apply it.
         .onChange(of: caskManager.requestedTab) { _, requested in
             if let requested {
+                caskManager.selectedAppDetails = nil
                 searchInput = ""
                 selection = requested
                 caskManager.requestedTab = nil
@@ -111,6 +115,7 @@ struct ContentView: View {
     // MARK: - Search
 
     private func handleSearchInputChange(_ newValue: String) {
+        caskManager.selectedAppDetails = nil
         // Limit search characters
         if newValue.count > 30 {
             searchInput = String(newValue.prefix(30))
@@ -130,6 +135,9 @@ struct ContentView: View {
     }
 
     private func handleSelectionChange(_ newValue: SidebarItem?) {
+        if newValue != nil {
+            caskManager.selectedAppDetails = nil
+        }
         // Sidebar tap during a search wins: clear the query so the detail
         // switches from SearchView to the tapped destination.
         if newValue != nil, !searchInput.isEmpty {

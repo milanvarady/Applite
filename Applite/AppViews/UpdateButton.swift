@@ -18,5 +18,7 @@ struct UpdateButton: View {
             Label("Update", systemImage: "arrow.triangle.2.circlepath")
         }
         .cardActionPill()
+        .disabled(cask.homebrewManagementBlockReason != nil || cask.isManagementProtected)
+        .help(cask.homebrewManagementBlockReason ?? String(localized: "Update with Homebrew"))
     }
 }

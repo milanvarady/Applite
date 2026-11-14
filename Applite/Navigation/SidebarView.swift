@@ -10,7 +10,6 @@ import SwiftUI
 struct SidebarView: View {
     @Environment(CaskManager.self) var caskManager
     @Binding var selection: SidebarItem?
-    @AppStorage(Preferences.detectExternallyInstalledApps) private var detectExternallyInstalledApps
     
     var body: some View {
         List(selection: $selection) {
@@ -24,13 +23,8 @@ struct SidebarView: View {
                 .tag(SidebarItem.updates)
             
             Label("Installed", systemImage: "externaldrive.badge.checkmark")
+                .badge(caskManager.locallyInstalledCount)
                 .tag(SidebarItem.installed)
-
-            if detectExternallyInstalledApps {
-                Label("Installed externally", systemImage: "app.badge.checkmark")
-                    .badge(caskManager.externalInstalledCount)
-                    .tag(SidebarItem.externalInstalled)
-            }
             
             Label("Active Tasks", systemImage: "gearshape")
                 .badge(caskManager.activeTasks.count)

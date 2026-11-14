@@ -46,6 +46,12 @@ struct SettingsView: View {
                 }
                 .tag(SettingsNavigation.Pane.general)
 
+            AppSettingsView(alert: alert)
+                .tabItem {
+                    Label("Apps", systemImage: "square.stack.3d.up")
+                }
+                .tag(SettingsNavigation.Pane.apps)
+
             BrewSettingsView(alert: alert)
                 .tabItem {
                     Label("Brew", systemImage: "mug")

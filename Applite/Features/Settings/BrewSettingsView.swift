@@ -18,9 +18,6 @@ struct BrewSettingsView: View {
 
     @AppStorage(Preferences.customUserBrewPath) var customUserBrewPath
     @AppStorage(Preferences.brewPathOption) var brewPathOption
-    @AppStorage(Preferences.includeCasksFromTaps) var includeCasksFromTaps
-    @AppStorage(Preferences.detectExternallyInstalledApps) var detectExternallyInstalledApps
-    @AppStorage(Preferences.offerHomebrewManagement) var offerHomebrewManagement
     @AppStorage(Preferences.annexUpdateFrequency) var annexUpdateFrequency
     @AppStorage(Preferences.appdirOn) private var appdirOn
     @AppStorage(Preferences.appdirPath) private var appdirPath
@@ -33,24 +30,18 @@ struct BrewSettingsView: View {
     // first frame (before the check runs) and then animate it out.
     @State var isSelectedBrewPathValid = true
 
-    /// Baseline of the settings as they were when the catalog was last loaded, captured from the
-    /// `@AppStorage` values in `.onAppear`. `nil` until then — so `needsRefresh` is false on the
-    /// first frame and the refresh banner can't flash in before a baseline exists.
+    /// Captured on appearance so the refresh banner cannot flash on the first frame.
     @State var previousBrewOption: Int?
-    @State var previousIncludeCasksFromTaps: Bool?
 
     var needsRefresh: Bool {
-        guard let previousBrewOption, let previousIncludeCasksFromTaps else { return false }
-        return previousBrewOption != brewPathOption ||
-            previousIncludeCasksFromTaps != includeCasksFromTaps
+        guard let previousBrewOption else { return false }
+        return previousBrewOption != brewPathOption
     }
 
     var body: some View {
         Form {
             pathSettings
             annexUpdateSettings
-            tapSettings
-            appdirSettings
         }
         .formStyle(.grouped)
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -60,10 +51,6 @@ struct BrewSettingsView: View {
         .animation(.default, value: isSelectedBrewPathValid)
         .onAppear {
             previousBrewOption = brewPathOption
-            previousIncludeCasksFromTaps = includeCasksFromTaps
-        }
-        .onChange(of: detectExternallyInstalledApps) { _, _ in
-            caskManager.applyExternalAppDetectionSetting(surfacingErrorsIn: alert)
         }
         .onChange(of: [String(brewPathOption), customUserBrewPath, String(appdirOn), appdirPath]) { _, _ in
             caskManager.applyExternalAppDetectionSetting(surfacingErrorsIn: alert)
@@ -99,7 +86,7 @@ struct BrewSettingsView: View {
     }
 
     /// Banner asking the user to refresh the catalog after a setting that
-    /// affects the catalog (brew path or tap inclusion) has changed. Pinned to
+    /// affects the catalog (brew path) has changed. Pinned to
     /// the bottom of the pane via `safeAreaInset` so it stays visible even when
     /// the form is scrolled.
     @ViewBuilder
@@ -128,7 +115,6 @@ struct BrewSettingsView: View {
                         // as though the change had been applied when nothing was fetched.
                         guard loaded else { return }
                         previousBrewOption = brewPathOption
-                        previousIncludeCasksFromTaps = includeCasksFromTaps
                     } label: {
                         Label("Refresh Catalog", systemImage: "arrow.clockwise")
                     }
@@ -163,54 +149,6 @@ struct BrewSettingsView: View {
                     }
                 }
             }
-        }
-    }
-
-    var tapSettings: some View {
-        Section("App Sources") {
-            GreedyUpgradeToggle()
-
-            Toggle(isOn: $includeCasksFromTaps) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Include Third-Party Taps", comment: "Brew settings tap toggle title")
-                    Text("Also show apps from Homebrew taps (third-party repositories) you've added manually. (Homebrew: `tap`)", comment: "Brew settings tap toggle description")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Toggle(isOn: $detectExternallyInstalledApps) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Detect externally installed apps")
-                    Text("Find apps installed outside Homebrew. Turning this off hides external app status and filters without changing your apps.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Toggle(isOn: $offerHomebrewManagement) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Offer Manage with Homebrew")
-                    Text("Show \"Manage with Homebrew\" on external app cards. Reinstalls require confirmation.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    if !detectExternallyInstalledApps {
-                        Text("Requires external app detection.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-            .padding(.leading, 20)
-            .foregroundStyle(detectExternallyInstalledApps ? Color.primary : Color.secondary)
-            .tint(detectExternallyInstalledApps ? Color.accentColor : Color.gray)
-            .disabled(!detectExternallyInstalledApps)
-        }
-    }
-
-    var appdirSettings: some View {
-        Section("Installation Location") {
-            AppdirSelectorView()
         }
     }
 

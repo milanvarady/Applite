@@ -9,9 +9,9 @@ import SwiftUI
 
 struct IconAndDescriptionView: View {
     var cask: CaskViewModel
-    var isLoadingDetails: Bool
     var showDetails: () -> Void
     @Environment(\.openURL) private var openURL
+    @State private var isHoveringDetails = false
     
     var body: some View {
         HStack {
@@ -32,33 +32,27 @@ struct IconAndDescriptionView: View {
                     guard !NSEvent.modifierFlags.contains(.command) else { return }
                     showDetails()
                 } label: {
-                    Text(cask.name)
-                        .font(.system(size: 16, weight: .bold))
-                        .overlay(alignment: .bottom) {
-                            if isLoadingDetails {
-                                ProgressView()
-                                    .progressViewStyle(.linear)
-                                    .controlSize(.mini)
-                                    .frame(height: 2)
-                                    .offset(y: 3)
-                                    .accessibilityHidden(true)
-                            }
-                        }
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(cask.name)
+                            .font(.system(size: 16, weight: .bold))
+
+                        Text(cask.descriptionText)
+                            .foregroundStyle(.secondary)
+                    }
+                    .multilineTextAlignment(.leading)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .disabled(isLoadingDetails)
+                .onHover(perform: updateDetailsCursor)
+                .onDisappear {
+                    updateDetailsCursor(false)
+                }
                 .accessibilityLabel("Show details for \(cask.name)")
-                .help(isLoadingDetails ? Text("Loading app details...") : Text("Show app details"))
+                .accessibilityHint(cask.descriptionText)
+                .help("Show app details")
 
-                Text(cask.descriptionText)
-                    .foregroundStyle(.secondary)
-
-                if cask.isInstalled {
+                if cask.isLocallyInstalled {
                     Text("Installed")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else if cask.isInstalledExternally {
-                    Text("Installed externally")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -76,5 +70,15 @@ struct IconAndDescriptionView: View {
                     }
                 }
         )
+    }
+
+    private func updateDetailsCursor(_ hovering: Bool) {
+        guard hovering != isHoveringDetails else { return }
+        isHoveringDetails = hovering
+        if hovering {
+            NSCursor.pointingHand.push()
+        } else {
+            NSCursor.pop()
+        }
     }
 }

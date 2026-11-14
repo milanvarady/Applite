@@ -7,6 +7,10 @@ enum ExternalInstallTests {
     @MainActor
     static func main() async throws {
         precondition(Bundle.main.bundleIdentifier == "dev.applite.ExternalInstallTests")
+        let defaults = UserDefaults.standard
+        defaults.removePersistentDomain(forName: "dev.applite.ExternalInstallTests")
+        defer { defaults.removePersistentDomain(forName: "dev.applite.ExternalInstallTests") }
+        testInstalledListOptions()
         let httpProxy = URLSessionConfiguration.ephemeral
         httpProxy.connectionProxyDictionary = ["HTTPEnable": 1, "HTTPProxy": "127.0.0.1", "HTTPPort": 8080]
         let originalDownloader = AppIconView.faviconDownloader(configuration: httpProxy)
@@ -82,6 +86,75 @@ enum ExternalInstallTests {
             bundleNames: ["Not A Bundle.app"], displayName: "", directories: directories
         ) == nil)
 
+        func appRecord(_ token: String, bundle: String, tap: String = "homebrew/cask") -> CaskRecord {
+            CaskRecord(
+                token: token, fullToken: tap == "homebrew/cask" ? token : "\(tap)/\(token)", tap: tap,
+                name: "1Password", descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: [bundle]
+            )
+        }
+        let password = systemApps.appendingPathComponent("1Password.app", isDirectory: true)
+        let nightlyApp = systemApps.appendingPathComponent("1Password Nightly.app", isDirectory: true)
+        let applite = systemApps.appendingPathComponent("Applite.app", isDirectory: true)
+        for app in [password, nightlyApp, applite] {
+            try fm.createDirectory(at: app, withIntermediateDirectories: true)
+        }
+        let stable = appRecord("1password", bundle: "1Password.app")
+        let beta = appRecord("1password@beta", bundle: "1Password.app")
+        let nightly = appRecord("1password@nightly", bundle: "1Password.app")
+        let tapped = appRecord("1password", bundle: "1Password.app", tap: "example/tap")
+        let selfRecord = appRecord("applite", bundle: "Applite.app")
+        let selfAlias = appRecord("applite@beta", bundle: "Applite.app")
+        let candidates = [nightly, tapped, selfRecord, beta, stable, selfAlias]
+        let deduplicated = try ExternalAppDetector.installations(
+            catalog: candidates, managedTokens: [], directories: directories
+        ).externalAppURLs
+        precondition(deduplicated == [stable.fullToken: password], "One bundle must not become multiple installed channels")
+        let reversedDetection = try ExternalAppDetector.installations(
+            catalog: candidates.reversed(), managedTokens: [], directories: directories
+        )
+        precondition(reversedDetection.externalAppURLs == deduplicated, "Catalog order must not choose the channel")
+        let managedBeta = try ExternalAppDetector.installations(
+            catalog: candidates, managedTokens: [beta.fullToken], directories: directories
+        )
+        precondition(managedBeta.externalAppURLs.isEmpty, "A managed beta must suppress external stable/nightly matches of its bundle")
+        let managedTap = try ExternalAppDetector.installations(
+            catalog: candidates, managedTokens: [tapped.fullToken], directories: directories
+        )
+        precondition(managedTap.externalAppURLs.isEmpty, "A managed third-party cask owns its bundle ahead of an unmanaged official cask")
+
+        let separateNightly = appRecord("1password@nightly", bundle: "1Password Nightly.app")
+        let separate = try ExternalAppDetector.installations(
+            catalog: [stable, separateNightly], managedTokens: [], directories: directories
+        ).externalAppURLs
+        precondition(separate == [stable.fullToken: password, separateNightly.fullToken: nightlyApp],
+                     "Distinct bundles with the same display name must remain separate")
+        let alias = userApps.appendingPathComponent("Password Alias.app")
+        try fm.createSymbolicLink(at: alias, withDestinationURL: password)
+        let aliasRecord = appRecord("1password-alias", bundle: "Password Alias.app", tap: "example/tap")
+        let symlinkDetection = try ExternalAppDetector.installations(
+            catalog: [aliasRecord, stable], managedTokens: [], directories: directories
+        )
+        precondition(symlinkDetection.externalAppURLs == [stable.fullToken: password],
+                     "Symlinks to the same bundle must not create another installed app")
+
+        let displayRegistry = CaskViewModelRegistry()
+        let stableVM = displayRegistry.viewModel(for: stable)
+        let nightlyVM = displayRegistry.viewModel(for: separateNightly)
+        let selfVM = displayRegistry.viewModel(for: selfRecord)
+        displayRegistry.markInstalled(tokens: [stable.fullToken, selfRecord.fullToken])
+        displayRegistry.markExternalInstallations(appURLs: [separateNightly.fullToken: nightlyApp])
+        precondition(Set(displayRegistry.locallyInstalledViewModels.map(\.fullToken)) == [stable.fullToken, separateNightly.fullToken])
+        precondition(displayRegistry.locallyInstalledCount == 2)
+        precondition(selfVM.isInstalled, "Self-exclusion must not change Homebrew receipts")
+        displayRegistry.markExternalInstallations(appURLs: [selfRecord.fullToken: applite])
+        precondition(displayRegistry.locallyInstalledViewModels == [stableVM])
+        precondition(displayRegistry.locallyInstalledCount == 1 && !nightlyVM.isLocallyInstalled)
+        displayRegistry.markInstalled(tokens: [])
+        displayRegistry.markExternalInstallations(appURLs: [selfRecord.fullToken: applite])
+        precondition(displayRegistry.locallyInstalledCount == 0, "Detected Applite must stay out of list totals")
+
         // Upgrade a v1 catalog in memory and verify its records and FTS triggers survive.
         let dbQueue = try DatabaseQueue()
         try AppDatabase.migrator().migrate(dbQueue, upTo: "v1_initial")
@@ -141,8 +214,6 @@ enum ExternalInstallTests {
         precondition(registry.externalInstalledCount == 0)
 
         // Confirmation does not run brew. No user's preferences or app database are modified.
-        let defaults = UserDefaults.standard
-        defer { defaults.removePersistentDomain(forName: "dev.applite.ExternalInstallTests") }
         defaults.removeObject(forKey: Preferences.detectExternallyInstalledApps.name)
         defaults.removeObject(forKey: Preferences.offerHomebrewManagement.name)
         defaults.setValue(true, for: Preferences.appdirOn)
@@ -207,15 +278,20 @@ enum ExternalInstallTests {
         let scanPool = try DatabasePool(path: root.appendingPathComponent("catalog.sqlite").path)
         try AppDatabase.migrator().migrate(scanPool)
         var scanRecord = tapRecord
-        scanRecord.appBundleNames = ["Helper.app"]
+        scanRecord.appBundleNames = ["External Helper.app"]
+        try fm.createDirectory(at: userApps.appendingPathComponent("External Helper.app"), withIntermediateDirectories: true)
         let externalRecord = scanRecord
         try await scanPool.write { db in
             try record.insert(db)
             try externalRecord.insert(db)
+            try selfRecord.insert(db)
         }
         let loader = CaskDataLoader(
-            dbService: CaskDatabaseService(databasePool: scanPool), registry: registry
+            dbService: CaskDatabaseService(databasePool: scanPool), registry: registry,
+            intuneInventory: { .empty }, artCraftInventory: { .empty }
         )
+        let selfResults = try await loader.search(query: "applite")
+        precondition(selfResults.isEmpty, "Applite must stay out of catalog search, not just its grid")
         defaults.setValue(userApps.path, for: Preferences.appdirPath)
         try await loader.refreshExternalInstallations()
         precondition(tapVM.installationState == .notInstalled)
@@ -255,8 +331,32 @@ enum ExternalInstallTests {
         fixture_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
         case "$1" in
           --version) echo "Homebrew fixture" ;;
+          info)
+            if [ -f "$fixture_dir/info-wait" ] &&
+               { [ ! -f "$fixture_dir/info-wait-token" ] || [ "$(cat "$fixture_dir/info-wait-token")" = "$4" ]; }; then
+              touch "$fixture_dir/info-started"
+              while [ -f "$fixture_dir/info-wait" ]; do sleep 0.01; done
+            fi
+            if [ -f "$fixture_dir/info-fail" ]; then
+              echo "Error: metadata fixture unavailable" >&2
+              exit 1
+            fi
+            if [ -f "$fixture_dir/info.json" ] && [ "$(cat "$fixture_dir/info-token")" = "$4" ]; then
+              cat "$fixture_dir/info.json"
+            else
+              token="${4##*/}"
+              case "$4" in
+                */*) tap="${4%/*}" ;;
+                *) tap="homebrew/cask" ;;
+              esac
+              printf '{"casks":[{"token":"%s","full_token":"%s","tap":"%s","homepage":"https://example.test/","url":"https://example.test/app.dmg","deprecated":false,"disabled":false}]}' "$token" "$4" "$tap"
+            fi ;;
           list)
-            if [ -f "$fixture_dir/managed" ]; then echo "example/tap/sample"; fi ;;
+            if [ -f "$fixture_dir/managed-tokens" ]; then
+              cat "$fixture_dir/managed-tokens"
+            elif [ -f "$fixture_dir/managed" ]; then
+              echo "example/tap/sample"
+            fi ;;
           outdated)
             if [ -f "$fixture_dir/fail-outdated" ]; then exit 1; fi
             if [ -f "$fixture_dir/pause-outdated" ]; then
@@ -272,6 +372,12 @@ enum ExternalInstallTests {
             touch "$fixture_dir/managed"
             echo "fixture success stderr" >&2
             echo "sample was successfully installed!" ;;
+          uninstall)
+            printf '%s\\n' "$@" > "$fixture_dir/arguments"
+            echo "fixture uninstalled" ;;
+          upgrade|reinstall)
+            printf '%s\\n' "$@" > "$fixture_dir/arguments"
+            echo "fixture was successfully upgraded!" ;;
           *) echo "Unexpected command" >&2; exit 2 ;;
         esac
         """
@@ -283,7 +389,7 @@ enum ExternalInstallTests {
         let failMarker = root.appendingPathComponent("fail")
         try Data().write(to: failMarker)
 
-        let service = BrewService(notify: { _, _, _ in })
+        let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
         let installedService = InstalledCaskService()
         var refreshCount = 0
         let reconcile: @MainActor () async throws -> Void = {
@@ -314,12 +420,1357 @@ enum ExternalInstallTests {
         precondition(registry.externalInstalledCount == 0)
         precondition(registry.externalInstalledViewModels.isEmpty)
         precondition(service.activeTasks.isEmpty)
+        try await testAppStorePrecedence(root: root, service: service, ordinaryCask: tapVM)
+        try await testIntunePrecedence(root: root, ordinaryCask: tapVM)
+        try await testSetappPrecedence(root: root, ordinaryCask: tapVM)
+        try await testArtCraftPrecedence(root: root, ordinaryCask: tapVM)
+        try await testHomebrewCompatibility(root: root, ordinaryCask: tapVM)
+        try await testManagementSourceOverrides(root: root, ordinaryCask: tapVM)
+        try await testOwnershipReviewRaces(root: root)
+        try await testInstalledBundleProjection(root: root)
         try await testAdoptionRaces(
             root: root, loader: loader, registry: registry, vm: tapVM,
-            appURL: helper, customApps: customApps, service: service
+            appURL: userApps.appendingPathComponent("External Helper.app", isDirectory: true),
+            customApps: customApps, service: service
         )
         try await testOutdatedRefreshLifetime(root: root, loader: loader, registry: registry, service: service)
-        print("PASS: detection, migration/FTS, identity/totals, default-enabled setting/disable guards, and adoption success/failure")
+        if CommandLine.arguments.contains("--live-intune") {
+            try checkLiveIntuneInventory()
+        }
+        if CommandLine.arguments.contains("--live-setapp") {
+            try checkLiveSetappInstallations()
+        }
+        if CommandLine.arguments.contains("--live-artcraft") {
+            try checkLiveArtCraftInventory()
+        }
+        print("PASS: default-off source overrides, enable consent, retained ownership, remaining-source guards, queued/metadata-time revocation, exact enabled Homebrew-cask eligibility, unsupported/failed verification guards, Intune/App Store/Setapp/ArtCraft precedence and queued/bulk write protection, Installed sorting/source/update/search filters, bundle/channel deduplication, managed ownership, self-exclusion, unified Installed totals, detection/settings guards, migration/FTS, and adoption success/failure")
+    }
+
+    @MainActor
+    private static func testAppStorePrecedence(
+        root: URL, service: BrewService, ordinaryCask: CaskViewModel
+    ) async throws {
+        let fm = FileManager.default
+        let apps = root.appendingPathComponent("Store Apps", isDirectory: true)
+        let app = apps.appendingPathComponent("Store Fixture.app", isDirectory: true)
+        let receiptDirectory = app.appendingPathComponent("Contents/_MASReceipt", isDirectory: true)
+        let receipt = receiptDirectory.appendingPathComponent("receipt")
+        try fm.createDirectory(at: receipt, withIntermediateDirectories: true)
+        precondition(!ExternalAppDetector.hasAppStoreReceipt(at: app), "A receipt directory is not a receipt file")
+        try fm.removeItem(at: receipt)
+        try Data("sandbox fixture".utf8).write(to: receiptDirectory.appendingPathComponent("sandboxReceipt"))
+        precondition(!ExternalAppDetector.hasAppStoreReceipt(at: app), "A sandbox receipt must not imply App Store management")
+        try Data("receipt fixture".utf8).write(to: receipt)
+        precondition(ExternalAppDetector.hasAppStoreReceipt(at: app))
+
+        func record(_ token: String) -> CaskRecord {
+            CaskRecord(
+                token: token, fullToken: token, tap: "homebrew/cask",
+                name: "Store Fixture", descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: ["Store Fixture.app"]
+            )
+        }
+        let stable = record("store-fixture")
+        let beta = record("store-fixture@beta")
+        let vendorApps = root.appendingPathComponent("Vendor Apps", isDirectory: true)
+        try fm.createDirectory(at: vendorApps.appendingPathComponent("Store Fixture.app"), withIntermediateDirectories: true)
+        let preferredStore = try ExternalAppDetector.installations(
+            catalog: [stable], managedTokens: [], directories: [vendorApps, apps]
+        )
+        precondition(preferredStore.externalAppURLs[stable.fullToken] == app,
+                     "An App Store copy must take precedence over a direct-download copy in another standard location")
+        let scan = try ExternalAppDetector.installations(
+            catalog: [beta, stable], managedTokens: [stable.fullToken], directories: [apps]
+        )
+        precondition(scan.externalAppURLs.isEmpty)
+        precondition(scan.appStoreAppURLs == [stable.fullToken: app, beta.fullToken: app],
+                     "App Store protection must cover aliases and take precedence over a stale brew receipt")
+        let registry = CaskViewModelRegistry()
+        let vm = registry.viewModel(for: stable)
+        _ = registry.viewModel(for: beta)
+        registry.markInstalled(tokens: [stable.fullToken])
+        registry.markExternalInstallations(appURLs: scan.externalAppURLs, appStoreAppURLs: scan.appStoreAppURLs)
+        registry.markOutdated(tokens: [stable.token])
+        precondition(vm.isInstalled && vm.isAppStoreManaged && registry.outdatedCount == 0)
+        precondition(InstalledListOptions(source: .homebrew).apply(to: [vm]).isEmpty)
+        precondition(InstalledListOptions(source: .other).apply(to: [vm]).isEmpty)
+        precondition(InstalledListOptions(source: .appStore).apply(to: [vm]) == [vm])
+        registry.clearExternalInstallations()
+        precondition(vm.isAppStoreManaged, "Disabling external listings must not discard known App Store protection")
+
+        registry.markInstalled(tokens: [])
+        let externalScan = try ExternalAppDetector.installations(catalog: [beta, stable], managedTokens: [], directories: [apps])
+        registry.markExternalInstallations(
+            appURLs: externalScan.externalAppURLs, appStoreAppURLs: externalScan.appStoreAppURLs
+        )
+        precondition(registry.locallyInstalledCount == 1 && vm.isInstalledExternally)
+        let defaults = UserDefaults.standard
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        defaults.setValue(apps.path, for: Preferences.appdirPath)
+        let manager = CaskManager(registry: registry, brewService: service)
+        manager.confirmAdoption(vm)
+        precondition(manager.alert.current == nil, "An App Store app must not be offered adoption")
+
+        // A receipt can appear after confirmation but before the queued install starts.
+        try fm.removeItem(at: receipt)
+        registry.markExternalInstallations(appURLs: [stable.fullToken: app])
+        manager.confirmAdoption(vm)
+        let pending = manager.alert.current!
+        let argumentsURL = root.appendingPathComponent("arguments")
+        let previousArguments = try Data(contentsOf: argumentsURL)
+        try Data("receipt fixture".utf8).write(to: receipt)
+        pending.actions.first?.handler?()
+        _ = try await service.runSerialized { true }
+        precondition(vm.isAppStoreManaged && !vm.isInstalled)
+        guard case .failed(let output) = vm.progressState else {
+            preconditionFailure("A stale adoption must fail explicitly without running brew")
+        }
+        precondition(output.contains(CaskAdoptionError.appStoreManaged.localizedDescription))
+        let afterPendingAdoption = try Data(contentsOf: argumentsURL)
+        precondition(afterPendingAdoption == previousArguments)
+
+        service.dismissFailure(vm)
+        registry.markExternalInstallations(appURLs: [stable.fullToken: app])
+        let cachedManager = CaskManager(registry: registry, brewService: service)
+        cachedManager.confirmAdoption(vm)
+        let cachedPending = cachedManager.alert.current!
+        registry.markExternalInstallations(appURLs: [stable.fullToken: app], appStoreAppURLs: [stable.fullToken: app])
+        cachedPending.actions.first?.handler?()
+        precondition(service.activeTasks.isEmpty, "A pending confirmation must respect refreshed App Store ownership")
+
+        try fm.removeItem(at: receipt)
+        registry.markExternalInstallations(appURLs: [stable.fullToken: app])
+        var queueGate: CheckedContinuation<Void, Never>?
+        let blocker = Task {
+            try await service.runSerialized {
+                await withCheckedContinuation { queueGate = $0 }
+                return true
+            }
+        }
+        let deadline = Date().addingTimeInterval(5)
+        while queueGate == nil && Date() < deadline {
+            await Task.yield()
+        }
+        precondition(queueGate != nil, "The fixture must hold the operation queue before enqueueing")
+        let queuedInstall = service.install(vm)
+        do {
+            try Data("receipt fixture".utf8).write(to: receipt)
+        } catch {
+            queueGate?.resume()
+            throw error
+        }
+        queueGate?.resume()
+        _ = try await blocker.value
+        await queuedInstall.value
+        precondition(vm.isAppStoreManaged && !vm.isInstalled,
+                     "A receipt added while waiting must be checked when the operation actually executes")
+        let afterQueuedInstall = try Data(contentsOf: argumentsURL)
+        precondition(afterQueuedInstall == previousArguments)
+
+        await service.install(vm).value
+        await service.update(vm).value
+        vm.isInstalled = true
+        service.reinstall(vm)
+        service.uninstall(vm, zap: true)
+        _ = try await service.runSerialized { true }
+        guard case .failed(let protectedOutput) = vm.progressState else {
+            preconditionFailure("App Store mutations must remain blocked")
+        }
+        precondition(protectedOutput.contains(CaskAdoptionError.appStoreManaged.localizedDescription))
+        precondition(vm.isInstalled, "Blocking an uninstall must not remove or rewrite Homebrew's receipt state")
+        let afterSingleOperations = try Data(contentsOf: argumentsURL)
+        precondition(afterSingleOperations == previousArguments)
+
+        service.installAll([vm])
+        _ = try await service.runSerialized { true }
+        service.updateAll([vm])
+        _ = try await service.runSerialized { true }
+        let afterProtectedBatches = try Data(contentsOf: argumentsURL)
+        precondition(afterProtectedBatches == previousArguments)
+        precondition(service.batchProgress == nil)
+
+        service.installAll([vm, ordinaryCask])
+        _ = try await service.runSerialized { true }
+        let batchArguments = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(batchArguments.contains(ordinaryCask.fullToken))
+        precondition(batchArguments.contains("--appdir=\(apps.path)"))
+        precondition(!batchArguments.contains(vm.fullToken), "A mixed bulk install must exclude App Store apps")
+        precondition(ordinaryCask.isInstalled && !ordinaryCask.progressState.isFailed)
+
+        // Imports/disabled detection must still check the real bundle before any write.
+        defaults.setValue(false, for: Preferences.detectExternallyInstalledApps)
+        let unresolved = CaskViewModel(record: stable)
+        await service.install(unresolved).value
+        precondition(unresolved.isAppStoreManaged && !unresolved.isInstalled)
+        let afterUnresolvedImport = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(afterUnresolvedImport == batchArguments)
+
+        try fm.removeItem(at: receipt)
+        registry.markInstalled(tokens: [])
+        let refreshed = try ExternalAppDetector.installations(catalog: [stable], managedTokens: [], directories: [apps])
+        registry.markExternalInstallations(appURLs: refreshed.externalAppURLs, appStoreAppURLs: refreshed.appStoreAppURLs)
+        precondition(!vm.isAppStoreManaged && vm.isInstalledExternally,
+                     "A later non-App-Store installation must not retain stale App Store ownership")
+    }
+
+    @MainActor
+    private static func testIntunePrecedence(root: URL, ordinaryCask: CaskViewModel) async throws {
+        let fm = FileManager.default
+        let directory = root.appendingPathComponent("Intune Fixture", isDirectory: true)
+        let agent = directory.appendingPathComponent("Agent.app", isDirectory: true)
+        let app = directory.appendingPathComponent("Managed Fixture.app", isDirectory: true)
+        try fm.createDirectory(at: agent, withIntermediateDirectories: true)
+        try fm.createDirectory(at: app.appendingPathComponent("Contents/_MASReceipt"), withIntermediateDirectories: true)
+        let plist = try PropertyListSerialization.data(
+            fromPropertyList: ["CFBundleIdentifier": "org.fixture.managed"], format: .xml, options: 0
+        )
+        try plist.write(to: app.appendingPathComponent("Contents/Info.plist"))
+        try Data("receipt fixture".utf8).write(to: app.appendingPathComponent("Contents/_MASReceipt/receipt"))
+
+        let databaseURL = directory.appendingPathComponent("sidecar.sqlite")
+        do {
+            _ = try IntuneAppDetector.load(agentURL: agent, databaseURL: databaseURL)
+            preconditionFailure("An installed agent with unavailable inventory must not be interpreted as unmanaged")
+        } catch CaskAdoptionError.intuneInventoryUnavailable { }
+        let database = try DatabaseQueue(path: databaseURL.path)
+        try await database.write { db in
+            try db.execute(sql: "CREATE TABLE ZAPPSTATECHANGEITEM (ZPOLICYRESULTJSON TEXT NOT NULL)")
+        }
+        let policy = """
+        {"Policy":{"PrimaryApplicationBundleId":"org.fixture.primary",
+        "AppInfos":[{"BundleId":"org.fixture.managed"},{"BundleId":"org.fixture.managed"}]}}
+        """
+        func setPolicy(_ json: String?) throws {
+            try database.write { db in
+                try db.execute(sql: "DELETE FROM ZAPPSTATECHANGEITEM")
+                if let json {
+                    try db.execute(sql: "INSERT INTO ZAPPSTATECHANGEITEM VALUES (?)", arguments: [json])
+                }
+            }
+        }
+        try setPolicy(policy)
+        let missingAgent = try IntuneAppDetector.load(
+            agentURL: directory.appendingPathComponent("Missing Agent.app"), databaseURL: databaseURL
+        )
+        precondition(missingAgent.bundleIDs.isEmpty, "A leftover policy cache without the agent must not imply management")
+        let snapshot = try IntuneAppDetector.load(agentURL: agent, databaseURL: databaseURL)
+        precondition(snapshot.bundleIDs == ["org.fixture.primary", "org.fixture.managed"])
+        let matches = try snapshot.isManagedApp(at: app)
+        precondition(matches)
+
+        let otherApp = directory.appendingPathComponent("Other Fixture.app", isDirectory: true)
+        try fm.createDirectory(at: otherApp.appendingPathComponent("Contents"), withIntermediateDirectories: true)
+        let otherPlist = try PropertyListSerialization.data(
+            fromPropertyList: ["CFBundleIdentifier": "ORG.fixture.managed"], format: .binary, options: 0
+        )
+        try otherPlist.write(to: otherApp.appendingPathComponent("Contents/Info.plist"))
+        let otherMatches = try snapshot.isManagedApp(at: otherApp)
+        precondition(!otherMatches, "Agent presence and similar bundle IDs must not classify unrelated apps")
+
+        func record(_ token: String) -> CaskRecord {
+            CaskRecord(
+                token: token, fullToken: token, tap: "homebrew/cask",
+                name: "Unrelated Display Name", descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: ["Managed Fixture.app"]
+            )
+        }
+        let stable = record("intune-fixture")
+        let alias = record("intune-fixture@beta")
+        let scan = try ExternalAppDetector.installations(
+            catalog: [alias, stable], managedTokens: [stable.fullToken], directories: [directory], intune: snapshot
+        )
+        precondition(scan.intuneAppURLs == [stable.fullToken: app, alias.fullToken: app])
+        precondition(scan.appStoreAppURLs == scan.intuneAppURLs && scan.externalAppURLs.isEmpty,
+                     "Retain secondary App Store evidence without duplicating a managed installation")
+        let registry = CaskViewModelRegistry()
+        let vm = registry.viewModel(for: stable)
+        _ = registry.viewModel(for: alias)
+        registry.markInstalled(tokens: [stable.fullToken])
+        registry.markExternalInstallations(
+            appURLs: [:], appStoreAppURLs: scan.appStoreAppURLs, intuneAppURLs: scan.intuneAppURLs
+        )
+        registry.markOutdated(tokens: [stable.token])
+        precondition(vm.isInstalled && vm.isIntuneManaged && !vm.isAppStoreManaged)
+        precondition(registry.outdatedCount == 0 && registry.outdatedViewModels.isEmpty)
+        precondition(InstalledListOptions(source: .intune).apply(to: [vm]) == [vm])
+        for source in [InstalledListOptions.Source.homebrew, .appStore, .setapp, .artCraft, .other] {
+            precondition(InstalledListOptions(source: source).apply(to: [vm]).isEmpty)
+        }
+        registry.clearExternalInstallations()
+        precondition(vm.isIntuneManaged)
+
+        let service = BrewService(notify: { _, _, _ in }, intuneInventory: {
+            try IntuneAppDetector.load(agentURL: agent, databaseURL: databaseURL)
+        }, artCraftInventory: { .empty })
+        let defaults = UserDefaults.standard
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        defaults.setValue(directory.path, for: Preferences.appdirPath)
+        let manager = CaskManager(registry: registry, brewService: service)
+        manager.confirmAdoption(vm)
+        precondition(manager.alert.current == nil)
+
+        // A newly received Intune assignment must invalidate a previously offered adoption.
+        registry.markInstalled(tokens: [])
+        registry.markExternalInstallations(appURLs: [stable.fullToken: app])
+        try setPolicy(nil)
+        manager.confirmAdoption(vm)
+        let pending = manager.alert.current!
+        try setPolicy(policy)
+        let argumentsURL = root.appendingPathComponent("arguments")
+        let before = try Data(contentsOf: argumentsURL)
+        pending.actions.first?.handler?()
+        _ = try await service.runSerialized { true }
+        precondition(vm.isIntuneManaged && !vm.isInstalled)
+        guard case .failed(let reason) = vm.progressState else {
+            preconditionFailure("A stale adoption must not bypass Intune ownership")
+        }
+        precondition(reason.contains(CaskAdoptionError.intuneManaged.localizedDescription))
+
+        vm.isInstalled = true
+        await service.update(vm).value
+        service.reinstall(vm)
+        service.uninstall(vm, zap: true)
+        _ = try await service.runSerialized { true }
+        service.installAll([vm])
+        service.updateAll([vm])
+        _ = try await service.runSerialized { true }
+        let afterProtectedOperations = try Data(contentsOf: argumentsURL)
+        precondition(before == afterProtectedOperations && vm.isInstalled)
+
+        service.installAll([vm, ordinaryCask])
+        _ = try await service.runSerialized { true }
+        let mixedArguments = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(mixedArguments.contains(ordinaryCask.fullToken) && !mixedArguments.contains(vm.fullToken))
+        precondition(ordinaryCask.isInstalled && !ordinaryCask.progressState.isFailed)
+
+        defaults.setValue(false, for: Preferences.detectExternallyInstalledApps)
+        let imported = CaskViewModel(record: stable)
+        await service.install(imported).value
+        precondition(imported.isIntuneManaged && !imported.isInstalled)
+
+        try setPolicy("not valid JSON")
+        await service.install(ordinaryCask).value
+        guard case .failed(let failure) = ordinaryCask.progressState else {
+            preconditionFailure("Unavailable Intune inventory must block writes, not assume unmanaged")
+        }
+        precondition(failure.contains(CaskAdoptionError.intuneInventoryUnavailable.localizedDescription))
+        service.updateAll([vm, ordinaryCask])
+        _ = try await service.runSerialized { true }
+        let afterInventoryFailure = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(afterInventoryFailure == mixedArguments)
+
+        try setPolicy(nil)
+        let cleared = try IntuneAppDetector.load(agentURL: agent, databaseURL: databaseURL)
+        let fallback = try ExternalAppDetector.protectedInstallation(
+            bundleNames: stable.appBundleNames, displayName: stable.name,
+            directories: [directory], intune: cleared
+        )
+        precondition(fallback?.source == .appStore,
+                     "Removing an Intune policy must restore independent App Store protection")
+        registry.markExternalInstallations(appURLs: [:], appStoreAppURLs: [stable.fullToken: app])
+        precondition(vm.isAppStoreManaged && !vm.isIntuneManaged)
+        try await database.write { db in try db.execute(sql: "DROP TABLE ZAPPSTATECHANGEITEM") }
+        do {
+            _ = try IntuneAppDetector.load(agentURL: agent, databaseURL: databaseURL)
+            preconditionFailure("An unsupported inventory schema must not be interpreted as no managed apps")
+        } catch CaskAdoptionError.intuneInventoryUnavailable { }
+    }
+
+    @MainActor
+    private static func testSetappPrecedence(root: URL, ordinaryCask: CaskViewModel) async throws {
+        let fm = FileManager.default
+        let defaults = UserDefaults.standard
+        let apps = root.appendingPathComponent("Setapp", isDirectory: true)
+        func makeApp(_ name: String, identifier: String) throws -> URL {
+            let app = apps.appendingPathComponent("\(name).app", isDirectory: true)
+            try fm.createDirectory(at: app.appendingPathComponent("Contents/Resources"), withIntermediateDirectories: true)
+            try setIdentifier(identifier, at: app)
+            return app
+        }
+        func setIdentifier(_ identifier: String, at app: URL) throws {
+            let plist = try PropertyListSerialization.data(
+                fromPropertyList: ["CFBundleIdentifier": identifier], format: .binary, options: 0
+            )
+            try plist.write(to: app.appendingPathComponent("Contents/Info.plist"))
+        }
+        let app = try makeApp("Subscription Fixture", identifier: "org.fixture.subscription-setapp")
+        let identifiedByBundle = try ExternalAppDetector.isSetappApp(at: app)
+        precondition(identifiedByBundle)
+        let legacy = try makeApp("Legacy Fixture", identifier: "org.fixture.legacy")
+        let key = legacy.appendingPathComponent("Contents/Resources/setappPublicKey.pem")
+        try fm.createDirectory(at: key, withIntermediateDirectories: true)
+        let keyDirectory = try ExternalAppDetector.isSetappApp(at: legacy)
+        precondition(!keyDirectory, "A directory named like a public key is not Setapp evidence")
+        try fm.removeItem(at: key)
+        try Data("public-key fixture".utf8).write(to: key)
+        let identifiedByResource = try ExternalAppDetector.isSetappApp(at: legacy)
+        precondition(identifiedByResource, "The documented main-bundle key supports older bundle IDs")
+        let unrelated = try makeApp("Unrelated Fixture", identifier: "org.fixture.not-setapp.helper")
+        let unrelatedMatch = try ExternalAppDetector.isSetappApp(at: unrelated)
+        precondition(!unrelatedMatch, "A Setapp folder or a substring in an ID must not classify unrelated apps")
+
+        func record(_ token: String) -> CaskRecord {
+            CaskRecord(
+                token: token, fullToken: token, tap: "homebrew/cask",
+                name: "Subscription Fixture", descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: ["Subscription Fixture.app"]
+            )
+        }
+        let stable = record("subscription-fixture")
+        let alias = record("subscription-fixture@beta")
+        let direct = root.appendingPathComponent("Direct Apps", isDirectory: true)
+        try fm.createDirectory(at: direct.appendingPathComponent("Subscription Fixture.app"), withIntermediateDirectories: true)
+        let scan = try ExternalAppDetector.installations(
+            catalog: [alias, stable], managedTokens: [], directories: [direct, apps]
+        )
+        precondition(scan.externalAppURLs == [stable.fullToken: app],
+                     "Setapp must be found in another scanned location even when a direct copy exists")
+        precondition(scan.setappAppURLs == [stable.fullToken: app, alias.fullToken: app])
+        let intune = try ExternalAppDetector.protectedInstallation(
+            bundleNames: stable.appBundleNames, displayName: stable.name, directories: [apps],
+            intune: IntuneAppDetector.Snapshot(bundleIDs: ["org.fixture.subscription-setapp"])
+        )
+        precondition(intune?.source == .intune, "Setapp must not override organizational ownership")
+        let receipt = app.appendingPathComponent("Contents/_MASReceipt/receipt")
+        try fm.createDirectory(at: receipt.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data("receipt fixture".utf8).write(to: receipt)
+        let store = try ExternalAppDetector.protectedInstallation(
+            bundleNames: stable.appBundleNames, displayName: stable.name, directories: [apps], intune: .empty
+        )
+        precondition(store?.source == .appStore)
+        try fm.removeItem(at: receipt)
+
+        let registry = CaskViewModelRegistry()
+        let vm = registry.viewModel(for: stable)
+        _ = registry.viewModel(for: alias)
+        registry.markInstalled(tokens: [stable.fullToken])
+        registry.markExternalInstallations(appURLs: scan.externalAppURLs, setappAppURLs: scan.setappAppURLs)
+        registry.markOutdated(tokens: [stable.token])
+        precondition(vm.isInstalled && vm.isSetappManaged && registry.outdatedCount == 0)
+        precondition(InstalledListOptions(source: .setapp).apply(to: [vm]) == [vm])
+        for source in [InstalledListOptions.Source.homebrew, .appStore, .intune, .artCraft, .other] {
+            precondition(InstalledListOptions(source: source).apply(to: [vm]).isEmpty)
+        }
+        registry.clearExternalInstallations()
+        precondition(vm.isSetappManaged)
+
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        defaults.setValue("/Applications/Setapp", for: Preferences.appdirPath)
+        let locations = InstalledAppLocator.applicationDirectories
+        precondition(locations.filter { $0 == URL(fileURLWithPath: "/Applications/Setapp", isDirectory: true) }.count == 1)
+        precondition(locations.contains(fm.homeDirectoryForCurrentUser.appendingPathComponent("Applications/Setapp", isDirectory: true)))
+        defaults.setValue(apps.path, for: Preferences.appdirPath)
+        let pool = try DatabasePool(path: root.appendingPathComponent("setapp-catalog.sqlite").path)
+        try AppDatabase.migrator().migrate(pool)
+        try await pool.write { db in
+            try stable.insert(db)
+            try alias.insert(db)
+        }
+        let loader = CaskDataLoader(
+            dbService: CaskDatabaseService(databasePool: pool), registry: registry,
+            intuneInventory: { .empty }, artCraftInventory: { .empty }
+        )
+        registry.markInstalled(tokens: [])
+        try await loader.refreshExternalInstallations()
+        precondition(vm.isSetappManaged && vm.isInstalledExternally && registry.locallyInstalledCount == 1)
+        let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
+        let manager = CaskManager(registry: registry, brewService: service)
+        manager.confirmAdoption(vm)
+        precondition(manager.alert.current == nil, "Known Setapp apps must never offer adoption")
+
+        try setIdentifier("org.fixture.subscription", at: app)
+        registry.markExternalInstallations(appURLs: [stable.fullToken: app])
+        manager.confirmAdoption(vm)
+        let pending = manager.alert.current!
+        try setIdentifier("org.fixture.subscription-setapp", at: app)
+        let argumentsURL = root.appendingPathComponent("arguments")
+        let before = try Data(contentsOf: argumentsURL)
+        pending.actions.first?.handler?()
+        _ = try await service.runSerialized { true }
+        guard case .failed(let reason) = vm.progressState else {
+            preconditionFailure("A stale adoption must not bypass Setapp ownership")
+        }
+        precondition(vm.isSetappManaged && !vm.isInstalled)
+        precondition(reason.contains(CaskAdoptionError.setappManaged.localizedDescription))
+        vm.isInstalled = true
+        service.uninstall(vm, zap: true)
+        service.updateAll([vm])
+        _ = try await service.runSerialized { true }
+        let afterProtectedOperations = try Data(contentsOf: argumentsURL)
+        precondition(before == afterProtectedOperations && vm.isInstalled)
+
+        service.installAll([vm, ordinaryCask])
+        _ = try await service.runSerialized { true }
+        let mixedArguments = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(mixedArguments.contains(ordinaryCask.fullToken) && !mixedArguments.contains(vm.fullToken))
+        precondition(ordinaryCask.isInstalled && !ordinaryCask.progressState.isFailed)
+        defaults.setValue(false, for: Preferences.detectExternallyInstalledApps)
+        let imported = CaskViewModel(record: stable)
+        await service.install(imported).value
+        precondition(imported.isSetappManaged && !imported.isInstalled)
+
+        // The legacy resource marker must also be rechecked at execution, not just during listing.
+        try setIdentifier("org.fixture.subscription", at: app)
+        let appKey = app.appendingPathComponent("Contents/Resources/setappPublicKey.pem")
+        try Data("public-key fixture".utf8).write(to: appKey)
+        await service.install(vm).value
+        precondition(vm.isSetappManaged)
+        let afterResourceProtection = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(afterResourceProtection == mixedArguments)
+        try fm.removeItem(at: appKey)
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        registry.markInstalled(tokens: [])
+        try await loader.refreshExternalInstallations()
+        precondition(!vm.isManagementProtected && vm.isInstalledExternally,
+                     "Replacing a Setapp build with an ordinary build must clear stale ownership")
+        try Data("invalid plist".utf8).write(to: app.appendingPathComponent("Contents/Info.plist"))
+        do {
+            _ = try ExternalAppDetector.isSetappApp(at: app)
+            preconditionFailure("Unreadable bundle metadata must report an error, not imply unmanaged")
+        } catch is DecodingError { }
+    }
+
+    @MainActor
+    private static func testArtCraftPrecedence(root: URL, ordinaryCask: CaskViewModel) async throws {
+        let fm = FileManager.default
+        let apps = root.appendingPathComponent("Launcher Owned Apps", isDirectory: true)
+        let app = apps.appendingPathComponent("Launcher Fixture.app", isDirectory: true)
+        try fm.createDirectory(at: app.appendingPathComponent("Contents"), withIntermediateDirectories: true)
+        let plist = try PropertyListSerialization.data(
+            fromPropertyList: ["CFBundleIdentifier": "org.fixture.launcher"], format: .xml, options: 0
+        )
+        try plist.write(to: app.appendingPathComponent("Contents/Info.plist"))
+        let manifest = root.appendingPathComponent("launcher-installed.json")
+        let absent = try ArtCraftAppDetector.load(manifestURL: manifest)
+        precondition(absent.appURLs.isEmpty, "A new/unused launcher has no installation records")
+        do {
+            _ = try ArtCraftAppDetector.load(manifestURL: apps)
+            preconditionFailure("An unreadable manifest must not be interpreted as absent")
+        } catch CaskAdoptionError.artCraftInventoryUnavailable { }
+        func writeManifest(_ paths: [String], kind: String = "Dmg") throws {
+            let entries = Dictionary(uniqueKeysWithValues: paths.enumerated().map {
+                ("entry-\($0.offset)", ["kind": kind, "path": $0.element, "version": "1.0"])
+            })
+            try JSONEncoder().encode(["apps": entries]).write(to: manifest, options: .atomic)
+        }
+        try writeManifest([app.path, apps.appendingPathComponent("Gone.app").path])
+        let snapshot = try ArtCraftAppDetector.load(manifestURL: manifest)
+        precondition(snapshot.appURLs == [app])
+        let link = root.appendingPathComponent("Launcher Alias.app")
+        try fm.createSymbolicLink(at: link, withDestinationURL: app)
+        precondition(snapshot.isManagedApp(at: link), "A bundle symlink must not bypass recorded ownership")
+        let direct = root.appendingPathComponent("Unrelated Apps", isDirectory: true)
+        let directCopy = direct.appendingPathComponent("Launcher Fixture.app", isDirectory: true)
+        try fm.createDirectory(at: directCopy, withIntermediateDirectories: true)
+        precondition(!snapshot.isManagedApp(at: directCopy), "A matching name alone must not establish ownership")
+        func record(_ token: String) -> CaskRecord {
+            CaskRecord(
+                token: token, fullToken: token, tap: "homebrew/cask",
+                name: "Launcher Fixture", descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: ["Launcher Fixture.app"]
+            )
+        }
+        let stable = record("launcher-fixture")
+        let alias = record("launcher-fixture@beta")
+        let scan = try ExternalAppDetector.installations(
+            catalog: [alias, stable], managedTokens: [], directories: [], artCraft: snapshot
+        )
+        precondition(scan.externalAppURLs == [stable.fullToken: app],
+                     "Recorded custom installation paths must work outside standard scan roots")
+        precondition(scan.artCraftAppURLs == [stable.fullToken: app, alias.fullToken: app])
+        let acrossLocations = try ExternalAppDetector.protectedInstallation(
+            bundleNames: stable.appBundleNames, displayName: stable.name, directories: [direct],
+            intune: .empty, artCraft: snapshot
+        )
+        precondition(acrossLocations?.url == app && acrossLocations?.source == .artCraft)
+        let intune = try ExternalAppDetector.protectedInstallation(
+            bundleNames: stable.appBundleNames, displayName: stable.name, directories: [],
+            intune: IntuneAppDetector.Snapshot(bundleIDs: ["org.fixture.launcher"]), artCraft: snapshot
+        )
+        precondition(intune?.source == .intune)
+        let receipt = app.appendingPathComponent("Contents/_MASReceipt/receipt")
+        try fm.createDirectory(at: receipt.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data("receipt fixture".utf8).write(to: receipt)
+        let store = try ExternalAppDetector.protectedInstallation(
+            bundleNames: stable.appBundleNames, displayName: stable.name, directories: [],
+            intune: .empty, artCraft: snapshot
+        )
+        precondition(store?.source == .appStore)
+        try fm.removeItem(at: receipt)
+        let resource = app.appendingPathComponent("Contents/Resources/setappPublicKey.pem")
+        try fm.createDirectory(at: resource.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data("public-key fixture".utf8).write(to: resource)
+        let setapp = try ExternalAppDetector.protectedInstallation(
+            bundleNames: stable.appBundleNames, displayName: stable.name, directories: [],
+            intune: .empty, artCraft: snapshot
+        )
+        precondition(setapp?.source == .setapp)
+        try fm.removeItem(at: resource)
+
+        let registry = CaskViewModelRegistry()
+        let vm = registry.viewModel(for: stable)
+        _ = registry.viewModel(for: alias)
+        registry.markInstalled(tokens: [stable.fullToken])
+        registry.markExternalInstallations(appURLs: [:], artCraftAppURLs: scan.artCraftAppURLs)
+        registry.markOutdated(tokens: [stable.token])
+        precondition(vm.isInstalled && vm.isArtCraftManaged && registry.outdatedCount == 0)
+        precondition(InstalledListOptions(source: .artCraft).apply(to: [vm]) == [vm])
+        for source in [InstalledListOptions.Source.homebrew, .appStore, .intune, .setapp, .other] {
+            precondition(InstalledListOptions(source: source).apply(to: [vm]).isEmpty)
+        }
+        registry.clearExternalInstallations()
+        precondition(vm.isArtCraftManaged)
+        let defaults = UserDefaults.standard
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        defaults.setValue(direct.path, for: Preferences.appdirPath)
+        let pool = try DatabasePool(path: root.appendingPathComponent("launcher-catalog.sqlite").path)
+        try AppDatabase.migrator().migrate(pool)
+        try await pool.write { db in
+            try stable.insert(db)
+            try alias.insert(db)
+        }
+        let loader = CaskDataLoader(
+            dbService: CaskDatabaseService(databasePool: pool), registry: registry,
+            intuneInventory: { .empty }, artCraftInventory: { try ArtCraftAppDetector.load(manifestURL: manifest) }
+        )
+        registry.markInstalled(tokens: [])
+        try await loader.refreshExternalInstallations()
+        precondition(vm.isArtCraftManaged && vm.isInstalledExternally && registry.locallyInstalledCount == 1)
+        let service = BrewService(
+            notify: { _, _, _ in }, intuneInventory: { .empty },
+            artCraftInventory: { try ArtCraftAppDetector.load(manifestURL: manifest) }
+        )
+        let manager = CaskManager(registry: registry, brewService: service)
+        manager.confirmAdoption(vm)
+        precondition(manager.alert.current == nil)
+        try writeManifest([])
+        registry.markExternalInstallations(appURLs: [stable.fullToken: app])
+        manager.confirmAdoption(vm)
+        let pending = manager.alert.current!
+        try writeManifest([app.path])
+        let argumentsURL = root.appendingPathComponent("arguments")
+        let before = try Data(contentsOf: argumentsURL)
+        pending.actions.first?.handler?()
+        _ = try await service.runSerialized { true }
+        guard case .failed(let reason) = vm.progressState else {
+            preconditionFailure("A launcher assignment received after confirmation must block adoption")
+        }
+        precondition(vm.isArtCraftManaged && reason.contains(CaskAdoptionError.artCraftManaged.localizedDescription))
+        vm.isInstalled = true
+        service.uninstall(vm, zap: true)
+        service.updateAll([vm])
+        _ = try await service.runSerialized { true }
+        let afterProtectedOperations = try Data(contentsOf: argumentsURL)
+        precondition(afterProtectedOperations == before && vm.isInstalled)
+        service.installAll([vm, ordinaryCask])
+        _ = try await service.runSerialized { true }
+        let mixedArguments = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(mixedArguments.contains(ordinaryCask.fullToken) && !mixedArguments.contains(vm.fullToken))
+        precondition(ordinaryCask.isInstalled && !ordinaryCask.progressState.isFailed)
+        defaults.setValue(false, for: Preferences.detectExternallyInstalledApps)
+        let imported = CaskViewModel(record: stable)
+        await service.install(imported).value
+        precondition(imported.isArtCraftManaged && !imported.isInstalled)
+
+        for invalid in ["not JSON", "{\"apps\":[]}", "{\"apps\":{\"bad\":{\"kind\":\"Dmg\",\"path\":\"relative.app\"}}}",
+                        "{\"apps\":{\"bad\":{\"kind\":\"Unknown\",\"path\":\"/Applications/Future.app\"}}}"] {
+            try Data(invalid.utf8).write(to: manifest, options: .atomic)
+            await service.install(ordinaryCask).value
+            guard case .failed(let failure) = ordinaryCask.progressState else {
+                preconditionFailure("An unreadable or unsupported launcher inventory must block writes")
+            }
+            precondition(failure.contains(CaskAdoptionError.artCraftInventoryUnavailable.localizedDescription))
+        }
+        service.installAll([vm, ordinaryCask])
+        _ = try await service.runSerialized { true }
+        let afterInventoryFailure = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(afterInventoryFailure == mixedArguments && vm.isArtCraftManaged)
+        try writeManifest([])
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        defaults.setValue(apps.path, for: Preferences.appdirPath)
+        registry.markInstalled(tokens: [])
+        try await loader.refreshExternalInstallations()
+        precondition(vm.isInstalledExternally && !vm.isManagementProtected,
+                     "Removing the launcher record must clear cached ownership on refresh")
+    }
+
+    @MainActor
+    private static func testHomebrewCompatibility(root: URL, ordinaryCask: CaskViewModel) async throws {
+        let fm = FileManager.default
+        let defaults = UserDefaults.standard
+        let apps = root.appendingPathComponent("Compatibility Apps", isDirectory: true)
+        let app = apps.appendingPathComponent("Compatibility Fixture.app", isDirectory: true)
+        try fm.createDirectory(at: app, withIntermediateDirectories: true)
+        defaults.setValue(apps.path, for: Preferences.appdirPath)
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        func record(_ token: String, warning: CaskRecord.WarningType? = nil) -> CaskRecord {
+            CaskRecord(
+                token: token, fullToken: token, tap: "homebrew/cask", name: "Compatibility Fixture",
+                descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: warning, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: ["Compatibility Fixture.app"]
+            )
+        }
+        let registry = CaskViewModelRegistry()
+        let disabled = registry.viewModel(for: record("disabled-fixture", warning: .disabled))
+        let vm = registry.viewModel(for: record("compatibility-fixture"))
+        let deprecated = registry.viewModel(for: record("deprecated-fixture", warning: .deprecated))
+        registry.markExternalInstallations(appURLs: [disabled.fullToken: app, vm.fullToken: app])
+        precondition(disabled.homebrewManagementBlockReason != nil && deprecated.homebrewManagementBlockReason == nil)
+        let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
+        let manager = CaskManager(registry: registry, brewService: service)
+        manager.confirmAdoption(disabled)
+        precondition(manager.alert.current?.title == "Homebrew management unavailable")
+        let argumentsURL = root.appendingPathComponent("arguments")
+        let before = try Data(contentsOf: argumentsURL)
+        await service.install(disabled).value
+        precondition(disabled.progressState.isFailed && !disabled.isInstalled)
+
+        let override = root.appendingPathComponent("info.json")
+        let overrideToken = root.appendingPathComponent("info-token")
+        try vm.fullToken.write(to: overrideToken, atomically: true, encoding: .utf8)
+        func info(_ cask: CaskViewModel, disabled: Bool = false) -> [String: Any] {
+            [
+                "token": cask.token, "full_token": cask.fullToken, "tap": cask.tap,
+                "homepage": "https://example.test/", "url": "https://example.test/app.dmg",
+                "deprecated": false, "disabled": disabled
+            ]
+        }
+        func setInfo(_ entries: [[String: Any]]) throws {
+            try JSONSerialization.data(withJSONObject: ["casks": entries]).write(to: override, options: .atomic)
+        }
+        let freshManager = CaskManager(registry: registry, brewService: service)
+        freshManager.confirmAdoption(vm)
+        let pending = freshManager.alert.current!
+        try setInfo([info(vm, disabled: true)])
+        pending.actions.first?.handler?()
+        _ = try await service.runSerialized { true }
+        precondition(vm.homebrewManagementBlockReason != nil && vm.isInstalledExternally)
+        let afterDisabledAdoption = try Data(contentsOf: argumentsURL)
+        precondition(afterDisabledAdoption == before, "A newly disabled cask must not be adopted")
+        for entries in [[], [info(ordinaryCask)]] {
+            try setInfo(entries)
+            await service.install(vm).value
+            guard case .failed(let reason) = vm.progressState else {
+                preconditionFailure("Missing/formula-only or mismatched casks must not be installed")
+            }
+            precondition(reason.contains(CaskAdoptionError.homebrewUnavailable.localizedDescription))
+        }
+        var wrongTap = info(vm)
+        wrongTap["full_token"] = "other/tap/\(vm.token)"
+        wrongTap["tap"] = "other/tap"
+        try setInfo([wrongTap])
+        await service.install(vm).value
+        precondition(vm.progressState.isFailed)
+        try Data("invalid JSON".utf8).write(to: override)
+        await service.install(vm).value
+        precondition(vm.progressState.isFailed)
+        let infoFailure = root.appendingPathComponent("info-fail")
+        try Data().write(to: infoFailure)
+        await service.install(vm).value
+        guard case .failed(let lookupError) = vm.progressState else {
+            preconditionFailure("A failed support check must block writes")
+        }
+        precondition(lookupError.contains("metadata fixture unavailable"))
+        try fm.removeItem(at: infoFailure)
+        let afterFailedLookups = try Data(contentsOf: argumentsURL)
+        precondition(afterFailedLookups == before)
+
+        registry.clearHomebrewManagementErrors()
+        try setInfo([info(vm)])
+        let queuedService = BrewService(
+            notify: { _, _, _ in },
+            intuneInventory: {
+                // Change availability in the ownership preflight after the queued operation starts.
+                try Data("{\"casks\":[]}".utf8).write(to: override, options: .atomic)
+                return .empty
+            },
+            artCraftInventory: { .empty }
+        )
+        var queueGate: CheckedContinuation<Void, Never>?
+        let blocker = Task {
+            try await queuedService.runSerialized {
+                await withCheckedContinuation { queueGate = $0 }
+                return true
+            }
+        }
+        let deadline = Date().addingTimeInterval(5)
+        while queueGate == nil && Date() < deadline {
+            await Task.yield()
+        }
+        precondition(queueGate != nil)
+        let queuedInstall = queuedService.install(vm)
+        queueGate?.resume()
+        _ = try await blocker.value
+        await queuedInstall.value
+        let afterQueuedCheck = try Data(contentsOf: argumentsURL)
+        precondition(vm.progressState.isFailed && afterQueuedCheck == before
+                     && vm.homebrewManagementError == CaskAdoptionError.homebrewUnavailable.localizedDescription,
+                     "Availability changing after enqueueing must be rechecked at execution, before any write")
+
+        try setInfo([info(vm, disabled: true)])
+        vm.isInstalled = true
+        service.reinstall(vm)
+        await service.update(vm).value
+        _ = try await service.runSerialized { true }
+        precondition(vm.progressState.isFailed && vm.isInstalled)
+        registry.markOutdated(tokens: [vm.token, disabled.token])
+        precondition(registry.outdatedCount == 0)
+        service.installAll([vm, ordinaryCask])
+        _ = try await service.runSerialized { true }
+        let mixedArguments = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(mixedArguments.contains(ordinaryCask.fullToken) && !mixedArguments.contains(vm.fullToken))
+        precondition(ordinaryCask.isInstalled && !ordinaryCask.progressState.isFailed)
+        service.updateAll([vm, disabled])
+        _ = try await service.runSerialized { true }
+        let afterUnsupportedUpdates = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(afterUnsupportedUpdates == mixedArguments)
+
+        // Retired casks can still be removed, but only when Homebrew actually owns the installation.
+        try Data().write(to: infoFailure)
+        service.uninstall(vm)
+        _ = try await service.runSerialized { true }
+        precondition(!vm.isInstalled && !vm.progressState.isFailed)
+        let removal = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(removal.hasPrefix("uninstall\n--cask\n\(vm.fullToken)\n"))
+        service.uninstall(vm)
+        _ = try await service.runSerialized { true }
+        precondition(vm.progressState.isFailed)
+        let afterUnmanagedRemoval = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(afterUnmanagedRemoval == removal)
+        try fm.removeItem(at: infoFailure)
+        registry.clearHomebrewManagementErrors()
+        precondition(vm.homebrewManagementBlockReason == nil && disabled.homebrewManagementBlockReason != nil)
+        var supported = info(vm)
+        supported["deprecated"] = true
+        try setInfo([supported])
+        await service.install(vm, confirmedConfiguration: .current).value
+        precondition(vm.isInstalled && !vm.progressState.isFailed && vm.homebrewManagementBlockReason == nil)
+        try fm.removeItem(at: override)
+        try fm.removeItem(at: overrideToken)
+    }
+
+    @MainActor
+    private static func testManagementSourceOverrides(root: URL, ordinaryCask: CaskViewModel) async throws {
+        let defaults = UserDefaults.standard
+        let sources = ProtectedAppInstallation.Source.allCases
+        precondition(sources.allSatisfy { !defaults.value(for: $0.overridePreference) })
+        let previousDetection = defaults.value(for: Preferences.detectExternallyInstalledApps)
+        let previousManagement = defaults.value(for: Preferences.offerHomebrewManagement)
+        defer {
+            for source in sources { defaults.removeObject(forKey: source.overridePreference.name) }
+            defaults.setValue(previousDetection, for: Preferences.detectExternallyInstalledApps)
+            defaults.setValue(previousManagement, for: Preferences.offerHomebrewManagement)
+        }
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        let fm = FileManager.default
+        let apps = root.appendingPathComponent("Override Apps", isDirectory: true)
+        let app = apps.appendingPathComponent("Override Fixture.app", isDirectory: true)
+        let receipt = app.appendingPathComponent("Contents/_MASReceipt/receipt")
+        try fm.createDirectory(at: receipt.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data().write(to: receipt)
+        let identifier = "org.fixture.overrides-setapp"
+        let plist = try PropertyListSerialization.data(
+            fromPropertyList: ["CFBundleIdentifier": identifier], format: .xml, options: 0
+        )
+        try plist.write(to: app.appendingPathComponent("Contents/Info.plist"))
+        defaults.setValue(apps.path, for: Preferences.appdirPath)
+        let intune = IntuneAppDetector.Snapshot(bundleIDs: [identifier])
+        let artCraft = ArtCraftAppDetector.Snapshot(appURLs: [app])
+        func record(warning: CaskRecord.WarningType? = nil) -> CaskRecord {
+            CaskRecord(
+                token: "override-fixture", fullToken: "override-fixture", tap: "homebrew/cask",
+                name: "Override Fixture", descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: warning, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: ["Override Fixture.app"]
+            )
+        }
+        let registry = CaskViewModelRegistry()
+        let vm = registry.viewModel(for: record())
+        let scan = try ExternalAppDetector.installations(
+            catalog: [record()], managedTokens: [], directories: [apps], intune: intune, artCraft: artCraft
+        )
+        registry.markExternalInstallations(
+            appURLs: scan.externalAppURLs, appStoreAppURLs: scan.appStoreAppURLs,
+            intuneAppURLs: scan.intuneAppURLs, setappAppURLs: scan.setappAppURLs,
+            artCraftAppURLs: scan.artCraftAppURLs
+        )
+        precondition(vm.protectedAppInstallation?.appURLs.count == 4 && vm.isIntuneManaged)
+        let service = BrewService(
+            notify: { _, _, _ in }, intuneInventory: { intune }, artCraftInventory: { artCraft }
+        )
+        let manager = CaskManager(registry: registry, brewService: service)
+        let argumentsURL = root.appendingPathComponent("arguments")
+        let before = try Data(contentsOf: argumentsURL)
+        func enable(_ source: ProtectedAppInstallation.Source) {
+            let surface = AlertManager()
+            manager.requestManagementSourceOverride(source, enabled: true, surfacingErrorsIn: surface)
+            precondition(!defaults.value(for: source.overridePreference), "Opening a warning must not enable an override")
+            precondition(surface.current?.actions.first?.role == .destructive)
+            surface.current?.actions.first?.handler?()
+            precondition(defaults.value(for: source.overridePreference))
+        }
+
+        let staleSurface = AlertManager()
+        manager.requestManagementSourceOverride(.intune, enabled: true, surfacingErrorsIn: staleSurface)
+        defaults.setValue(false, for: Preferences.offerHomebrewManagement)
+        staleSurface.current?.actions.first?.handler?()
+        precondition(!defaults.value(for: Preferences.overrideIntuneManagement))
+        precondition(staleSurface.pending.contains { $0.title == "Homebrew management disabled" })
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        for (index, source) in sources.enumerated() {
+            let cancelled = AlertManager()
+            manager.requestManagementSourceOverride(source, enabled: true, surfacingErrorsIn: cancelled)
+            cancelled.current?.actions.last?.handler?()
+            precondition(!defaults.value(for: source.overridePreference))
+            enable(source)
+            precondition(vm.protectedAppInstallation?.appURLs.count == 4, "Overrides must not erase detected ownership")
+            if index + 1 < sources.count {
+                let remaining = sources[index + 1]
+                precondition(vm.managementProtection?.source == remaining)
+                await service.install(vm).value
+                guard case .failed(let reason) = vm.progressState else {
+                    preconditionFailure("An override must not bypass another detected source")
+                }
+                precondition(reason.contains(remaining.blockError.localizedDescription))
+                let unchanged = try Data(contentsOf: argumentsURL)
+                precondition(unchanged == before)
+            }
+        }
+        precondition(!vm.isManagementProtected && vm.isInstalledExternally)
+        manager.confirmAdoption(vm)
+        let pendingAdoption = manager.alert.current!
+        precondition(pendingAdoption.message.contains("brew install --cask \(vm.fullToken) --force"))
+        precondition(sources.allSatisfy { pendingAdoption.message.contains($0.name) })
+        manager.requestManagementSourceOverride(.intune, enabled: false, surfacingErrorsIn: AlertManager())
+        pendingAdoption.actions.first?.handler?()
+        _ = try await service.runSerialized { true }
+        let afterStaleAdoption = try Data(contentsOf: argumentsURL)
+        precondition(vm.isManagementProtected && afterStaleAdoption == before)
+        service.installAll([vm, ordinaryCask])
+        _ = try await service.runSerialized { true }
+        let mixedArguments = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(mixedArguments.contains(ordinaryCask.fullToken) && !mixedArguments.contains(vm.fullToken))
+
+        enable(.intune)
+        await service.install(vm, confirmedConfiguration: .current).value
+        precondition(vm.isInstalled && !vm.progressState.isFailed && !vm.isManagementProtected)
+        let installedArguments = try String(contentsOf: argumentsURL, encoding: .utf8)
+        precondition(installedArguments.hasPrefix("install\n--cask\n\(vm.fullToken)\n"))
+        let managedTokens = root.appendingPathComponent("managed-tokens")
+        try vm.fullToken.write(to: managedTokens, atomically: true, encoding: .utf8)
+        defer { try! fm.removeItem(at: managedTokens) }
+        service.installAll([vm])
+        _ = try await service.runSerialized { true }
+        precondition(vm.isInstalled && !vm.progressState.isFailed)
+        vm.isOutdated = true
+        service.updateAll([vm])
+        _ = try await service.runSerialized { true }
+        precondition(!vm.isOutdated && !vm.progressState.isFailed)
+        service.reinstall(vm)
+        _ = try await service.runSerialized { true }
+        precondition(!vm.progressState.isFailed)
+        var intuneFilter = InstalledListOptions()
+        intuneFilter.source = .intune
+        precondition(intuneFilter.apply(to: [vm]) == [vm], "Source filters must retain detected ownership")
+        intuneFilter.source = .homebrew
+        precondition(intuneFilter.apply(to: [vm]) == [vm], "Overridden, tracked apps must also be available under Homebrew")
+        intuneFilter.source = .other
+        precondition(intuneFilter.apply(to: [vm]).isEmpty)
+
+        let beforeRevocation = try Data(contentsOf: argumentsURL)
+        var queueGate: CheckedContinuation<Void, Never>?
+        let blocker = Task {
+            try await service.runSerialized {
+                await withCheckedContinuation { queueGate = $0 }
+                return true
+            }
+        }
+        let queueDeadline = Date().addingTimeInterval(5)
+        while queueGate == nil && Date() < queueDeadline { await Task.yield() }
+        precondition(queueGate != nil)
+        let queuedInstall = service.install(vm)
+        manager.requestManagementSourceOverride(.intune, enabled: false, surfacingErrorsIn: AlertManager())
+        queueGate?.resume()
+        _ = try await blocker.value
+        await queuedInstall.value
+        let afterRevocation = try Data(contentsOf: argumentsURL)
+        precondition(vm.progressState.isFailed && afterRevocation == beforeRevocation)
+
+        enable(.intune)
+        let wait = root.appendingPathComponent("info-wait")
+        let started = root.appendingPathComponent("info-started")
+        for isBatch in [false, true] {
+            if fm.fileExists(atPath: started.path) { try fm.removeItem(at: started) }
+            try Data().write(to: wait)
+            if isBatch {
+                service.installAll([vm])
+            } else {
+                service.install(vm)
+            }
+            let metadataDeadline = Date().addingTimeInterval(5)
+            while !fm.fileExists(atPath: started.path) && Date() < metadataDeadline {
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            let observedMetadata = fm.fileExists(atPath: started.path)
+            manager.requestManagementSourceOverride(.appStore, enabled: false, surfacingErrorsIn: AlertManager())
+            try fm.removeItem(at: wait)
+            _ = try await service.runSerialized { true }
+            precondition(observedMetadata, "The fixture must pause inside the metadata lookup")
+            let afterMetadataRevocation = try Data(contentsOf: argumentsURL)
+            precondition(vm.managementProtection?.source == .appStore && afterMetadataRevocation == beforeRevocation,
+                         "Revocation during asynchronous metadata checks must block single and bulk writes")
+            enable(.appStore)
+        }
+        vm.updateRecord(record(warning: .disabled))
+        await service.install(vm).value
+        let afterUnsupported = try Data(contentsOf: argumentsURL)
+        precondition(vm.homebrewManagementBlockReason != nil && afterUnsupported == beforeRevocation,
+                     "Source overrides must not bypass Homebrew eligibility")
+        defaults.setValue(false, for: Preferences.offerHomebrewManagement)
+        manager.applyAppManagementSettings(surfacingErrorsIn: AlertManager())
+        await service.install(vm).value
+        precondition(vm.managementProtection?.source == .intune && defaults.value(for: Preferences.overrideIntuneManagement))
+        service.uninstall(vm)
+        _ = try await service.runSerialized { true }
+        precondition(vm.isInstalled && vm.progressState.isFailed)
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        defaults.setValue(false, for: Preferences.detectExternallyInstalledApps)
+        await service.install(vm).value
+        precondition(vm.managementProtection?.source == .intune)
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        vm.updateRecord(record())
+        let unavailable = BrewService(
+            notify: { _, _, _ in },
+            intuneInventory: { throw CaskAdoptionError.intuneInventoryUnavailable },
+            artCraftInventory: { artCraft }
+        )
+        await unavailable.install(vm).value
+        guard case .failed(let reason) = vm.progressState else {
+            preconditionFailure("Overrides must not bypass unavailable ownership inventories")
+        }
+        precondition(reason.contains(CaskAdoptionError.intuneInventoryUnavailable.localizedDescription))
+        let afterBlockedOperations = try Data(contentsOf: argumentsURL)
+        precondition(afterBlockedOperations == beforeRevocation)
+        service.uninstall(vm)
+        _ = try await service.runSerialized { true }
+        precondition(!vm.isInstalled && !vm.isInstalledExternally && !vm.progressState.isFailed)
+    }
+
+    private static func checkLiveArtCraftInventory() throws {
+        let snapshot = try ArtCraftAppDetector.load()
+        var matches = 0
+        for app in snapshot.appURLs {
+            let protection = try ExternalAppDetector.protectedInstallation(
+                bundleNames: [app.lastPathComponent], displayName: "", directories: [],
+                knownURL: app, intune: .empty, artCraft: snapshot
+            )
+            if protection?.source == .artCraft { matches += 1 }
+        }
+        print("PASS: live ArtCraft inventory read-only: \(snapshot.appURLs.count) recorded installed bundles; \(matches) ArtCraft ownership matches (no app/account details logged)")
+    }
+
+    private static func checkLiveSetappInstallations() throws {
+        let fm = FileManager.default
+        let roots = [URL.applicationDirectory, fm.homeDirectoryForCurrentUser.appendingPathComponent("Applications")]
+        var matches: Set<URL> = []
+        for directory in roots + roots.map({ $0.appendingPathComponent("Setapp") }) {
+            guard fm.fileExists(atPath: directory.path) else { continue }
+            for app in try fm.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+                where app.pathExtension == "app" {
+                if try ExternalAppDetector.isSetappApp(at: app) {
+                    matches.insert(app.resolvingSymlinksInPath())
+                }
+            }
+        }
+        print("PASS: live Setapp detection read-only: \(matches.count) installed bundles with Setapp distribution markers (no app/account details logged)")
+    }
+
+    private static func checkLiveIntuneInventory() throws {
+        let snapshot = try IntuneAppDetector.load()
+        let fm = FileManager.default
+        var matches: Set<URL> = []
+        for directory in [URL(fileURLWithPath: "/Applications"), fm.homeDirectoryForCurrentUser.appendingPathComponent("Applications")] {
+            guard fm.fileExists(atPath: directory.path) else { continue }
+            for app in try fm.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+                where app.pathExtension == "app" {
+                if try snapshot.isManagedApp(at: app) {
+                    matches.insert(app.resolvingSymlinksInPath())
+                }
+            }
+        }
+        print("PASS: live Intune inventory read-only: \(snapshot.bundleIDs.count) policy bundle IDs; \(matches.count) installed app matches (no app/account details logged)")
+    }
+
+    @MainActor
+    private static func testInstalledListOptions() {
+        func app(_ token: String, name: String, downloads: Int = 0, tap: String = "homebrew/cask") -> CaskViewModel {
+            CaskViewModel(record: CaskRecord(
+                token: token, fullToken: tap == "homebrew/cask" ? token : "\(tap)/\(token)", tap: tap,
+                name: name, descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: downloads
+            ))
+        }
+        let alpha = app("zulu-token", name: "Alpha 2", downloads: 10)
+        let alphaTen = app("alpha-ten", name: "Alpha 10")
+        let beta = app("beta", name: "Beta", downloads: 100)
+        let tappedBeta = app("beta", name: "Beta", downloads: 100, tap: "example/tap")
+        for cask in [alpha, beta, tappedBeta] {
+            cask.isInstalled = true
+        }
+        alphaTen.externalAppURL = URL(fileURLWithPath: "/Applications/Alpha 10.app")
+        beta.isOutdated = true
+        let input = [tappedBeta, beta, alphaTen, alpha]
+
+        var options = InstalledListOptions()
+        precondition(options.apply(to: input) == [alpha, alphaTen, beta, tappedBeta],
+                     "Default sorting uses friendly names and natural numbers, not cask tokens")
+        options.sortOrder = .zToA
+        precondition(options.apply(to: input) == [beta, tappedBeta, alphaTen, alpha])
+        options.sortOrder = .mostDownloaded
+        precondition(options.apply(to: input) == [beta, tappedBeta, alpha, alphaTen])
+        precondition(options.apply(to: input.reversed()) == options.apply(to: input),
+                     "Equal names/downloads must have a stable full-token tie-break")
+
+        options = InstalledListOptions(source: .homebrew)
+        precondition(options.apply(to: input) == [alpha, beta, tappedBeta])
+        options.source = .other
+        precondition(options.apply(to: input) == [alphaTen])
+        options.updatesOnly = true
+        precondition(options.apply(to: input).isEmpty)
+        options.source = .all
+        precondition(options.apply(to: input) == [beta])
+        options.updatesOnly = false
+        precondition(options.apply(to: input, query: "ALPHA") == [alpha, alphaTen])
+        precondition(options.apply(to: input, query: "zulu") == [alpha])
+        precondition(options.apply(to: input, query: "missing").isEmpty)
+
+        options.source = .other
+        alphaTen.isInstalled = true
+        precondition(options.apply(to: input).isEmpty,
+                     "Adoption must immediately remove an app from the other-apps filter")
+        options.source = .homebrew
+        precondition(options.apply(to: input) == [alpha, alphaTen, beta, tappedBeta])
+        options = InstalledListOptions()
+        precondition(options.apply(to: input) == [alpha, alphaTen, beta, tappedBeta],
+                     "Resetting options must restore the complete alphabetized list")
+    }
+
+    @MainActor
+    private static func testOwnershipReviewRaces(root: URL) async throws {
+        let fm = FileManager.default
+        let defaults = UserDefaults.standard
+        let originalBrew = defaults.value(for: Preferences.customUserBrewPath)
+        let originalAppdir = defaults.value(for: Preferences.appdirPath)
+        defer {
+            defaults.setValue(originalBrew, for: Preferences.customUserBrewPath)
+            defaults.setValue(originalAppdir, for: Preferences.appdirPath)
+        }
+        for source in ProtectedAppInstallation.Source.allCases {
+            defaults.setValue(false, for: source.overridePreference)
+        }
+        let apps = root.appendingPathComponent("Review Current Apps")
+        let app = apps.appendingPathComponent("Review Protected.app")
+        let receipt = app.appendingPathComponent("Contents/_MASReceipt/receipt")
+        let key = app.appendingPathComponent("Contents/Resources/setappPublicKey.pem")
+        try fm.createDirectory(at: receipt.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try fm.createDirectory(at: key.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let identifier = "org.fixture.review-protected"
+        try PropertyListSerialization.data(
+            fromPropertyList: ["CFBundleIdentifier": identifier], format: .xml, options: 0
+        ).write(to: app.appendingPathComponent("Contents/Info.plist"))
+        defaults.setValue(apps.path, for: Preferences.appdirPath)
+        func record(_ token: String) -> CaskRecord {
+            CaskRecord(
+                token: token, fullToken: token, tap: "homebrew/cask", name: "Review Protected",
+                descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: ["Review Protected.app"]
+            )
+        }
+        let assigned = root.appendingPathComponent("review-intune-assignment")
+        let recordedAssigned = root.appendingPathComponent("review-recorded-intune-assignment")
+        let recordedIdentifier = "org.fixture.review-recorded"
+        let service = BrewService(
+            notify: { _, _, _ in },
+            intuneInventory: {
+                var ids: Set<String> = []
+                if FileManager.default.fileExists(atPath: assigned.path) { ids.insert(identifier) }
+                if FileManager.default.fileExists(atPath: recordedAssigned.path) { ids.insert(recordedIdentifier) }
+                return IntuneAppDetector.Snapshot(bundleIDs: ids)
+            },
+            artCraftInventory: { .empty }
+        )
+        let vm = CaskViewModel(record: record("review-race"), isInstalled: true)
+        let argumentsURL = root.appendingPathComponent("arguments")
+        let before = try Data(contentsOf: argumentsURL)
+        let wait = root.appendingPathComponent("info-wait")
+        let started = root.appendingPathComponent("info-started")
+        func pausedOperation(isBatch: Bool, change: @MainActor () throws -> Void) async throws {
+            if fm.fileExists(atPath: started.path) { try fm.removeItem(at: started) }
+            try Data().write(to: wait)
+            if isBatch { service.updateAll([vm]) } else { service.update(vm) }
+            let deadline = Date().addingTimeInterval(5)
+            while !fm.fileExists(atPath: started.path) && Date() < deadline {
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            let observed = fm.fileExists(atPath: started.path)
+            if observed { try change() }
+            try fm.removeItem(at: wait)
+            _ = try await service.runSerialized { true }
+            precondition(observed, "The fixture must pause inside metadata verification")
+            let after = try Data(contentsOf: argumentsURL)
+            precondition(vm.progressState.isFailed && after == before,
+                         "Ownership/configuration changes during metadata must prevent the modifying command")
+        }
+        for source in [ProtectedAppInstallation.Source.appStore, .setapp, .intune] {
+            let marker = source == .appStore ? receipt : source == .setapp ? key : assigned
+            for isBatch in [false, true] {
+                try await pausedOperation(isBatch: isBatch) { try Data().write(to: marker) }
+                precondition(vm.protectedAppInstallation?.source == source)
+                try fm.removeItem(at: marker)
+            }
+        }
+        let alternate = root.appendingPathComponent("Other Selected Brew/bin/brew")
+        try fm.createDirectory(at: alternate.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try fm.createSymbolicLink(at: alternate, withDestinationURL: URL(fileURLWithPath: originalBrew))
+        for isBatch in [false, true] {
+            try await pausedOperation(isBatch: isBatch) {
+                defaults.setValue(alternate.path, for: Preferences.customUserBrewPath)
+            }
+            precondition(!fm.fileExists(atPath: alternate.deletingLastPathComponent().appendingPathComponent("arguments").path),
+                         "A newly selected Homebrew must not execute a command verified by another installation")
+            defaults.setValue(originalBrew, for: Preferences.customUserBrewPath)
+        }
+        let last = CaskViewModel(record: record("review-race-last"), isInstalled: true)
+        let waitToken = root.appendingPathComponent("info-wait-token")
+        try last.fullToken.write(to: waitToken, atomically: true, encoding: .utf8)
+        for changeConfiguration in [false, true] {
+            if fm.fileExists(atPath: started.path) { try fm.removeItem(at: started) }
+            try Data().write(to: wait)
+            service.updateAll([vm, last])
+            let deadline = Date().addingTimeInterval(5)
+            while !fm.fileExists(atPath: started.path) && Date() < deadline {
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            let observed = fm.fileExists(atPath: started.path)
+            if changeConfiguration {
+                defaults.setValue(alternate.path, for: Preferences.customUserBrewPath)
+            } else {
+                try Data().write(to: receipt)
+            }
+            try fm.removeItem(at: wait)
+            _ = try await service.runSerialized { true }
+            let after = try Data(contentsOf: argumentsURL)
+            precondition(observed && vm.progressState.isFailed && last.progressState.isFailed && after == before,
+                         "The first batch entry must be rechecked after the last entry's metadata await")
+            defaults.setValue(originalBrew, for: Preferences.customUserBrewPath)
+            if fm.fileExists(atPath: receipt.path) { try fm.removeItem(at: receipt) }
+        }
+        try fm.removeItem(at: waitToken)
+
+        let recordedBrew = root.appendingPathComponent("Recorded Brew/bin/brew")
+        try fm.createDirectory(at: recordedBrew.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try fm.createSymbolicLink(at: recordedBrew, withDestinationURL: URL(fileURLWithPath: originalBrew))
+        let oldApp = root.appendingPathComponent("Old Applications/Review Protected.app")
+        let oldReceipt = oldApp.appendingPathComponent("Contents/_MASReceipt/receipt")
+        let oldKey = oldApp.appendingPathComponent("Contents/Resources/setappPublicKey.pem")
+        try fm.createDirectory(at: oldReceipt.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try fm.createDirectory(at: oldKey.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try PropertyListSerialization.data(
+            fromPropertyList: ["CFBundleIdentifier": recordedIdentifier], format: .xml, options: 0
+        ).write(to: oldApp.appendingPathComponent("Contents/Info.plist"))
+        let recordedLink = root.appendingPathComponent("Recorded Brew/Caskroom/review-recorded/1.0/Review Protected.app")
+        try fm.createDirectory(at: recordedLink.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try fm.createSymbolicLink(at: recordedLink, withDestinationURL: oldApp)
+        defaults.setValue(recordedBrew.path, for: Preferences.customUserBrewPath)
+        let targets = try InstalledAppLocator.recordedAppURLs(token: "review-recorded", executable: recordedBrew)
+        precondition(targets == [oldApp.resolvingSymlinksInPath().standardizedFileURL])
+        for source in [ProtectedAppInstallation.Source.appStore, .setapp, .intune] {
+            let marker = source == .appStore ? oldReceipt : source == .setapp ? oldKey : recordedAssigned
+            try Data().write(to: marker)
+            let recorded = CaskViewModel(record: record("review-recorded"), isInstalled: true)
+            service.uninstall(recorded)
+            _ = try await service.runSerialized { true }
+            precondition(recorded.progressState.isFailed && recorded.protectedAppInstallation?.source == source)
+            service.updateAll([recorded])
+            _ = try await service.runSerialized { true }
+            precondition(recorded.progressState.isFailed && recorded.protectedAppInstallation?.source == source)
+            precondition(!fm.fileExists(atPath: recordedBrew.deletingLastPathComponent().appendingPathComponent("arguments").path),
+                         "Recorded custom-directory targets must retain source protection for single and bulk writes")
+            try fm.removeItem(at: marker)
+        }
+    }
+
+    @MainActor
+    private static func testInstalledBundleProjection(root: URL) async throws {
+        let fm = FileManager.default
+        let defaults = UserDefaults.standard
+        let previousAppdir = defaults.value(for: Preferences.appdirPath)
+        defer { defaults.setValue(previousAppdir, for: Preferences.appdirPath) }
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        let apps = root.appendingPathComponent("Canonical Apps")
+        let shared = apps.appendingPathComponent("Shared.app")
+        let aliasURL = apps.appendingPathComponent("Shared Alias.app")
+        let separate = apps.appendingPathComponent("Separate.app")
+        try fm.createDirectory(at: shared, withIntermediateDirectories: true)
+        try fm.createDirectory(at: separate, withIntermediateDirectories: true)
+        try fm.createSymbolicLink(at: aliasURL, withDestinationURL: shared)
+        defaults.setValue(apps.path, for: Preferences.appdirPath)
+        func record(_ token: String, bundle: String) -> CaskRecord {
+            CaskRecord(
+                token: token, fullToken: token, tap: "homebrew/cask", name: "Shared",
+                descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: [bundle]
+            )
+        }
+        let stable = record("review-shared", bundle: "Shared.app")
+        let alias = record("review-shared@beta", bundle: "Shared Alias.app")
+        let other = record("review-separate", bundle: "Separate.app")
+        let registry = CaskViewModelRegistry()
+        _ = registry.viewModels(for: [stable, alias, other])
+        let tokens: Set<CaskId> = [stable.fullToken, alias.fullToken, other.fullToken]
+        registry.markInstalled(tokens: tokens)
+        let scan = try ExternalAppDetector.installations(
+            catalog: [stable, alias, other], managedTokens: tokens, directories: [apps]
+        )
+        registry.markExternalInstallations(appURLs: scan.externalAppURLs, bundleURLs: scan.bundleURLs)
+        precondition(registry.installedCount == 3 && registry.installedViewModels.count == 3,
+                     "Deduplication must preserve every actual Homebrew receipt flag")
+        precondition(registry.locallyInstalledCount == 2 && registry.locallyInstalledViewModels.count == 2,
+                     "Installed rows/counts must collapse canonical managed aliases but preserve separate bundles")
+
+        let adoption = CaskViewModelRegistry()
+        let external = adoption.viewModel(for: stable)
+        let managed = adoption.viewModel(for: alias)
+        adoption.markExternalInstallations(appURLs: [stable.fullToken: shared], bundleURLs: scan.bundleURLs)
+        let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
+        await service.install(managed, confirmedConfiguration: .current).value
+        precondition(managed.isInstalled && !managed.progressState.isFailed && external.isInstalledExternally)
+        precondition(adoption.locallyInstalledViewModels == [managed] && adoption.locallyInstalledCount == 1,
+                     "A single alias install must immediately replace the external row in the projection")
+        adoption.markInstalled(tokens: [])
+        adoption.markExternalInstallations(appURLs: [stable.fullToken: shared], bundleURLs: scan.bundleURLs)
+        let managedTokens = root.appendingPathComponent("managed-tokens")
+        try managed.fullToken.write(to: managedTokens, atomically: true, encoding: .utf8)
+        defer { try! fm.removeItem(at: managedTokens) }
+        service.installAll([managed])
+        _ = try await service.runSerialized { true }
+        precondition(managed.isInstalled && !managed.progressState.isFailed)
+        precondition(adoption.locallyInstalledViewModels == [managed] && adoption.locallyInstalledCount == 1,
+                     "Bulk reconciliation must immediately collapse the old external alias row")
     }
 
     @MainActor
@@ -336,7 +1787,10 @@ enum ExternalInstallTests {
         vm.isInstalled = false
         vm.externalAppURL = nil
         await service.install(vm).value
-        precondition(vm.externalAppURL == appURL && vm.progressState.isFailed)
+        precondition(
+            vm.externalAppURL == appURL && vm.progressState.isFailed,
+            "Unconfirmed detection failed: state=\(vm.progressState), bundles=\(vm.appBundleNames), url=\(String(describing: vm.externalAppURL))"
+        )
         let afterUnconfirmed = try Data(contentsOf: argumentsURL)
         precondition(afterUnconfirmed == before,
                      "Install before the first scan must not silently adopt a local app")
@@ -408,7 +1862,7 @@ enum ExternalInstallTests {
         manager.applyExternalAppDetectionSetting()
         defaults.setValue(customApps.path, for: Preferences.appdirPath)
         defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
-        let newerApp = customApps.appendingPathComponent("Helper.app")
+        let newerApp = customApps.appendingPathComponent(appURL.lastPathComponent)
         try FileManager.default.createDirectory(at: newerApp, withIntermediateDirectories: true)
         try await loader.refreshExternalInstallations { _, _, _ in [fullToken: newerApp] }
         defaults.setValue(appURL.deletingLastPathComponent().path, for: Preferences.appdirPath)

@@ -25,7 +25,7 @@ struct AppGridView: View {
     var body: some View {
         // Filter out self; done once per body pass rather than as a per-row
         // conditional inside ForEach (which wraps every row in _ConditionalContent).
-        let displayedCasks = casks.filter { $0.token != "applite" }
+        let displayedCasks = casks.filter { !$0.isApplite }
 
         ScrollView {
             LazyVGrid(columns: columns, spacing: 20) {

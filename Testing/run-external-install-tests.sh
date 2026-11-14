@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Use an existing unsigned Debug build; do not launch the app or touch real Homebrew.
-derived_data="${1:?Usage: bash Testing/run-external-install-tests.sh /path/to/DerivedData}"
+derived_data="${1:?Usage: bash Testing/run-external-install-tests.sh /path/to/DerivedData [--live-intune] [--live-setapp] [--live-artcraft]}"
 repo="$(cd "$(dirname "$0")/.." && pwd)"
 products="$derived_data/Build/Products/Debug"
 sqlite="$derived_data/SourcePackages/checkouts/GRDB.swift/Sources/GRDBSQLite"
@@ -28,4 +28,4 @@ xcrun swiftc -parse-as-library -swift-version 6 \
     -Xlinker -rpath -Xlinker "$products/Applite.app/Contents/MacOS" \
     -Xlinker -rpath -Xlinker "$products/Applite.app/Contents/Frameworks" \
     -o "$bundle/Contents/MacOS/ExternalInstallTests"
-"$bundle/Contents/MacOS/ExternalInstallTests"
+"$bundle/Contents/MacOS/ExternalInstallTests" "${@:2}"

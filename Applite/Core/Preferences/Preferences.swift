@@ -28,19 +28,24 @@ struct PreferenceKey<Value: Sendable>: Sendable {
 enum Preferences {
     // General
     static let colorSchemePreference = PreferenceKey("colorSchemePreference", default: ColorSchemePreference.system)
-    static let catalogUpdateFrequency = PreferenceKey("catalogUpdateFrequency", default: CatalogUpdateFrequency.default)
-    static let notificationSuccess = PreferenceKey("notificationSuccess", default: false)
-    static let notificationFailure = PreferenceKey("notificationFailure", default: true)
 
     // Brew
     static let brewPathOption = PreferenceKey("brewPathOption", default: BrewPaths.PathOption.annex.rawValue)
     static let customUserBrewPath = PreferenceKey("customUserBrewPath", default: "/opt/homebrew/bin/brew")
+    // Apps
+    static let catalogUpdateFrequency = PreferenceKey("catalogUpdateFrequency", default: CatalogUpdateFrequency.default)
     static let includeCasksFromTaps = PreferenceKey("includeCasksFromTaps", default: true)
     static let detectExternallyInstalledApps = PreferenceKey("detectExternallyInstalledApps", default: true)
     static let offerHomebrewManagement = PreferenceKey("offerHomebrewManagement", default: false)
+    static let overrideIntuneManagement = PreferenceKey("overrideIntuneManagement", default: false)
+    static let overrideAppStoreManagement = PreferenceKey("overrideAppStoreManagement", default: false)
+    static let overrideSetappManagement = PreferenceKey("overrideSetappManagement", default: false)
+    static let overrideArtCraftManagement = PreferenceKey("overrideArtCraftManagement", default: false)
     static let appdirOn = PreferenceKey("appdirOn", default: false)
     static let appdirPath = PreferenceKey("appdirPath", default: "/Applications")
     static let greedyUpgrade = PreferenceKey("greedyUpgrade", default: false)
+    static let notificationSuccess = PreferenceKey("notificationSuccess", default: false)
+    static let notificationFailure = PreferenceKey("notificationFailure", default: true)
 
     // Annex Homebrew freshness (Applite's own tarball install; brew's git self-update is unavailable without CLT)
     static let annexLastRefreshDate = PreferenceKey("annexLastRefreshDate", default: 0.0) // timeIntervalSince1970; 0 = never
@@ -60,6 +65,9 @@ enum Preferences {
     // Sorting options
     static let searchSortOption = PreferenceKey("searchSortOption", default: SortingOptions.mostDownloaded)
     static let categorySortOption = PreferenceKey("categorySortOption", default: CategorySortingOptions.mostDownloaded)
+    static let installedSortOption = PreferenceKey("installedSortOption", default: InstalledListOptions.SortOrder.aToZ)
+    static let installedSourceFilter = PreferenceKey("installedSourceFilter", default: InstalledListOptions.Source.all)
+    static let installedUpdatesOnly = PreferenceKey("installedUpdatesOnly", default: false)
     static let hideUnpopularApps = PreferenceKey("hideUnpopularApps", default: false)
     static let hideDisabledApps = PreferenceKey("hideDisabledApps", default: false)
 

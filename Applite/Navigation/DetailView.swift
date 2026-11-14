@@ -22,10 +22,7 @@ struct DetailView: View {
             UpdateView(casks: caskManager.outdatedViewModels)
 
         case .installed:
-            InstalledView(casks: caskManager.installedViewModels)
-
-        case .externalInstalled:
-            InstalledView(casks: caskManager.externalInstalledViewModels, externalOnly: true)
+            InstalledView(casks: caskManager.locallyInstalledViewModels)
 
         case .activeTasks:
             ActiveTasksView()

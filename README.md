@@ -101,6 +101,8 @@ existing Settings window instead of creating a separate uninstaller.
 The app menu's **Check for Updates...** action selects and opens or focuses
 **Settings > Updates** before starting the existing Sparkle update check.
 It remains disabled while a check is in progress.
+**Version History**, directly below Check for Updates in Settings, opens the
+official GitHub release notes in your browser and remains available during checks.
 
 The main window has a persistent bottom status bar with a **Refresh App Catalog**
 button and a shortcut to **Active Tasks**. It shows startup/setup, catalog refresh,
@@ -113,20 +115,61 @@ a refresh, installed-state check, standalone app-update check, startup/setup, or
 Homebrew maintenance is running. Standalone update checks and retries show their
 own busy status instead of Ready or an old failure.
 
-App names stay in their human-readable form. Clicking a name opens **Get Info**,
-with loading feedback while Homebrew retrieves details; it no longer toggles all
-cards to cask tokens. The info window shows the app name, description, available
-version, installation details, source, links, download size when available, and
-deprecation/disablement information. Homebrew tokens remain selectable there.
-Cmd-click continues to open the app's website.
+App names stay in their human-readable form. Clicking a name or description, or
+choosing **Get Info**, opens a details page inside the main window, not a popup.
+The name and description show a pointing-hand cursor on hover.
+Native Back navigation returns to the previous list or search. The page shows the
+app's full name, description, available version, installation details, source,
+links, download size when available, and deprecation/disablement information.
+Detected apps also show their bundle location and non-Homebrew management status.
+Loading and retryable errors stay on the page; Homebrew tokens remain selectable.
+Cmd-click continues to open the app's website instead of the details page.
 
-**Include Self-Updating Apps** is configured in Settings, not duplicated in the
+**Include Self-Updating Apps** is configured in **Settings > Apps > Homebrew Management**, not duplicated in the
 Updates toolbar. Updates retains its refresh button and search.
 
 Applite does not show itself in the app lists by default. Its update and uninstall
 actions remain in the app menu and Settings. A default-off, internal developer
 preference can restore the Installed self-card for diagnostics; see the
 [diagnostic instructions](Testing/README.md#optional-applite-self-card).
+
+## App settings
+
+**Settings > Apps** groups managed-app preferences in one place:
+
+- **App Catalog**: refresh frequency and third-party Homebrew taps.
+- **Installed App Detection**: read-only discovery of external apps (on by default).
+- **Installation Location**: the existing custom app-directory controls.
+- **Homebrew Management**: opt-in management offers and self-updating-app updates.
+- **Notifications**: successful/failed app installs and updates.
+- **Advanced: App Management Source Overrides**: separate, default-off overrides
+  for Microsoft Intune (Company Portal), Apple App Store, Setapp, and ArtCraft Launcher.
+
+General retains appearance; Brew retains executable selection and Applite's own
+Homebrew freshness. Updates still controls updates/version history for Applite
+itself. Existing preferences keep their saved values and list/search toolbar
+controls remain available.
+
+Source overrides require both external detection and **Offer Manage with Homebrew**.
+Enabling each override requires a warning confirmation; canceling changes nothing.
+Only enable one if you are authorized to replace those apps: licenses, settings,
+and future updates can be affected, and the original manager may reinstall them.
+Overrides lift Applite's source guard only, not device enrollment, organizational
+policies, license checks, or Homebrew eligibility/inventory requirements.
+
+Each detected source must be overridden independently. Overriding Intune does not
+silently override an App Store receipt, for example. Details retain all detected
+sources, **Tracked by Homebrew**, and applicable **Source Overrides**. Installed
+retains detected source filters; an overridden, Homebrew-tracked app can also
+appear under Homebrew-managed. Adoption still previews the exact
+command and warns about the overridden source(s).
+
+Turning off detection or **Offer Manage with Homebrew** suspends every override
+without forgetting saved choices. Disabling an override restores its protection
+immediately, including pending confirmations and queued work; settings are checked
+again after asynchronous metadata verification, before modifying commands start.
+Already-running Homebrew commands are not undone. Unreadable/unsupported inventories
+still block writes even when all source overrides have been enabled.
 
 ## App icons
 
@@ -165,13 +208,13 @@ bound to the selected Homebrew and installation directory; changing either requi
 a fresh confirmation, including for queued work. Detection drops superseded scans,
 and a failed post-install refresh retains the command's output alongside its error.
 
-**Settings > Brew > App Sources > Detect externally installed apps** is enabled by
-default. Turn it off to stop external-app scans, clear external status/counts, and
-hide the external-app sidebar/search filters and adoption actions. Managed apps are
+**Settings > Apps > Installed App Detection > Detect externally installed apps** is enabled by
+default. Turn it off to stop external-app scans and remove detected apps and
+management offers from Installed. Homebrew-managed apps are
 unaffected, and no apps are changed or removed. Turning it back on rescans locally;
 no catalog download is required.
 
-**Offer Manage with Homebrew**, indented beneath detection, defaults to off when
+**Offer Manage with Homebrew**, under **Homebrew Management**, defaults to off when
 no preference has been saved. Enable it to offer Homebrew management on external
 app cards; otherwise, they show **Open** while detection, status, filters, and
 counts remain available. Both settings must be enabled to offer management.
@@ -179,18 +222,140 @@ When detection is off, the management setting is greyed out and unavailable.
 Its saved choice is preserved and respected when detection is re-enabled.
 Disabling management also prevents an already-open confirmation from starting a reinstall.
 
-Apps found in `/Applications`, `~/Applications`, or your custom app directory that are
-not tracked by the selected Homebrew appear as **Installed externally**. Detection uses
+Applite only manages Homebrew casks; an arbitrary app on disk, a formula, or a
+matching display name does not make an app Homebrew-compatible. Unknown import
+tokens are not offered as installable apps. Before every queued install/adoption,
+update, reinstall, or bulk entry, Applite asks the selected Homebrew for fresh cask
+metadata and requires one exact token/full-token/tap match with an enabled cask.
+Missing, mismatched, disabled, malformed, or failed lookups block the modifying
+command and expose the reason in Active Tasks. Existing ownership protection wins
+before this check.
+
+Each operation pins its Homebrew executable and app-directory configuration.
+Ownership evidence is refreshed again after metadata verification, including
+recorded Caskroom targets in previous custom app directories. Bulk operations
+refresh shared inventories after all metadata requests, then make final override
+decisions without yielding. Changing the selection invalidates pending writes.
+Installed rows, search filtering, and totals use canonical bundle identities;
+duplicate receipts stay intact, and single/bulk installs reconcile the projection.
+
+Disabled/unavailable apps cannot offer adoption, installation, updates, or reinstall;
+cards show **Homebrew unavailable** with an explanatory tooltip. Open/Get Info remain
+available for local apps. **Refresh App Catalog** clears transient verification
+errors so checks can be retried; disabled catalog entries stay blocked until their
+metadata changes. A disabled or retired app already owned by Homebrew may still
+be uninstalled to allow cleanup; external/protected apps cannot use that exception.
+Deprecation alone does not mean disabled. These checks verify cask availability
+and enabled state, not that vendor software will run correctly; Homebrew remains
+responsible for its OS, architecture, dependency, and installer requirements.
+
+Apps found in `/Applications`, `~/Applications`, their `Setapp` subfolders, or your custom app directory that are
+not tracked by the selected Homebrew appear alongside managed apps in **Installed**.
+Both use the simple **Installed** card status; Homebrew management remains a separate,
+opt-in action, and only managed apps offer Homebrew uninstall/update operations. Detection uses
 the cask's expected app bundle names (including renamed targets), with the display name
 as a fallback when no app artifact is available. Non-app casks are not inferred from
 package receipts or executables.
 
-Use the **Installed externally** sidebar item or search-menu filter to find these apps.
+Use the **Installed** sidebar item or search-menu filter to find these apps.
+Installed's **Sort & Filter** toolbar button offers A-to-Z (default), Z-to-A, and
+download sorting; all, Homebrew-managed, Intune-managed, App Store-managed, Setapp-managed, ArtCraft-managed, or other
+installed apps; and an updates-only filter. Other installed apps exclude Homebrew,
+Intune, App Store, Setapp, and ArtCraft ownership. These choices are remembered separately from Search and Discover.
+The menu shows matching/total counts and can reset sorting and filters; the
+sidebar badge continues to show the full installed total.
+
+The following source protections apply by default; only the explicitly confirmed
+[source overrides](#app-settings) can relax their individual ownership guards.
+
+App Store ownership takes precedence over Homebrew, including when Homebrew still has an old
+receipt for the same app. A local `Contents/_MASReceipt/receipt` file identifies
+these apps; the card shows a grey, disabled **App Store-managed** button instead of
+offering Homebrew management. **Open** remains in the app's menu. Details show the
+App Store source and bundle location, and Homebrew update lists exclude these apps.
+All queued Homebrew installs, updates, reinstalls, uninstalls, and bulk operations
+recheck for App Store receipts before writing. Protected apps report a blocked
+action; eligible apps in mixed batches can still proceed.
+These are local receipt-presence checks, not cryptographic receipt validation or
+an App Store account lookup. Disabling external listings does not remove known
+App Store protection or bypass the pre-write checks.
+
+Microsoft Intune (Company Portal) ownership takes precedence over the App Store,
+Setapp, ArtCraft Launcher, and Homebrew. Applite matches an installed bundle's exact `CFBundleIdentifier`
+against the local Intune agent's per-app policy cache, opened **read-only**. Matching
+apps show a grey, disabled **Intune-managed** button, retain Open/Get Info, and have
+their own Installed source filter. Homebrew modifying actions are blocked, including
+stale confirmations, imports, and protected entries in mixed batches.
+Company Portal/agent presence alone never labels every app as managed. No cloud
+sign-in, administrator privileges, agent changes, account data, or scripts are needed.
+
+This is best-effort local detection using the agent's currently observed
+`SideCar/sidecar.sqlite` app-policy schema, not a supported universal Intune inventory
+API. It covers bundle IDs in that cache; script-only or native MDM/VPP deployments
+without corresponding cache entries cannot reliably be identified as Intune-owned.
+Independent App Store receipt protection still applies. Cached policies may remain
+protective until Company Portal syncs. If the agent exists but its inventory is
+missing, unreadable, malformed, or unsupported, Applite reports the error and blocks
+Homebrew writes instead of assuming ownership is absent.
+See Microsoft's [Intune agent troubleshooting](https://techcommunity.microsoft.com/blog/intunecustomersuccess/support-tip-troubleshooting-microsoft-intune-management-agent-on-macos/4431810)
+for the distinction between agent app policies, bundle IDs, and script deployments.
+
+Setapp distributions show a grey, disabled **Setapp-managed** button instead of
+Homebrew management. Open/Get Info, source/location details, and a Setapp source
+filter remain available; Homebrew Updates and modifying actions exclude these apps.
+Detection checks the app's documented `-setapp` bundle-ID suffix or its main-bundle
+`Contents/Resources/setappPublicKey.pem` file. The resource marker also covers builds
+with older/nonstandard IDs. These are distribution-marker checks, not cryptographic
+key validation or a check of your subscription/account. No key contents, license
+data, or Setapp databases are read. Folder names, vendor names, and the Setapp client
+being installed do not establish ownership.
+
+Both standard Setapp installation folders are scanned: `/Applications/Setapp`
+and `~/Applications/Setapp`. Setapp builds moved into another scanned folder
+are still recognized by their bundle markers. The shared Spotlight-preview folder
+`/Users/Shared/Apps/Setapp` is not added to scanning. As with other protected
+sources, imports, stale confirmations, and queued/bulk writes recheck protection
+even when external listings are disabled. Replacing a Setapp build with an unmarked
+ordinary build clears Setapp ownership on refresh. Ownership priority is
+**Intune > App Store > Setapp > ArtCraft Launcher > Homebrew**.
+See Setapp's [bundle-ID requirements](https://docs.setapp.com/docs/set-an-app-bundle-id),
+[public-key resource requirements](https://docs.setapp.com/docs/add-a-public-key-to-your-app-1),
+and [installation locations](https://support.setapp.com/hc/en-us/articles/360002037440-Where-does-Setapp-store-its-files).
+
+ArtCraft Launcher apps show a grey, disabled **ArtCraft-managed** button, retain
+Open/Get Info, and have an Installed source filter. Applite reads only the current
+user's `~/Library/Application Support/ArtCraft Launcher/installed.json` inventory,
+matching existing macOS (`Dmg`) app-bundle records by canonical path. Exact recorded
+paths also work outside the standard scan folders. Symlink aliases cannot bypass
+ownership, and matching cask aliases still produce one Installed entry.
+Homebrew adoption, installs/imports, updates, reinstall/removal, and bulk operations
+recheck the inventory when they execute, even with external listings disabled.
+
+This uses the launcher's installed-record format, verified against its
+[v0.19.2 manifest](https://github.com/storytold/craft-launcher/blob/v0.19.2/crates/native/src/manifest.rs)
+and [macOS installation behavior](https://github.com/storytold/craft-launcher/blob/v0.19.2/crates/native/src/install.rs).
+Launcher presence, an app name, or a vendor bundle-ID prefix alone never establishes
+ownership. A missing inventory means no recorded launcher ownership; an existing
+unreadable, malformed, or unsupported inventory reports an error and blocks Homebrew
+writes. Records are last-known evidence: replacing an app at the same recorded path
+remains protected until the launcher record is removed or its source guard is explicitly overridden. Unrecorded/manual installs,
+other users' inventories, and nonstandard/portable inventory locations are not
+inferred. No launcher activation, token, settings, log, account data, or inventory
+modification is needed.
+
 Choose **Manage with Homebrew** on a card to review the exact command before continuing:
 `brew install --cask <token> --force` (plus your custom app-directory option, if set).
 This reinstalls the app so Homebrew can track its updates. A successful adoption refreshes
 the managed state; a failed command preserves the previous state and exposes the full
 Homebrew output, including stderr, from the card's terminal button.
+
+The Installed badge counts visible managed and detected apps, excluding Applite.
+If several casks match the same resolved app bundle (for example 1Password's stable,
+beta, and nightly casks all declaring `1Password.app`), detection shows it once.
+A Homebrew receipt takes precedence; otherwise, a supported official unversioned
+cask is preferred deterministically. Bundle presence alone does not prove a release
+channel. Separate app bundles remain separate, even when their display names match.
+Alternative channels remain available in the catalog; no apps or cask records are deleted.
 
 ## Development and AI
 

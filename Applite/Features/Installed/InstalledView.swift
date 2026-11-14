@@ -10,40 +10,83 @@ import SwiftUI
 /// Shows installed apps, where the user can open and uninstall them
 struct InstalledView: View {
     var casks: [CaskViewModel]
-    var externalOnly = false
 
     @Environment(CaskManager.self) private var caskManager
 
-    @State var searchText = ""
-
-    /// Filtered casks based on local search text
-    var filteredCasks: [CaskViewModel] {
-        if searchText.isEmpty {
-            return casks
-        }
-        let query = searchText.lowercased()
-        return casks.filter {
-            $0.name.lowercased().contains(query) || $0.token.lowercased().contains(query)
-        }
-    }
+    @State private var searchText = ""
+    @AppStorage(Preferences.installedSortOption) private var sortBy
+    @AppStorage(Preferences.installedSourceFilter) private var source
+    @AppStorage(Preferences.installedUpdatesOnly) private var updatesOnly
 
     var body: some View {
-        VStack {
-            if externalOnly && caskManager.isResolvingInstalledState {
+        let options = InstalledListOptions(sortOrder: sortBy, source: source, updatesOnly: updatesOnly)
+        let displayed = options.apply(to: casks, query: searchText)
+        return VStack {
+            if casks.isEmpty && caskManager.isResolvingInstalledState {
                 ProgressView()
-            } else if externalOnly && casks.isEmpty {
+            } else if casks.isEmpty {
                 ContentUnavailableView(
-                    "No externally installed apps detected.",
+                    "No installed apps found.",
                     systemImage: "app.badge.checkmark"
                 )
-            } else if !searchText.isEmpty && filteredCasks.isEmpty {
-                ContentUnavailableView.search(text: searchText)
+            } else if displayed.isEmpty {
+                ContentUnavailableView {
+                    Label("No matching installed apps", systemImage: "line.3.horizontal.decrease.circle")
+                } description: {
+                    Text("Try another search or reset your filters.")
+                } actions: {
+                    Button("Show All Installed Apps") {
+                        searchText = ""
+                        source = .all
+                        updatesOnly = false
+                    }
+                }
             } else {
-                AppGridView(casks: filteredCasks, appRole: externalOnly ? .installAndManage : .installed)
+                AppGridView(casks: displayed, appRole: .installed)
             }
         }
-        .navigationTitle(externalOnly ? Text("Installed externally") : Text("Installed"))
+        .navigationTitle("Installed")
         .searchable(text: $searchText, placement: .toolbar)
+        .toolbar {
+            ToolbarItem {
+                Menu {
+                    Text("Showing \(displayed.count) of \(casks.count) apps")
+
+                    Picker("Sort By", selection: $sortBy) {
+                        ForEach(InstalledListOptions.SortOrder.allCases) { option in
+                            Text(option.description)
+                                .tag(option)
+                        }
+                    }
+                    .pickerStyle(.inline)
+
+                    Divider()
+
+                    Picker("App Source", selection: $source) {
+                        ForEach(InstalledListOptions.Source.allCases) { option in
+                            Text(option.description)
+                                .tag(option)
+                        }
+                    }
+                    .pickerStyle(.inline)
+
+                    Toggle("Updates available only", isOn: $updatesOnly)
+
+                    Divider()
+
+                    Button("Reset Sorting and Filters") {
+                        sortBy = Preferences.installedSortOption.defaultValue
+                        source = Preferences.installedSourceFilter.defaultValue
+                        updatesOnly = Preferences.installedUpdatesOnly.defaultValue
+                    }
+                    .disabled(!options.hasFilters && sortBy == .aToZ)
+                } label: {
+                    Label("Sort & Filter", systemImage: "slider.horizontal.3")
+                        .labelStyle(.titleAndIcon)
+                }
+                .help("Sort and filter installed apps")
+            }
+        }
     }
 }
 

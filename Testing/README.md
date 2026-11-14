@@ -2,6 +2,12 @@
 
 ## Non-destructive external-install regression tests
 
+Review-race cases pause single and bulk metadata requests before adding App Store,
+Setapp or Intune evidence or changing Homebrew. A two-entry batch also pauses its
+last metadata request to verify the first entry is rechecked. Recorded old-appdir
+targets, managed-receipt aliases, separate bundles, and immediate single/bulk
+Installed projection reconciliation use isolated filesystem fixtures.
+
 Review-race fixtures also cover an Install before initial detection, configuration
 changes before confirmation/queued execution, retained stdout/stderr after a failed
 reconciliation, and a paused scan completing after detection is disabled/re-enabled.
@@ -9,7 +15,7 @@ reconciliation, and a paused scan completing after detection is disabled/re-enab
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including
 renamed targets), v1 database migration/FTS preservation, managed/external/missing
-state precedence, full-token identity, external filter membership/counts, command
+state precedence, full-token identity, unified Installed membership/counts, command
 confirmation/quoting, the default-enabled detection setting and immediate disable
 guards (including pending confirmations), and queued adoption success/failure with stderr capture.
 The separate management-offer setting defaults to off; tests verify explicit opt-in,
@@ -17,6 +23,47 @@ preserved management choices across detection changes, and guards that block new
 and already-open management confirmations without clearing external detection.
 They do not launch Applite, run real Homebrew, modify installed apps, show notification
 permission prompts, or use your Applite preferences/database.
+Shared-bundle fixtures cover stable/beta/nightly and tap duplicates, managed-owner
+precedence, deterministic selection, symlink aliases, separately installed bundles
+with matching names, and hiding Applite without changing its managed state.
+Installed-list cases cover natural friendly-name A-to-Z/Z-to-A and download
+sorting, stable full-token tie-breaks, managed/other sources, combined update/search
+filters, empty matches, reset behavior, and immediate filter changes after adoption.
+App Store fixtures cover receipt-file versus directory/sandbox detection,
+cross-location precedence, aliases and stale brew receipts, source/update
+filtering, stale confirmations, single/queued/bulk write protection, mixed batches,
+disabled detection/imports, and clearing ownership on a later receipt-free scan.
+Intune tests use isolated SQLite policy databases and app bundles: exact primary
+and child bundle IDs, nonmatching IDs, no-agent/missing-inventory cases, malformed
+and unsupported data, Intune-over-App-Store/Homebrew precedence, aliases, source
+filters, stale confirmations, protected single/bulk operations, mixed batches,
+and falling back to independent App Store protection after policy removal.
+Normal runs inject fixture inventory loaders and do not read real Intune policies
+or ArtCraft Launcher inventory.
+Setapp fixtures cover bundle-ID versus public-key-resource markers, false
+substring/folder matches, marker-file versus directory checks, cross-location
+detection, preserved Intune/App Store precedence, aliases, stale Homebrew receipts,
+actual catalog-loader propagation, Installed filters/counts, stale confirmations,
+single/bulk/import guards, mixed batches, and clearing ownership on replacement.
+Malformed bundle metadata must surface an error rather than imply unmanaged ownership.
+ArtCraft fixtures cover absent/deleted app records, canonical path/symlink matching,
+same-name unrelated copies, custom recorded paths, higher-priority ownership,
+catalog-loader propagation, alias counts, source/update filters, stale confirmations,
+single/bulk/import guards, mixed batches, malformed/unsupported inventory blocking,
+and ownership removal on refresh.
+Homebrew eligibility cases use the fixture CLI's real `info --json=v2 --cask`
+path: disabled catalog and newly disabled live metadata, empty/formula-only or
+wrong-token/tap responses, malformed JSON, stderr/nonzero lookup failures, blocked
+single/bulk operations, eligible mixed batches, refresh/retry, and permitted
+Homebrew-owned cleanup of retired casks. Enabled/deprecated casks still work.
+No actual Homebrew command runs in the default harness.
+Source-override tests use a single fixture with all four ownership signals.
+They verify default-off guards, canceled/stale enable confirmations, independent
+remaining-source protection, retained provenance/filtering, confirmed command
+previews, successful single/bulk/reinstall operations, blocked mixed batches,
+revocation before queued execution and during a paused metadata read, suspended
+saved choices when either prerequisite is off, and continued Homebrew-eligibility
+and unreadable-inventory blocking.
 
 ```sh
 xcodebuild -quiet -project Applite.xcodeproj -scheme Applite -configuration Debug \
@@ -25,30 +72,110 @@ xcodebuild -quiet -project Applite.xcodeproj -scheme Applite -configuration Debu
 bash Testing/run-external-install-tests.sh /tmp/applite-build
 ```
 
+For an explicitly requested, read-only check on an Intune-managed Mac, append
+`--live-intune`. It uses the production inventory reader and matches existing
+`/Applications` and user-Applications bundles, reporting only policy-ID and
+matching-app **counts**, not app names, bundle IDs, accounts, policy contents, or scripts.
+It does not sync, alter, or authenticate to Intune.
+
+Append `--live-setapp` for a read-only check of installed Setapp distribution
+markers in the two standard app roots and their Setapp subfolders. It reports
+only a bundle count, not app names or identifiers. No subscription/license data,
+key contents, Setapp databases, or account details are read; apps are not launched.
+Append `--live-artcraft` for a read-only check of the current user's recorded,
+existing macOS ArtCraft bundles and production ownership resolution. Only counts
+are printed, not app names, paths, or inventory contents. The launcher's token,
+settings, account data, and logs are not read or modified. All live flags can be combined.
+
 For a visual/end-to-end check in a disposable VM, place a known cask's expected
 bundle in `/Applications` without installing its cask in the selected Homebrew.
-Refresh Applite and check its **Installed externally** card, sidebar badge, and
-search filter. Cancel adoption once to verify no change; confirm it and check the
-displayed command, then verify the app becomes **Installed** and leaves the external
-list. Trigger a failed adoption and use the card's terminal button to inspect stderr;
-the external status and count must remain unchanged. Also check a managed app and
+Refresh Applite and check its **Installed** card, combined sidebar badge, and
+Installed search filter. Cancel adoption once to verify no change; confirm it and check the
+displayed command, then verify the app stays in **Installed**, switches to Open,
+and offers Homebrew management options. Trigger a failed adoption and use the card's terminal button to inspect stderr;
+the Installed status and count must remain unchanged. Also check a managed app and
 an absent app still offer Open and Install respectively.
 
-In **Settings > Brew > App Sources**, verify **Detect externally installed apps**
-starts enabled. Disable it while viewing the external list or using its search
-filter: the filters should disappear, navigation should leave the hidden external
-list, and external status/counts should clear immediately without changing managed
+In **Installed**, open **Sort & Filter**. Check each sort order and app-source
+choice, combine them with local search and **Updates available only**, and confirm
+the menu's matching/total counts while the sidebar retains the full total.
+An empty result must offer **Show All Installed Apps** to clear search and filters.
+Verify **Reset Sorting and Filters**, return from an app's details page, and relaunch:
+Installed options should persist without changing Search/Discover sorting.
+Disabling external detection must remove other installed apps from results and
+counts, never managed apps.
+
+Unsupported/disabled cards must not offer adoption/install/update/reinstall;
+they show **Homebrew unavailable** and a reason. Open/Get Info remain for local
+apps. After a lookup failure, inspect Active Tasks output and refresh the catalog
+to retry. Do not disable or remove real casks to test this: fixtures verify that
+no modifying command runs after failed checks. Actual Homebrew-owned retired
+casks retain uninstall for cleanup; ordinary external apps never gain it.
+
+With source overrides off (the default), perform the following ownership checks.
+Do not enable overrides for live organization/store-managed apps on a shared Mac.
+
+For an existing App Store app with a known cask, refresh and check its grey,
+disabled **App Store-managed** button in Installed and Discover/search. Its menu
+must still offer Open and Get Info, but no Homebrew reinstall/uninstall actions,
+and Details must show the App Store source/location. It must appear under the
+App Store source filter, not Homebrew/other sources, even with a stale brew receipt,
+and must not appear in Homebrew Updates. Do not modify real receipts or run
+destructive operations for this check; queued/import/bulk protection uses the
+isolated fixtures above.
+
+For a known Company Portal app, refresh and check the disabled **Intune-managed**
+pill, Open/Get Info menu, source filter, details, and exclusion from Homebrew
+Updates. An unrelated local app must not become Intune-managed merely because
+the agent is installed. Intune wins if both an App Store receipt and an Intune
+policy match exist. Do not edit the live agent database, profiles, or receipts;
+use the isolated fixtures for stale-policy, failure, and bulk-operation checks.
+
+For a known Setapp app, refresh and check the disabled **Setapp-managed** pill,
+Open/Get Info, source/location details, the Setapp filter, and exclusion from
+Homebrew Updates and modifying menu items. Check an ordinary app remains
+eligible for its normal actions. Use isolated fixtures, not real bundle changes,
+to test precedence, replacement, stale confirmations, and blocked writes.
+
+For an app installed through ArtCraft Launcher with a known cask, refresh and check
+the disabled **ArtCraft-managed** pill, Open/Get Info, source/location details, the
+ArtCraft filter, and exclusion from Homebrew Updates and modifying menu items.
+Do not edit the live inventory or installed apps; use fixtures for record changes
+and blocked-operation checks. A same-name unrecorded copy must not independently
+establish launcher ownership.
+
+In **Settings > Apps > Installed App Detection**, verify **Detect externally installed apps**
+starts enabled. Disable it while viewing Installed or using its search
+filter: detected apps should disappear from the list/count immediately without changing managed
 apps. Re-enable it and check that local external apps are rediscovered without a
 catalog download.
 
 With no saved management preference, **Offer Manage with Homebrew** should start
-off. Verify it is indented beneath detection, greyed out and disabled when detection
+off in **Homebrew Management**. Verify it is greyed out and disabled when detection
 is off, and displays **Requires external app detection.** Re-enabling detection must
 restore the saved management choice, not enable it automatically.
 
 Enable **Offer Manage with Homebrew**, then disable it separately: external status,
 filters, and counts should remain, while external cards show **Open** instead of
 **Manage with Homebrew**. Re-enable it to restore the management offer.
+
+In **Settings > Apps**, verify the catalog frequency/taps, installation location,
+self-updating-app option, and app notifications moved from General/Brew without
+changing saved values. Changing third-party tap inclusion must offer Refresh
+Catalog and retain the prompt after a failed refresh. General retains appearance,
+Brew retains executable/Homebrew freshness, and Updates still manages Applite.
+List/search filter toolbars must remain available.
+
+Scroll to **Advanced: App Management Source Overrides**. Each source switch must
+start off and remain unavailable until detection and management offers are enabled.
+Cancel an enable warning: the switch must stay off. In a disposable environment
+only, enable a source override, check its warning and adoption command preview,
+then verify details still identify the detected source plus Source Overrides.
+An app with multiple signals must remain protected by every non-overridden source.
+Turning off either prerequisite suspends overrides but preserves saved choices;
+restoring prerequisites resumes those choices. Disabling a source override must
+block pending/queued writes, not undo already-running commands. Use the isolated
+fixtures for all modifying, inventory-failure, and asynchronous-revocation checks.
 
 ## Non-destructive single-instance regression tests
 
@@ -108,14 +235,20 @@ install/update/uninstall labels, real download percentages, bulk completed count
 and failures that show a warning rather than an endless spinner. Opening Tasks or
 refreshing the catalog must not cancel an ongoing operation.
 
-Click an app's name in Discover, search, Installed, and Updates. It must keep its
-friendly name, show a loading indicator during the request, and open the same
-Get Info destination as the ellipsis/right-click menu. Other cards' names must not
-change. Verify the info window's friendly title, description, available version,
-and existing installation/source details; repeat the action and confirm the same
-unchanged info value focuses its existing window. Cmd-click must open only the
-homepage, not details. With an unavailable brew, the request must surface an error
-and re-enable the title/menu action for retry.
+Click an app's name and description in Discover, search, Installed, and Updates.
+Both must open the same in-window details page as the ellipsis/right-click Get Info
+action, without creating an auxiliary window. Verify the full friendly name,
+description, available version, installation/source details, links, and available
+download size. Detected apps must show Installed, their bundle location, and
+non-Homebrew management rather than claiming the app is absent.
+Back must return to the prior list or search with its query intact; sidebar changes
+and typing a new search must leave the page. Cmd-click on either text area must open
+only the homepage. On a metadata failure, retain the header, show the error inline,
+and verify Try Again can recover. Back or navigating to another app while loading
+must not apply stale results, open a popup, or leave a spinner on the old card.
+Hover over the name and description: both must show a pointing-hand cursor.
+Leaving the text or navigating to details while hovering must restore the cursor;
+repeated hover/navigation must not leave the hand cursor stuck on other controls.
 
 ## Optional Applite self-card
 

@@ -11,7 +11,6 @@ enum SidebarItem: Equatable, Hashable {
     case home
     case updates
     case installed
-    case externalInstalled
     case activeTasks
     case appMigration
     case brew
