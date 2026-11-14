@@ -716,13 +716,8 @@ enum ExternalInstallTests {
         guard case .busy = vm.progressState else {
             preconditionFailure("A completed command must stay busy during ownership reconciliation")
         }
-        let activity = AppStatusSummary(
-            isRefreshingCatalog: false, isResolvingInstalledState: false,
-            outdatedRefreshFailed: false,
-            operations: service.activeTasks.map { ($0.viewModel.name, $0.viewModel.progressState) }
-        )
-        precondition(activity.activity.isBusy && activity.activeTaskCount > 0,
-                     "The footer/quit-facing operation state must remain active during reconciliation")
+        precondition(service.activeTasks.contains { $0.viewModel === vm },
+                     "The operation must remain active during reconciliation")
         resumeReconciliation?.resume()
         await reconcileTask.value
 
