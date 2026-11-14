@@ -26,6 +26,7 @@ final class CaskViewModel {
     var isInstalled: Bool = false {
         didSet {
             if isInstalled { externalAppURL = nil }
+            else { isOutdated = false }
         }
     }
 
