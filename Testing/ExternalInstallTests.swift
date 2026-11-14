@@ -2478,7 +2478,7 @@ enum ExternalInstallTests {
             touch "$prefix/list-started"
             while [ -f "$prefix/pause-list" ]; do sleep 0.01; done
             if [ -f "$prefix/fail-list" ]; then echo "receipt query failed" >&2; exit 1; fi ;;
-          outdated) : ;;
+          outdated) touch "$prefix/outdated-started" ;;
           uninstall) touch "$prefix/uninstall-started" ;;
         esac
         """
@@ -2552,6 +2552,31 @@ enum ExternalInstallTests {
         _ = try await service.runSerialized { true }
         precondition(vm.progressState.isFailed,
                      "A successful retry must unblock actions, which still verify the selected receipt")
+        try fm.removeItem(at: secondPrefix.appendingPathComponent("outdated-started"))
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        let failedInventoryService = BrewService(
+            notify: { _, _, _ in },
+            intuneInventory: { throw CaskAdoptionError.intuneInventoryUnavailable },
+            artCraftInventory: { .empty }
+        )
+        let scanManager = CaskManager(dataLoader: loader, registry: registry, brewService: failedInventoryService)
+        let scanAlert = AlertManager()
+        scanManager.selectedHomebrewDidChange(surfacingErrorsIn: scanAlert)
+        let scanDeadline = Date().addingTimeInterval(5)
+        while scanManager.isResolvingInstalledState && Date() < scanDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(!scanManager.isResolvingInstalledState && scanAlert.current != nil
+                     && fm.fileExists(atPath: secondPrefix.appendingPathComponent("outdated-started").path)
+                     && !scanManager.outdatedRefreshFailed,
+                     "Ownership scan failures must be reported without suppressing valid receipt and outdated refreshes")
+        vm.isInstalled = true
+        vm.progressState = .idle
+        scanManager.uninstall(vm)
+        _ = try await failedInventoryService.runSerialized { true }
+        precondition(vm.progressState.isFailed
+                     && !fm.fileExists(atPath: secondPrefix.appendingPathComponent("uninstall-started").path),
+                     "Writes must still fail closed when ownership inventory is unavailable")
     }
 
     @MainActor
