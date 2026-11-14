@@ -1,5 +1,8 @@
 # Applite test harness
 
+Ownership fixtures cover inaccessible Intune agent paths, internal JSON and
+dangling recorded links, protected sibling aliases, and renamed installed copies.
+
 ## Non-destructive external-install regression tests
 
 Creating a missing custom app directory must not change its captured Homebrew configuration.

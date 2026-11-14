@@ -155,7 +155,7 @@ final class CaskViewModel {
     var cardIdentity: String {
         guard hasMultipleInstalledCopies || isAdditionalInstalledCopy,
               let url = selectedInstallationURL else { return id }
-        return "\(fullToken)\u{0}\(url.resolvingSymlinksInPath().standardizedFileURL.path)"
+        return "\(fullToken)\u{0}\(url.standardizedFileURL.path)"
     }
 
     func launchApp() async throws {

@@ -864,6 +864,21 @@ enum ExternalInstallTests {
         )
         precondition(rubyTargets == [otherApp.resolvingSymlinksInPath().standardizedFileURL],
                      "Ruby-only saved casks must use recorded receipt artifacts without evaluating Ruby")
+        try fm.removeItem(at: rubyRoom.appendingPathComponent(".metadata/INSTALL_RECEIPT.json"))
+        let legacyLaunch = try InstalledAppLocator.launchURL(
+            token: "ruby-receipt", displayName: "Ruby Receipt", preferredURL: nil,
+            isManaged: true, configuration: configurationA
+        )
+        precondition(legacyLaunch?.path == otherApp.path,
+                     "Read-only lookup must locate legacy Ruby-only installations without a receipt")
+        do {
+            _ = try InstalledAppLocator.recordedAppURLs(
+                token: "ruby-receipt", executable: configurationA.executable, requireRecordedOwnership: true
+            )
+            preconditionFailure("Legacy Ruby-only installations must fail closed for mutation preflights")
+        } catch CaskAdoptionError.installationTargetsUnavailable { }
+        try JSONSerialization.data(withJSONObject: ["uninstall_artifacts": [["app": ["Source.app"]]]])
+            .write(to: rubyRoom.appendingPathComponent(".metadata/INSTALL_RECEIPT.json"))
         try fm.removeItem(at: rubyLink)
         do {
             _ = try InstalledAppLocator.recordedAppURLs(token: "ruby-receipt", executable: configurationA.executable)
@@ -1115,6 +1130,14 @@ enum ExternalInstallTests {
             agentURL: directory.appendingPathComponent("Missing Agent.app"), databaseURL: databaseURL
         )
         precondition(missingAgent.bundleIDs.isEmpty, "A leftover policy cache without the agent must not imply management")
+        let inaccessible = directory.appendingPathComponent("Inaccessible")
+        try fm.createDirectory(at: inaccessible, withIntermediateDirectories: true)
+        try fm.setAttributes([.posixPermissions: 0], ofItemAtPath: inaccessible.path)
+        do {
+            _ = try IntuneAppDetector.load(agentURL: inaccessible.appendingPathComponent("Agent.app"), databaseURL: databaseURL)
+            preconditionFailure("An inaccessible agent location must not be interpreted as absent")
+        } catch CaskAdoptionError.intuneInventoryUnavailable { }
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: inaccessible.path)
         let snapshot = try IntuneAppDetector.load(agentURL: agent, databaseURL: databaseURL)
         precondition(snapshot.bundleIDs == ["org.fixture.primary", "org.fixture.managed"])
         let matches = try snapshot.isManagedApp(at: app)
@@ -1145,6 +1168,14 @@ enum ExternalInstallTests {
         precondition(scan.intuneAppURLs == [stable.fullToken: app, alias.fullToken: app])
         precondition(scan.appStoreAppURLs == scan.intuneAppURLs && scan.externalAppURLs.isEmpty,
                      "Retain secondary App Store evidence without duplicating a managed installation")
+        let recordedAlias = try ExternalAppDetector.installations(
+            catalog: [alias, stable], managedTokens: [stable.fullToken], directories: [directory],
+            intune: snapshot, recordedAppURLs: [stable.fullToken: [app]]
+        )
+        precondition(recordedAlias.intuneAppURLs[alias.fullToken] == app
+                     && recordedAlias.appStoreAppURLs[alias.fullToken] == app
+                     && recordedAlias.externalAppURLs[alias.fullToken] == nil,
+                     "A recorded sibling bundle must still protect its alias without adding an installed copy")
         let registry = CaskViewModelRegistry()
         let vm = registry.viewModel(for: stable)
         _ = registry.viewModel(for: alias)
@@ -2539,6 +2570,76 @@ enum ExternalInstallTests {
         await service.install(sibling, confirmedConfiguration: .current).value
         precondition(sibling.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
                      "Unknown managed ownership must fail closed")
+        try Data("cask fixture".utf8).write(to: metadata.appendingPathComponent("stable.rb"))
+        try fm.createSymbolicLink(at: prefix.appendingPathComponent("Caskroom/stable/1/Shared.app"),
+                                  withDestinationURL: managedApp)
+        let unrelated = CaskRecord(
+            token: "unrelated", fullToken: "unrelated", tap: "homebrew/cask", name: "Unrelated",
+            descriptionText: "", homepageURL: nil, pkgInstaller: false, warningType: nil,
+            warningDate: nil, warningReason: nil, downloadsIn365days: 0, appBundleNames: ["Unrelated.app"]
+        )
+        try fm.createDirectory(at: externalDirectory.appendingPathComponent("Unrelated.app"),
+                               withIntermediateDirectories: true)
+        try await pool.write { db in
+            try stable.insert(db)
+            try unrelated.insert(db)
+        }
+        try await loader.refreshInstalled()
+        precondition(registry.viewModel(for: unrelated).isInstalledExternally,
+                     "A legacy Ruby-only receipt must not block unrelated external discovery")
+        await service.install(sibling, confirmedConfiguration: .current).value
+        precondition(sibling.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "A legacy Ruby-only receipt must still block unverifiable mutation")
+        try Data("invalid metadata".utf8).write(to: metadata.appendingPathComponent("stable.json"))
+        try await loader.refreshInstalled()
+        precondition(registry.viewModel(for: unrelated).isInstalledExternally,
+                     "Malformed metadata for one managed cask must not abort unrelated discovery")
+        let receiptRoom = prefix.appendingPathComponent("Caskroom/receipt-cask")
+        let staged = receiptRoom.appendingPathComponent("1/Payload")
+        let receiptMetadata = receiptRoom.appendingPathComponent(".metadata/1/1/Casks")
+        try fm.createDirectory(at: staged, withIntermediateDirectories: true)
+        try fm.createDirectory(at: receiptMetadata, withIntermediateDirectories: true)
+        try fm.createSymbolicLink(at: staged.appendingPathComponent("Source.app"), withDestinationURL: managedApp)
+        try JSONSerialization.data(withJSONObject: ["url_specs": ["only_path": "Payload"]])
+            .write(to: receiptMetadata.appendingPathComponent("receipt-cask.json"))
+        try JSONSerialization.data(withJSONObject: ["uninstall_artifacts": [["app": ["Source.app"]]]])
+            .write(to: receiptRoom.appendingPathComponent(".metadata/INSTALL_RECEIPT.json"))
+        let receiptTargets = try InstalledAppLocator.recordedAppURLs(
+            token: "receipt-cask", executable: brew, requireRecordedOwnership: true
+        )
+        precondition(receiptTargets == [managedApp.resolvingSymlinksInPath().standardizedFileURL])
+        try fm.moveItem(at: receiptMetadata.appendingPathComponent("receipt-cask.json"),
+                        to: receiptMetadata.appendingPathComponent("receipt-cask.internal.json"))
+        let internalTargets = try InstalledAppLocator.recordedAppURLs(
+            token: "receipt-cask", executable: brew, requireRecordedOwnership: true
+        )
+        precondition(internalTargets == receiptTargets, "Internal JSON must preserve staged-path metadata")
+        try fm.removeItem(at: receiptMetadata.appendingPathComponent("receipt-cask.internal.json"))
+        try JSONSerialization.data(withJSONObject: ["url_specs": ["only_path": "../outside"]])
+            .write(to: receiptMetadata.appendingPathComponent("receipt-cask.json"))
+        do {
+            _ = try InstalledAppLocator.recordedAppURLs(token: "receipt-cask", executable: brew)
+            preconditionFailure("An unsafe recorded source path must fail closed")
+        } catch CaskAdoptionError.installationTargetsUnavailable { }
+        try fm.removeItem(at: receiptMetadata.appendingPathComponent("receipt-cask.json"))
+        try Data("cask fixture".utf8).write(to: receiptMetadata.appendingPathComponent("receipt-cask.rb"))
+        let directLink = receiptRoom.appendingPathComponent("1/Source.app")
+        try fm.createSymbolicLink(at: directLink, withDestinationURL: managedApp)
+        let rubyTargets = try InstalledAppLocator.recordedAppURLs(
+            token: "receipt-cask", executable: brew, requireRecordedOwnership: true
+        )
+        precondition(rubyTargets == [managedApp.resolvingSymlinksInPath().standardizedFileURL])
+        try fm.removeItem(at: directLink)
+        try fm.createSymbolicLink(at: directLink, withDestinationURL: prefix.appendingPathComponent("Missing.app"))
+        let missingTargets = try InstalledAppLocator.recordedAppURLs(
+            token: "receipt-cask", executable: brew, requireRecordedOwnership: true
+        )
+        precondition(missingTargets.isEmpty, "A recorded link to a missing app must not block other casks")
+        try fm.removeItem(at: directLink)
+        do {
+            _ = try InstalledAppLocator.recordedAppURLs(token: "receipt-cask", executable: brew)
+            preconditionFailure("Ruby-only metadata with an unverifiable staged link must fail closed")
+        } catch CaskAdoptionError.installationTargetsUnavailable { }
     }
 
     @MainActor
@@ -2560,6 +2661,17 @@ enum ExternalInstallTests {
         }
         let stable = record("identity-shared")
         let beta = record("identity-shared@beta")
+        let oldApp = system.appendingPathComponent("Old.app")
+        try fm.createDirectory(at: oldApp, withIntermediateDirectories: true)
+        let renamed = try ExternalAppDetector.installations(
+            catalog: [stable], managedTokens: [stable.fullToken], directories: [user],
+            recordedAppURLs: [stable.fullToken: [oldApp]]
+        )
+        precondition(renamed.multipleCopyTokens.contains(stable.fullToken)
+                     && renamed.bundleURLs[stable.fullToken] == oldApp.resolvingSymlinksInPath().standardizedFileURL
+                     && renamed.additionalInstallations[stable.fullToken]?.map(\.url)
+                        == [userApp.resolvingSymlinksInPath().standardizedFileURL],
+                     "A recorded old target and a separate renamed current target are distinct copies")
         let recordedOnly = try ExternalAppDetector.installations(
             catalog: [stable], managedTokens: [stable.fullToken], directories: [],
             recordedAppURLs: [stable.fullToken: [systemApp, userApp, systemApp]]

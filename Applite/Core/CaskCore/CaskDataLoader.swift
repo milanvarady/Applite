@@ -199,14 +199,24 @@ final class CaskDataLoader {
         let catalog = detectionEnabled ? records : records.filter { tokens.contains($0.fullToken) }
         let loadIntuneInventory = self.loadIntuneInventory
         let loadArtCraftInventory = self.loadArtCraftInventory
+        let logger = self.logger
         let task = Task.detached {
+            func recordedURLs(for token: String) throws -> [URL] {
+                try Task.checkCancellation()
+                do {
+                    return try InstalledAppLocator.recordedAppURLs(token: token, executable: configuration.executable)
+                } catch is CancellationError {
+                    throw CancellationError()
+                } catch {
+                    logger.error("Could not inspect recorded installation for \(token, privacy: .public): \(error.localizedDescription)")
+                    return []
+                }
+            }
             if !detectionEnabled {
                 var bundleURLs: [CaskId: URL] = [:]
                 for record in catalog {
                     try Task.checkCancellation()
-                    let recorded = try InstalledAppLocator.recordedAppURLs(
-                        token: record.token, executable: configuration.executable
-                    )
+                    let recorded = try recordedURLs(for: record.token)
                     if let url = recorded.first ?? ExternalAppDetector.appURL(
                         bundleNames: record.appBundleNames, displayName: record.name,
                         directories: configuration.applicationDirectories
@@ -241,10 +251,7 @@ final class CaskDataLoader {
                 let artCraft = try loadArtCraftInventory()
                 let recorded = try Dictionary(uniqueKeysWithValues: tokens.map { token in
                     try Task.checkCancellation()
-                    return (token, try InstalledAppLocator.recordedAppURLs(
-                        token: (token as NSString).lastPathComponent, executable: configuration.executable,
-                        requireRecordedOwnership: true
-                    ))
+                    return (token, try recordedURLs(for: (token as NSString).lastPathComponent))
                 })
                 return try ExternalAppDetector.installations(
                     catalog: catalog, managedTokens: tokens,
@@ -267,6 +274,8 @@ final class CaskDataLoader {
         registry.materializeMissingViewModels(for: catalog.filter {
             result.bundleURLs[$0.fullToken] != nil || result.externalAppURLs[$0.fullToken] != nil
                 || result.additionalInstallations[$0.fullToken] != nil
+                || result.appStoreAppURLs[$0.fullToken] != nil || result.intuneAppURLs[$0.fullToken] != nil
+                || result.setappAppURLs[$0.fullToken] != nil || result.artCraftAppURLs[$0.fullToken] != nil
         })
         if !detectionEnabled {
             registry.updateManagedBundleURLs(
