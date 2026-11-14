@@ -85,12 +85,13 @@ final class CaskViewModelRegistry {
         artCraftAppURLs: [CaskId: URL] = [:], bundleURLs: [CaskId: URL]? = nil,
         copies: [CaskId: [ExternalAppDetector.AdditionalInstallation]] = [:],
         multipleCopyTokens: Set<CaskId> = [],
+        selectedCopyTokens: Set<CaskId>? = nil,
         selectedCopyProtection: [CaskId: ProtectedAppInstallation] = [:]
     ) {
         applyManagementSourceOverrides()
         for vm in viewModelsByFullToken.values {
             vm.hasMultipleInstalledCopies = multipleCopyTokens.contains(vm.fullToken)
-            vm.hasSelectedCopyProvenance = vm.hasMultipleInstalledCopies
+            vm.hasSelectedCopyProvenance = selectedCopyTokens?.contains(vm.fullToken) ?? vm.hasMultipleInstalledCopies
             vm.selectedCopyProtection = selectedCopyProtection[vm.fullToken]
             let urls: [ProtectedAppInstallation.Source: URL?] = [
                 .intune: intuneAppURLs[vm.fullToken], .appStore: appStoreAppURLs[vm.fullToken],
@@ -135,16 +136,22 @@ final class CaskViewModelRegistry {
 
     func updateManagedBundleURLs(
         _ urls: [CaskId: URL], multipleCopyTokens: Set<CaskId>,
-        selectedCopyProtection: [CaskId: ProtectedAppInstallation]
+        selectedCopyProtection: [CaskId: ProtectedAppInstallation],
+        selectedCopyTokens: Set<CaskId> = []
     ) {
         for vm in viewModelsByFullToken.values where vm.isInstalled {
-            let url = urls[vm.fullToken]
-            if vm.installedBundleURL == url && !multipleCopyTokens.contains(vm.fullToken) {
+            let token = vm.fullToken
+            let url = urls[token]
+            let hasMultipleCopies = multipleCopyTokens.contains(token)
+            let hasSelectedCopyProvenance = selectedCopyTokens.contains(token) || hasMultipleCopies
+            if vm.installedBundleURL == url && vm.hasMultipleInstalledCopies == hasMultipleCopies
+                && !selectedCopyTokens.contains(token) {
                 continue
             }
             vm.installedBundleURL = url
-            vm.hasSelectedCopyProvenance = multipleCopyTokens.contains(vm.fullToken)
-            vm.selectedCopyProtection = selectedCopyProtection[vm.fullToken]
+            vm.hasMultipleInstalledCopies = hasMultipleCopies
+            vm.hasSelectedCopyProvenance = hasSelectedCopyProvenance
+            vm.selectedCopyProtection = selectedCopyProtection[token]
             if let selected = vm.selectedCopyProtection {
                 var sources = vm.protectedAppInstallation?.appURLs ?? [:]
                 sources.merge(selected.appURLs) { _, current in current }

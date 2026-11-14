@@ -13,6 +13,7 @@ enum ExternalAppDetector {
         var setappAppURLs: [CaskId: URL] = [:]
         var artCraftAppURLs: [CaskId: URL] = [:]
         var bundleURLs: [CaskId: URL] = [:]
+        var selectedCopyTokens: Set<CaskId> = []
         var selectedCopyProtection: [CaskId: ProtectedAppInstallation] = [:]
         var additionalInstallations: [CaskId: [AdditionalInstallation]] = [:]
         var multipleCopyTokens: Set<CaskId> = []
@@ -126,10 +127,12 @@ enum ExternalAppDetector {
                 continue
             }
             let selectedCopyProtection = try Self.protection(at: selected, intune: intune, artCraft: artCraft)
+            found.selectedCopyTokens.insert(record.fullToken)
+            if let selectedCopyProtection {
+                found.selectedCopyProtection[record.fullToken] = selectedCopyProtection
+            }
             var additionalCopies: [(URL, ProtectedAppInstallation?)] = []
             let candidates = matching + recorded
-            let competingArtifactNames = Set(ordered.filter { $0.fullToken != record.fullToken }
-                .flatMap { $0.appBundleNames.map { ($0 as NSString).lastPathComponent } })
             for url in candidates {
                 let sameArtifact = candidates.filter { $0.lastPathComponent == url.lastPathComponent }
                 guard renamedCopyTokens.contains(record.fullToken) || hasMultipleCopies(sameArtifact) else {
@@ -143,16 +146,11 @@ enum ExternalAppDetector {
                     continue
                 }
                 let copyProtection = try Self.protection(at: url, intune: intune, artCraft: artCraft)
-                guard !competingArtifactNames.contains(url.lastPathComponent)
-                        || copyProtection?.source == selectedCopyProtection?.source else {
-                    continue
-                }
                 additionalCopies.append((canonical, copyProtection))
             }
             found.bundleURLs[record.fullToken] = canonicalURL
             if !additionalCopies.isEmpty {
                 found.multipleCopyTokens.insert(record.fullToken)
-                found.selectedCopyProtection[record.fullToken] = selectedCopyProtection
             }
             if !isManaged {
                 found.externalAppURLs[record.fullToken] = selected

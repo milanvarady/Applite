@@ -156,6 +156,13 @@ enum ExternalInstallTests {
                 .init(data: Data(staleHTML.utf8), status: 200, url: canonicalAPIURL)
             }
             precondition(staleRedirectNotes == nil, "Stale release links should fall back to release history")
+            let rejectedRedirect = try await ReleaseNotesResolver.load(renamedRepository) { _ in
+                .init(
+                    data: Data(), status: 301,
+                    url: URL(string: "https://api.github.com/repositories/123/releases/tags/v1.2.3")!
+                )
+            }
+            precondition(rejectedRedirect == nil, "A rejected GitHub repository redirect should fall back to release history")
             let ambiguous = ReleaseNotesResolver.source(
                 homepage: homepage, download: URL(string: "https://example.test/app.dmg")!, version: "1.2.3,42"
             )!
@@ -1538,10 +1545,12 @@ enum ExternalInstallTests {
         let scan = try ExternalAppDetector.installations(
             catalog: [alias, stable], managedTokens: [], directories: [direct, apps]
         )
-        precondition(scan.externalAppURLs == [
-            stable.fullToken: app,
-            alias.fullToken: direct.appendingPathComponent("Subscription Fixture.app", isDirectory: true)
-        ], "Setapp must remain preferred while the separate direct-download copy remains detected")
+        precondition(scan.externalAppURLs == [stable.fullToken: app]
+                     && scan.additionalInstallations[stable.fullToken]?.map(\.url)
+                        == [direct.appendingPathComponent("Subscription Fixture.app", isDirectory: true)]
+                     && scan.additionalInstallations[stable.fullToken]?.first?.protection == nil
+                     && scan.externalAppURLs[alias.fullToken] == nil,
+                     "Setapp must remain preferred while an unrecorded copy stays under the preferred cask")
         precondition(scan.setappAppURLs == [stable.fullToken: app, alias.fullToken: app])
         let intune = try ExternalAppDetector.protectedInstallation(
             bundleNames: stable.appBundleNames, displayName: stable.name, directories: [apps],
@@ -3028,6 +3037,56 @@ enum ExternalInstallTests {
         precondition(appStoreRows[0].installedManagementSourceName == ProtectedAppInstallation.Source.appStore.name
                      && otherRows[0].installedManagementSourceName == String(localized: "Unknown"),
                      "Details must describe the selected copy's source rather than another copy's protection")
+        let aliasedCopies = try ExternalAppDetector.installations(
+            catalog: [beta, stable], managedTokens: [], directories: [system, user]
+        )
+        precondition(aliasedCopies.externalAppURLs[stable.fullToken]?.path == userApp.path
+                     && aliasedCopies.externalAppURLs[beta.fullToken] == nil
+                     && aliasedCopies.additionalInstallations[stable.fullToken]?.map(\.url.path) == [systemApp.path]
+                     && aliasedCopies.additionalInstallations[stable.fullToken]?.first?.protection == nil,
+                     "Copies with different protection sources must stay under the preferred cask and retain each source")
+        let aliasRegistry = CaskViewModelRegistry()
+        let aliasPrimary = aliasRegistry.viewModel(for: stable)
+        aliasRegistry.markExternalInstallations(
+            appURLs: aliasedCopies.externalAppURLs, appStoreAppURLs: aliasedCopies.appStoreAppURLs,
+            bundleURLs: aliasedCopies.bundleURLs, copies: aliasedCopies.additionalInstallations,
+            multipleCopyTokens: aliasedCopies.multipleCopyTokens,
+            selectedCopyTokens: aliasedCopies.selectedCopyTokens,
+            selectedCopyProtection: aliasedCopies.selectedCopyProtection
+        )
+        let aliasRows = aliasRegistry.locallyInstalledViewModels
+        let aliasAppStoreRows = InstalledListOptions(source: .appStore).apply(to: aliasRows)
+        let aliasOtherRows = InstalledListOptions(source: .other).apply(to: aliasRows)
+        precondition(aliasRows.count == 2 && aliasPrimary.hasSelectedCopyProvenance
+                     && aliasPrimary.displayedProtection?.source == .appStore
+                     && aliasPrimary.installedManagementSourceName == ProtectedAppInstallation.Source.appStore.name
+                     && aliasAppStoreRows.count == 1
+                     && aliasAppStoreRows[0].selectedInstallationURL?.path == userApp.path
+                     && aliasOtherRows.count == 1
+                     && aliasOtherRows[0].selectedInstallationURL?.path == systemApp.path,
+                     "An explicit unprotected primary copy must not inherit another copy's source")
+
+        let managedAliases = try ExternalAppDetector.installations(
+            catalog: [beta, stable], managedTokens: [stable.fullToken, beta.fullToken],
+            directories: [system, user],
+            recordedAppURLs: [stable.fullToken: [systemApp], beta.fullToken: [userApp]]
+        )
+        let managedAliasRegistry = CaskViewModelRegistry()
+        let managedStable = managedAliasRegistry.viewModel(for: stable)
+        let managedBeta = managedAliasRegistry.viewModel(for: beta)
+        managedAliasRegistry.markInstalled(tokens: [stable.fullToken, beta.fullToken])
+        managedAliasRegistry.markExternalInstallations(
+            appURLs: managedAliases.externalAppURLs, appStoreAppURLs: managedAliases.appStoreAppURLs,
+            bundleURLs: managedAliases.bundleURLs,
+            selectedCopyTokens: managedAliases.selectedCopyTokens,
+            selectedCopyProtection: managedAliases.selectedCopyProtection
+        )
+        precondition(managedStable.hasSelectedCopyProvenance && managedStable.displayedProtection == nil
+                     && managedStable.installedManagementSourceName == String(localized: "Homebrew")
+                     && managedStable.protectedAppInstallation?.source == .appStore
+                     && managedBeta.displayedProtection?.source == .appStore
+                     && managedBeta.installedManagementSourceName == ProtectedAppInstallation.Source.appStore.name,
+                     "Recorded stable and beta copies must display their own protection while retaining aggregate guards")
         let managedMixed = try ExternalAppDetector.installations(
             catalog: [stable], managedTokens: [stable.fullToken], directories: [system, user],
             recordedAppURLs: [stable.fullToken: [systemApp]]

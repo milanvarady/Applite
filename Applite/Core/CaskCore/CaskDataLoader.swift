@@ -245,6 +245,7 @@ final class CaskDataLoader {
                     for (token, url) in changed {
                         try Task.checkCancellation()
                         result.multipleCopyTokens.insert(token)
+                        result.selectedCopyTokens.insert(token)
                         result.selectedCopyProtection[token] = try ExternalAppDetector.protection(
                             at: url, intune: intune, artCraft: artCraft
                         )
@@ -291,7 +292,8 @@ final class CaskDataLoader {
         if !detectionEnabled {
             registry.updateManagedBundleURLs(
                 result.bundleURLs, multipleCopyTokens: result.multipleCopyTokens,
-                selectedCopyProtection: result.selectedCopyProtection
+                selectedCopyProtection: result.selectedCopyProtection,
+                selectedCopyTokens: result.selectedCopyTokens
             )
             return
         }
@@ -300,6 +302,7 @@ final class CaskDataLoader {
             intuneAppURLs: result.intuneAppURLs, setappAppURLs: result.setappAppURLs,
             artCraftAppURLs: result.artCraftAppURLs, bundleURLs: result.bundleURLs,
             copies: result.additionalInstallations, multipleCopyTokens: result.multipleCopyTokens,
+            selectedCopyTokens: result.selectedCopyTokens,
             selectedCopyProtection: result.selectedCopyProtection
         )
     }

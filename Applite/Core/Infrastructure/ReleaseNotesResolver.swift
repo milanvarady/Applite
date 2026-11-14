@@ -112,6 +112,7 @@ enum ReleaseNotesResolver {
                 throw Failure.invalidResponse
             }
             let response = try await fetch(url)
+            if (300..<400).contains(response.status) { return nil }
             guard let resolved = apiReleaseIdentity(response.url), resolved.tag == tag else {
                 throw Failure.invalidResponse
             }
@@ -146,6 +147,9 @@ enum ReleaseNotesResolver {
             defer { bytes.task.cancel() }
             guard let response = response as? HTTPURLResponse, let finalURL = response.url else {
                 throw Failure.invalidResponse
+            }
+            if (300..<400).contains(response.statusCode) {
+                return Response(data: Data(), status: response.statusCode, url: finalURL)
             }
             guard apiReleaseIdentity(finalURL) != nil else { throw Failure.invalidResponse }
             var data = Data()
