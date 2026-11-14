@@ -203,7 +203,7 @@ struct AppView: View {
         switch role {
         case .installAndManage:
             if cask.isInstalled {
-                OpenButton(cask: cask)
+                installedAction
             } else {
                 DownloadButton(cask: cask)
             }
@@ -214,9 +214,24 @@ struct AppView: View {
             UpdateButton(cask: cask)
 
         case .installed:
-            OpenButton(cask: cask)
+            installedAction
 
             optionsMenuButton
+        }
+    }
+
+    @ViewBuilder
+    private var installedAction: some View {
+        if cask.isFontCask {
+            Label("Installed", systemImage: "checkmark")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.secondary.opacity(0.1), in: Capsule())
+                .accessibilityLabel("Installed")
+        } else {
+            OpenButton(cask: cask)
         }
     }
 

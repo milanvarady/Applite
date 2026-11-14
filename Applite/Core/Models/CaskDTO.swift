@@ -13,6 +13,7 @@ struct CaskDTO: Decodable {
     let token: String
     let fullToken: String
     let tap: String
+    let rubySourcePath: String?
     let nameArray: Array<String>
     let desc: String?
     let homepage: String
@@ -30,6 +31,7 @@ struct CaskDTO: Decodable {
         case token
         case fullToken = "full_token"
         case tap
+        case rubySourcePath = "ruby_source_path"
         case nameArray = "name"
         case desc
         case homepage
@@ -45,7 +47,10 @@ struct CaskDTO: Decodable {
     }
 
     var isFontCask: Bool {
-        artifacts?.contains { $0.font?.isEmpty == false } == true
+        let hasFontArtifact = artifacts?.contains { $0.font?.isEmpty == false } == true
+        let isDefaultTapFontSource = tap == "homebrew/cask"
+            && rubySourcePath?.hasPrefix("Casks/font/") == true
+        return hasFontArtifact || isDefaultTapFontSource
     }
 }
 

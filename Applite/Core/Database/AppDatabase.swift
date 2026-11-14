@@ -154,6 +154,10 @@ struct AppDatabase {
             try db.execute(sql: "DELETE FROM metadata WHERE key = 'lastSyncDate'")
         }
 
+        migrator.registerMigration("v3_fontSourcePathClassification") { db in
+            try db.execute(sql: "DELETE FROM metadata WHERE key = 'lastSyncDate'")
+        }
+
         return migrator
     }
 
