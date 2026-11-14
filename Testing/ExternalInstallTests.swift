@@ -717,7 +717,16 @@ enum ExternalInstallTests {
         defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
         try fm.removeItem(at: profileReceipts)
         try await loader.refreshInstalled()
+        let staleRecord = CaskRecord(
+            token: externalRecord.token, fullToken: externalRecord.fullToken, tap: externalRecord.tap,
+            name: externalRecord.name, descriptionText: "", homepageURL: nil, pkgInstaller: false,
+            warningType: .disabled, warningDate: "2020-01-01", warningReason: "Old",
+            downloadsIn365days: 0, appBundleNames: ["External.app"]
+        )
+        _ = registry.viewModel(for: staleRecord)
+        precondition(vm.warning?.isDisabled == true)
         try await loader.refreshExternalInstallations { _, _, _ in [:] }
+        precondition(vm.warning == nil, "Fresh catalog data must update existing external cards before scanning")
         precondition(registry.count == 2, "Empty scans must not materialize the entire catalog")
         let scanGate = ScanGate()
         let scannedToken = externalRecord.fullToken
@@ -742,6 +751,11 @@ enum ExternalInstallTests {
         try await delayedScan.value
         precondition(vm.name == "Newer Catalog Name",
                      "A slow external scan must not overwrite newer live catalog data")
+        let oldSnapshots = registry.recordSnapshots()
+        _ = registry.viewModel(for: staleRecord)
+        registry.updateExistingViewModels(for: [externalRecord], unchangedSince: oldSnapshots)
+        precondition(vm.warning?.isDisabled == true,
+                     "A record updated during catalog fetch must not be overwritten by its old snapshot")
         _ = registry.viewModel(for: externalRecord)
         for enabled in [false, true] {
             defaults.setValue(enabled, for: Preferences.offerHomebrewManagement)

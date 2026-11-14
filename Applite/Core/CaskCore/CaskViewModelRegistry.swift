@@ -45,6 +45,18 @@ final class CaskViewModelRegistry {
         }
     }
 
+    func recordSnapshots() -> [CaskId: CaskRecord] {
+        viewModelsByFullToken.mapValues(\.recordSnapshot)
+    }
+
+    func updateExistingViewModels(for records: [CaskRecord], unchangedSince snapshots: [CaskId: CaskRecord]) {
+        for record in records {
+            guard let existing = viewModelsByFullToken[record.fullToken],
+                  let previous = snapshots[record.fullToken], existing.recordSnapshot == previous else { continue }
+            existing.updateRecord(record)
+        }
+    }
+
     // MARK: - Bulk State Updates
 
     /// Reconciles a boolean flag across every view model using `isMatch`.
