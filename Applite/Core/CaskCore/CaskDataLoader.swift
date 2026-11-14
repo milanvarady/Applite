@@ -97,10 +97,13 @@ final class CaskDataLoader {
     // MARK: - Search
 
     /// Searches casks using FTS5 and returns view models (reuses existing instances)
-    func search(query: String, limit: Int = 50, externalOnly: Bool = false) async throws -> [CaskViewModel] {
-        let records = try await dbService.search(query: query, limit: externalOnly ? Int.max : limit)
-        // Keep unresolved models too: the view filters reactively when the disk scan finishes.
+    func search(query: String, limit: Int = 50) async throws -> [CaskViewModel] {
+        let records = try await dbService.search(query: query, limit: limit)
         return registry.viewModels(for: records)
+    }
+
+    func searchExternalTokens(query: String) async throws -> [CaskId] {
+        try await dbService.searchFullTokens(query: query)
     }
 
     /// Resolves cask tokens to view models via the DB, creating any that aren't already live.
@@ -117,6 +120,7 @@ final class CaskDataLoader {
     /// and marks them installed in the registry.
     func refreshInstalled(
         configuration: BrewOperationConfiguration = .current,
+        onExternalScanFailure: (@MainActor (Error) -> Void)? = nil,
         scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil
     ) async throws {
         installedRefreshGeneration &+= 1
@@ -140,6 +144,15 @@ final class CaskDataLoader {
             guard generation == installedRefreshGeneration else { throw CancellationError() }
             guard externalScanGeneration != scanGeneration else { throw CancellationError() }
             // A replacement disk scan does not invalidate successfully refreshed receipts.
+        } catch {
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
+            guard generation == installedRefreshGeneration else { throw CancellationError() }
+            if externalScanGeneration == scanGeneration {
+                guard let onExternalScanFailure else { throw error }
+                registry.markExternalInstallations(appURLs: [:])
+                onExternalScanFailure(error)
+            }
         }
         try Task.checkCancellation()
         try configuration.validateCurrent()

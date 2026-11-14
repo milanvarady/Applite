@@ -287,6 +287,17 @@ enum ExternalInstallTests {
         let loader = CaskDataLoader(
             dbService: CaskDatabaseService(databasePool: scanPool), registry: registry
         )
+        let searchRegistry = CaskViewModelRegistry()
+        let searchLoader = CaskDataLoader(
+            dbService: CaskDatabaseService(databasePool: scanPool), registry: searchRegistry
+        )
+        let matchingTokens = try await searchLoader.searchExternalTokens(query: "sample")
+        precondition(matchingTokens.contains(externalRecord.fullToken) && searchRegistry.count == 0,
+                     "External search must not materialize unrelated catalog models")
+        _ = searchRegistry.viewModel(for: externalRecord)
+        searchRegistry.markExternalInstallations(appURLs: [externalRecord.fullToken: helper])
+        precondition(searchRegistry.externalInstalledViewModels.filter { matchingTokens.contains($0.fullToken) }.count == 1,
+                     "Search tokens must match models detected after the search")
         defaults.setValue(userApps.path, for: Preferences.appdirPath)
         try await loader.refreshExternalInstallations()
         precondition(tapVM.installationState == .notInstalled)
@@ -432,7 +443,12 @@ enum ExternalInstallTests {
           --version) echo "Homebrew fixture" ;;
           list) echo stable ;;
           outdated) echo stable ;;
-          install) printf '%s\\n' "$@" > "$dir/arguments" ;;
+          install)
+            printf '%s\\n' "$@" > "$dir/arguments"
+            if [ -f "$dir/pause-install" ]; then
+              touch "$dir/install-started"
+              while [ -f "$dir/pause-install" ]; do sleep 0.02; done
+            fi ;;
           *) exit 2 ;;
         esac
         """
@@ -535,8 +551,34 @@ enum ExternalInstallTests {
         _ = try await service.runSerialized { true }
         precondition(sibling.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
                      "Bulk install must also block a sibling's managed target")
+        sibling.externalAppURL = nil
+        let safe = CaskViewModel(record: CaskRecord(
+            token: "safe", fullToken: "safe", tap: "homebrew/cask", name: "Safe",
+            descriptionText: "", homepageURL: nil, pkgInstaller: false, warningType: nil,
+            warningDate: nil, warningReason: nil, downloadsIn365days: 0, appBundleNames: ["Safe.app"]
+        ))
+        let pauseInstall = prefix.appendingPathComponent("pause-install")
+        try Data().write(to: pauseInstall)
+        service.installAll([sibling, safe])
+        let batchDeadline = Date().addingTimeInterval(5)
+        while !fm.fileExists(atPath: prefix.appendingPathComponent("install-started").path)
+                && Date() < batchDeadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        precondition(fm.fileExists(atPath: prefix.appendingPathComponent("install-started").path)
+                     && sibling.progressState.isFailed,
+                     "Managed conflicts must fail before eligible batch installs finish")
+        try fm.removeItem(at: pauseInstall)
+        _ = try await service.runSerialized { true }
+        try fm.removeItem(at: arguments)
 
         defaults.setValue(externalDirectory.path, for: Preferences.appdirPath)
+        let selectedCopy = prefix.appendingPathComponent("Previously Selected/Shared.app")
+        try fm.createDirectory(at: selectedCopy, withIntermediateDirectories: true)
+        sibling.externalAppURL = selectedCopy
+        await service.install(sibling, confirmedConfiguration: .current).value
+        precondition(sibling.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "A different preflight copy must require new consent")
         sibling.externalAppURL = externalApp
         await service.install(sibling, confirmedConfiguration: .current).value
         precondition(fm.fileExists(atPath: arguments.path),
@@ -554,6 +596,23 @@ enum ExternalInstallTests {
         let rubyOwned = try InstalledAppLocator.recordedAppURLs(token: "stable", executable: brew)
         precondition(rubyOwned == [managedApp.resolvingSymlinksInPath().standardizedFileURL],
                      "Ruby-only saved casks must use receipt artifacts without evaluating Ruby")
+        try fm.removeItem(at: metadata.appendingPathComponent("stable.rb"))
+        let receiptOwned = try InstalledAppLocator.recordedAppURLs(token: "stable", executable: brew)
+        precondition(receiptOwned == rubyOwned,
+                     "Receipt artifacts must work without saved cask metadata")
+        try fm.removeItem(at: source)
+        do {
+            _ = try InstalledAppLocator.recordedAppURLs(token: "stable", executable: brew)
+            preconditionFailure("Receipt-only artifacts still require verified staged links")
+        } catch CaskAdoptionError.installationTargetsUnavailable { }
+        manager.applyExternalAppDetectionSetting()
+        let failedScanDeadline = Date().addingTimeInterval(5)
+        while (manager.alert.current == nil || manager.outdatedRefreshFailed) && Date() < failedScanDeadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        precondition(managedVM.isInstalled && managedVM.isOutdated && !manager.outdatedRefreshFailed
+                     && manager.alert.current?.title == "Couldn't detect externally installed apps",
+                     "A disk-scan failure must be surfaced without skipping the outdated refresh")
     }
 
     @MainActor
@@ -680,6 +739,7 @@ enum ExternalInstallTests {
         case "$1" in
           --version) echo "Homebrew fixture" ;;
           list)
+            if [ -f "$fixture_dir/fail-list" ]; then exit 1; fi
             if [ -f "$fixture_dir/pause-list" ]; then
               touch "$fixture_dir/list-started"
               while [ -f "$fixture_dir/pause-list" ]; do sleep 0.01; done
@@ -717,15 +777,17 @@ enum ExternalInstallTests {
               sleep 0.2
               touch "$fixture_dir/stream-finished"
             fi
+            if [ -f "$fixture_dir/fail-list-after-install" ]; then echo "Installing batch"; fi
             for token in "$@"; do
               case "$token" in install|--cask|--force|--appdir=*) continue ;; esac
               mkdir -p "$fixture_dir/Caskroom/$token/1" "$fixture_dir/Caskroom/$token/.metadata/1/1/Casks"
               printf '{"artifacts":[]}' > "$fixture_dir/Caskroom/$token/.metadata/1/1/Casks/$token.json"
               printf '%s\\n' "$token" >> "$fixture_dir/receipts"
-              if [ ! -f "$fixture_dir/no-markers" ]; then echo "$token was successfully installed!"; fi
+              if [ ! -f "$fixture_dir/no-markers" ] && [ "$token" != "partial-unresolved" ]; then echo "$token was successfully installed!"; fi
               if [ "$token" = "review-missing" ]; then mkdir -p "$fixture_dir/Apps/Missing.app"; fi
             done
-            if [ -f "$fixture_dir/pause-reconciliation" ]; then touch "$fixture_dir/pause-list"; fi ;;
+            if [ -f "$fixture_dir/pause-reconciliation" ]; then touch "$fixture_dir/pause-list"; fi
+            if [ -f "$fixture_dir/fail-list-after-install" ]; then touch "$fixture_dir/fail-list"; fi ;;
           *) exit 2 ;;
         esac
         """
@@ -1036,10 +1098,10 @@ enum ExternalInstallTests {
         for mode in ["superseded", "parent", "configuration"] {
             let gate = ScanGate()
             let receiptRefresh = Task {
-                try await loader.refreshInstalled(configuration: configuration) { _, _, _ in
+                try await loader.refreshInstalled(configuration: configuration, scan: { _, _, _ in
                     try await gate.waitForCancellation()
                     return [:]
-                }
+                })
             }
             let deadline = Date().addingTimeInterval(5)
             while !(await gate.cancellationStarted) && Date() < deadline { await Task.yield() }
@@ -1061,11 +1123,25 @@ enum ExternalInstallTests {
             defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
         }
         do {
-            try await loader.refreshInstalled(configuration: configuration) { _, _, _ in
+            try await loader.refreshInstalled(configuration: configuration, scan: { _, _, _ in
                 throw CancellationError()
-            }
+            })
             preconditionFailure("An unexpected scan cancellation must not be hidden")
         } catch is CancellationError { }
+
+        try? fm.removeItem(at: prefix.appendingPathComponent("receipts"))
+        var fallbackNotices = 0
+        let batchService = BrewService(notify: { _, _, _ in fallbackNotices += 1 })
+        let batchSuccess = CaskViewModel(record: record("partial-success", bundle: "PartialSuccess.app"))
+        let batchUnknown = CaskViewModel(record: record("partial-unresolved", bundle: "PartialUnknown.app"))
+        try Data().write(to: prefix.appendingPathComponent("fail-list-after-install"))
+        batchService.installAll([batchSuccess, batchUnknown])
+        _ = try await batchService.runSerialized { true }
+        precondition(batchSuccess.isInstalled && !batchSuccess.progressState.isFailed
+                     && batchUnknown.progressState.isFailed && fallbackNotices == 1,
+                     "Fallback query: installed=\(batchSuccess.isInstalled), success=\(batchSuccess.progressState), unknown=\(batchUnknown.progressState), notices=\(fallbackNotices)")
+        try fm.removeItem(at: prefix.appendingPathComponent("fail-list-after-install"))
+        try fm.removeItem(at: prefix.appendingPathComponent("fail-list"))
 
         for mode in ["stream", "reconciliation"] {
             let missingApp = apps.appendingPathComponent("Missing.app")
@@ -1122,6 +1198,8 @@ enum ExternalInstallTests {
                      "A single install from the previous Homebrew must not publish receipt state")
         defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
 
+        vm.isInstalled = false
+        vm.externalAppURL = app
         var resumeReconciliation: CheckedContinuation<Void, Never>?
         let reconcileTask = service.install(vm, confirmedConfiguration: .current) {
             await withCheckedContinuation { resumeReconciliation = $0 }
@@ -1139,7 +1217,9 @@ enum ExternalInstallTests {
         await reconcileTask.value
 
         if fm.fileExists(atPath: profileReceipts.path) { try fm.removeItem(at: profileReceipts) }
-        try await loader.refreshInstalled { _, _, _ in [:] }
+        try "review-unused\n".write(to: profileReceipts, atomically: true, encoding: .utf8)
+        try await loader.refreshInstalled(scan: { _, _, _ in [:] })
+        try fm.removeItem(at: profileReceipts)
         registry.markInstalled(tokens: [])
         registry.markExternalInstallations(appURLs: [:])
         for _ in 0..<3 {

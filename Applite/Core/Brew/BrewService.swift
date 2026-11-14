@@ -96,6 +96,7 @@ final class BrewService {
         adoptionConsent: BrewAdoptionConsent? = nil,
         reconcile: (@MainActor () async throws -> Void)? = nil
     ) -> Task<Void, Never> {
+        let confirmedAppURL = confirmedConfiguration == nil ? nil : vm.externalAppURL
         return runTask(for: vm) {
             let configuration = confirmedConfiguration ?? .current
             Self.logger.info("Cask \"\(vm.token)\" installation started")
@@ -112,6 +113,13 @@ final class BrewService {
                 try Task.checkCancellation()
                 if preflight.managedConflicts.contains(vm.fullToken) {
                     throw CaskAdoptionError.managedByAnotherCask
+                }
+                if confirmedConfiguration != nil {
+                    guard let confirmedAppURL, let detectedURL = preflight.external[vm.fullToken],
+                          confirmedAppURL.resolvingSymlinksInPath().standardizedFileURL
+                            == detectedURL.resolvingSymlinksInPath().standardizedFileURL else {
+                        throw CaskAdoptionError.confirmationExpired
+                    }
                 }
                 if let appURL = preflight.external[vm.fullToken] {
                     guard confirmedConfiguration != nil else {
@@ -716,13 +724,13 @@ final class BrewService {
                         preflight.external[$0.fullToken] == nil && !preflight.managedConflicts.contains($0.fullToken)
                     }
                     blocked = vms.filter { preflight.external[$0.fullToken] != nil }
+                    for vm in managedConflicts {
+                        vm.progressState = .failed(output: CaskAdoptionError.managedByAnotherCask.localizedDescription)
+                    }
                     for vm in blocked {
                         vm.isInstalled = false
                         if UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) {
                             vm.externalAppURL = preflight.external[vm.fullToken]
-                        }
-                        for vm in managedConflicts {
-                            vm.progressState = .failed(output: CaskAdoptionError.managedByAnotherCask.localizedDescription)
                         }
                         vm.progressState = .failed(output: CaskAdoptionError.confirmationRequired.localizedDescription)
                     }
@@ -847,13 +855,23 @@ final class BrewService {
         } catch is CancellationError {
             for vm in vms { vm.progressState = .idle }
         } catch {
-            for vm in vms {
-                await showFailure(
-                    for: vm, error: error, output: completeOutput + "\n" + error.localizedDescription,
-                    failureTitle: String(localized: "Couldn't refresh installed apps"),
-                    failureMessage: error.localizedDescription
-                )
+            if configuration != .current {
+                await failBatchForConfigurationChange(vms, output: completeOutput)
+                return
             }
+            let unresolved = vms.filter {
+                switch $0.progressState {
+                case .success, .failed: return false
+                default: return true
+                }
+            }
+            for vm in vms {
+                if case .success = vm.progressState { vm.progressState = .idle }
+            }
+            await showBatchFailure(
+                for: unresolved, error: error, output: completeOutput + "\n" + error.localizedDescription,
+                failureTitle: String(localized: "Couldn't refresh installed apps")
+            )
         }
     }
 
