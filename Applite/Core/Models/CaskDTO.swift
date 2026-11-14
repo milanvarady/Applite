@@ -51,4 +51,30 @@ struct CaskDTO: Decodable {
 
 struct CaskArtifact: Decodable {
     let font: [String]?
+
+    private enum CodingKeys: String, CodingKey {
+        case font
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        guard container.contains(.font) else {
+            font = nil
+            return
+        }
+        if try container.decodeNil(forKey: .font) {
+            font = nil
+            return
+        }
+
+        var arguments = try container.nestedUnkeyedContainer(forKey: .font)
+        var fontPaths: [String] = []
+        while !arguments.isAtEnd {
+            let argument = try arguments.superDecoder()
+            if let path = try? argument.singleValueContainer().decode(String.self) {
+                fontPaths.append(path)
+            }
+        }
+        font = fontPaths
+    }
 }

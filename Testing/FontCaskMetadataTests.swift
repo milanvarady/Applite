@@ -5,11 +5,17 @@ enum FontCaskMetadataTests {
     static func main() throws {
         let font = try decode(artifacts: [["font": ["FiraCode-Regular.ttf"]]])
         let app = try decode(artifacts: [["app": ["Sample.app"]]])
-        let emptyFont = try decode(artifacts: [["font": [String]() ]])
+        let renamedFont = try decode(artifacts: [["font": ["Source.ttf", ["target": "Renamed.ttf"]]]])
+        let emptyFont = try decode(artifacts: [["font": [String]()]])
         let noArtifacts = try decode(artifacts: nil)
 
         precondition(font.isFontCask, "A cask with a font artifact must be recognized as a font")
         precondition(!app.isFontCask, "App artifacts must not classify a cask as a font")
+        precondition(renamedFont.isFontCask, "Font option objects must not break cask decoding")
+        precondition(
+            renamedFont.artifacts?.first?.font == ["Source.ttf"],
+            "String font paths must be retained while option objects are ignored"
+        )
         precondition(!emptyFont.isFontCask, "An empty font artifact must not create an empty category entry")
         precondition(!noArtifacts.isFontCask, "Casks without artifacts must remain non-font casks")
         print("PASS: Homebrew font artifact classification")
