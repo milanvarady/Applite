@@ -30,7 +30,7 @@ struct DownloadButton: View {
             Label("Install", systemImage: "arrow.down")
         }
         .cardActionPill()
-        .disabled(caskManager.isResolvingInstalledState || cask.homebrewManagementBlockReason != nil || cask.isManagementProtected)
+        .disabled(cask.homebrewManagementBlockReason != nil || cask.isManagementProtected)
         .help(cask.homebrewManagementBlockReason ?? String(localized: "Install with Homebrew"))
         .alert(cask.warning?.title ?? "", isPresented: $showCaveatsAndWarnings) {
             Button("Download Anyway") {
