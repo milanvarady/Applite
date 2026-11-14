@@ -17,7 +17,7 @@ configuration closes stale details.
 Review-race cases pause single and bulk metadata requests before adding App Store,
 Setapp or Intune evidence or changing Homebrew. A two-entry batch also pauses its
 last metadata request to verify the first entry is rechecked. Recorded old-appdir
-targets, managed-receipt aliases, separate bundles, and immediate single/bulk
+targets (including nested staging links and a directory-symlink loop), managed-receipt aliases, separate bundles, and immediate single/bulk
 Installed projection reconciliation use isolated filesystem fixtures.
 
 Hidden-self fixtures ensure an external Applite bundle contributes neither a row
