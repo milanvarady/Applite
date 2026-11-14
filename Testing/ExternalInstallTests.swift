@@ -538,15 +538,29 @@ enum ExternalInstallTests {
             if [ -f "$fixture_dir/receipts" ]; then cat "$fixture_dir/receipts"; fi ;;
           outdated) exit 0 ;;
           info)
-            token="${4##*/}"
-            bundle="External.app"
-            if [ "$token" = "review-missing" ]; then bundle="Missing.app"; fi
-            if [ "$token" = "legacy-safe" ]; then bundle="Safe.app"; fi
-            if [ -f "$fixture_dir/missing-artifacts" ]; then
-              printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask"}]}' "$token" "$4"
-              exit 0
+            echo info >> "$fixture_dir/info-calls"
+            if [ -f "$fixture_dir/pause-info" ]; then
+              touch "$fixture_dir/info-started"
+              while [ -f "$fixture_dir/pause-info" ]; do sleep 0.01; done
             fi
-            printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["%s"]}],"deprecated":false,"disabled":false}]}' "$token" "$4" "$bundle" ;;
+            if [ -f "$fixture_dir/fail-info" ]; then echo "metadata lookup failed" >&2; exit 1; fi
+            shift 3
+            printf '{"casks":['
+            separator=""
+            for full_token in "$@"; do
+              token="${full_token##*/}"
+              bundle="External.app"
+              if [ "$token" = "review-missing" ]; then bundle="Missing.app"; fi
+              case "$token" in legacy-safe*) bundle="Safe.app" ;; esac
+              printf '%s' "$separator"
+              if [ -f "$fixture_dir/missing-artifacts" ] || [ "$token" = "legacy-invalid" ]; then
+                printf '{"token":"%s","full_token":"%s","tap":"homebrew/cask"}' "$token" "$full_token"
+              else
+                printf '{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["%s"]}],"deprecated":false,"disabled":false}' "$token" "$full_token" "$bundle"
+              fi
+              separator=","
+            done
+            printf ']}' ;;
           install)
             printf '%s\\n' "$@" > "$fixture_dir/arguments"
             if [ -f "$fixture_dir/pause-stream" ]; then
@@ -794,6 +808,60 @@ enum ExternalInstallTests {
         precondition(safe.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
                      "Missing live artifacts must fail closed for bulk installs")
         try fm.removeItem(at: prefix.appendingPathComponent("missing-artifacts"))
+        var invalidRecord = record("legacy-invalid", bundle: "")
+        invalidRecord.appBundleNames = []
+        let invalid = CaskViewModel(record: invalidRecord)
+        let validKnown = CaskViewModel(record: record("known-safe", bundle: "Known-safe.app"))
+        let infoCalls = prefix.appendingPathComponent("info-calls")
+        try fm.removeItem(at: infoCalls)
+        service.installAll([safe, invalid, validKnown])
+        _ = try await service.runSerialized { true }
+        let calls = try String(contentsOf: infoCalls, encoding: .utf8).split(whereSeparator: \.isNewline)
+        let partialArguments = try String(contentsOf: arguments, encoding: .utf8)
+        precondition(calls.count == 1 && invalid.progressState.isFailed
+                     && partialArguments.contains(safe.fullToken) && partialArguments.contains(validKnown.fullToken)
+                     && !partialArguments.contains(invalid.fullToken),
+                     "A single metadata lookup must isolate invalid casks from verified installs")
+        try fm.removeItem(at: arguments)
+        try Data().write(to: prefix.appendingPathComponent("fail-info"))
+        let secondKnown = CaskViewModel(record: record("known-safe-two", bundle: "Known-safe-two.app"))
+        service.installAll([invalid, secondKnown])
+        _ = try await service.runSerialized { true }
+        let failedLookupArguments = try String(contentsOf: arguments, encoding: .utf8)
+        precondition(invalid.progressState.isFailed && failedLookupArguments.contains(secondKnown.fullToken)
+                     && !failedLookupArguments.contains(invalid.fullToken),
+                     "A failed lookup must not block casks with complete metadata")
+        try fm.removeItem(at: prefix.appendingPathComponent("fail-info"))
+        try fm.removeItem(at: arguments)
+        let pauseInfo = prefix.appendingPathComponent("pause-info")
+        let infoStarted = prefix.appendingPathComponent("info-started")
+        try Data().write(to: pauseInfo)
+        let changingInfo = CaskViewModel(record: record("known-changing-info", bundle: "Changing-info.app"))
+        service.installAll([invalid, changingInfo])
+        let infoDeadline = Date().addingTimeInterval(5)
+        while !fm.fileExists(atPath: infoStarted.path) && Date() < infoDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(fm.fileExists(atPath: infoStarted.path))
+        defaults.setValue(prefix.appendingPathComponent("Other Apps").path, for: Preferences.appdirPath)
+        try fm.removeItem(at: pauseInfo)
+        _ = try await service.runSerialized { true }
+        precondition(!fm.fileExists(atPath: arguments.path) && changingInfo.progressState.isFailed,
+                     "A settings change during metadata lookup must stop the entire batch")
+        defaults.setValue(apps.path, for: Preferences.appdirPath)
+        try fm.removeItem(at: infoStarted)
+        try Data().write(to: pauseInfo)
+        service.installAll([invalid, changingInfo])
+        let cancelDeadline = Date().addingTimeInterval(5)
+        while !fm.fileExists(atPath: infoStarted.path) && Date() < cancelDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(fm.fileExists(atPath: infoStarted.path))
+        service.cancelBatch()
+        try fm.removeItem(at: pauseInfo)
+        _ = try await service.runSerialized { true }
+        precondition(!fm.fileExists(atPath: arguments.path) && !changingInfo.progressState.isFailed,
+                     "Cancelling metadata lookup must stop the entire batch")
         await service.install(safe).value
         let normalArguments = try String(contentsOf: arguments, encoding: .utf8)
         precondition(!normalArguments.split(whereSeparator: \.isNewline).contains("--force"),
