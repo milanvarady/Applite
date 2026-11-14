@@ -11331,9 +11331,14 @@
     "Requires external app detection." : {},
     "Show \"Manage with Homebrew\" on external app cards. Reinstalls require confirmation." : {},
     "Couldn't start app installation" : {},
-    "Homebrew configuration changed" : {},
+    "Homebrew configuration changed" : {
+      "extractionState" : "stale"
+    },
     "Homebrew or the app installation directory changed. Review the current settings and confirm the command again." : {},
-    "This app is already installed. Enable Homebrew management and confirm the current command before reinstalling it." : {}
+    "This app is already installed. Enable Homebrew management and confirm the current command before reinstalling it." : {},
+    "Couldn't confirm Homebrew management" : {},
+    "Refreshing installed apps..." : {},
+    "This Homebrew management confirmation expired. Review and confirm the current command again." : {}
   },
   "version" : "1.1"
 }

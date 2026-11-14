@@ -301,6 +301,7 @@ enum ExternalInstallTests {
             root: root, loader: loader, registry: registry, vm: tapVM,
             appURL: helper, customApps: customApps, service: service
         )
+        try await testUpstreamConsentAndRefresh(root: root)
         print("PASS: detection, migration/FTS, identity/totals, default-enabled setting/disable guards, and adoption success/failure")
     }
 
@@ -315,6 +316,10 @@ enum ExternalInstallTests {
         defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
         defaults.setValue(true, for: Preferences.offerHomebrewManagement)
         defaults.setValue(appURL.deletingLastPathComponent().path, for: Preferences.appdirPath)
+        let managedMarker = root.appendingPathComponent("managed")
+        if FileManager.default.fileExists(atPath: managedMarker.path) {
+            try FileManager.default.removeItem(at: managedMarker)
+        }
         vm.isInstalled = false
         vm.externalAppURL = nil
         await service.install(vm).value
@@ -395,14 +400,215 @@ enum ExternalInstallTests {
         try await loader.refreshExternalInstallations { _, _, _ in [fullToken: newerApp] }
         defaults.setValue(appURL.deletingLastPathComponent().path, for: Preferences.appdirPath)
         await gate.release()
-        try await oldScan.value
+        do {
+            try await oldScan.value
+        } catch is CancellationError { }
         precondition(vm.externalAppURL == newerApp,
                      "An old scan must not win after detection was disabled and re-enabled, even with restored settings")
+    }
+
+    @MainActor
+    private static func testUpstreamConsentAndRefresh(root: URL) async throws {
+        let fm = FileManager.default
+        let defaults = UserDefaults.standard
+        let oldBrew = defaults.value(for: Preferences.customUserBrewPath)
+        let oldAppdir = defaults.value(for: Preferences.appdirPath)
+        defer {
+            defaults.setValue(oldBrew, for: Preferences.customUserBrewPath)
+            defaults.setValue(oldAppdir, for: Preferences.appdirPath)
+        }
+        let prefix = root.appendingPathComponent("Upstream Consent")
+        let brew = prefix.appendingPathComponent("bin/brew")
+        let apps = prefix.appendingPathComponent("Apps")
+        let app = apps.appendingPathComponent("External.app", isDirectory: true)
+        try fm.createDirectory(at: brew.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try fm.createDirectory(at: app, withIntermediateDirectories: true)
+        let fixture = """
+        #!/bin/sh
+        fixture_dir="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+        case "$1" in
+          --version) echo "Homebrew fixture" ;;
+          list)
+            if [ -f "$fixture_dir/pause-list" ]; then
+              touch "$fixture_dir/list-started"
+              while [ -f "$fixture_dir/pause-list" ]; do sleep 0.01; done
+            fi
+            if [ -f "$fixture_dir/receipts" ]; then cat "$fixture_dir/receipts"; fi ;;
+          info)
+            token="${4##*/}"
+            bundle="External.app"
+            if [ "$token" = "review-missing" ]; then bundle="Missing.app"; fi
+            printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["%s"]}],"deprecated":false,"disabled":false}]}' "$token" "$4" "$bundle" ;;
+          install)
+            printf '%s\\n' "$@" > "$fixture_dir/arguments"
+            for token in "$@"; do
+              case "$token" in install|--cask|--force|--appdir=*) continue ;; esac
+              printf '%s\\n' "$token" >> "$fixture_dir/receipts"
+              echo "$token was successfully installed!"
+              if [ "$token" = "review-missing" ]; then mkdir -p "$fixture_dir/Apps/Missing.app"; fi
+            done ;;
+          *) exit 2 ;;
+        esac
+        """
+        try fixture.write(to: brew, atomically: true, encoding: .utf8)
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: brew.path)
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+        defaults.setValue(apps.path, for: Preferences.appdirPath)
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        func record(_ token: String, bundle: String) -> CaskRecord {
+            CaskRecord(
+                token: token, fullToken: token, tap: "homebrew/cask", name: "External Fixture",
+                descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: [bundle]
+            )
+        }
+        let externalRecord = record("review-external", bundle: "External.app")
+        let missingRecord = record("review-missing", bundle: "Missing.app")
+        let pool = try DatabasePool(path: prefix.appendingPathComponent("catalog.sqlite").path)
+        try AppDatabase.migrator().migrate(pool)
+        try await pool.write { db in
+            try externalRecord.insert(db)
+            try missingRecord.insert(db)
+        }
+        let registry = CaskViewModelRegistry()
+        let vm = registry.viewModel(for: externalRecord)
+        let missing = registry.viewModel(for: missingRecord)
+        let loader = CaskDataLoader(dbService: CaskDatabaseService(databasePool: pool), registry: registry)
+        let service = BrewService(notify: { _, _, _ in })
+        let manager = CaskManager(dataLoader: loader, registry: registry, brewService: service)
+        let arguments = prefix.appendingPathComponent("arguments")
+        for enabled in [false, true] {
+            defaults.setValue(enabled, for: Preferences.offerHomebrewManagement)
+            service.installAll([vm])
+            _ = try await service.runSerialized { true }
+            precondition(vm.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                         "Bulk import must never adopt an external app without explicit consent")
+        }
+        service.installAll([vm, missing])
+        _ = try await service.runSerialized { true }
+        let mixedArguments = try String(contentsOf: arguments, encoding: .utf8)
+        precondition(vm.progressState.isFailed && missing.isInstalled
+                     && mixedArguments.contains(missing.fullToken) && !mixedArguments.contains(vm.fullToken))
+
+        registry.markExternalInstallations(appURLs: [vm.fullToken: app])
+        manager.confirmAdoption(vm)
+        let staleConfirmation = manager.alert.current!
+        defaults.setValue(false, for: Preferences.offerHomebrewManagement)
+        manager.invalidateAdoptionConsent()
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        manager.invalidateAdoptionConsent()
+        let previousTasks = service.activeTasks.map(\.id)
+        staleConfirmation.actions.first?.handler?()
+        precondition(service.activeTasks.map(\.id) == previousTasks,
+                     "Turning management off and back on must not revive an open confirmation")
+
+        let queuedManager = CaskManager(dataLoader: loader, registry: registry, brewService: service)
+        var resumeQueue: CheckedContinuation<Void, Never>?
+        let blocker = Task {
+            try await service.runSerialized {
+                await withCheckedContinuation { resumeQueue = $0 }
+                return true
+            }
+        }
+        let queueDeadline = Date().addingTimeInterval(5)
+        while resumeQueue == nil && Date() < queueDeadline { await Task.yield() }
+        precondition(resumeQueue != nil)
+        queuedManager.confirmAdoption(vm)
+        queuedManager.alert.current!.actions.first?.handler?()
+        defaults.setValue(false, for: Preferences.offerHomebrewManagement)
+        queuedManager.invalidateAdoptionConsent()
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        queuedManager.invalidateAdoptionConsent()
+        resumeQueue?.resume()
+        _ = try await blocker.value
+        _ = try await service.runSerialized { true }
+        let afterRevocation = try String(contentsOf: arguments, encoding: .utf8)
+        precondition(vm.progressState.isFailed && afterRevocation == mixedArguments,
+                     "Queued consent must remain revoked after management is re-enabled")
+
+        let receipts = prefix.appendingPathComponent("receipts")
+        try vm.fullToken.write(to: receipts, atomically: true, encoding: .utf8)
+        let configuration = BrewOperationConfiguration.current
+        let pause = prefix.appendingPathComponent("pause-list")
+        let started = prefix.appendingPathComponent("list-started")
+        try Data().write(to: pause)
+        let refresh = Task { try await loader.refreshInstalled(configuration: configuration) }
+        let listDeadline = Date().addingTimeInterval(5)
+        while !fm.fileExists(atPath: started.path) && Date() < listDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(fm.fileExists(atPath: started.path))
+        defaults.setValue(prefix.appendingPathComponent("other-brew").path, for: Preferences.customUserBrewPath)
+        try fm.removeItem(at: pause)
+        do {
+            try await refresh.value
+            preconditionFailure("An old Homebrew receipt snapshot must be rejected")
+        } catch CaskAdoptionError.configurationChanged { }
+        precondition(!vm.isInstalled, "Stale receipts must not commit to the registry after Homebrew changes")
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+
+        var resumeReconciliation: CheckedContinuation<Void, Never>?
+        let reconcileTask = service.install(vm, confirmedConfiguration: .current) {
+            await withCheckedContinuation { resumeReconciliation = $0 }
+            registry.markInstalled(tokens: [vm.fullToken])
+        }
+        let reconciliationDeadline = Date().addingTimeInterval(5)
+        while resumeReconciliation == nil && Date() < reconciliationDeadline { await Task.yield() }
+        precondition(resumeReconciliation != nil)
+        guard case .busy = vm.progressState else {
+            preconditionFailure("A completed command must stay busy during ownership reconciliation")
+        }
+        resumeReconciliation?.resume()
+        await reconcileTask.value
+
+        registry.markInstalled(tokens: [])
+        registry.markExternalInstallations(appURLs: [:])
+        for _ in 0..<3 {
+            manager.applyExternalAppDetectionSetting(debounce: true)
+            try await Task.sleep(for: .milliseconds(80))
+            precondition(vm.externalAppURL == nil, "Path edits must not immediately launch/apply a scan")
+        }
+        try await Task.sleep(for: .milliseconds(100))
+        precondition(vm.externalAppURL == nil, "Only the last debounced path edit should schedule detection")
+        let scanDeadline = Date().addingTimeInterval(5)
+        while vm.externalAppURL == nil && Date() < scanDeadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        precondition(vm.externalAppURL == app)
+        let probe = ScanGate()
+        let scan = Task {
+            try await loader.refreshExternalInstallations { _, _, _ in
+                try await probe.waitForCancellation()
+                return [:]
+            }
+        }
+        let cancellationDeadline = Date().addingTimeInterval(5)
+        while !(await probe.cancellationStarted) && Date() < cancellationDeadline { await Task.yield() }
+        loader.invalidateExternalInstallations()
+        do {
+            try await scan.value
+            preconditionFailure("Superseded scan work must be canceled, not merely ignored")
+        } catch is CancellationError { }
+        let canceled = await probe.cancellationObserved
+        precondition(canceled)
     }
 
     private actor ScanGate {
         private var continuation: CheckedContinuation<Void, Never>?
         var isWaiting: Bool { continuation != nil }
+        private(set) var cancellationStarted = false
+        private(set) var cancellationObserved = false
+
+        func waitForCancellation() async throws {
+            cancellationStarted = true
+            do {
+                try await Task.sleep(for: .seconds(10))
+            } catch is CancellationError {
+                cancellationObserved = true
+                throw CancellationError()
+            }
+        }
 
         func wait() async {
             await withCheckedContinuation { continuation = $0 }

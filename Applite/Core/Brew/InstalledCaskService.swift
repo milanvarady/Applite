@@ -17,8 +17,9 @@ struct InstalledCaskService {
 
     /// Gets the list of installed casks
     /// - Returns: A set of Cask IDs representing installed casks
-    func getInstalledCasks() async throws -> Set<CaskId> {
-        let output = try await Shell.runBrewCommand(["list", "--cask", "--full-name"])
+    func getInstalledCasks(configuration: BrewOperationConfiguration = .current) async throws -> Set<CaskId> {
+        let output = try await Shell.run(configuration.executable, ["list", "--cask", "--full-name"])
+        try configuration.validateCurrent()
 
         if output.isEmpty {
             logger.notice("No installed casks were found.")
@@ -34,7 +35,7 @@ struct InstalledCaskService {
 
     /// Gets the list of outdated casks
     /// - Returns: A set of Cask IDs representing outdated casks
-    func getOutdatedCasks() async throws -> Set<CaskId> {
+    func getOutdatedCasks(configuration: BrewOperationConfiguration = .current) async throws -> Set<CaskId> {
         var arguments: [String] = ["outdated", "--cask", "-q"]
 
         let greedy = UserDefaults.standard.value(for: Preferences.greedyUpgrade)
@@ -43,7 +44,8 @@ struct InstalledCaskService {
             arguments.append("-g")
         }
 
-        let output = try await Shell.runBrewCommand(arguments)
+        let output = try await Shell.run(configuration.executable, arguments)
+        try configuration.validateCurrent()
 
         let caskIds = output
             .trimmingCharacters(in: .whitespacesAndNewlines)

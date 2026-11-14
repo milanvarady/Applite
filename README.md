@@ -90,6 +90,12 @@ Architecture notes are in [CLAUDE.md](CLAUDE.md).
 
 ### Externally installed apps
 
+Bulk imports skip apps already present outside the selected Homebrew; use the
+single-app management confirmation instead. Disabling either management prerequisite
+permanently invalidates open/queued confirmations until a new confirmation is made.
+Receipt refreshes are bound to their selected Homebrew configuration and cannot
+publish after it changes. Path edits debounce detection; superseded scans are canceled.
+
 Install rechecks the expected app bundle before running, so an unfinished detection
 scan cannot silently turn Install into Homebrew adoption. Adoption confirmation is
 bound to the selected Homebrew and installation directory; changing either requires
