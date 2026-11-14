@@ -28,6 +28,8 @@ A delayed external scan cannot overwrite a newer existing catalog record.
 Legacy records with missing artifact names query the selected Homebrew before single
 and bulk installs; tests cover renamed external bundles, missing live artifacts, and
 an install with verified non-conflicting targets.
+Manually verify an eligible Install button remains usable during installed-state
+refresh, with the operation queued and checked before it starts.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including
