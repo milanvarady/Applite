@@ -2822,6 +2822,7 @@ enum ExternalInstallTests {
         case "$1" in
           --version) echo "Homebrew fixture" ;;
           list)
+            if [ -f "$fixture_dir/fail-list" ]; then echo "fixture list failure" >&2; exit 1; fi
             if [ -f "$fixture_dir/pause-list" ]; then
               touch "$fixture_dir/list-started"
               while [ -f "$fixture_dir/pause-list" ]; do sleep 0.01; done
@@ -2848,12 +2849,22 @@ enum ExternalInstallTests {
               sleep 0.2
               touch "$fixture_dir/stream-finished"
             fi
+            if [ -f "$fixture_dir/mixed-reconcile" ]; then echo "Starting fixture batch"; fi
             for token in "$@"; do
               case "$token" in install|--cask|--force|--appdir=*) continue ;; esac
+              if [ -f "$fixture_dir/mixed-reconcile" ]; then
+                case "$token" in
+                  mixed-success) echo "$token was successfully installed!" ;;
+                  mixed-error) echo "Error: $token: fixture individual failure" ;;
+                  mixed-unresolved) echo "fixture unresolved output" ;;
+                esac
+                continue
+              fi
               printf '%s\\n' "$token" >> "$fixture_dir/receipts"
               if [ ! -f "$fixture_dir/no-markers" ]; then echo "$token was successfully installed!"; fi
               if [ "$token" = "review-missing" ]; then mkdir -p "$fixture_dir/Apps/Missing.app"; fi
             done
+            if [ -f "$fixture_dir/mixed-reconcile" ]; then touch "$fixture_dir/fail-list"; fi
             if [ -f "$fixture_dir/pause-reconciliation" ]; then touch "$fixture_dir/pause-list"; fi ;;
           *) exit 2 ;;
         esac
@@ -2891,6 +2902,25 @@ enum ExternalInstallTests {
         let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
         let manager = CaskManager(dataLoader: loader, registry: registry, brewService: service)
         let arguments = prefix.appendingPathComponent("arguments")
+        let resolved = CaskViewModel(record: record("mixed-success", bundle: "Mixed-success.app"))
+        let failed = CaskViewModel(record: record("mixed-error", bundle: "Mixed-error.app"))
+        let unresolved = CaskViewModel(record: record("mixed-unresolved", bundle: "Mixed-unresolved.app"))
+        try Data().write(to: prefix.appendingPathComponent("mixed-reconcile"))
+        service.installAll([resolved, failed, unresolved])
+        _ = try await service.runSerialized { true }
+        precondition(resolved.isInstalled && !resolved.progressState.isFailed,
+                     "A successful marker must survive a failed reconciliation query: \(resolved.progressState)")
+        guard case .failed(let failedOutput) = failed.progressState,
+              case .failed(let unresolvedOutput) = unresolved.progressState else {
+            preconditionFailure("Failed and unresolved batch entries must retain failure output")
+        }
+        precondition(failedOutput.contains("fixture individual failure")
+                     && unresolvedOutput.contains("fixture unresolved output")
+                     && unresolvedOutput.contains("fixture list failure"),
+                     "Preserve the per-cask error and append the query error to unresolved command output")
+        try fm.removeItem(at: prefix.appendingPathComponent("mixed-reconcile"))
+        try fm.removeItem(at: prefix.appendingPathComponent("fail-list"))
+        try fm.removeItem(at: arguments)
         try await loader.refreshExternalInstallations { _, _, _ in [:] }
         precondition(registry.count == 2, "Empty scans must not materialize the entire catalog")
         let scanGate = ScanGate()
