@@ -37,6 +37,7 @@ final class CaskViewModel {
     }
 
     var isInstalledExternally: Bool { installationState == .externalInstalled }
+    var isApplite: Bool { record.isApplite }
 
     /// Whether the cask has an update available
     var isOutdated: Bool = false
