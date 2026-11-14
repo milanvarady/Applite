@@ -53,10 +53,11 @@ actor FaviconResolver {
         request.setValue("text/html, application/xhtml+xml", forHTTPHeaderField: "Accept")
         request.httpShouldHandleCookies = false
 
+        var pageURL = homepage
         do {
             let (bytes, response) = try await session.bytes(for: request)
             defer { bytes.task.cancel() }
-            let pageURL = response.url.flatMap(httpURL) ?? homepage
+            pageURL = response.url.flatMap(httpURL) ?? homepage
             guard let response = response as? HTTPURLResponse,
                   (200..<300).contains(response.statusCode),
                   response.mimeType == "text/html" || response.mimeType == "application/xhtml+xml" else {
@@ -71,7 +72,7 @@ actor FaviconResolver {
             return candidates(in: String(decoding: data, as: UTF8.self), pageURL: pageURL)
         } catch {
             logger.info("Favicon discovery failed for \(homepage.absoluteString): \(error.localizedDescription)")
-            return candidates(in: "", pageURL: homepage)
+            return candidates(in: "", pageURL: pageURL)
         }
     }
 
@@ -81,7 +82,9 @@ actor FaviconResolver {
             #/(?is)<!--.*?(?:-->|$)|<script\b[^>]*>.*?(?:</script\s*>|$)|<style\b[^>]*>.*?(?:</style\s*>|$)/#,
             with: ""
         )
-        let headEnd = visibleHTML.range(of: "</head", options: .caseInsensitive)?.lowerBound ?? visibleHTML.endIndex
+        let headEnd = visibleHTML.matches(of: #/(?is)<(?:[^"'<>]|"[^"]*"|'[^']*')*>/#)
+            .first { $0.0.wholeMatch(of: #/(?i)</head\s*>/#) != nil }?.range.lowerBound
+            ?? visibleHTML.endIndex
         let head = String(visibleHTML[..<headEnd])
         let tags = head.matches(of: #/(?is)<(link|base)\b(?:[^"'<>]|"[^"]*"|'[^']*')*>/#)
         var baseURL = pageURL

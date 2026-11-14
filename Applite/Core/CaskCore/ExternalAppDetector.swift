@@ -88,11 +88,9 @@ enum ExternalAppDetector {
         return found
     }
 
-    nonisolated static func hasAppStoreReceipt(at appURL: URL) -> Bool {
+    nonisolated static func hasAppStoreReceipt(at appURL: URL) throws -> Bool {
         let receipt = appURL.appendingPathComponent("Contents/_MASReceipt/receipt")
-        var isDirectory: ObjCBool = false
-        return FileManager.default.fileExists(atPath: receipt.path, isDirectory: &isDirectory)
-            && !isDirectory.boolValue
+        return try isMarkerFile(at: receipt)
     }
 
     nonisolated static func isSetappApp(at appURL: URL) throws -> Bool {
@@ -100,9 +98,18 @@ enum ExternalAppDetector {
             return true
         }
         let key = appURL.appendingPathComponent("Contents/Resources/setappPublicKey.pem")
-        var isDirectory: ObjCBool = false
-        return FileManager.default.fileExists(atPath: key.path, isDirectory: &isDirectory)
-            && !isDirectory.boolValue
+        return try isMarkerFile(at: key)
+    }
+
+    private nonisolated static func isMarkerFile(at url: URL) throws -> Bool {
+        do {
+            guard let isDirectory = try url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory else {
+                throw CocoaError(.fileReadUnknown)
+            }
+            return !isDirectory
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            return false
+        }
     }
 
     nonisolated static func protectedInstallation(
@@ -130,7 +137,7 @@ enum ExternalAppDetector {
         for url in candidates {
             try Task.checkCancellation()
             if appURLs[.intune] == nil, try intune.isManagedApp(at: url) { appURLs[.intune] = url }
-            if appURLs[.appStore] == nil, hasAppStoreReceipt(at: url) { appURLs[.appStore] = url }
+            if appURLs[.appStore] == nil, try hasAppStoreReceipt(at: url) { appURLs[.appStore] = url }
             if appURLs[.setapp] == nil, try isSetappApp(at: url) { appURLs[.setapp] = url }
             if appURLs[.artCraft] == nil, artCraft.isManagedApp(at: url) { appURLs[.artCraft] = url }
         }
