@@ -27,6 +27,10 @@ targets (including nested staging links and a directory-symlink loop), managed-r
 Installed projection reconciliation use isolated filesystem fixtures.
 Recorded source tests cover receipt artifacts, staged `only_path`, unrelated payload
 apps, and unsafe source paths without recursively traversing Caskroom payloads.
+Sibling-cask fixtures cover uncataloged managed owners, symlink aliases, separate
+copies, conflicting configured destinations, stale selections, single/bulk guards,
+and fail-closed handling of unavailable ownership records. Confirmation also warns
+when the selected copy is outside Homebrew's app directory.
 
 Hidden-self fixtures ensure an external Applite bundle contributes neither a row
 nor a badge. A paused reconciliation also verifies the real operation remains busy

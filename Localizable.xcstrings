@@ -11492,7 +11492,9 @@
     "Refresh installed apps before performing Homebrew actions." : {},
     "Wait for installed apps to finish refreshing." : {},
     "Multiple copies of this app were detected. Homebrew changes are unavailable until the installation target is unambiguous." : {},
-    "Couldn't scan app management sources" : {}
+    "Couldn't scan app management sources" : {},
+    "Another Homebrew cask already manages this app. Homebrew cannot replace it through this cask." : {},
+    "Existing app: %@\nHomebrew app directory: %@\nThe existing copy is outside the Homebrew app directory and will remain unmanaged; Homebrew will install a separate copy." : {}
   },
   "version" : "1.1"
 }

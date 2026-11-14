@@ -58,7 +58,9 @@ enum InstalledAppLocator {
         let uninstall_artifacts: [CaskArtifact]?
     }
 
-    nonisolated static func recordedAppURLs(token: String, executable: URL) throws -> [URL] {
+    nonisolated static func recordedAppURLs(
+        token: String, executable: URL, requireRecordedOwnership: Bool = false
+    ) throws -> [URL] {
         guard !token.isEmpty, token != ".", token != "..",
               (token as NSString).lastPathComponent == token else {
             throw CaskAdoptionError.homebrewUnavailable
@@ -72,9 +74,13 @@ enum InstalledAppLocator {
                 at: caskroom, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles]
             )
         } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            if requireRecordedOwnership { throw CaskAdoptionError.installationTargetsUnavailable }
             return []
         }
-        guard !versions.isEmpty else { return [] }
+        guard !versions.isEmpty else {
+            if requireRecordedOwnership { throw CaskAdoptionError.installationTargetsUnavailable }
+            return []
+        }
         let metadata = caskroom.appendingPathComponent(".metadata")
         let receiptURL = metadata.appendingPathComponent("INSTALL_RECEIPT.json")
         let receipt: InstalledReceipt?
@@ -84,6 +90,7 @@ enum InstalledAppLocator {
             receipt = nil
         }
         var result: Set<URL> = []
+        var parsedVersion = false
         for version in versions.sorted(by: { $0.lastPathComponent > $1.lastPathComponent }) {
             let versionValues = try version.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
             guard versionValues.isDirectory == true, versionValues.isSymbolicLink != true else { continue }
@@ -107,6 +114,7 @@ enum InstalledAppLocator {
             guard let installed, let artifacts = installed.artifacts ?? receipt?.uninstall_artifacts else {
                 throw CaskAdoptionError.installationTargetsUnavailable
             }
+            parsedVersion = true
             var staged = version
             if let onlyPath = installed.url_specs?.only_path {
                 guard isSafeRelativePath(onlyPath) else { throw CaskAdoptionError.installationTargetsUnavailable }
@@ -131,16 +139,23 @@ enum InstalledAppLocator {
                     throw CaskAdoptionError.installationTargetsUnavailable
                 }
                 do {
-                    guard try entry.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink == true else { continue }
+                    guard try entry.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink == true else {
+                        if requireRecordedOwnership { throw CaskAdoptionError.installationTargetsUnavailable }
+                        continue
+                    }
                     let resolved = entry.resolvingSymlinksInPath().standardizedFileURL
                     if try resolved.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
                         result.insert(resolved)
+                    } else if requireRecordedOwnership {
+                        throw CaskAdoptionError.installationTargetsUnavailable
                     }
                 } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                    if requireRecordedOwnership { throw CaskAdoptionError.installationTargetsUnavailable }
                     continue
                 }
             }
         }
+        if requireRecordedOwnership && !parsedVersion { throw CaskAdoptionError.installationTargetsUnavailable }
         return result.sorted { $0.path < $1.path }
     }
 
