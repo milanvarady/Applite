@@ -580,6 +580,7 @@ enum ExternalInstallTests {
         )
         try await testOutdatedRefreshLifetime(root: root, loader: loader, registry: registry, service: service)
         try await testUpstreamConsentAndRefresh(root: root)
+        try await testReceiptOwnershipAfterSuccessfulOperations(root: root)
         try await testLiveArtifactOwnershipAndCatalogResult(root: root)
         try await testDistinctInstallationIdentities(root: root)
         try await testManagedSiblingOwnership(root: root)
@@ -3267,6 +3268,106 @@ enum ExternalInstallTests {
         _ = await successfulCatalog.loadData(forceSync: false)
         precondition(successfulCatalog.successfulCatalogRefreshRevision == 1,
                      "A non-forced load must not advance the explicit-refresh revision")
+    }
+
+    @MainActor
+    private static func testReceiptOwnershipAfterSuccessfulOperations(root: URL) async throws {
+        let fm = FileManager.default
+        let defaults = UserDefaults.standard
+        let oldBrew = defaults.value(for: Preferences.customUserBrewPath)
+        let oldAppdir = defaults.value(for: Preferences.appdirPath)
+        let oldDetection = defaults.value(for: Preferences.detectExternallyInstalledApps)
+        let oldManagement = defaults.value(for: Preferences.offerHomebrewManagement)
+        defer {
+            defaults.setValue(oldBrew, for: Preferences.customUserBrewPath)
+            defaults.setValue(oldAppdir, for: Preferences.appdirPath)
+            defaults.setValue(oldDetection, for: Preferences.detectExternallyInstalledApps)
+            defaults.setValue(oldManagement, for: Preferences.offerHomebrewManagement)
+        }
+
+        let prefix = root.appendingPathComponent("Receipt Ownership Operations")
+        let brew = prefix.appendingPathComponent("bin/brew")
+        let apps = prefix.appendingPathComponent("Apps")
+        try fm.createDirectory(at: brew.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try fm.createDirectory(at: apps, withIntermediateDirectories: true)
+        let fixture = """
+        #!/bin/sh
+        fixture_dir="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+        case "$1" in
+          --version) echo "Homebrew fixture" ;;
+          list)
+            if [ -f "$fixture_dir/receipts" ]; then cat "$fixture_dir/receipts"; fi ;;
+          info)
+            full="$4"
+            token="${full##*/}"
+            tap=homebrew/cask
+            case "$full" in homebrew/cask-versions/*) tap=homebrew/cask-versions ;; esac
+            printf '{"casks":[{"token":"%s","full_token":"%s","tap":"%s","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["Shared.app"]}],"deprecated":false,"disabled":false}]}' "$token" "$full" "$tap" ;;
+          install)
+            full="$3"
+            printf '%s\\n' "$full" >> "$fixture_dir/receipts"
+            mkdir -p "$fixture_dir/Apps/Shared.app"
+            echo "$full was successfully installed!" ;;
+          uninstall)
+            full="$3"
+            if [ -f "$fixture_dir/receipts" ]; then
+              grep -Fvx "$full" "$fixture_dir/receipts" > "$fixture_dir/receipts.tmp" || true
+              mv "$fixture_dir/receipts.tmp" "$fixture_dir/receipts"
+            fi ;;
+          *) exit 2 ;;
+        esac
+        """
+        try fixture.write(to: brew, atomically: true, encoding: .utf8)
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: brew.path)
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+        defaults.setValue(apps.path, for: Preferences.appdirPath)
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+
+        func record(tap: String) -> CaskRecord {
+            CaskRecord(
+                token: "shared", fullToken: "\(tap)/shared", tap: tap, name: "Shared App",
+                descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: ["Shared.app"]
+            )
+        }
+        let stable = record(tap: "homebrew/cask")
+        let beta = record(tap: "homebrew/cask-versions")
+        let pool = try DatabasePool(path: prefix.appendingPathComponent("catalog.sqlite").path)
+        try AppDatabase.migrator().migrate(pool)
+        try await pool.write { db in
+            try stable.insert(db)
+            try beta.insert(db)
+        }
+        let registry = CaskViewModelRegistry()
+        let stableVM = registry.viewModel(for: stable)
+        let betaVM = registry.viewModel(for: beta)
+        let loader = CaskDataLoader(
+            dbService: CaskDatabaseService(databasePool: pool), registry: registry,
+            intuneInventory: { .empty }, artCraftInventory: { .empty }
+        )
+        let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
+        let manager = CaskManager(dataLoader: loader, registry: registry, brewService: service)
+
+        try await loader.refreshInstalled()
+        await service.install(betaVM, confirmedConfiguration: .current).value
+        precondition(betaVM.isInstalled && manager.installedCount == 1)
+
+        defaults.setValue(false, for: Preferences.detectExternallyInstalledApps)
+        try await loader.refreshExternalInstallations()
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        try await loader.refreshExternalInstallations()
+        precondition(betaVM.isInstalled && !betaVM.isInstalledExternally && !stableVM.isInstalledExternally,
+                     "After installing the beta cask, a detection toggle must not offer adoption from its stable alias")
+
+        try await loader.refreshInstalled()
+        service.uninstall(betaVM)
+        _ = try await service.runSerialized { true }
+        precondition(!betaVM.isInstalled && manager.installedCount == 0)
+        try await loader.refreshExternalInstallations()
+        precondition(stableVM.isInstalledExternally && !betaVM.isInstalledExternally,
+                     "After uninstalling the beta cask, retained app files must be detected under the stable alias")
     }
 
     @MainActor

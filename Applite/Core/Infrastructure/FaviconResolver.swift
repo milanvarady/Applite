@@ -78,10 +78,7 @@ actor FaviconResolver {
 
     static func candidates(in html: String, pageURL: URL) -> [URL] {
         guard let pageURL = httpURL(pageURL) else { return [] }
-        let visibleHTML = html.replacing(
-            #/(?is)<!--.*?(?:-->|$)|<script\b[^>]*>.*?(?:</script\s*>|$)|<style\b[^>]*>.*?(?:</style\s*>|$)/#,
-            with: ""
-        )
+        let visibleHTML = removingIgnoredRegions(from: html)
         let tags = visibleHTML.matches(of: #/(?is)<(?:[^"'<>]|"[^"]*"|'[^']*')*>/#)
             .prefix { $0.0.wholeMatch(of: #/(?i)</head\s*>/#) == nil }
             .compactMap { $0.0.wholeMatch(of: #/(?is)<(link|base)\b(?:[^"'<>]|"[^"]*"|'[^']*')*>/#) }
@@ -121,6 +118,63 @@ actor FaviconResolver {
             result.append(root)
         }
         return result
+    }
+
+    private static func removingIgnoredRegions(from html: String) -> String {
+        var visibleHTML = ""
+        var index = html.startIndex
+        while index < html.endIndex {
+            let remainder = html[index...]
+            if remainder.hasPrefix("<!--") {
+                let commentStart = html.index(index, offsetBy: 4)
+                guard let commentEnd = html.range(of: "-->", range: commentStart..<html.endIndex) else {
+                    break
+                }
+                index = commentEnd.upperBound
+                continue
+            }
+
+            guard html[index] == "<", let tagEnd = tagEnd(in: html, startingAt: index) else {
+                visibleHTML.append(html[index])
+                index = html.index(after: index)
+                continue
+            }
+
+            let tag = html[index...tagEnd]
+            let afterTag = html.index(after: tagEnd)
+            if tag.firstMatch(of: #/(?i)^<script\b/#) != nil {
+                guard let closingTag = html[afterTag...].firstMatch(of: #/(?i)</script\s*>/#) else {
+                    break
+                }
+                index = closingTag.range.upperBound
+            } else if tag.firstMatch(of: #/(?i)^<style\b/#) != nil {
+                guard let closingTag = html[afterTag...].firstMatch(of: #/(?i)</style\s*>/#) else {
+                    break
+                }
+                index = closingTag.range.upperBound
+            } else {
+                visibleHTML.append(contentsOf: tag)
+                index = afterTag
+            }
+        }
+        return visibleHTML
+    }
+
+    private static func tagEnd(in html: String, startingAt start: String.Index) -> String.Index? {
+        var index = html.index(after: start)
+        var quote: Character?
+        while index < html.endIndex {
+            let character = html[index]
+            if let activeQuote = quote {
+                if character == activeQuote { quote = nil }
+            } else if character == "\"" || character == "'" {
+                quote = character
+            } else if character == ">" {
+                return index
+            }
+            index = html.index(after: index)
+        }
+        return nil
     }
 
     private static func attributes(in tag: String) -> [String: String] {

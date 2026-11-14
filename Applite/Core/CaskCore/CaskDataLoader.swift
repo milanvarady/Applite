@@ -174,6 +174,21 @@ final class CaskDataLoader {
         invalidateExternalInstallations()
     }
 
+    func reconcileInstalledReceipt(token: CaskId, isInstalled: Bool) {
+        installedRefreshGeneration &+= 1
+        if receiptConfiguration == .current {
+            if isInstalled {
+                receiptTokens.insert(token)
+            } else {
+                receiptTokens.remove(token)
+            }
+        } else {
+            receiptConfiguration = nil
+            receiptTokens = []
+        }
+        invalidateExternalInstallations()
+    }
+
     func refreshExternalInstallations(
         configuration: BrewOperationConfiguration = .current,
         scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil

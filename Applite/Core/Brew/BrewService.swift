@@ -64,6 +64,7 @@ final class BrewService {
     /// broken brew should look (E1/F1). `run()` is single-flight, so a queue of ops collapses into
     /// a single recovery pass.
     var recoverBrew: (@MainActor () async -> Bool)?
+    var reconcileInstalledReceipt: (@MainActor (CaskId, Bool) -> Void)?
 
     /// Progress of an in-flight bulk operation, or `nil` when none. Drives an aggregate
     /// "Installing X of N…" header (see `ActiveTasksView`).
@@ -229,6 +230,9 @@ final class BrewService {
                     for: [vm], configuration: configuration, bundleNames: [vm.fullToken: appBundleNames]
                 )
             } catch {
+                if vm.isInstalled {
+                    self.reconcileInstalledReceipt?(vm.fullToken, true)
+                }
                 await self.showFailure(
                     for: vm,
                     error: error,
@@ -239,6 +243,7 @@ final class BrewService {
                 return
             }
 
+            self.reconcileInstalledReceipt?(vm.fullToken, true)
             await self.showSuccess(
                 for: vm,
                 logMessage: "Successfully installed cask \(vm.token)",
@@ -300,6 +305,7 @@ final class BrewService {
 
             vm.isInstalled = false
             vm.installedBundleURL = nil
+            self.reconcileInstalledReceipt?(vm.fullToken, false)
             await self.showSuccess(
                 for: vm,
                 logMessage: "Successfully uninstalled \(vm.fullToken)",
@@ -997,6 +1003,12 @@ final class BrewService {
             }
             return
         }
+        let reconcileReceiptsAfterInstall = kind == .install
+        defer {
+            if reconcileReceiptsAfterInstall {
+                reconcileSuccessfulInstallReceipts(in: vms)
+            }
+        }
         // token AND fullToken → vm, so brew's per-cask output lines (which name either) can be
         // routed to a card. If two casks in the batch share a key (e.g. a core cask and a tap cask
         // with the same bare token), drop that key so it can't mis-route — those fall to reconcile.
@@ -1147,6 +1159,12 @@ final class BrewService {
                 progress.completed += 1
                 batchProgress = progress
             }
+        }
+    }
+
+    private func reconcileSuccessfulInstallReceipts(in vms: [CaskViewModel]) {
+        for vm in vms where vm.isInstalled {
+            reconcileInstalledReceipt?(vm.fullToken, true)
         }
     }
 

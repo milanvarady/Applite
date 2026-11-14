@@ -117,6 +117,9 @@ final class CaskManager {
             await bootstrap.run()
             return bootstrap.isBrewReady
         }
+        self.brewService.reconcileInstalledReceipt = { [weak loader] token, isInstalled in
+            loader?.reconcileInstalledReceipt(token: token, isInstalled: isInstalled)
+        }
     }
 
     /// Loads the category list (cached remote copy → bundled fallback) and returns placeholder
