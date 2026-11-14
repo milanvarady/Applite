@@ -7,6 +7,8 @@ Creating a missing custom app directory must not change its captured Homebrew co
 Hidden-self fixtures ensure an external Applite bundle contributes neither a row
 nor a badge. A paused reconciliation also verifies the real operation remains busy
 in the status summary until post-install ownership refresh completes.
+Manually verify self aliases are excluded from migration while any already-enqueued
+self task remains visible and dismissible in Active Tasks.
 
 Review-race fixtures also cover an Install before initial detection, configuration
 changes before confirmation/queued execution, retained stdout/stderr after a failed
