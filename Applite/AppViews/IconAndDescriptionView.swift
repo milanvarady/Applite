@@ -10,6 +10,7 @@ import SwiftUI
 struct IconAndDescriptionView: View {
     var cask: CaskViewModel
     var showDetails: () -> Void
+    var showReleaseNotes = false
     @Environment(\.openURL) private var openURL
     @State private var isHoveringDetails = false
     
@@ -35,9 +36,11 @@ struct IconAndDescriptionView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(cask.name)
                             .font(.system(size: 16, weight: .bold))
+                            .lineLimit(showReleaseNotes ? 1 : nil)
 
                         Text(cask.descriptionText)
                             .foregroundStyle(.secondary)
+                            .lineLimit(showReleaseNotes ? 1 : nil)
                     }
                     .multilineTextAlignment(.leading)
                     .contentShape(Rectangle())
@@ -51,7 +54,12 @@ struct IconAndDescriptionView: View {
                 .accessibilityHint(cask.descriptionText)
                 .help("Show app details")
 
-                if cask.isLocallyInstalled {
+                if showReleaseNotes {
+                    Button("Release Notes", action: showDetails)
+                        .font(.caption)
+                        .foregroundStyle(.tint)
+                        .help("Show release notes and version information")
+                } else if cask.isLocallyInstalled {
                     Text("Installed")
                         .font(.caption)
                         .foregroundStyle(.secondary)

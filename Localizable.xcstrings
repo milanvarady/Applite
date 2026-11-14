@@ -11494,7 +11494,24 @@
     "Multiple copies of this app were detected. Homebrew changes are unavailable until the installation target is unambiguous." : {},
     "Couldn't scan app management sources" : {},
     "Another Homebrew cask already manages this app. Homebrew cannot replace it through this cask." : {},
-    "Existing app: %@\nHomebrew app directory: %@\nThe existing copy is outside the Homebrew app directory and will remain unmanaged; Homebrew will install a separate copy." : {}
+    "Existing app: %@\nHomebrew app directory: %@\nThe existing copy is outside the Homebrew app directory and will remain unmanaged; Homebrew will install a separate copy." : {},
+    "Couldn't load release notes" : {},
+    "GitHub release notes are not available for this app." : {},
+    "GitHub release: %@" : {},
+    "GitHub returned HTTP %lld." : {},
+    "Loading release notes..." : {},
+    "No release notes were found for the Homebrew available version." : {},
+    "Release Notes" : {},
+    "Release notes are requested from GitHub when you open this page." : {},
+    "Release notes require Homebrew details." : {},
+    "Show release notes and version information" : {},
+    "Showing an excerpt. Open the full release for more." : {},
+    "The Homebrew version could not be matched to a GitHub release." : {},
+    "The release notes response could not be verified." : {},
+    "The release notes response was too large." : {},
+    "View Full Release Notes" : {},
+    "View GitHub Release History" : {},
+    "This GitHub release has no notes." : {}
   },
   "version" : "1.1"
 }

@@ -45,7 +45,7 @@ struct AppView: View {
 
     var body: some View {
         HStack {
-            IconAndDescriptionView(cask: cask, showDetails: showInfo)
+            IconAndDescriptionView(cask: cask, showDetails: showInfo, showReleaseNotes: role == .update)
             IconsAndWarnings(cask: cask)
             actionsView
         }

@@ -20,6 +20,20 @@ struct AppDetailsView: View {
     @State private var homebrewRetryCount = 0
     @State private var localRetryCount = 0
     @State private var localState: LocalState = .loading
+    @State private var releaseRetryCount = 0
+    @State private var releaseState: ReleaseState = .loading
+
+    private struct ReleaseKey: Hashable {
+        let infoKey: [String]
+        let source: ReleaseNotesResolver.Source?
+        let retryCount: Int
+    }
+
+    private enum ReleaseState {
+        case loading
+        case loaded(ReleaseKey, ReleaseNotesResolver.Notes?)
+        case failed(ReleaseKey, String)
+    }
 
     private enum LoadState {
         case loading
@@ -91,6 +105,7 @@ struct AppDetailsView: View {
             }
 
             installationSection
+            releaseNotesSection
             localInformationSection
 
             switch loadState {
@@ -121,6 +136,9 @@ struct AppDetailsView: View {
         }
         .task(id: localKey) {
             await loadLocalInfo()
+        }
+        .task(id: releaseKey) {
+            await loadReleaseNotes()
         }
         .task(id: downloadURL) {
             downloadSize = .loading
@@ -155,6 +173,13 @@ struct AppDetailsView: View {
         return info
     }
 
+    private var releaseKey: ReleaseKey {
+        let source = brewInfo.flatMap {
+            ReleaseNotesResolver.source(homepage: $0.homepage, download: $0.url, version: $0.version)
+        }
+        return ReleaseKey(infoKey: infoKey, source: source, retryCount: releaseRetryCount)
+    }
+
     private var localInfo: InstalledAppMetadata? {
         guard case .loaded(let key, let info) = localState, key == localKey else { return nil }
         return info
@@ -176,6 +201,9 @@ struct AppDetailsView: View {
                 }
             case .unknown: infoRow("Installed Version", String(localized: "Unknown"))
             case .notInstalled: infoRow("Installed Version", String(localized: "Not installed"))
+            }
+            if let version = brewInfo?.version {
+                infoRow("Homebrew Available Version", version)
             }
             if let build = localInfo?.build {
                 infoRow("Bundle Version", build)
@@ -217,6 +245,64 @@ struct AppDetailsView: View {
             }
         } header: {
             Label("Installation", systemImage: "arrow.down.circle")
+        }
+    }
+
+    @ViewBuilder
+    private var releaseNotesSection: some View {
+        Section {
+            Text("Release notes are requested from GitHub when you open this page.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if brewInfo == nil {
+                Text("Release notes require Homebrew details.")
+                    .foregroundStyle(.secondary)
+            } else if let source = releaseKey.source {
+                switch releaseState {
+                case .loading:
+                    ProgressView("Loading release notes...")
+                case .loaded(let key, let notes) where key == releaseKey:
+                    if let notes {
+                        Text("GitHub release: \(notes.tag)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        if notes.body.isEmpty {
+                            Text("This GitHub release has no notes.")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text(verbatim: String(notes.body.prefix(8_000)))
+                                .textSelection(.enabled)
+                        }
+                        if notes.body.count > 8_000 {
+                            Text("Showing an excerpt. Open the full release for more.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Link("View Full Release Notes", destination: notes.url)
+                    } else {
+                        if source.tags.isEmpty {
+                            Text("The Homebrew version could not be matched to a GitHub release.")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text("No release notes were found for the Homebrew available version.")
+                                .foregroundStyle(.secondary)
+                        }
+                        Link("View GitHub Release History", destination: source.historyURL)
+                    }
+                case .failed(let key, let message) where key == releaseKey:
+                    Label("Couldn't load release notes", systemImage: "exclamationmark.triangle")
+                    Text(message).foregroundStyle(.secondary).textSelection(.enabled)
+                    Button("Try Again") { releaseRetryCount += 1 }
+                    Link("View GitHub Release History", destination: source.historyURL)
+                default:
+                    ProgressView("Loading release notes...")
+                }
+            } else {
+                Text("GitHub release notes are not available for this app.")
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Label("Release Notes", systemImage: "text.page")
         }
     }
 
@@ -280,9 +366,6 @@ struct AppDetailsView: View {
     @ViewBuilder
     private func informationSections(_ info: CaskAdditionalInfo) -> some View {
         Section {
-            if let version = info.version {
-                infoRow("Homebrew Available Version", version)
-            }
             infoRow("Token", info.token)
             infoRow("Full Token", info.full_token)
             infoRow("Tap", info.tap)
@@ -337,6 +420,26 @@ struct AppDetailsView: View {
 
     private var downloadURL: URL? {
         brewInfo?.url
+    }
+
+    private func loadReleaseNotes() async {
+        let key = releaseKey
+        releaseState = .loading
+        guard brewInfo != nil, let source = key.source else { return }
+        do {
+            let notes = try await ReleaseNotesResolver.load(
+                source, configuration: NetworkProxyManager.getURLSessionConfiguration()
+            )
+            try Task.checkCancellation()
+            guard key == releaseKey else { return }
+            releaseState = .loaded(key, notes)
+        } catch is CancellationError {
+            return
+        } catch {
+            guard !Task.isCancelled, key == releaseKey else { return }
+            Self.logger.error("Failed to load release notes: \(error.localizedDescription)")
+            releaseState = .failed(key, error.localizedDescription)
+        }
     }
 
     private func loadLocalInfo() async {

@@ -3,6 +3,31 @@ import GRDB
 import os
 @testable import Applite
 
+private final class ReleaseNotesURLProtocol: URLProtocol, @unchecked Sendable {
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        guard let url = request.url,
+              let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil) else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badURL))
+            return
+        }
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        if url.path.contains("/oversized/") {
+            client?.urlProtocol(self, didLoad: Data(repeating: 65, count: 256 * 1024 + 1))
+        } else {
+            let json = """
+            {"tag_name":"v1.2.3","body":"network fixture","html_url":"https://github.com/example/project/releases/tag/v1.2.3","draft":false}
+            """
+            client?.urlProtocol(self, didLoad: Data(json.utf8))
+        }
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+}
+
 @main
 enum ExternalInstallTests {
     private static func writeRecordedArtifacts(
@@ -46,6 +71,96 @@ enum ExternalInstallTests {
         for directory in directories {
             try fm.createDirectory(at: directory, withIntermediateDirectories: true)
         }
+
+        func testReleaseNotes() async throws {
+            let homepage = URL(string: "https://github.com/example/project")!
+            let download = URL(string: "https://github.com/example/project/releases/download/v1.2.3/App.dmg")!
+            let source = ReleaseNotesResolver.source(homepage: homepage, download: download, version: "1.2.3,42")!
+            precondition(source.tags == ["v1.2.3"])
+            precondition(ReleaseNotesResolver.source(homepage: homepage, download: download, version: "2.0")?.tags == [])
+            precondition(ReleaseNotesResolver.source(homepage: homepage, download: download, version: "latest")?.tags == [])
+            precondition(ReleaseNotesResolver.source(
+                homepage: URL(string: "https://github.com.evil.test/example/project")!,
+                download: URL(string: "https://example.test/app.dmg")!, version: "1.0"
+            ) == nil)
+            let homepageSource = ReleaseNotesResolver.source(
+                homepage: homepage, download: URL(string: "https://example.test/app.dmg")!, version: "1.2.3"
+            )!
+            let ambiguous = ReleaseNotesResolver.source(
+                homepage: homepage, download: URL(string: "https://example.test/app.dmg")!, version: "1.2.3,42"
+            )!
+            let skipped = try await ReleaseNotesResolver.load(ambiguous) { _ in
+                preconditionFailure("An ambiguous version must not trigger a request")
+            }
+            precondition(skipped == nil)
+            let notes = try await ReleaseNotesResolver.load(homepageSource) { url in
+                if url.lastPathComponent == "1.2.3" {
+                    return .init(data: Data(), status: 404, url: url)
+                }
+                let json = """
+                {"tag_name":"v1.2.3","body":"Changes for this version","html_url":"https://github.com/example/project/releases/tag/v1.2.3","draft":false}
+                """
+                return .init(data: Data(json.utf8), status: 200, url: url)
+            }
+            precondition(notes?.tag == "v1.2.3" && notes?.body == "Changes for this version")
+            let missing = try await ReleaseNotesResolver.load(source) { url in
+                .init(data: Data(), status: 404, url: url)
+            }
+            precondition(missing == nil)
+            let empty = """
+            {"tag_name":"v1.2.3","body":null,"html_url":"https://github.com/example/project/releases/tag/v1.2.3","draft":false}
+            """
+            let emptyNotes = try await ReleaseNotesResolver.load(source) { url in
+                .init(data: Data(empty.utf8), status: 200, url: url)
+            }
+            precondition(emptyNotes?.body == "" && emptyNotes?.url.absoluteString == "https://github.com/example/project/releases/tag/v1.2.3")
+            let unverified = """
+            {"tag_name":"v1.2.3","body":"wrong","html_url":"https://evil.test/example/project/releases/tag/v1.2.3","draft":false}
+            """
+            do {
+                _ = try await ReleaseNotesResolver.load(source) { url in
+                    .init(data: Data(unverified.utf8), status: 200, url: url)
+                }
+                preconditionFailure("An untrusted release link must be rejected")
+            } catch ReleaseNotesResolver.Failure.invalidResponse {}
+            let wrongTag = """
+            {"tag_name":"v9.9","body":"wrong","html_url":"https://github.com/example/project/releases/tag/v1.2.3","draft":false}
+            """
+            do {
+                _ = try await ReleaseNotesResolver.load(source) { url in
+                    .init(data: Data(wrongTag.utf8), status: 200, url: url)
+                }
+                preconditionFailure("A mismatched release tag must be rejected")
+            } catch ReleaseNotesResolver.Failure.invalidResponse {}
+            do {
+                _ = try await ReleaseNotesResolver.load(source) { url in
+                    .init(data: Data("invalid".utf8), status: 200, url: url)
+                }
+                preconditionFailure("Malformed release data must fail")
+            } catch is DecodingError {}
+            do {
+                _ = try await ReleaseNotesResolver.load(source) { url in
+                    .init(data: Data(), status: 403, url: url)
+                }
+                preconditionFailure("HTTP errors must not be reported as missing notes")
+            } catch ReleaseNotesResolver.Failure.requestFailed(403) {}
+            do {
+                _ = try await ReleaseNotesResolver.load(source) { _ in
+                    throw CancellationError()
+                }
+                preconditionFailure("Cancellation must propagate")
+            } catch is CancellationError {}
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.protocolClasses = [ReleaseNotesURLProtocol.self]
+            let fetched = try await ReleaseNotesResolver.load(source, configuration: configuration)
+            precondition(fetched?.body == "network fixture")
+            let oversized = ReleaseNotesResolver.Source(owner: "example", repository: "oversized", tags: ["v1.2.3"])
+            do {
+                _ = try await ReleaseNotesResolver.load(oversized, configuration: configuration)
+                preconditionFailure("Oversized network responses must fail")
+            } catch ReleaseNotesResolver.Failure.responseTooLarge {}
+        }
+        try await testReleaseNotes()
         let hiddenSelfApp = userApps.appendingPathComponent("Applite.app")
         try fm.createDirectory(at: hiddenSelfApp, withIntermediateDirectories: true)
         let hiddenSelfRecord = CaskRecord(
