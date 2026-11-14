@@ -112,13 +112,22 @@ enum InstalledAppDetails {
 
     static func updateStatus(
         isLocallyInstalled: Bool, isHomebrewManaged: Bool, hasOtherOwner: Bool,
-        brew: CaskAdditionalInfo?
+        metadata: InstalledAppMetadata?, brew: CaskAdditionalInfo?
     ) -> UpdateStatus {
         guard isLocallyInstalled else { return .notApplicable }
         guard isHomebrewManaged, !hasOtherOwner,
-              concreteVersion(brew?.installed) != nil, concreteVersion(brew?.version) != nil,
+              let installed = concreteVersion(brew?.installed),
+              let localVersion = concreteVersion(metadata?.version),
+              concreteVersion(brew?.version) != nil,
               brew?.auto_updates != true,
               let outdated = brew?.outdated else { return .unknown }
+        let components = installed.split(separator: ",", omittingEmptySubsequences: false)
+        guard (1...2).contains(components.count), String(components[0]) == localVersion else { return .unknown }
+        if components.count == 2 {
+            guard let localBuild = concreteVersion(metadata?.build), String(components[1]) == localBuild else {
+                return .unknown
+            }
+        }
         return outdated ? .outdated : .current
     }
 }

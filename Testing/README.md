@@ -106,6 +106,8 @@ and missing plists, beta versions, and Unknown update status for external/protec
 apps, self-updaters, placeholders, and missing Homebrew version or status. They also check managed current and
 outdated outcomes and preserve local version information when Homebrew is unavailable.
 An omitted auto-update flag preserves a reported Homebrew outdated status.
+Reported status is shown only when the local release and any receipt build match;
+missing or mismatched local metadata remains Unknown.
 Managed-location fixtures move/rename a bundle, repeat the lookup with a stale cached
 path, verify opening resolves the moved managed bundle, select a second pinned Homebrew, and retain an explicit external/protected
 distribution. When multiple historical targets remain, they retain ownership evidence

@@ -580,6 +580,10 @@ enum ExternalInstallTests {
         let latestAvailable = try brew(installed: "8.12.44", outdated: false, available: "latest")
         let selfUpdating = try brew(installed: "8.12.44", outdated: false, autoUpdates: true)
         let unknownAutoUpdates = try brew(installed: "8.12.44", outdated: false, autoUpdates: nil)
+        let buildReceipt = try brew(installed: "8.12.44,8044", outdated: false)
+        let mismatchedBuild = try brew(installed: "8.12.44,8045", outdated: false)
+        try writePlist(["CFBundleShortVersionString": "8.12.44", "CFBundleVersion": "8044"])
+        let matchingMetadata = try InstalledAppMetadata.read(at: app)
 
         precondition(InstalledAppDetails.version(
             isLocallyInstalled: true, isHomebrewManaged: false, hasOtherOwner: false, metadata: metadata, brew: current
@@ -600,40 +604,52 @@ enum ExternalInstallTests {
             isLocallyInstalled: false, isHomebrewManaged: false, hasOtherOwner: false, metadata: nil, brew: current
         ) == .notInstalled)
         precondition(InstalledAppDetails.updateStatus(
-            isLocallyInstalled: true, isHomebrewManaged: false, hasOtherOwner: false, brew: current
+            isLocallyInstalled: true, isHomebrewManaged: false, hasOtherOwner: false, metadata: metadata, brew: current
         ) == .unknown, "Homebrew cannot determine update status for an external beta")
         precondition(InstalledAppDetails.updateStatus(
-            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: true, brew: current
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: true, metadata: metadata, brew: current
         ) == .unknown, "A protected distribution must not inherit another receipt's status")
         precondition(InstalledAppDetails.updateStatus(
-            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: missingVersion
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: matchingMetadata, brew: missingVersion
         ) == .unknown, "An outdated=false response without an installed version is not evidence")
         precondition(InstalledAppDetails.updateStatus(
-            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: missingStatus
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: matchingMetadata, brew: missingStatus
         ) == .unknown)
         for info in [latestInstalled, latestAvailable, selfUpdating] {
             precondition(InstalledAppDetails.updateStatus(
-                isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: info
+                isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: matchingMetadata, brew: info
             ) == .unknown, "Placeholder versions or self-updating apps cannot establish update status")
         }
         precondition(InstalledAppDetails.updateStatus(
-            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: unknownAutoUpdates
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: matchingMetadata, brew: unknownAutoUpdates
         ) == .current, "An absent auto-update flag must preserve Homebrew's reported update status")
         precondition(InstalledAppDetails.version(
             isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: nil, brew: latestInstalled
         ) == .unknown)
         precondition(InstalledAppDetails.updateStatus(
-            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: nil
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: matchingMetadata, brew: nil
         ) == .unknown)
         precondition(InstalledAppDetails.updateStatus(
-            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: current
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: matchingMetadata, brew: current
         ) == .current)
         precondition(InstalledAppDetails.updateStatus(
-            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: outdated
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: matchingMetadata, brew: outdated
         ) == .outdated)
         precondition(InstalledAppDetails.updateStatus(
-            isLocallyInstalled: false, isHomebrewManaged: false, hasOtherOwner: false, brew: nil
+            isLocallyInstalled: false, isHomebrewManaged: false, hasOtherOwner: false, metadata: nil, brew: nil
         ) == .notApplicable)
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: metadata, brew: current
+        ) == .unknown, "A different local beta must not inherit the receipt's status")
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: nil, brew: current
+        ) == .unknown, "Missing local metadata cannot corroborate the receipt")
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: matchingMetadata, brew: buildReceipt
+        ) == .current, "Homebrew release/build receipts can match local release and build metadata")
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: matchingMetadata, brew: mismatchedBuild
+        ) == .unknown, "A different local build must not inherit the receipt's status")
 
         try writePlist(["CFBundleShortVersionString": "  ", "CFBundleVersion": "2"])
         let updated = try InstalledAppMetadata.read(at: app)

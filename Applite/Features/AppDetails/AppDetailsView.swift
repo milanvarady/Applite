@@ -204,7 +204,7 @@ struct AppDetailsView: View {
             if cask.isLocallyInstalled {
                 switch InstalledAppDetails.updateStatus(
                     isLocallyInstalled: true, isHomebrewManaged: cask.isInstalled,
-                    hasOtherOwner: cask.displayedProtection != nil, brew: brewInfo
+                    hasOtherOwner: cask.displayedProtection != nil, metadata: localInfo, brew: brewInfo
                 ) {
                 case .outdated: infoRow("Outdated", yesNo(true))
                 case .current: infoRow("Outdated", yesNo(false))
