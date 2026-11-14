@@ -34,6 +34,7 @@ struct CaskAdditionalInfo: Codable, Hashable {
     let disable_date: String?
     let disable_reason: String?
     let disable_replacement: String?
+    let artifacts: [CaskArtifact]?
 
     var displayName: String {
         name?.first(where: { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) ?? full_token
@@ -60,6 +61,7 @@ struct CaskAdditionalInfo: Codable, Hashable {
         disabled: false,
         disable_date: nil,
         disable_reason: nil,
-        disable_replacement: nil
+        disable_replacement: nil,
+        artifacts: []
     )
 }

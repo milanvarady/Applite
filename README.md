@@ -242,12 +242,17 @@ command and expose the reason in Active Tasks. Existing ownership protection win
 before this check.
 
 Each operation pins its Homebrew executable and app-directory configuration.
+Verified live cask artifacts supplement cached/recorded targets before final
+ownership and adoption checks. Missing target metadata blocks modifying commands.
 Ownership evidence is refreshed again after metadata verification, including
 recorded Caskroom targets in previous custom app directories. Bulk operations
 refresh shared inventories after all metadata requests, then make final override
 decisions without yielding. Changing the selection invalidates pending writes.
 Installed rows, search filtering, and totals use canonical bundle identities;
 duplicate receipts stay intact, and single/bulk installs reconcile the projection.
+Matching continues across app directories after a canonical bundle is claimed.
+Conservative management-source evidence never replaces a distinct selected or
+recorded bundle identity. A failed catalog sync cannot retire the Settings refresh prompt.
 
 Disabled/unavailable apps cannot offer adoption, installation, updates, or reinstall;
 cards show **Homebrew unavailable** with an explanatory tooltip. Open/Get Info remain

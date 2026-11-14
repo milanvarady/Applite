@@ -21,6 +21,7 @@ final class CaskManager {
     private let dataLoader: CaskDataLoader
     private let registry: CaskViewModelRegistry
     private let brewService: BrewService
+    private let catalogLoad: @MainActor (Bool) async throws -> (categories: [CategoryLoadResult], taps: [TapLoadResult])
     private var adoptionConsentGeneration = 0
     private var detectionSettingTask: Task<Void, Never>?
 
@@ -92,11 +93,14 @@ final class CaskManager {
     init(
         dataLoader: CaskDataLoader? = nil,
         registry: CaskViewModelRegistry? = nil,
-        brewService: BrewService? = nil
+        brewService: BrewService? = nil,
+        catalogLoad: (@MainActor (Bool) async throws -> (categories: [CategoryLoadResult], taps: [TapLoadResult]))? = nil
     ) {
         let reg = registry ?? CaskViewModelRegistry()
         self.registry = reg
-        self.dataLoader = dataLoader ?? CaskDataLoader(registry: reg)
+        let loader = dataLoader ?? CaskDataLoader(registry: reg)
+        self.dataLoader = loader
+        self.catalogLoad = catalogLoad ?? { forceSync in try await loader.loadCatalogData(forceSync: forceSync) }
         self.brewService = brewService ?? BrewService()
         self.categories = Self.loadInitialCategories()
 
@@ -431,7 +435,7 @@ final class CaskManager {
                 surface.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: surface))
             }
             await loadInstalledState(surfacingErrorsIn: surface)
-            return true
+            return catalogError == nil
         }
 
         // Selected brew is invalid — attempt recovery (detect existing / reinstall annex).
@@ -473,7 +477,7 @@ final class CaskManager {
         do {
             // Animate the placeholder→full transition so cask cards cross-fade into place
             // rather than swapping instantly mid-shimmer-cycle.
-            let catalog = try await dataLoader.loadCatalogData(forceSync: forceSync)
+            let catalog = try await catalogLoad(forceSync)
             withAnimation(.easeInOut(duration: 0.25)) {
                 self.categories = catalog.categories
                 self.taps = catalog.taps

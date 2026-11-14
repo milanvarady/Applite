@@ -2,6 +2,12 @@
 
 ## Non-destructive external-install regression tests
 
+Live-artifact fixtures rename Old.app to a protected New.app, revoke prerequisites
+during the final ownership await, and reject incomplete target metadata. Injected
+catalog failure/success verifies refresh-baseline results without network requests.
+Identity fixtures cover two roots sharing a bundle filename and distinct recorded
+targets protected conservatively by a third store-managed copy.
+
 Review-race cases pause single and bulk metadata requests before adding App Store,
 Setapp or Intune evidence or changing Homebrew. A two-entry batch also pauses its
 last metadata request to verify the first entry is rechecked. Recorded old-appdir

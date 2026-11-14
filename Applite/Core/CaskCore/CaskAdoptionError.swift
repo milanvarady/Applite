@@ -14,6 +14,7 @@ enum CaskAdoptionError: LocalizedError {
     case configurationChanged
     case confirmationRequired
     case confirmationExpired
+    case installationTargetsUnavailable
 
     var errorDescription: String? {
         switch self {
@@ -43,6 +44,8 @@ enum CaskAdoptionError: LocalizedError {
             String(localized: "This app is already installed. Enable Homebrew management and confirm the current command before reinstalling it.")
         case .confirmationExpired:
             String(localized: "This Homebrew management confirmation expired. Review and confirm the current command again.")
+        case .installationTargetsUnavailable:
+            String(localized: "Couldn't verify this cask's installation targets. Homebrew changes are blocked. Refresh the app catalog and try again.")
         }
     }
 }
