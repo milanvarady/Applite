@@ -155,6 +155,11 @@ struct AppDatabase {
             try db.execute(sql: "DELETE FROM metadata WHERE key = 'lastSyncDate'")
         }
 
+        migrator.registerMigration("v3_appTargetPaths") { db in
+            try db.execute(sql: "UPDATE casks SET appBundleNames = '[]'")
+            try db.execute(sql: "DELETE FROM metadata WHERE key = 'lastSyncDate'")
+        }
+
         return migrator
     }
 
