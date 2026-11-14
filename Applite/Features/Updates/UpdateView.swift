@@ -42,8 +42,7 @@ struct UpdateView: View {
 
     var updateAllButton: some View {
         Button {
-            isUpdatingAll = true
-            caskManager.updateAll(caskManager.outdatedViewModels)
+            isUpdatingAll = caskManager.updateAll(caskManager.outdatedViewModels)
         } label: {
             HStack {
                 Image(systemName: "arrow.2.circlepath")
@@ -74,6 +73,11 @@ struct UpdateView: View {
 
     var body: some View {
         VStack {
+            if caskManager.hasNonActionableOutdated && !casks.isEmpty {
+                Text("Some outdated apps can't be updated here because their installation or ownership needs attention.")
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal)
+            }
             // App grid
             AppGridView(casks: filteredCasks, appRole: .update)
                 .overlay(alignment: .bottom) {
@@ -100,6 +104,12 @@ struct UpdateView: View {
                             try? await caskManager.refreshOutdated()
                         }
                     }
+                } else if caskManager.hasNonActionableOutdated {
+                    ContentUnavailableView(
+                        "Updates Need Attention",
+                        systemImage: "exclamationmark.triangle",
+                        description: Text("Some outdated apps can't be updated here because their installation or ownership needs attention.")
+                    )
                 } else {
                     ContentUnavailableView(
                         "No Updates Available",

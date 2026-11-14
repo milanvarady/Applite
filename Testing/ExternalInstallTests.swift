@@ -46,6 +46,17 @@ enum ExternalInstallTests {
         defaults.removePersistentDomain(forName: "dev.applite.ExternalInstallTests")
         defer { defaults.removePersistentDomain(forName: "dev.applite.ExternalInstallTests") }
         testInstalledListOptions()
+        let configuredHTTP = NetworkProxyManager.sessionConfiguration(
+            proxy: NetworkProxyConfiguration(type: .http, host: "127.0.0.1", port: 8080)
+        )
+        let proxyValues = configuredHTTP.connectionProxyDictionary ?? [:]
+        precondition(proxyValues[kCFNetworkProxiesHTTPSEnable as String] as? Int == 1
+                     && proxyValues[kCFNetworkProxiesHTTPSProxy as String] as? String == "127.0.0.1"
+                     && proxyValues[kCFNetworkProxiesHTTPSPort as String] as? Int == 8080,
+                     "An HTTP proxy must tunnel HTTPS requests through the same endpoint")
+        let configuredDownloader = AppIconView.faviconDownloader(configuration: configuredHTTP)
+        precondition(NSDictionary(dictionary: configuredDownloader.sessionConfiguration.connectionProxyDictionary ?? [:])
+            .isEqual(to: proxyValues), "Favicon downloads must use the HTTPS tunnel configuration")
         let httpProxy = URLSessionConfiguration.ephemeral
         httpProxy.connectionProxyDictionary = ["HTTPEnable": 1, "HTTPProxy": "127.0.0.1", "HTTPPort": 8080]
         let originalDownloader = AppIconView.faviconDownloader(configuration: httpProxy)
@@ -86,6 +97,32 @@ enum ExternalInstallTests {
             let homepageSource = ReleaseNotesResolver.source(
                 homepage: homepage, download: URL(string: "https://example.test/app.dmg")!, version: "1.2.3"
             )!
+            let plusSource = ReleaseNotesResolver.source(
+                homepage: homepage,
+                download: URL(string: "https://github.com/example/project/releases/download/v1.2.3+456/App.dmg")!,
+                version: "1.2.3+456"
+            )!
+            precondition(plusSource.tags == ["v1.2.3+456"])
+            let plusNotes = try await ReleaseNotesResolver.load(plusSource) { url in
+                let json = """
+                {"tag_name":"v1.2.3+456","body":"build","html_url":"https://github.com/Example/Project/releases/tag/v1.2.3+456","draft":false}
+                """
+                return .init(data: Data(json.utf8), status: 200, url: url)
+            }
+            precondition(plusNotes?.tag == "v1.2.3+456")
+            for path in ["Example/Other/releases/tag/v1.2.3+456",
+                         "Example/Project/releases/tag/V1.2.3+456",
+                         "Example/Project/RELEASES/tag/v1.2.3+456"] {
+                do {
+                    _ = try await ReleaseNotesResolver.load(plusSource) { url in
+                        let json = """
+                        {"tag_name":"v1.2.3+456","body":"wrong","html_url":"https://github.com/\(path)","draft":false}
+                        """
+                        return .init(data: Data(json.utf8), status: 200, url: url)
+                    }
+                    preconditionFailure("Only owner and repository case may vary")
+                } catch ReleaseNotesResolver.Failure.invalidResponse {}
+            }
             let ambiguous = ReleaseNotesResolver.source(
                 homepage: homepage, download: URL(string: "https://example.test/app.dmg")!, version: "1.2.3,42"
             )!
@@ -152,6 +189,7 @@ enum ExternalInstallTests {
             } catch is CancellationError {}
             let configuration = URLSessionConfiguration.ephemeral
             configuration.protocolClasses = [ReleaseNotesURLProtocol.self]
+            configuration.connectionProxyDictionary = configuredHTTP.connectionProxyDictionary
             let fetched = try await ReleaseNotesResolver.load(source, configuration: configuration)
             precondition(fetched?.body == "network fixture")
             let oversized = ReleaseNotesResolver.Source(owner: "example", repository: "oversized", tags: ["v1.2.3"])
@@ -420,7 +458,7 @@ enum ExternalInstallTests {
         precondition(registry.externalInstalledCount == 2)
         precondition(registry.installedCount == 0)
         registry.markOutdated(tokens: [record.token])
-        precondition(registry.outdatedCount == 0)
+        precondition(registry.outdatedCount == 0 && registry.hasNonActionableOutdated)
 
         // A successful managed refresh takes priority and only affects the exact full token.
         registry.markInstalled(tokens: [record.fullToken])
@@ -431,7 +469,12 @@ enum ExternalInstallTests {
         precondition(registry.externalInstalledCount == 1)
         precondition(registry.installedCount == 1)
         registry.markOutdated(tokens: [record.token])
-        precondition(registry.outdatedViewModels == [vm])
+        precondition(registry.outdatedViewModels == [vm] && !registry.hasNonActionableOutdated)
+        registry.markOutdated(tokens: [record.token, "unrecognized"])
+        precondition(registry.outdatedViewModels == [vm] && registry.hasNonActionableOutdated)
+        registry.markOutdated(tokens: [])
+        precondition(!registry.hasNonActionableOutdated)
+        registry.markOutdated(tokens: [record.token])
         registry.markExternalInstallations(appURLs: [:])
         precondition(vm.externalAppURL == nil)
         precondition(tapVM.installationState == .notInstalled)
@@ -1082,7 +1125,8 @@ enum ExternalInstallTests {
         registry.markInstalled(tokens: [stable.fullToken])
         registry.markExternalInstallations(appURLs: scan.externalAppURLs, appStoreAppURLs: scan.appStoreAppURLs)
         registry.markOutdated(tokens: [stable.token])
-        precondition(vm.isInstalled && vm.isAppStoreManaged && registry.outdatedCount == 0)
+        precondition(vm.isInstalled && vm.isAppStoreManaged && registry.outdatedCount == 0
+                     && registry.hasNonActionableOutdated)
         precondition(InstalledListOptions(source: .homebrew).apply(to: [vm]).isEmpty)
         precondition(InstalledListOptions(source: .other).apply(to: [vm]).isEmpty)
         precondition(InstalledListOptions(source: .appStore).apply(to: [vm]) == [vm])
@@ -3083,6 +3127,8 @@ enum ExternalInstallTests {
         manager.selectedHomebrewDidChange(surfacingErrorsIn: manager.alert)
         precondition(!vm.isInstalled && manager.isResolvingInstalledState,
                      "Switching Homebrew must immediately invalidate stale receipt ownership")
+        precondition(!manager.updateAll([vm]), "Update All must reject requests while receipts refresh")
+        precondition(!manager.updateAll([]), "Update All must reject an empty batch")
         manager.uninstall(vm)
         precondition(!fm.fileExists(atPath: secondPrefix.appendingPathComponent("uninstall-started").path))
         let started = secondPrefix.appendingPathComponent("list-started")

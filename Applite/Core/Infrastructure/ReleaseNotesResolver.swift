@@ -99,7 +99,7 @@ enum ReleaseNotesResolver {
             let release = try JSONDecoder().decode(Release.self, from: response.data)
             guard !release.draft, release.tag_name == tag,
                   let components = githubComponents(release.html_url),
-                  components.path == "/\(source.owner)/\(source.repository)/releases/tag/\(tag)" else {
+                  verifiedReleasePath(components.path, source: source, tag: tag) else {
                 throw Failure.invalidResponse
             }
             let body = release.body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
@@ -155,7 +155,20 @@ enum ReleaseNotesResolver {
     }
 
     private static func validTag(_ value: String) -> Bool {
-        validComponent(value) && !normalized(value).isEmpty && value.count <= 100
+        !value.isEmpty && value != "." && value != ".."
+            && value.unicodeScalars.allSatisfy {
+                CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-+").contains($0)
+            }
+            && !normalized(value).isEmpty && value.count <= 100
+    }
+
+    private static func verifiedReleasePath(_ path: String, source: Source, tag: String) -> Bool {
+        let parts = path.split(separator: "/", omittingEmptySubsequences: false)
+        guard parts.count == 6 else { return false }
+        return parts[0].isEmpty
+            && parts[1].lowercased() == source.owner.lowercased()
+            && parts[2].lowercased() == source.repository.lowercased()
+            && parts[3] == "releases" && parts[4] == "tag" && parts[5] == tag
     }
 
     private static func normalized(_ value: String) -> String {

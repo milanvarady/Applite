@@ -78,11 +78,7 @@ actor FaviconResolver {
 
     static func candidates(in html: String, pageURL: URL) -> [URL] {
         guard let pageURL = httpURL(pageURL) else { return [] }
-        let visibleHTML = html.replacing(
-            #/(?is)<!--.*?(?:-->|$)|<script\b[^>]*>.*?(?:</script\s*>|$)|<style\b[^>]*>.*?(?:</style\s*>|$)/#,
-            with: ""
-        )
-        let tags = visibleHTML.matches(of: #/(?is)<(?:[^"'<>]|"[^"]*"|'[^']*')*>/#)
+        let tags = html.matches(of: #/(?is)<!--.*?(?:-->|$)|<script\b(?:[^"'<>]|"[^"]*"|'[^']*')*>.*?(?:</script\s*>|$)|<style\b(?:[^"'<>]|"[^"]*"|'[^']*')*>.*?(?:</style\s*>|$)|<(?:[^"'<>]|"[^"]*"|'[^']*')*>/#)
             .prefix { $0.0.wholeMatch(of: #/(?i)</head\s*>/#) == nil }
             .compactMap { $0.0.wholeMatch(of: #/(?is)<(link|base)\b(?:[^"'<>]|"[^"]*"|'[^']*')*>/#) }
         var baseURL = pageURL

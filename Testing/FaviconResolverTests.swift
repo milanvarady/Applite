@@ -157,6 +157,13 @@ enum FaviconResolverTests {
         precondition(FaviconResolver.candidates(in: quotedTags, pageURL: page).map(\.absoluteString) == [
             "https://example.invalid/docs/right.png", "https://example.invalid/favicon.ico"
         ], "Tag-like text in quoted attributes must not alter icon discovery")
+        let quotedIgnoredRegions = """
+        <meta content="Using <script> in examples"><meta content="A <!-- comment">
+        <link rel=icon href="/real.png">
+        """
+        precondition(FaviconResolver.candidates(in: quotedIgnoredRegions, pageURL: page).map(\.path) == [
+            "/real.png", "/favicon.ico"
+        ], "Script and comment text inside attributes must not hide real icons")
         let references = """
         <base href="&#47;assets&#x2f;">
         <link rel=icon href="favicon&copy;.png?x=1&amp;y=&quot;q&quot;">

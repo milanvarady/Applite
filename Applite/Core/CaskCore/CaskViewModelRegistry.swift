@@ -21,6 +21,7 @@ final class CaskViewModelRegistry {
     /// All live view models keyed by cask full token
     private var viewModelsByFullToken: [CaskId: CaskViewModel] = [:]
     private var additionalCopies: [String: CaskViewModel] = [:]
+    private var outdatedTokens: Set<CaskId> = []
 
     // MARK: - Lookup & Creation
 
@@ -204,6 +205,7 @@ final class CaskViewModelRegistry {
     /// same-token casks can be the installed one, and installed state is reconciled first (see
     /// `CaskManager.loadInstalledState`, which awaits `refreshInstalled` before `refreshOutdated`).
     func markOutdated(tokens: Set<CaskId>) {
+        outdatedTokens = tokens
         updateFlag(\.isOutdated) {
             $0.isInstalled && !$0.isManagementProtected
                 && $0.homebrewManagementBlockReason == nil && $0.matchesBareToken(in: tokens)
@@ -273,6 +275,11 @@ final class CaskViewModelRegistry {
         viewModelsByFullToken.values.lazy.filter {
             $0.isOutdated && !$0.isManagementProtected && $0.homebrewManagementBlockReason == nil
         }.count
+    }
+
+    var hasNonActionableOutdated: Bool {
+        let actionable = Set(outdatedViewModels.map(\.token))
+        return !outdatedTokens.subtracting(actionable).isEmpty
     }
 
     /// Total number of tracked view models

@@ -55,9 +55,13 @@ struct IconAndDescriptionView: View {
                 .help("Show app details")
 
                 if showReleaseNotes {
-                    Button("Release Notes", action: showDetails)
+                    Button("Release Notes") {
+                        guard !NSEvent.modifierFlags.contains(.command) else { return }
+                        showDetails()
+                    }
                         .font(.caption)
                         .foregroundStyle(.tint)
+                        .accessibilityLabel("Show details for \(cask.name)")
                         .help("Show release notes and version information")
                 } else if cask.isLocallyInstalled {
                     Text("Installed")

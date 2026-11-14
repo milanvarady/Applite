@@ -104,16 +104,23 @@ struct NetworkProxyManager {
     }
 
     static func getURLSessionConfiguration() -> URLSessionConfiguration {
+        sessionConfiguration(proxy: try? getSystemProxySettings())
+    }
+
+    static func sessionConfiguration(proxy proxySettings: NetworkProxyConfiguration?) -> URLSessionConfiguration {
         let sessionConfiguration = URLSessionConfiguration.default
 
         // Add proxy settings
-        if let proxySettings = try? Self.getSystemProxySettings() {
+        if let proxySettings {
             switch proxySettings.type {
             case .http:
                 sessionConfiguration.connectionProxyDictionary = [
                     kCFNetworkProxiesHTTPEnable: 1,
                     kCFNetworkProxiesHTTPPort: proxySettings.port,
-                    kCFNetworkProxiesHTTPProxy: proxySettings.host
+                    kCFNetworkProxiesHTTPProxy: proxySettings.host,
+                    kCFNetworkProxiesHTTPSEnable: 1,
+                    kCFNetworkProxiesHTTPSPort: proxySettings.port,
+                    kCFNetworkProxiesHTTPSProxy: proxySettings.host
                 ]
             case .https:
                 sessionConfiguration.connectionProxyDictionary = [

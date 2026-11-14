@@ -81,6 +81,7 @@ final class CaskManager {
     /// to render a number.
     var installedCount: Int { registry.installedCount }
     var outdatedCount: Int { registry.outdatedCount }
+    var hasNonActionableOutdated: Bool { registry.hasNonActionableOutdated }
     var externalInstalledViewModels: [CaskViewModel] { registry.externalInstalledViewModels }
     var externalInstalledCount: Int { registry.externalInstalledCount }
     var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
@@ -408,9 +409,11 @@ final class CaskManager {
         brewService.installAll(casks)
     }
 
-    func updateAll(_ casks: [CaskViewModel]) {
-        guard canModifyApps() else { return }
+    @discardableResult
+    func updateAll(_ casks: [CaskViewModel]) -> Bool {
+        guard canModifyApps(), !casks.isEmpty else { return false }
         brewService.updateAll(casks)
+        return true
     }
 
     func getAdditionalInfoForCask(_ cask: CaskViewModel) async throws -> CaskAdditionalInfo {
