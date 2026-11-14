@@ -46,7 +46,6 @@ struct DiscoverSectionView: View {
         }
         .onAppear(perform: updatePreparedCasks)
         .onChange(of: sortKeySnapshot) { _, _ in updatePreparedCasks() }
-        .onChange(of: sortOption) { _, _ in updatePreparedCasks() }
     }
 
     var categoryHeader: some View {
