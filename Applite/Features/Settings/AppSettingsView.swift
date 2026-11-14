@@ -72,8 +72,8 @@ struct AppSettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                .disabled(caskManager.isRefreshingCatalog)
             }
+            .disabled(caskManager.isRefreshingCatalog)
         }
     }
 
