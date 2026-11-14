@@ -1,0 +1,74 @@
+name: Pull request checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repository:
+    name: Repository checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check PR whitespace
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: git diff --check "$BASE_SHA" HEAD
+      - name: Validate structured data and scripts
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/python-cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          git ls-files -z '*.json' '*.xcstrings' |
+            xargs -0 -n 1 python3 -m json.tool > /dev/null
+          find Scripts Testing -type f -name '*.py' -exec python3 -m py_compile {} +
+          while IFS= read -r -d '' file; do
+            bash -n "$file"
+          done < <(find Scripts -type f -name '*.sh' -print0)
+          ruby -c Applite/Resources/brew-tap-cask-info.rb
+          node --check Applite/Resources/askpass.js
+          python3 Scripts/Release/appcast_insert.py appcast.xml --check-only
+
+  build:
+    name: Build (${{ matrix.configuration }})
+    runs-on: macos-26
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Check Xcode and property lists
+        run: |
+          xcodebuild -version
+          plutil -lint Applite/*.plist Applite/*.entitlements Scripts/Release/ExportOptions.plist
+      - name: Build unsigned universal app
+        run: |
+          xcodebuild -project Applite.xcodeproj -scheme Applite \
+            -configuration "${{ matrix.configuration }}" \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath "$RUNNER_TEMP/AppliteDerivedData" \
+            ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO build
+          app="$RUNNER_TEMP/AppliteDerivedData/Build/Products/${{ matrix.configuration }}/Applite.app/Contents/MacOS/Applite"
+          lipo "$app" -verify_arch arm64
+          lipo "$app" -verify_arch x86_64

@@ -12,6 +12,7 @@ suggestions are all useful.
 3. [Suggesting a feature](#suggesting-a-feature)
 4. [Contributing code](#contributing-code)
    - [Building](#building)
+   - [Pull request checks](#pull-request-checks)
    - [Project layout](#project-layout)
    - [AI-assisted contributions](#ai-assisted-contributions)
 5. [Contributing a translation](#contributing-a-translation)
@@ -84,6 +85,28 @@ avoids it.
 
 Open `Applite.xcodeproj` in Xcode 16 or newer and build. Swift Package Manager resolves the
 dependencies on first build; there is nothing else to install. The deployment target is macOS 14.
+
+### Pull request checks
+
+Pull requests run an unsigned universal Debug and Release build on a macOS runner with Xcode 26.6.
+They also check changed-line whitespace, JSON and string-catalog syntax, shell/Python/Ruby/JavaScript
+syntax, property lists, and the Sparkle appcast's ordering and build numbers. Actions use a read-only
+token and don't use signing credentials. Run the builds locally with:
+
+```sh
+xcodebuild -project Applite.xcodeproj -scheme Applite -configuration Debug \
+  -destination 'generic/platform=macOS' ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO \
+  CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project Applite.xcodeproj -scheme Applite -configuration Release \
+  -destination 'generic/platform=macOS' ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO \
+  CODE_SIGNING_ALLOWED=NO build
+```
+
+CI is a compile and syntax baseline, **not** an automated UI or Homebrew integration test.
+The shared scheme currently has no test target. Keep the guided [test harness](../Testing/README.md)
+on a disposable VM; it changes Homebrew and system state and must not run on a shared runner.
+Swift package versions can drift because the Xcode `Package.resolved` is intentionally ignored;
+committing it and enabling Swift Dependabot updates is a separate maintainer decision.
 
 ### Project layout
 

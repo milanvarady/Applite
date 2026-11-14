@@ -327,3 +327,8 @@ xcuserdata
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,xcode,swift,swiftpackagemanager,appcode,jetbrains
 Applite.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+# Local script caches and Xcode result bundles
+__pycache__/
+*.py[cod]
+*.xcresult/
