@@ -473,16 +473,24 @@ final class BrewService {
     private func verifiedLegacyInstallationTargets(
         in vms: [CaskViewModel], configuration: BrewOperationConfiguration
     ) async throws -> [CaskId: [String]] {
+        let missing = vms.filter { $0.appBundleNames.isEmpty }
+        guard !missing.isEmpty else { return [:] }
+        let json = try await Shell.run(
+            configuration.executable, ["info", "--json=v2", "--cask"] + missing.map(\.fullToken),
+            timeout: .seconds(30)
+        )
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
+        let response = try JSONDecoder().decode(LegacyTargetResponse.self, from: Data(json.utf8))
+        guard response.casks.count == missing.count else {
+            throw CaskAdoptionError.installationTargetsUnavailable
+        }
+        let byFullToken = Dictionary(grouping: response.casks, by: \.full_token)
         var result: [CaskId: [String]] = [:]
-        for vm in vms where vm.appBundleNames.isEmpty {
-            let json = try await Shell.run(
-                configuration.executable, ["info", "--json=v2", "--cask", vm.fullToken], timeout: .seconds(30)
-            )
-            try Task.checkCancellation()
-            try configuration.validateCurrent()
-            let response = try JSONDecoder().decode(LegacyTargetResponse.self, from: Data(json.utf8))
-            guard response.casks.count == 1, let cask = response.casks.first,
-                  cask.token == vm.token, cask.full_token == vm.fullToken, cask.tap == vm.tap,
+        for vm in missing {
+            let matches = byFullToken[vm.fullToken] ?? []
+            guard matches.count == 1, let cask = matches.first,
+                  cask.token == vm.token, cask.tap == vm.tap, result[vm.fullToken] == nil,
                   let artifacts = cask.artifacts,
                   artifacts.allSatisfy({ $0.app == nil || $0.bundleName != nil }) else {
                 throw CaskAdoptionError.installationTargetsUnavailable

@@ -526,15 +526,25 @@ enum ExternalInstallTests {
             if [ -f "$fixture_dir/receipts" ]; then cat "$fixture_dir/receipts"; fi ;;
           outdated) exit 0 ;;
           info)
-            token="${4##*/}"
-            bundle="External.app"
-            if [ "$token" = "review-missing" ]; then bundle="Missing.app"; fi
-            if [ "$token" = "legacy-safe" ]; then bundle="Safe.app"; fi
-            if [ -f "$fixture_dir/missing-artifacts" ]; then
-              printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask"}]}' "$token" "$4"
-              exit 0
-            fi
-            printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["%s"]}],"deprecated":false,"disabled":false}]}' "$token" "$4" "$bundle" ;;
+            echo info >> "$fixture_dir/info-calls"
+            shift 3
+            printf '{"casks":['
+            separator=""
+            for full_token in "$@"; do
+              token="${full_token##*/}"
+              if [ -f "$fixture_dir/wrong-info-identity" ] && [ "$token" = "legacy-safe-two" ]; then token="wrong"; fi
+              bundle="External.app"
+              if [ "$token" = "review-missing" ]; then bundle="Missing.app"; fi
+              case "$token" in legacy-safe*) bundle="Safe.app" ;; esac
+              printf '%s' "$separator"
+              if [ -f "$fixture_dir/missing-artifacts" ]; then
+                printf '{"token":"%s","full_token":"%s","tap":"homebrew/cask"}' "$token" "$full_token"
+              else
+                printf '{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["%s"]}],"deprecated":false,"disabled":false}' "$token" "$full_token" "$bundle"
+              fi
+              separator=","
+            done
+            printf ']}' ;;
           install)
             printf '%s\\n' "$@" > "$fixture_dir/arguments"
             if [ -f "$fixture_dir/pause-stream" ]; then
@@ -753,6 +763,26 @@ enum ExternalInstallTests {
         precondition(safe.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
                      "Missing live artifacts must fail closed for bulk installs")
         try fm.removeItem(at: prefix.appendingPathComponent("missing-artifacts"))
+        var secondSafeRecord = record("legacy-safe-two", bundle: "")
+        secondSafeRecord.appBundleNames = []
+        let secondSafe = CaskViewModel(record: secondSafeRecord)
+        let infoCalls = prefix.appendingPathComponent("info-calls")
+        let wrongIdentity = prefix.appendingPathComponent("wrong-info-identity")
+        try Data().write(to: wrongIdentity)
+        service.installAll([safe, secondSafe])
+        _ = try await service.runSerialized { true }
+        precondition(safe.progressState.isFailed && secondSafe.progressState.isFailed
+                     && !fm.fileExists(atPath: arguments.path),
+                     "A response with a mismatched cask identity must fail closed")
+        try fm.removeItem(at: wrongIdentity)
+        try fm.removeItem(at: infoCalls)
+        service.installAll([safe, secondSafe])
+        _ = try await service.runSerialized { true }
+        let calls = try String(contentsOf: infoCalls, encoding: .utf8).split(whereSeparator: \.isNewline)
+        precondition(calls.count == 1, "A bulk preflight must use one pinned metadata lookup")
+        let bulkArguments = try String(contentsOf: arguments, encoding: .utf8)
+        precondition(bulkArguments.contains(safe.fullToken) && bulkArguments.contains(secondSafe.fullToken))
+        try fm.removeItem(at: arguments)
         await service.install(safe).value
         let normalArguments = try String(contentsOf: arguments, encoding: .utf8)
         precondition(!normalArguments.split(whereSeparator: \.isNewline).contains("--force"),
