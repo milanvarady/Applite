@@ -687,13 +687,10 @@ final class BrewService {
                     if Task.isCancelled {
                         for vm in vms { vm.progressState = .idle }
                     } else {
-                        for vm in vms {
-                            await self.showFailure(
-                                for: vm, error: error, output: error.localizedDescription,
-                                failureTitle: String(localized: "Couldn't start app installation"),
-                                failureMessage: error.localizedDescription
-                            )
-                        }
+                        await self.showBatchFailure(
+                            for: vms, error: error, output: error.localizedDescription,
+                            failureTitle: String(localized: "Couldn't start app installation")
+                        )
                     }
                     return
                 }
@@ -701,12 +698,11 @@ final class BrewService {
             if !allowed.isEmpty {
                 await self.runBatchOperation(allowed, kind: kind, configuration: configuration)
             }
-            for vm in blocked {
+            if !blocked.isEmpty {
                 let error = CaskAdoptionError.confirmationRequired
-                await self.showFailure(
-                    for: vm, error: error, output: error.localizedDescription,
-                    failureTitle: String(localized: "Couldn't start app installation"),
-                    failureMessage: error.localizedDescription
+                await self.showBatchFailure(
+                    for: blocked, error: error, output: error.localizedDescription,
+                    failureTitle: String(localized: "Couldn't start app installation")
                 )
             }
         }
@@ -730,16 +726,13 @@ final class BrewService {
             try Task.checkCancellation()
             try configuration.validateCurrent()
         } catch {
-            for vm in vms {
-                if Task.isCancelled {
-                    vm.progressState = .idle
-                } else {
-                    await self.showFailure(
-                        for: vm, error: error, output: error.localizedDescription,
-                        failureTitle: String(localized: "Couldn't start app installation"),
-                        failureMessage: error.localizedDescription
-                    )
-                }
+            if Task.isCancelled {
+                for vm in vms { vm.progressState = .idle }
+            } else {
+                await showBatchFailure(
+                    for: vms, error: error, output: error.localizedDescription,
+                    failureTitle: String(localized: "Couldn't start app installation")
+                )
             }
             return
         }
@@ -827,13 +820,10 @@ final class BrewService {
 
     private func failBatchForConfigurationChange(_ vms: [CaskViewModel], output: String) async {
         let error = CaskAdoptionError.configurationChanged
-        for vm in vms {
-            await showFailure(
-                for: vm, error: error, output: output + "\n" + error.localizedDescription,
-                failureTitle: String(localized: "Couldn't refresh installed apps"),
-                failureMessage: error.localizedDescription
-            )
-        }
+        await showBatchFailure(
+            for: vms, error: error, output: output + "\n" + error.localizedDescription,
+            failureTitle: String(localized: "Couldn't refresh installed apps")
+        )
     }
 
     /// Routes one streamed batch-output line to the matching cask's `progressState`.
@@ -1105,5 +1095,15 @@ final class BrewService {
         vm.progressState = .failed(output: output)
 
         await notify(failureTitle, failureMessage, .failure)
+    }
+
+    private func showBatchFailure(
+        for vms: [CaskViewModel], error: Error, output: String, failureTitle: String
+    ) async {
+        guard !vms.isEmpty else { return }
+        Self.logger.error("\(failureTitle)\nError: \(error.localizedDescription)\nOutput: \(output)")
+        for vm in vms { vm.progressState = .failed(output: output) }
+        let names = vms.map(\.name).joined(separator: ", ")
+        await notify(failureTitle, "\(names): \(error.localizedDescription)", .failure)
     }
 }

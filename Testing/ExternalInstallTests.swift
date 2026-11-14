@@ -622,6 +622,48 @@ enum ExternalInstallTests {
                      "Recovery must not change a confirmed adoption's previewed configuration")
         service.recoverBrew = nil
         try fm.removeItem(at: prefix.appendingPathComponent("receipts"))
+        var notices: [String] = []
+        let notificationService = BrewService(notify: { title, _, _ in notices.append(title) })
+        let blockedA = CaskViewModel(record: record("blocked-a", bundle: "External.app"))
+        let blockedB = CaskViewModel(record: record("blocked-b", bundle: "External.app"))
+        notificationService.installAll([blockedA, blockedB])
+        _ = try await notificationService.runSerialized { true }
+        precondition(notices.count == 1 && blockedA.progressState.isFailed && blockedB.progressState.isFailed,
+                     "Blocked external installs must retain per-card errors but produce one notification")
+        notices.removeAll()
+        var unknownARecord = record("unknown-a", bundle: "")
+        unknownARecord.appBundleNames = []
+        var unknownBRecord = record("unknown-b", bundle: "")
+        unknownBRecord.appBundleNames = []
+        let unknownA = CaskViewModel(record: unknownARecord)
+        let unknownB = CaskViewModel(record: unknownBRecord)
+        try Data().write(to: prefix.appendingPathComponent("missing-artifacts"))
+        notificationService.installAll([unknownA, unknownB])
+        _ = try await notificationService.runSerialized { true }
+        precondition(notices.count == 1 && unknownA.progressState.isFailed && unknownB.progressState.isFailed,
+                     "A batch preflight failure must produce one notification and retain each error")
+        try fm.removeItem(at: prefix.appendingPathComponent("missing-artifacts"))
+        notices.removeAll()
+        let changingA = CaskViewModel(record: record("changing-a", bundle: "Changing-a.app"))
+        let changingB = CaskViewModel(record: record("changing-b", bundle: "Changing-b.app"))
+        let notificationPause = prefix.appendingPathComponent("pause-stream")
+        let notificationStarted = prefix.appendingPathComponent("stream-started")
+        try Data().write(to: notificationPause)
+        notificationService.installAll([changingA, changingB])
+        let deadline = Date().addingTimeInterval(5)
+        while !fm.fileExists(atPath: notificationStarted.path) && Date() < deadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(fm.fileExists(atPath: notificationStarted.path))
+        defaults.setValue(invalidBrew.path, for: Preferences.customUserBrewPath)
+        try fm.removeItem(at: notificationPause)
+        _ = try await notificationService.runSerialized { true }
+        precondition(notices.count == 1 && changingA.progressState.isFailed && changingB.progressState.isFailed,
+                     "A batch configuration change must produce one notification and retain each error")
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+        try fm.removeItem(at: notificationStarted)
+        try fm.removeItem(at: arguments)
+        try fm.removeItem(at: prefix.appendingPathComponent("receipts"))
         try await loader.refreshExternalInstallations { _, _, _ in [:] }
         precondition(registry.count == 2, "Empty scans must not materialize the entire catalog")
         let scanGate = ScanGate()
