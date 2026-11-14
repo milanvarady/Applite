@@ -10,8 +10,14 @@ import SwiftUI
 struct IconAndDescriptionView: View {
     var cask: CaskViewModel
     var showDetails: () -> Void
+    var updateVersion: UpdateVersionState? = nil
+    var retryUpdateVersions: () -> Void = {}
     @Environment(\.openURL) private var openURL
     @State private var isHoveringDetails = false
+    private var isUpdate: Bool {
+        if case .some = updateVersion { return true }
+        return false
+    }
     
     var body: some View {
         HStack {
@@ -35,9 +41,12 @@ struct IconAndDescriptionView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(cask.name)
                             .font(.system(size: 16, weight: .bold))
+                            .lineLimit(isUpdate ? 1 : nil)
 
-                        Text(cask.descriptionText)
-                            .foregroundStyle(.secondary)
+                        if !isUpdate {
+                            Text(cask.descriptionText)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     .multilineTextAlignment(.leading)
                     .contentShape(Rectangle())
@@ -51,7 +60,33 @@ struct IconAndDescriptionView: View {
                 .accessibilityHint(cask.descriptionText)
                 .help("Show app details")
 
-                if cask.isLocallyInstalled {
+                if let updateVersion {
+                    switch updateVersion {
+                    case .loading:
+                        Text("Loading versions...")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    case .loaded(let versions, let error):
+                        let installed = versions.installed ?? String(localized: "Unknown")
+                        let available = versions.available ?? String(localized: "Unknown")
+                        HStack(spacing: 4) {
+                            Text("\(installed) → \(available)")
+                                .font(.caption)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .help(String(localized: "Installed: \(installed); Homebrew available: \(available)"))
+                                .accessibilityLabel("Installed: \(installed); Homebrew available: \(available)")
+                            if let error {
+                                Button(action: retryUpdateVersions) {
+                                    Image(systemName: "exclamationmark.triangle")
+                                }
+                                .accessibilityLabel("Couldn't load versions: \(error). Retry")
+                                .help(error)
+                            }
+                        }
+                        .foregroundStyle(.secondary)
+                    }
+                } else if cask.isLocallyInstalled {
                     Text("Installed")
                         .font(.caption)
                         .foregroundStyle(.secondary)

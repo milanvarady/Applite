@@ -16,6 +16,8 @@ struct AppGridView: View {
     let casks: [CaskViewModel]
     var appRole: AppRole
     var includeSelf = false
+    var updateVersions: [String: UpdateVersionState] = [:]
+    var retryUpdateVersions: () -> Void = {}
 
     @AppStorage(Preferences.showAppliteInInstalledList) private var showAppliteInInstalledList
 
@@ -35,7 +37,8 @@ struct AppGridView: View {
                 }
 
                 ForEach(displayedCasks, id: \.cardIdentity) { cask in
-                    AppView(cask: cask, role: appRole)
+                    AppView(cask: cask, role: appRole, updateVersion: updateVersions[cask.cardIdentity],
+                            retryUpdateVersions: retryUpdateVersions)
                         .transition(.scale(scale: 0.85).combined(with: .opacity))
                 }
             }

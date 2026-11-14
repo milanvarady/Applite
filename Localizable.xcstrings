@@ -11494,7 +11494,13 @@
     "Multiple copies of this app were detected. Homebrew changes are unavailable until the installation target is unambiguous." : {},
     "Couldn't scan app management sources" : {},
     "Another Homebrew cask already manages this app. Homebrew cannot replace it through this cask." : {},
-    "Existing app: %@\nHomebrew app directory: %@\nThe existing copy is outside the Homebrew app directory and will remain unmanaged; Homebrew will install a separate copy." : {}
+    "Existing app: %@\nHomebrew app directory: %@\nThe existing copy is outside the Homebrew app directory and will remain unmanaged; Homebrew will install a separate copy." : {},
+    "%@ → %@" : {},
+    "Couldn't load versions: %@. Retry" : {},
+    "Homebrew information: %@" : {},
+    "Installed app information: %@" : {},
+    "Installed: %@; Homebrew available: %@" : {},
+    "Loading versions..." : {}
   },
   "version" : "1.1"
 }

@@ -655,6 +655,28 @@ enum ExternalInstallTests {
         try writePlist(["CFBundleShortVersionString": "8.12.44", "CFBundleVersion": "8044"])
         let matchingMetadata = try InstalledAppMetadata.read(at: app)
 
+        let updateVersions = UpdateVersions.resolve(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: metadata, brew: current
+        )
+        precondition(updateVersions.installed == "8.12.46-26.BETA" && updateVersions.available == "8.12.44")
+        let receiptVersions = UpdateVersions.resolve(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: nil, brew: current
+        )
+        precondition(receiptVersions.installed == "8.12.44")
+        let protectedVersions = UpdateVersions.resolve(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: true, metadata: nil, brew: current
+        )
+        precondition(protectedVersions.installed == nil && protectedVersions.available == "8.12.44")
+        let unavailableVersions = UpdateVersions.resolve(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: metadata, brew: nil
+        )
+        precondition(unavailableVersions.installed == "8.12.46-26.BETA" && unavailableVersions.available == nil)
+        let placeholderVersions = UpdateVersions.resolve(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: nil,
+            brew: try brew(installed: "unknown", outdated: nil, available: "latest")
+        )
+        precondition(placeholderVersions.installed == nil && placeholderVersions.available == nil)
+
         precondition(InstalledAppDetails.version(
             isLocallyInstalled: true, isHomebrewManaged: false, hasOtherOwner: false, metadata: metadata, brew: current
         ) == .known("8.12.46-26.BETA"), "The installed beta version must come from its own bundle")

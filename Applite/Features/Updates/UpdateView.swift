@@ -7,14 +7,22 @@
 
 import SwiftUI
 import ButtonKit
+import OSLog
 
 /// Update section
 struct UpdateView: View {
     var casks: [CaskViewModel]
 
     @Environment(CaskManager.self) var caskManager
+    @AppStorage(Preferences.brewPathOption) private var brewPathOption
+    @AppStorage(Preferences.customUserBrewPath) private var customUserBrewPath
+    @AppStorage(Preferences.appdirOn) private var appdirOn
+    @AppStorage(Preferences.appdirPath) private var appdirPath
 
     @State var searchText = ""
+    @State private var versions: [String: UpdateVersionState] = [:]
+    @State private var versionsKey: [String] = []
+    @State private var versionsRetryCount = 0
     @State var isUpdatingAll = false
     @State var updateAllButtonRotation = 0.0
 
@@ -75,7 +83,10 @@ struct UpdateView: View {
     var body: some View {
         VStack {
             // App grid
-            AppGridView(casks: filteredCasks, appRole: .update)
+            AppGridView(casks: filteredCasks, appRole: .update,
+                        updateVersions: versionsKey == versionKey ? versions : [:]) {
+                versionsRetryCount += 1
+            }
                 .overlay(alignment: .bottom) {
                     if filteredCasks.count > 1 {
                         updateAllButton
@@ -112,6 +123,9 @@ struct UpdateView: View {
             }
         }
         .navigationTitle("Update")
+        .task(id: versionKey) {
+            await loadVersions()
+        }
         .searchable(text: $searchText, placement: .toolbar)
         .toolbar {
             UpdateToolbar()
@@ -130,6 +144,66 @@ struct UpdateView: View {
             if new == nil, old?.isUpdate == true {
                 isUpdatingAll = false
             }
+        }
+    }
+
+    private var versionKey: [String] {
+        [String(brewPathOption), customUserBrewPath, String(appdirOn), appdirPath,
+         String(caskManager.successfulCatalogRefreshRevision), String(versionsRetryCount)] +
+        casks.flatMap {
+            [$0.cardIdentity, String($0.isInstalled), $0.selectedInstallationURL?.path ?? "",
+             String($0.displayedProtection != nil), String($0.metadataRevision)]
+        }
+    }
+
+    private func loadVersions() async {
+        let key = versionKey
+        let candidates = casks
+        guard !Task.isCancelled, key == versionKey else { return }
+        versionsKey = key
+        versions = Dictionary(candidates.map { ($0.cardIdentity, .loading) }, uniquingKeysWith: { first, _ in first })
+        let configuration = BrewOperationConfiguration.current
+        let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Applite", category: "UpdateVersions")
+        for cask in candidates {
+            guard !Task.isCancelled, key == versionKey else { return }
+            let identity = cask.cardIdentity
+            let token = cask.token
+            let name = cask.name
+            let url = cask.selectedInstallationURL
+            let isManaged = cask.isInstalled
+            let hasOtherOwner = cask.displayedProtection != nil
+            var errors: [String] = []
+            let metadata: InstalledAppMetadata?
+            do {
+                metadata = try await Task.detached {
+                    guard let path = try InstalledAppLocator.metadataAppURL(
+                        token: token, displayName: name, preferredURL: url,
+                        isManaged: isManaged, configuration: configuration
+                    ) else { return nil }
+                    return try InstalledAppMetadata.read(at: path)
+                }.value
+            } catch {
+                guard !Task.isCancelled, key == versionKey else { return }
+                logger.error("Could not read installed version for \(cask.fullToken, privacy: .public): \(error.localizedDescription)")
+                errors.append(String(localized: "Installed app information: \(error.localizedDescription)"))
+                metadata = nil
+            }
+            guard !Task.isCancelled, key == versionKey else { return }
+            let info: CaskAdditionalInfo?
+            do {
+                info = try await caskManager.getAdditionalInfoForCask(cask)
+            } catch {
+                guard !Task.isCancelled, key == versionKey else { return }
+                logger.error("Could not load Homebrew version for \(cask.fullToken, privacy: .public): \(error.localizedDescription)")
+                errors.append(String(localized: "Homebrew information: \(error.localizedDescription)"))
+                info = nil
+            }
+            guard !Task.isCancelled, key == versionKey else { return }
+            let resolved = UpdateVersions.resolve(
+                isLocallyInstalled: cask.isLocallyInstalled, isHomebrewManaged: isManaged,
+                hasOtherOwner: hasOtherOwner, metadata: metadata, brew: info
+            )
+            versions[identity] = .loaded(resolved, error: errors.isEmpty ? nil : errors.joined(separator: "\n"))
         }
     }
 }

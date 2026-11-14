@@ -20,6 +20,8 @@ struct AppView: View {
     var cask: CaskViewModel
     /// Role of the app, e.g. install, updated or uninstall
     var role: AppRole
+    var updateVersion: UpdateVersionState? = nil
+    var retryUpdateVersions: () -> Void = {}
 
     @Environment(\.openWindow) var openWindow
 
@@ -45,7 +47,9 @@ struct AppView: View {
 
     var body: some View {
         HStack {
-            IconAndDescriptionView(cask: cask, showDetails: showInfo)
+            IconAndDescriptionView(cask: cask, showDetails: showInfo,
+                                   updateVersion: role == .update ? (updateVersion ?? .loading) : nil,
+                                   retryUpdateVersions: retryUpdateVersions)
             IconsAndWarnings(cask: cask)
             actionsView
         }
