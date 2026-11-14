@@ -5,6 +5,15 @@ import os
 
 @main
 enum ExternalInstallTests {
+    private static func writeRecordedArtifacts(
+        caskroom: URL, token: String, version: String, source: String
+    ) throws {
+        let directory = caskroom.appendingPathComponent(".metadata/\(version)/20260101000000/Casks")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let data = try JSONSerialization.data(withJSONObject: ["artifacts": [["app": [source]]]])
+        try data.write(to: directory.appendingPathComponent("\(token).json"))
+    }
+
     @MainActor
     static func main() async throws {
         precondition(Bundle.main.bundleIdentifier == "dev.applite.ExternalInstallTests")
@@ -728,6 +737,8 @@ enum ExternalInstallTests {
             let directory = configuration.executable.deletingLastPathComponent().deletingLastPathComponent()
                 .appendingPathComponent("Caskroom/\(token)/\(version)")
             try fm.createDirectory(at: directory, withIntermediateDirectories: true)
+            try writeRecordedArtifacts(caskroom: directory.deletingLastPathComponent(), token: token,
+                                       version: version, source: app.lastPathComponent)
             let link = directory.appendingPathComponent(app.lastPathComponent)
             try fm.createSymbolicLink(at: link, withDestinationURL: app)
             return link
@@ -748,6 +759,14 @@ enum ExternalInstallTests {
         let initial = try resolve(oldApp, configuration: configurationA)
         let initialMetadata = try InstalledAppMetadata.read(at: initial)
         precondition(initialMetadata.version == "1.0")
+        let unrelated = apps.appendingPathComponent("Unrelated.app")
+        try writeApp(unrelated, version: "9.0")
+        let unrelatedLink = oldLink.deletingLastPathComponent().appendingPathComponent("Payload/Unrelated.app")
+        try fm.createDirectory(at: unrelatedLink.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try fm.createSymbolicLink(at: unrelatedLink, withDestinationURL: unrelated)
+        let initialTargets = try InstalledAppLocator.recordedAppURLs(token: token, executable: configurationA.executable)
+        precondition(initialTargets == [oldApp.resolvingSymlinksInPath().standardizedFileURL],
+                     "Unrecorded payload apps must not be treated as managed artifacts")
         try fm.moveItem(at: oldApp, to: newApp)
         try writeApp(newApp, version: "2.0")
         try fm.removeItem(at: oldLink)
@@ -782,6 +801,27 @@ enum ExternalInstallTests {
         let metadataB = try InstalledAppMetadata.read(at: selectedB)
         precondition(selectedB.path == otherApp.path && metadataB.version == "3.0",
                      "A different pinned Homebrew must not reuse an existing bundle from the previous profile")
+        let receiptToken = "metadata-receipt"
+        let receiptCaskroom = configurationA.executable.deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Caskroom/\(receiptToken)")
+        let staged = receiptCaskroom.appendingPathComponent("1.0/Payload")
+        try fm.createDirectory(at: staged, withIntermediateDirectories: true)
+        try fm.createSymbolicLink(at: staged.appendingPathComponent("Source.app"), withDestinationURL: otherApp)
+        let receiptMetadata = receiptCaskroom.appendingPathComponent(".metadata/1.0/20260101000000/Casks")
+        try fm.createDirectory(at: receiptMetadata, withIntermediateDirectories: true)
+        try JSONSerialization.data(withJSONObject: ["url_specs": ["only_path": "Payload"]])
+            .write(to: receiptMetadata.appendingPathComponent("\(receiptToken).json"))
+        try JSONSerialization.data(withJSONObject: ["uninstall_artifacts": [["app": ["Source.app"]]]])
+            .write(to: receiptCaskroom.appendingPathComponent(".metadata/INSTALL_RECEIPT.json"))
+        let receiptTargets = try InstalledAppLocator.recordedAppURLs(token: receiptToken, executable: configurationA.executable)
+        precondition(receiptTargets == [otherApp.resolvingSymlinksInPath().standardizedFileURL],
+                     "Receipt artifacts and recorded only_path must identify the staged source")
+        try JSONSerialization.data(withJSONObject: ["url_specs": ["only_path": "../outside"]])
+            .write(to: receiptMetadata.appendingPathComponent("\(receiptToken).json"))
+        do {
+            _ = try InstalledAppLocator.recordedAppURLs(token: receiptToken, executable: configurationA.executable)
+            preconditionFailure("An unsafe recorded source path must fail closed")
+        } catch CaskAdoptionError.installationTargetsUnavailable { }
         let launchB = try InstalledAppLocator.launchURL(
             token: token, displayName: "Metadata Fixture", preferredURL: newApp,
             isManaged: true, configuration: configurationB
@@ -2082,6 +2122,10 @@ enum ExternalInstallTests {
         let recordedLink = root.appendingPathComponent("Recorded Brew/Caskroom/review-recorded/1.0/Nested/Review Protected.app")
         try fm.createDirectory(at: recordedLink.deletingLastPathComponent(), withIntermediateDirectories: true)
         try fm.createSymbolicLink(at: recordedLink, withDestinationURL: oldApp)
+        try writeRecordedArtifacts(
+            caskroom: recordedLink.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent(),
+            token: "review-recorded", version: "1.0", source: "Nested/Review Protected.app"
+        )
         let loop = recordedLink.deletingLastPathComponent().appendingPathComponent("Loop")
         try fm.createSymbolicLink(at: loop, withDestinationURL: recordedLink.deletingLastPathComponent())
         defaults.setValue(recordedBrew.path, for: Preferences.customUserBrewPath)
@@ -2532,6 +2576,8 @@ enum ExternalInstallTests {
             let directory = prefix.appendingPathComponent("Caskroom/\(token)/1")
             try fm.createDirectory(at: directory, withIntermediateDirectories: true)
             try fm.createSymbolicLink(at: directory.appendingPathComponent("Shared.app"), withDestinationURL: app)
+            try writeRecordedArtifacts(caskroom: directory.deletingLastPathComponent(), token: token,
+                                       version: "1", source: "Shared.app")
         }
         func record(_ token: String) -> CaskRecord {
             CaskRecord(
@@ -2750,6 +2796,8 @@ enum ExternalInstallTests {
         let recordedLink = prefix.appendingPathComponent("Caskroom/review-live/1.0/Old.app")
         try fm.createDirectory(at: recordedLink.deletingLastPathComponent(), withIntermediateDirectories: true)
         try fm.createSymbolicLink(at: recordedLink, withDestinationURL: oldApp)
+        try writeRecordedArtifacts(caskroom: recordedLink.deletingLastPathComponent().deletingLastPathComponent(),
+                                   token: "review-live", version: "1.0", source: "Old.app")
         let receiptList = prefix.appendingPathComponent("receipts")
         try record.fullToken.write(to: receiptList, atomically: true, encoding: .utf8)
         for isBatch in [false, true] {

@@ -23,6 +23,8 @@ Setapp or Intune evidence or changing Homebrew. A two-entry batch also pauses it
 last metadata request to verify the first entry is rechecked. Recorded old-appdir
 targets (including nested staging links and a directory-symlink loop), managed-receipt aliases, separate bundles, and immediate single/bulk
 Installed projection reconciliation use isolated filesystem fixtures.
+Recorded source tests cover receipt artifacts, staged `only_path`, unrelated payload
+apps, and unsafe source paths without recursively traversing Caskroom payloads.
 
 Hidden-self fixtures ensure an external Applite bundle contributes neither a row
 nor a badge. A paused reconciliation also verifies the real operation remains busy
