@@ -605,11 +605,14 @@ enum ExternalInstallTests {
         precondition(InstalledAppDetails.updateStatus(
             isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: missingStatus
         ) == .unknown)
-        for info in [latestInstalled, latestAvailable, selfUpdating, unknownAutoUpdates] {
+        for info in [latestInstalled, latestAvailable, selfUpdating] {
             precondition(InstalledAppDetails.updateStatus(
                 isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: info
             ) == .unknown, "Placeholder versions or self-updating apps cannot establish update status")
         }
+        precondition(InstalledAppDetails.updateStatus(
+            isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, brew: unknownAutoUpdates
+        ) == .current, "An absent auto-update flag must preserve Homebrew's reported update status")
         precondition(InstalledAppDetails.version(
             isLocallyInstalled: true, isHomebrewManaged: true, hasOtherOwner: false, metadata: nil, brew: latestInstalled
         ) == .unknown)
@@ -693,6 +696,12 @@ enum ExternalInstallTests {
         try writeApp(newApp, version: "2.0")
         try fm.removeItem(at: oldLink)
         _ = try record(newApp, version: "2.0", configuration: configurationA)
+        let recoveredLaunch = try InstalledAppLocator.launchURL(
+            token: token, displayName: "Metadata Fixture", preferredURL: oldApp,
+            isManaged: true, configuration: configurationA
+        )
+        precondition(recoveredLaunch?.path == newApp.path,
+                     "Opening a managed app must recover a moved bundle from the pinned Caskroom")
         for _ in 0..<2 {
             let recovered = try resolve(oldApp, configuration: configurationA)
             let metadata = try InstalledAppMetadata.read(at: recovered)

@@ -230,6 +230,7 @@ struct AppDetailsView: View {
                 case .unavailable:
                     Text("The installed app bundle could not be located.")
                         .foregroundStyle(.secondary)
+                    Button("Try Again") { localRetryCount += 1 }
                 case .failed(let key, let message):
                     if key == localKey {
                         Label("Couldn't read installed app information", systemImage: "exclamationmark.triangle")

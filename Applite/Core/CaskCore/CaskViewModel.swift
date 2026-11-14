@@ -160,16 +160,17 @@ final class CaskViewModel {
     func launchApp() async throws {
         let token = self.token
         let displayName = self.name
-
-        // Resolve the real bundle location off the main actor — a few stat calls plus a small
-        // JSON read. `InstalledAppLocator` tries the Caskroom symlink, the cask's `app` artifact
-        // name, a display-name guess, and finally a LaunchServices bundle-id lookup.
-        let appURL = if let selectedInstallationURL {
-            selectedInstallationURL
-        } else {
-            await Task.detached {
-                InstalledAppLocator.appURL(token: token, displayName: displayName)
-            }.value
+        let preferredURL = selectedInstallationURL
+        let isManaged = isInstalled
+        let brewConfiguration = BrewOperationConfiguration.current
+        let appURL = try await Task.detached {
+            try InstalledAppLocator.launchURL(
+                token: token, displayName: displayName, preferredURL: preferredURL,
+                isManaged: isManaged, configuration: brewConfiguration
+            )
+        }.value
+        if isManaged {
+            try brewConfiguration.validateCurrent()
         }
 
         guard let appURL else {

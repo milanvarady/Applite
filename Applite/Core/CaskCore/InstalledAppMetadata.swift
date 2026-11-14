@@ -117,7 +117,7 @@ enum InstalledAppDetails {
         guard isLocallyInstalled else { return .notApplicable }
         guard isHomebrewManaged, !hasOtherOwner,
               concreteVersion(brew?.installed) != nil, concreteVersion(brew?.version) != nil,
-              brew?.auto_updates == false,
+              brew?.auto_updates != true,
               let outdated = brew?.outdated else { return .unknown }
         return outdated ? .outdated : .current
     }

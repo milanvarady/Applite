@@ -98,8 +98,9 @@ Installed-details fixtures check fresh release/build metadata, languages, malfor
 and missing plists, beta versions, and Unknown update status for external/protected
 apps, self-updaters, placeholders, and missing Homebrew version or status. They also check managed current and
 outdated outcomes and preserve local version information when Homebrew is unavailable.
+An omitted auto-update flag preserves a reported Homebrew outdated status.
 Managed-location fixtures move/rename a bundle, repeat the lookup with a stale cached
-path, select a second pinned Homebrew, and retain an explicit external/protected
+path, verify opening resolves the moved managed bundle, select a second pinned Homebrew, and retain an explicit external/protected
 distribution. When multiple historical targets remain, they retain ownership evidence
 while the selected recorded bundle supplies metadata. Malformed recovered/selected
 plists must fail rather than switch apps. Explicit successful catalog refresh advances
@@ -123,7 +124,8 @@ manager, such as Microsoft Intune; an unrecognized external source should be Unk
 Homebrew receipt status and any additional detected sources remain separate.
 Retry a failed Homebrew lookup while local facts are loaded, and retry a local
 metadata error while Homebrew details are loaded: the unaffected source must stay
-visible and must not reload. Successful single and bulk update/reinstall fixtures
+visible and must not reload. Retry an unavailable local bundle after restoring it.
+Successful single and bulk update/reinstall fixtures
 advance metadata revisions and replace bundle versions without changing Installed.
 With a completed details page open, switch between two Homebrew profiles that both
 have the cask installed. Receipt/available versions and Outdated must reload without
