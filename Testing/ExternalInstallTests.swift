@@ -538,6 +538,7 @@ enum ExternalInstallTests {
         try await testDistinctInstallationIdentities(root: root)
         try await testManagedSiblingOwnership(root: root)
         try await testManagedIdentityWithDetectionDisabled(root: root)
+        try await testMissingBrewRecovery(root: root)
         if CommandLine.arguments.contains("--live-intune") {
             try checkLiveIntuneInventory()
         }
@@ -548,6 +549,47 @@ enum ExternalInstallTests {
             try checkLiveArtCraftInventory()
         }
         print("PASS: default-off source overrides, enable consent, retained ownership, remaining-source guards, queued/metadata-time revocation, exact enabled Homebrew-cask eligibility, unsupported/failed verification guards, Intune/App Store/Setapp/ArtCraft precedence and queued/bulk write protection, Installed sorting/source/update/search filters, bundle/channel deduplication, managed ownership, self-exclusion, unified Installed totals, detection/settings guards, migration/FTS, and adoption success/failure")
+    }
+
+    @MainActor
+    private static func testMissingBrewRecovery(root: URL) async throws {
+        let defaults = UserDefaults.standard
+        let oldBrew = defaults.value(for: Preferences.customUserBrewPath)
+        let oldOption = defaults.value(for: Preferences.brewPathOption)
+        defer {
+            defaults.setValue(oldBrew, for: Preferences.customUserBrewPath)
+            defaults.setValue(oldOption, for: Preferences.brewPathOption)
+        }
+        defaults.setValue(BrewPaths.PathOption.custom.rawValue, for: Preferences.brewPathOption)
+        defaults.setValue(root.appendingPathComponent("missing-brew").path, for: Preferences.customUserBrewPath)
+        let record = CaskRecord(
+            token: "recovery", fullToken: "recovery", tap: "homebrew/cask", name: "Recovery",
+            descriptionText: "", homepageURL: nil, pkgInstaller: false, warningType: nil,
+            warningDate: nil, warningReason: nil, downloadsIn365days: 0, appBundleNames: []
+        )
+        let vm = CaskViewModel(record: record)
+        let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
+        var recoveryCount = 0
+        service.recoverBrew = {
+            recoveryCount += 1
+            return false
+        }
+        await service.install(vm).value
+        precondition(recoveryCount == 1 && !vm.progressState.isFailed && service.activeTasks.isEmpty,
+                     "A missing brew must invoke recovery before single-operation Caskroom lookup")
+        service.installAll([vm])
+        _ = try await service.runSerialized { true }
+        precondition(recoveryCount == 2 && !vm.progressState.isFailed && service.activeTasks.isEmpty,
+                     "A missing brew must invoke recovery before batch Caskroom lookup")
+
+        service.recoverBrew = {
+            recoveryCount += 1
+            defaults.setValue(root.appendingPathComponent("other-brew").path, for: Preferences.customUserBrewPath)
+            return true
+        }
+        await service.install(vm).value
+        precondition(recoveryCount == 3 && vm.progressState.isFailed,
+                     "Recovery must not use a stale captured Homebrew configuration")
     }
 
     @MainActor

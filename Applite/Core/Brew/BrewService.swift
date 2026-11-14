@@ -614,6 +614,16 @@ final class BrewService {
                 return
             }
 
+            do {
+                try configuration.validateCurrent()
+            } catch {
+                await self.reportManagementBlock(for: vm, error: error)
+                return
+            }
+            guard await self.brewPathIsValid(configuration: configuration) else {
+                vm.progressState = .idle
+                return
+            }
             let pinned: BrewOperationConfiguration
             do {
                 pinned = try await configuration.resolvingCaskroom()
@@ -624,12 +634,6 @@ final class BrewService {
             }
             let configuration = pinned
             guard !(await self.blockProtectedManagement(of: vm, configuration: configuration)) else { return }
-
-            // Make sure brew path is valid
-            guard await self.brewPathIsValid(configuration: configuration) else {
-                vm.progressState = .idle
-                return
-            }
 
             var appBundleNames = vm.appBundleNames
             if requiresSupportedCask {
@@ -794,6 +798,7 @@ final class BrewService {
     /// progress state on `false`.
     private func brewPathIsValid(configuration: BrewOperationConfiguration) async -> Bool {
         guard await BrewPaths.isBrewPathValid(at: configuration.executable) else {
+            guard !Task.isCancelled, configuration.matchesSettings(of: .current) else { return false }
             Self.logger.error("Couldn't start brew operation because brew path is invalid")
 
             // Unwired (no owner, i.e. not the running app) — nothing can recover it here.
@@ -873,6 +878,16 @@ final class BrewService {
                 for vm in vms { vm.progressState = .idle }
                 return
             }
+            do {
+                try configuration.validateCurrent()
+            } catch {
+                for vm in vms { await self.reportManagementBlock(for: vm, error: error) }
+                return
+            }
+            guard await self.brewPathIsValid(configuration: configuration) else {
+                for vm in vms { vm.progressState = .idle }
+                return
+            }
             let pinned: BrewOperationConfiguration
             do {
                 pinned = try await configuration.resolvingCaskroom()
@@ -916,10 +931,6 @@ final class BrewService {
                 return
             }
             guard !eligible.isEmpty else { return }
-            guard await self.brewPathIsValid(configuration: configuration) else {
-                for vm in eligible { vm.progressState = .idle }
-                return
-            }
             var supported: [CaskViewModel] = []
             var verifiedBundles: [CaskId: [String]] = [:]
             for vm in eligible {
