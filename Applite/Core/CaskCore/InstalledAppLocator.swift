@@ -59,14 +59,13 @@ enum InstalledAppLocator {
     }
 
     nonisolated static func recordedAppURLs(
-        token: String, executable: URL, requireRecordedOwnership: Bool = false
+        token: String, caskroom: URL, requireRecordedOwnership: Bool = false
     ) throws -> [URL] {
         guard !token.isEmpty, token != ".", token != "..",
               (token as NSString).lastPathComponent == token else {
             throw CaskAdoptionError.homebrewUnavailable
         }
-        let caskroom = executable.deletingLastPathComponent().deletingLastPathComponent()
-            .appendingPathComponent("Caskroom").appendingPathComponent(token)
+        let caskroom = caskroom.appendingPathComponent(token)
         let fm = FileManager.default
         let versions: [URL]
         do {
@@ -218,7 +217,10 @@ enum InstalledAppLocator {
         isManaged: Bool, configuration: BrewOperationConfiguration
     ) throws -> URL? {
         guard isManaged else { return preferredURL }
-        let recorded = try recordedAppURLs(token: token, executable: configuration.executable)
+        guard let caskroom = configuration.caskroom else {
+            throw CaskAdoptionError.installationTargetsUnavailable
+        }
+        let recorded = try recordedAppURLs(token: token, caskroom: caskroom)
         if let preferredURL {
             let preferred = preferredURL.resolvingSymlinksInPath().standardizedFileURL
             if recorded.contains(preferred) { return preferred }
@@ -251,11 +253,12 @@ enum InstalledAppLocator {
     ///
     /// Pure disk/LaunchServices lookups — safe to call off the main actor.
     nonisolated static func appURL(
-        token: String, displayName: String, configuration: BrewOperationConfiguration = .current
+        token: String, displayName: String, configuration: BrewOperationConfiguration
     ) -> URL? {
-        let caskroom = configuration.executable.deletingLastPathComponent().deletingLastPathComponent()
-            .appending(path: "Caskroom", directoryHint: .isDirectory)
-            .appending(path: token, directoryHint: .isDirectory)
+        guard let caskroom = configuration.caskroom?.appending(path: token, directoryHint: .isDirectory) else {
+            logger.error("No Caskroom configured while locating cask \(token, privacy: .public)")
+            return nil
+        }
         guard let appDirectory = configuration.applicationDirectories.first else {
             logger.error("No application directory configured while locating cask \(token, privacy: .public)")
             return nil

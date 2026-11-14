@@ -2,6 +2,8 @@
 
 Ownership fixtures cover inaccessible Intune agent paths, internal JSON and
 dangling recorded links, protected sibling aliases, and renamed installed copies.
+The selected Homebrew reports the Caskroom path, including nested Intel-style
+executable layouts; changing Homebrew invalidates that pinned configuration.
 
 ## Non-destructive external-install regression tests
 

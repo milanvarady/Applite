@@ -162,12 +162,13 @@ final class CaskViewModel {
         let token = self.token
         let displayName = self.name
         let preferredURL = selectedInstallationURL
-        let isManaged = isInstalled
+        let isManaged = isInstalled && displayedProtection == nil
         let brewConfiguration = BrewOperationConfiguration.current
+        let resolvedConfiguration = isManaged ? try await brewConfiguration.resolvingCaskroom() : brewConfiguration
         let appURL = try await Task.detached {
             try InstalledAppLocator.launchURL(
                 token: token, displayName: displayName, preferredURL: preferredURL,
-                isManaged: isManaged, configuration: brewConfiguration
+                isManaged: isManaged, configuration: resolvedConfiguration
             )
         }.value
         if isManaged {

@@ -449,16 +449,17 @@ struct AppDetailsView: View {
         }
         localState = .loading
         let key = localKey
-        let isManaged = cask.isInstalled
+        let isManaged = cask.isInstalled && cask.displayedProtection == nil
         let knownURL = cask.selectedInstallationURL
         let configuration = BrewOperationConfiguration.current
         let token = cask.token
         let name = cask.name
         do {
+            let resolvedConfiguration = isManaged ? try await configuration.resolvingCaskroom() : configuration
             let info = try await Task.detached { () throws -> InstalledAppMetadata? in
                 guard let url = try InstalledAppLocator.metadataAppURL(
                     token: token, displayName: name, preferredURL: knownURL,
-                    isManaged: isManaged, configuration: configuration
+                    isManaged: isManaged, configuration: resolvedConfiguration
                 ) else {
                     return nil
                 }
