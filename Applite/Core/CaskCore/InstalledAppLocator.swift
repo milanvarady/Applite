@@ -59,14 +59,13 @@ enum InstalledAppLocator {
     }
 
     nonisolated static func recordedAppURLs(
-        token: String, executable: URL, requireRecordedOwnership: Bool = false
+        token: String, caskroom: URL, requireRecordedOwnership: Bool = false
     ) throws -> [URL] {
         guard !token.isEmpty, token != ".", token != "..",
               (token as NSString).lastPathComponent == token else {
             throw CaskAdoptionError.homebrewUnavailable
         }
-        let caskroom = executable.deletingLastPathComponent().deletingLastPathComponent()
-            .appendingPathComponent("Caskroom").appendingPathComponent(token)
+        let caskroom = caskroom.appendingPathComponent(token)
         let fm = FileManager.default
         let versions: [URL]
         do {

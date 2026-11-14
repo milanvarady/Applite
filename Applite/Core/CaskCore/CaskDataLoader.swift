@@ -188,21 +188,32 @@ final class CaskDataLoader {
         // Scan the full catalog, not just curated/search results, so totals include unbrowsed apps.
         let records = try await dbService.fetchAllCasks()
         try Task.checkCancellation()
-        guard generation == externalScanGeneration, configuration == .current,
+        guard generation == externalScanGeneration, configuration.matchesSettings(of: .current),
               UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) == detectionEnabled else { return }
         registry.updateExistingViewModels(for: records)
-        let tokens = receiptConfiguration == configuration
+        let tokens = receiptConfiguration?.matchesSettings(of: configuration) == true
             ? receiptTokens : Set(registry.installedViewModels.map(\.fullToken))
         let catalog = detectionEnabled ? records : records.filter { tokens.contains($0.fullToken) }
+        let scanConfiguration = detectionEnabled && scan != nil
+            ? configuration : try await configuration.resolvingCaskroom()
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
+        guard generation == externalScanGeneration,
+              UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) == detectionEnabled else {
+            throw CancellationError()
+        }
         let loadIntuneInventory = self.loadIntuneInventory
         let loadArtCraftInventory = self.loadArtCraftInventory
         let task = Task.detached {
             if !detectionEnabled {
+                guard let caskroom = scanConfiguration.caskroom else {
+                    throw CaskAdoptionError.installationTargetsUnavailable
+                }
                 var bundleURLs: [CaskId: URL] = [:]
                 for record in catalog {
                     try Task.checkCancellation()
                     let recorded = try InstalledAppLocator.recordedAppURLs(
-                        token: record.token, executable: configuration.executable
+                        token: record.token, caskroom: caskroom
                     )
                     if let url = recorded.first ?? ExternalAppDetector.appURL(
                         bundleNames: record.appBundleNames, displayName: record.name,
@@ -219,12 +230,15 @@ final class CaskDataLoader {
                 )
             } else {
                 try Task.checkCancellation()
+                guard let caskroom = scanConfiguration.caskroom else {
+                    throw CaskAdoptionError.installationTargetsUnavailable
+                }
                 let intune = try loadIntuneInventory()
                 let artCraft = try loadArtCraftInventory()
                 let recorded = try Dictionary(uniqueKeysWithValues: tokens.map { token in
                     try Task.checkCancellation()
                     return (token, try InstalledAppLocator.recordedAppURLs(
-                        token: (token as NSString).lastPathComponent, executable: configuration.executable,
+                        token: (token as NSString).lastPathComponent, caskroom: caskroom,
                         requireRecordedOwnership: true
                     ))
                 })
@@ -243,7 +257,7 @@ final class CaskDataLoader {
             task.cancel()
         }
         guard !Task.isCancelled, generation == externalScanGeneration,
-              configuration == .current else { return }
+              configuration.matchesSettings(of: .current) else { return }
         // A Settings toggle may have changed while the off-main scan was running.
         guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) == detectionEnabled else { return }
         registry.materializeMissingViewModels(for: catalog.filter {
