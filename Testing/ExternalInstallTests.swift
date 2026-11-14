@@ -749,6 +749,12 @@ enum ExternalInstallTests {
         let metadataB = try InstalledAppMetadata.read(at: selectedB)
         precondition(selectedB.path == otherApp.path && metadataB.version == "3.0",
                      "A different pinned Homebrew must not reuse an existing bundle from the previous profile")
+        let launchB = try InstalledAppLocator.launchURL(
+            token: token, displayName: "Metadata Fixture", preferredURL: newApp,
+            isManaged: true, configuration: configurationB
+        )
+        precondition(launchB?.path == otherApp.path,
+                     "Opening a managed app must use the selected Homebrew's recorded bundle")
 
         let externalApp = apps.appendingPathComponent("Protected Distribution.app")
         try writeApp(externalApp, version: "7.0")

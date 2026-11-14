@@ -98,17 +98,10 @@ enum InstalledAppLocator {
         token: String, displayName: String, preferredURL: URL?,
         isManaged: Bool, configuration: BrewOperationConfiguration
     ) throws -> URL? {
-        guard isManaged else { return preferredURL }
-        if let preferredURL {
-            do {
-                if try preferredURL.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
-                    return preferredURL
-                }
-            } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
-                // A managed operation may have moved the selected bundle.
-            }
-        }
-        return appURL(token: token, displayName: displayName, configuration: configuration)
+        try metadataAppURL(
+            token: token, displayName: displayName, preferredURL: preferredURL,
+            isManaged: isManaged, configuration: configuration
+        )
     }
 
     nonisolated static func metadataAppURL(
