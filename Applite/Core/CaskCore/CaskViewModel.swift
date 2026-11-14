@@ -23,7 +23,19 @@ final class CaskViewModel {
     // MARK: - Runtime State (not persisted)
 
     /// Whether the cask is currently installed
-    var isInstalled: Bool = false
+    var isInstalled: Bool = false {
+        didSet {
+            if isInstalled { externalAppURL = nil }
+        }
+    }
+
+    var externalAppURL: URL?
+
+    var installationState: CaskInstallationState {
+        CaskInstallationState(isManaged: isInstalled, externalAppURL: externalAppURL)
+    }
+
+    var isInstalledExternally: Bool { installationState == .externalInstalled }
 
     /// Whether the cask has an update available
     var isOutdated: Bool = false
@@ -56,6 +68,7 @@ final class CaskViewModel {
     var homepageURL: String? { record.homepageURL }
     var pkgInstaller: Bool { record.pkgInstaller }
     var downloadsIn365days: Int { record.downloadsIn365days }
+    var appBundleNames: [String] { record.appBundleNames }
 
     /// Homepage as URL
     var homepage: URL? { record.homepage }
@@ -96,9 +109,13 @@ final class CaskViewModel {
         // Resolve the real bundle location off the main actor — a few stat calls plus a small
         // JSON read. `InstalledAppLocator` tries the Caskroom symlink, the cask's `app` artifact
         // name, a display-name guess, and finally a LaunchServices bundle-id lookup.
-        let appURL = await Task.detached {
-            InstalledAppLocator.appURL(token: token, displayName: displayName)
-        }.value
+        let appURL = if let externalAppURL, isInstalledExternally {
+            externalAppURL
+        } else {
+            await Task.detached {
+                InstalledAppLocator.appURL(token: token, displayName: displayName)
+            }.value
+        }
 
         guard let appURL else {
             throw AppLaunchError.appNotFound(name: displayName)

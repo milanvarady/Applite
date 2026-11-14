@@ -24,6 +24,8 @@ struct AppView: View {
     @Environment(\.openWindow) var openWindow
 
     @Environment(CaskManager.self) var caskManager
+    @AppStorage(Preferences.detectExternallyInstalledApps) private var detectExternallyInstalledApps
+    @AppStorage(Preferences.offerHomebrewManagement) private var offerHomebrewManagement
 
     // Alerts
     @State var failureAlertMessage = ""
@@ -127,6 +129,10 @@ struct AppView: View {
                 Label("Uninstall & delete app data", systemImage: "trash.fill")
             }
         } else {
+            if cask.isInstalledExternally {
+                OpenButton(cask: cask)
+            }
+
             if let homepage = cask.homepage {
                 Link(destination: homepage) {
                     Label("Homepage", systemImage: "house")
@@ -201,9 +207,21 @@ struct AppView: View {
     @ViewBuilder
     private var mainButtons: some View {
         switch role {
-        case .installAndManage:
+        case .installAndManage, .installed:
             if cask.isInstalled {
                 OpenButton(cask: cask)
+            } else if cask.isInstalledExternally {
+                if detectExternallyInstalledApps && offerHomebrewManagement {
+                    Button("Manage with Homebrew") {
+                        caskManager.confirmAdoption(cask)
+                    }
+                    .cardActionPill()
+                    .frame(maxWidth: 140)
+                    .disabled(cask.warning?.isDisabled ?? false)
+                    .help("Reinstall with Homebrew so this app is tracked and updated by Homebrew.")
+                } else {
+                    OpenButton(cask: cask)
+                }
             } else {
                 DownloadButton(cask: cask)
             }
@@ -213,10 +231,6 @@ struct AppView: View {
         case .update:
             UpdateButton(cask: cask)
 
-        case .installed:
-            OpenButton(cask: cask)
-
-            optionsMenuButton
         }
     }
 

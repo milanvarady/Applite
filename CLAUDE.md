@@ -30,14 +30,17 @@ The shared cask/brew engine lives under `Applite/Core/`, split into focused subf
 
 **Persistence** (`Applite/Core/Database/`)
 - `AppDatabase` - Schema migrations, DatabasePool with WAL mode, FTS5 virtual table on `casks`
-- `CaskRecord` - GRDB `FetchableRecord`/`PersistableRecord`, decodes from `CaskDTO`
+- `CaskRecord` - GRDB `FetchableRecord`/`PersistableRecord`, decodes from `CaskDTO`; persists expected app bundle names from cask artifacts
 - `CaskDatabaseService` - CRUD, FTS5 search (async), API sync
 
 **Cask engine** (`Applite/Core/CaskCore/`) — the `@Observable` runtime layer
-- `CaskViewModel` - `@Observable @MainActor` view model wrapping `CaskRecord` with runtime state (`isInstalled`, `isOutdated`, `progressState`)
+- `CaskViewModel` - `@Observable @MainActor` view model wrapping `CaskRecord` with runtime state (`isInstalled`, `externalAppURL`, `isOutdated`, `progressState`). `isInstalled` remains Homebrew-managed only; `installationState` distinguishes `.installed`, `.externalInstalled`, and `.notInstalled`, with managed state taking precedence
 - `CaskViewModelRegistry` - Single-identity store; `viewModels(for:)` is get-or-create so the same cask shares one VM across views. **Identity is `fullToken` everywhere** — DB primary key, registry key, brew ops. The bare `token` is not unique (two taps can each ship a "firefox"), so it must never key anything; it's indexed for lookup only
 - `CaskDataLoader` - Orchestrates: `loadCatalogData()` (DB-only), `refreshInstalled()`/`refreshOutdated()` (brew CLI), `search(query:)` (FTS5). Defines `CategoryLoadResult` and `TapLoadResult`.
 - `CaskWarning` - Warning enum (deprecated/disabled/caveat)
+- `ExternalAppDetector` - Disk-only external detection using artifact bundle names, or display-name fallback, in the configured app directory, `/Applications`, and `~/Applications`. `refreshInstalled()` scans the entire catalog off the main actor so external totals include unbrowsed casks
+- `Preferences.detectExternallyInstalledApps` defaults to true. The Brew settings App Sources toggle clears external runtime state immediately when disabled and hides external filters; enabling it rescans locally. Both scan-result application and adoption confirmation check the preference to reject stale in-flight work
+- `Preferences.offerHomebrewManagement` defaults to false (opt-in), preserving existing saved choices. Its indented settings row is greyed out and disabled when detection is off without overwriting the saved value. Cards only offer "Manage with Homebrew" when both preferences are enabled. Disabling management preserves external detection/status/filter counts and shows Open on external cards instead. Both confirmation creation and its action recheck both preferences
 - `CaskProgressState`, `CaskLoadError` - install progress + load error types
 
 **Plain models** (`Applite/Core/Models/`)
@@ -54,6 +57,7 @@ Other `Core/` subfolders: `Core/Brew/` (brew CLI services + `BrewPaths`, `Shell`
 - `alert: AlertManager` is the **main window's one alert surface** — brew failures, catalog/load failures and view-raised errors all queue in it, and `ContentView` presents it once at the window root via `.alertManager(_:)`. Rule: **one manager per window, bound at that window's root**; never inside a repeated view (binding it per cask card was the F5/P3-5 bug). Alerts carry their own buttons (`AppAlert.Action`), so nothing hand-rolls `.alert`. Windows that can't see that root (Settings' `UninstallView`) own a local one
 - `loadData(forceSync:)` is non-throwing — it path-validates, runs stage 1, then stage 2, surfacing any failure through `alert` (with Retry/Quit actions). The same entry point powers initial load, the ⌘R menu action, and the "Refresh Catalog" prompt in Settings
 - Forwards install/uninstall/update to `BrewService`
+- `confirmAdoption(_:)` uses the root alert to preview and confirm `brew install --cask <fullToken> --force`, then refreshes installed state inside the serialized operation on success. Failures retain external state and expose stderr through the existing card/Active Tasks error surface
 
 **Brew services** (`Applite/Core/Brew/`)
 - `BrewService` - Brew CLI operations; tracks `activeTasks: [ActiveBrewTask]`
@@ -62,8 +66,8 @@ Other `Core/` subfolders: `Core/Brew/` (brew CLI services + `BrewPaths`, `Shell`
 **Views** — split across `App/` (entry + `Commands`), `Navigation/` (shell), `Components/` (generic reusable views), `AppViews/` (the shared cask "app card" cluster), `Features/<Screen>/` (one folder per screen), and `Windows/` (standalone windows)
 - `Navigation/` split into `ContentView` / `SidebarViews` / `DetailView`. `ContentView` is a `NavigationSplitView`; the detail closure picks `SearchView` (when `searchInput` is non-empty) or `DetailViews` (tab-driven), while a broken/installing brew is covered by the `ComponentsInstallView` overlay gated on `bootstrap.needsSetupOverlay`. The `.home` sidebar tab renders `DiscoverView` directly (no wrapper)
 - `selection: SidebarItem?` is optional. Typing in the search field stashes the current selection into `lastSelection` and clears `selection` so a sidebar tap can interrupt the search; tapping a sidebar item while a search is active clears `searchInput`; clearing the search (Esc) restores `lastSelection`. Two `onChange` guards (`!searchInput.isEmpty` / `selection == nil`) keep the watchers from looping
-- `Features/Search/SearchView` - Owns its own results state. Uses `.task(id: query)` with a 200ms `Task.sleep` for debounced live search; `ContentUnavailableView.search(text:)` for the empty state. Sort/filter are scoped here, not in ContentView
-- `Features/Search/SortingOptionsToolbar` - Toolbar shared by SearchView (sort + hide-unpopular + hide-disabled toggles)
+- `Features/Search/SearchView` - Owns its own results state. Uses a task keyed by query and external filter with a 200ms `Task.sleep` for debounced live search. External filtering is reactive and searches beyond the usual 50-result limit. Sort/filter are scoped here, not in ContentView
+- `Features/Search/SortingOptionsToolbar` - SearchView toolbar (sort + hide-unpopular + hide-disabled + installed-externally toggles); external totals also appear as a sidebar badge
 - `AppViews/` - App card display components (split across 8+ files). `AppliteAppView` (self-card in the installed list) reads the live app icon from `NSApplication.shared.applicationIconImage` so the new Icon Composer / Liquid Glass icon renders correctly
 - `Features/Settings/SettingsView+BrewSettingsView` - Shows a single fixed-height "Refresh Catalog" prompt at the bottom whenever the brew-path option or the "Include Casks from Taps" toggle differs from the baselines captured `.onAppear`. The button calls `caskManager.loadData(forceSync: true)` and resets the baselines on success. The old "relaunch app" flow was replaced
 - `Features/Bootstrap/` - `ComponentsInstallView` (the setup overlay) + `SetupStatusIcon`. Not an onboarding flow; it's a modal over the main window

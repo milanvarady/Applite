@@ -21,6 +21,14 @@ import OSLog
 enum InstalledAppLocator {
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "InstalledAppLocator")
 
+    nonisolated static var applicationDirectories: [URL] {
+        let configured = appDirectory
+        return [configured] + [
+            URL.applicationDirectory,
+            FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications", isDirectory: true)
+        ].filter { $0 != configured }
+    }
+
     /// Resolves the URL of the installed app for a cask.
     ///
     /// - Parameters:

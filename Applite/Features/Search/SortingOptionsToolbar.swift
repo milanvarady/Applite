@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct SortingOptionsToolbar: ToolbarContent {
+    @Binding var externalOnly: Bool
+    var externalCount: Int
+    @AppStorage(Preferences.detectExternallyInstalledApps) private var detectExternallyInstalledApps
     @AppStorage(Preferences.searchSortOption) var sortBy
     @AppStorage(Preferences.hideUnpopularApps) var hideUnpopularApps
     @AppStorage(Preferences.hideDisabledApps) var hideDisabledApps
@@ -22,6 +25,18 @@ struct SortingOptionsToolbar: ToolbarContent {
                     }
                 }
                 .pickerStyle(.inline)
+
+                if detectExternallyInstalledApps {
+                    Toggle(isOn: $externalOnly) {
+                        HStack {
+                            Text("Installed externally")
+                            Spacer()
+                            Text(externalCount, format: .number)
+                        }
+                    }
+                }
+
+                Divider()
 
                 Toggle(isOn: $hideUnpopularApps) {
                     Text("Hide apps with few downloads", comment: "Few downloads search filter")

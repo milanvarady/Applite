@@ -19,7 +19,11 @@ struct BrewSettingsView: View {
     @AppStorage(Preferences.customUserBrewPath) var customUserBrewPath
     @AppStorage(Preferences.brewPathOption) var brewPathOption
     @AppStorage(Preferences.includeCasksFromTaps) var includeCasksFromTaps
+    @AppStorage(Preferences.detectExternallyInstalledApps) var detectExternallyInstalledApps
+    @AppStorage(Preferences.offerHomebrewManagement) var offerHomebrewManagement
     @AppStorage(Preferences.annexUpdateFrequency) var annexUpdateFrequency
+    @AppStorage(Preferences.appdirOn) private var appdirOn
+    @AppStorage(Preferences.appdirPath) private var appdirPath
 
     /// Applite's own annex brew is the selected one.
     var isUsingAnnexBrew: Bool { brewPathOption == BrewPaths.PathOption.annex.rawValue }
@@ -47,7 +51,6 @@ struct BrewSettingsView: View {
             annexUpdateSettings
             tapSettings
             appdirSettings
-            otherFlags
         }
         .formStyle(.grouped)
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -58,6 +61,12 @@ struct BrewSettingsView: View {
         .onAppear {
             previousBrewOption = brewPathOption
             previousIncludeCasksFromTaps = includeCasksFromTaps
+        }
+        .onChange(of: detectExternallyInstalledApps) { _, _ in
+            caskManager.applyExternalAppDetectionSetting(surfacingErrorsIn: alert)
+        }
+        .onChange(of: [String(brewPathOption), customUserBrewPath, String(appdirOn), appdirPath]) { _, _ in
+            caskManager.applyExternalAppDetectionSetting(surfacingErrorsIn: alert)
         }
     }
 
@@ -159,6 +168,8 @@ struct BrewSettingsView: View {
 
     var tapSettings: some View {
         Section("App Sources") {
+            GreedyUpgradeToggle()
+
             Toggle(isOn: $includeCasksFromTaps) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Include Third-Party Taps", comment: "Brew settings tap toggle title")
@@ -167,18 +178,39 @@ struct BrewSettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+
+            Toggle(isOn: $detectExternallyInstalledApps) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Detect externally installed apps")
+                    Text("Find apps installed outside Homebrew. Turning this off hides external app status and filters without changing your apps.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Toggle(isOn: $offerHomebrewManagement) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Offer Manage with Homebrew")
+                    Text("Show \"Manage with Homebrew\" on external app cards. Reinstalls require confirmation.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    if !detectExternallyInstalledApps {
+                        Text("Requires external app detection.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .padding(.leading, 20)
+            .foregroundStyle(detectExternallyInstalledApps ? Color.primary : Color.secondary)
+            .tint(detectExternallyInstalledApps ? Color.accentColor : Color.gray)
+            .disabled(!detectExternallyInstalledApps)
         }
     }
 
     var appdirSettings: some View {
         Section("Installation Location") {
             AppdirSelectorView()
-        }
-    }
-
-    var otherFlags: some View {
-        Section("Advanced") {
-            GreedyUpgradeToggle()
         }
     }
 

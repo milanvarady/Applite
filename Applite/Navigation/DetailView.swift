@@ -24,6 +24,9 @@ struct DetailView: View {
         case .installed:
             InstalledView(casks: caskManager.installedViewModels)
 
+        case .externalInstalled:
+            InstalledView(casks: caskManager.externalInstalledViewModels, externalOnly: true)
+
         case .activeTasks:
             ActiveTasksView()
 

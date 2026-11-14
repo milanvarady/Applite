@@ -53,6 +53,7 @@ Comparison drawn in August 2026; check the projects themselves for current state
 ## Key Features
 
 - Install, update, and uninstall apps in one click
+- Detect externally installed apps and adopt them into Homebrew management with confirmation
 - Self-contained Homebrew installation, no Command Line Tools required
 - Works with an existing Homebrew installation if you have one
 - Handpicked gallery of apps, plus full-catalog FTS5 search
@@ -86,6 +87,41 @@ Minimum OS version: **macOS 14+**. Universal binary, Apple Silicon and Intel.
 Swift and SwiftUI, targeting macOS 14 so `@Observable` and `NavigationSplitView` are available without back-deployment shims. No Combine. The cask catalog is a local SQLite database (GRDB.swift, WAL mode) synced from the Homebrew JSON API, with FTS5 and BM25 ranking for full-catalog search. Loading is two-stage: SQLite paints the UI immediately, then `brew list --cask` and `brew outdated --cask` fill in installed and outdated state reactively, so nothing blocks on the brew CLI.
 
 Architecture notes are in [CLAUDE.md](CLAUDE.md).
+
+### Externally installed apps
+
+Install rechecks the expected app bundle before running, so an unfinished detection
+scan cannot silently turn Install into Homebrew adoption. Adoption confirmation is
+bound to the selected Homebrew and installation directory; changing either requires
+a fresh confirmation, including for queued work. Detection drops superseded scans,
+and a failed post-install refresh retains the command's output alongside its error.
+
+**Settings > Brew > App Sources > Detect externally installed apps** is enabled by
+default. Turn it off to stop external-app scans, clear external status/counts, and
+hide the external-app sidebar/search filters and adoption actions. Managed apps are
+unaffected, and no apps are changed or removed. Turning it back on rescans locally;
+no catalog download is required.
+
+**Offer Manage with Homebrew**, indented beneath detection, defaults to off when
+no preference has been saved. Enable it to offer Homebrew management on external
+app cards; otherwise, they show **Open** while detection, status, filters, and
+counts remain available. Both settings must be enabled to offer management.
+When detection is off, the management setting is greyed out and unavailable.
+Its saved choice is preserved and respected when detection is re-enabled.
+Disabling management also prevents an already-open confirmation from starting a reinstall.
+
+Apps found in `/Applications`, `~/Applications`, or your custom app directory that are
+not tracked by the selected Homebrew appear as **Installed externally**. Detection uses
+the cask's expected app bundle names (including renamed targets), with the display name
+as a fallback when no app artifact is available. Non-app casks are not inferred from
+package receipts or executables.
+
+Use the **Installed externally** sidebar item or search-menu filter to find these apps.
+Choose **Manage with Homebrew** on a card to review the exact command before continuing:
+`brew install --cask <token> --force` (plus your custom app-directory option, if set).
+This reinstalls the app so Homebrew can track its updates. A successful adoption refreshes
+the managed state; a failed command preserves the previous state and exposes the full
+Homebrew output, including stderr, from the card's terminal button.
 
 ## Development and AI
 

@@ -30,7 +30,7 @@ struct DownloadButton: View {
             Label("Install", systemImage: "arrow.down")
         }
         .cardActionPill()
-        .disabled(cask.warning?.isDisabled ?? false)
+        .disabled(caskManager.isResolvingInstalledState || (cask.warning?.isDisabled ?? false))
         .alert(cask.warning?.title ?? "", isPresented: $showCaveatsAndWarnings) {
             Button("Download Anyway") {
                 caskManager.install(cask)

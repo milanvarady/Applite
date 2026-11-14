@@ -16,6 +16,7 @@ final class CaskDataLoader {
     private let dbService: CaskDatabaseService
     private let registry: CaskViewModelRegistry
     private let installedService: InstalledCaskService
+    private var externalScanGeneration = 0
 
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -92,8 +93,9 @@ final class CaskDataLoader {
     // MARK: - Search
 
     /// Searches casks using FTS5 and returns view models (reuses existing instances)
-    func search(query: String, limit: Int = 50) async throws -> [CaskViewModel] {
-        let records = try await dbService.search(query: query, limit: limit)
+    func search(query: String, limit: Int = 50, externalOnly: Bool = false) async throws -> [CaskViewModel] {
+        let records = try await dbService.search(query: query, limit: externalOnly ? Int.max : limit)
+        // Keep unresolved models too: the view filters reactively when the disk scan finishes.
         return registry.viewModels(for: records)
     }
 
@@ -114,6 +116,38 @@ final class CaskDataLoader {
         let records = try await dbService.fetchCasks(forTokens: Array(tokens))
         _ = registry.viewModels(for: records)
         registry.markInstalled(tokens: tokens)
+
+        try await refreshExternalInstallations()
+    }
+
+    func invalidateExternalInstallations() {
+        externalScanGeneration &+= 1
+    }
+
+    func refreshExternalInstallations(
+        scan: @Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL] = ExternalAppDetector.scan
+    ) async throws {
+        invalidateExternalInstallations()
+        let generation = externalScanGeneration
+        let configuration = BrewOperationConfiguration.current
+        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
+            registry.markExternalInstallations(appURLs: [:])
+            return
+        }
+
+        // Scan the full catalog, not just curated/search results, so totals include unbrowsed apps.
+        let catalog = try await dbService.fetchAllCasks()
+        let tokens = Set(registry.installedViewModels.map(\.fullToken))
+        let appURLs = try await scan(catalog, configuration.applicationDirectories, tokens)
+        guard !Task.isCancelled, generation == externalScanGeneration,
+              configuration == .current else { return }
+        // A Settings toggle may have changed while the off-main scan was running.
+        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
+            registry.markExternalInstallations(appURLs: [:])
+            return
+        }
+        _ = registry.viewModels(for: catalog)
+        registry.markExternalInstallations(appURLs: appURLs)
     }
 
     /// Re-queries brew CLI for outdated casks, ensures view models exist for each,

@@ -53,6 +53,8 @@ struct CaskRecord: Equatable {
 
     /// Number of downloads in last 365 days
     var downloadsIn365days: Int
+
+    var appBundleNames: [String] = []
 }
 
 // MARK: - Persistence Types
@@ -116,6 +118,7 @@ extension CaskRecord {
         self.homepageURL = dto.homepage.isEmpty ? nil : dto.homepage
         self.pkgInstaller = dto.url.hasSuffix("pkg")
         self.downloadsIn365days = downloadsIn365days
+        self.appBundleNames = dto.artifacts?.compactMap(\.bundleName) ?? []
 
         // Determine warning type
         if dto.disabled {

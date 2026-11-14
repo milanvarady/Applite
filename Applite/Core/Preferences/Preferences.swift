@@ -36,6 +36,8 @@ enum Preferences {
     static let brewPathOption = PreferenceKey("brewPathOption", default: BrewPaths.PathOption.annex.rawValue)
     static let customUserBrewPath = PreferenceKey("customUserBrewPath", default: "/opt/homebrew/bin/brew")
     static let includeCasksFromTaps = PreferenceKey("includeCasksFromTaps", default: true)
+    static let detectExternallyInstalledApps = PreferenceKey("detectExternallyInstalledApps", default: true)
+    static let offerHomebrewManagement = PreferenceKey("offerHomebrewManagement", default: false)
     static let appdirOn = PreferenceKey("appdirOn", default: false)
     static let appdirPath = PreferenceKey("appdirPath", default: "/Applications")
     static let greedyUpgrade = PreferenceKey("greedyUpgrade", default: false)

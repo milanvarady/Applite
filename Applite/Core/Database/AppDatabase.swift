@@ -47,7 +47,7 @@ struct AppDatabase {
     ///    triggers with it — search then returns empty for upgraders, indistinguishable from "no
     ///    matches" and invisible in testing on a fresh install. Re-run `synchronize` after any
     ///    such rebuild. (P3-13)
-    private static func migrator() -> DatabaseMigrator {
+    static func migrator() -> DatabaseMigrator {
         var migrator = DatabaseMigrator()
 
         #if DEBUG
@@ -145,6 +145,14 @@ struct AppDatabase {
                 t.primaryKey("key", .text)
                 t.column("value", .text)
             }
+        }
+
+        migrator.registerMigration("v2_appBundleNames") { db in
+            try db.alter(table: "casks") { t in
+                t.add(column: "appBundleNames", .text).notNull().defaults(to: "[]")
+            }
+            // Refill artifact metadata on the next sync, even for an otherwise fresh catalog.
+            try db.execute(sql: "DELETE FROM metadata WHERE key = 'lastSyncDate'")
         }
 
         return migrator
