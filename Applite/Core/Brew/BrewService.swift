@@ -126,7 +126,18 @@ final class BrewService {
                 )
                 return
             }
-            let arguments = arguments ?? Self.installArguments(fullToken: vm.fullToken, configuration: configuration)
+            let arguments = arguments ?? Self.installArguments(
+                fullToken: vm.fullToken, configuration: configuration
+            ).filter { confirmedConfiguration != nil || $0 != "--force" }
+            if arguments.contains("--force") && confirmedConfiguration == nil {
+                let error = CaskAdoptionError.confirmationRequired
+                await self.showFailure(
+                    for: vm, error: error, output: error.localizedDescription,
+                    failureTitle: String(localized: "Couldn't start app installation"),
+                    failureMessage: error.localizedDescription
+                )
+                return
+            }
 
             // Setup progress
             vm.progressState = .busy(withTask: "")
@@ -231,7 +242,7 @@ final class BrewService {
         runTask(for: vm) {
             vm.progressState = .busy(withTask: String(localized: "Uninstalling", comment: "Uninstall progress text"))
 
-            // Always --force (mirrors the bulk-install rationale): a cask whose files are partly
+            // Always --force: a cask whose files are partly
             // gone — app manually trashed, an orphaned font, a half-finished install — otherwise
             // fails a plain uninstall and strands the entry. Force makes uninstall resilient.
             var arguments: [String] = ["uninstall", "--cask", vm.fullToken, "--force"]
@@ -701,12 +712,7 @@ final class BrewService {
 
         var arguments = [kind.subcommand, "--cask"] + vms.map(\.fullToken)
         if kind == .install {
-            // --force: bulk install is only used by app-list import, which commonly re-lists casks
-            // that are already installed (or orphaned — e.g. a font whose files remain after brew
-            // lost track). Without --force any one of those raises a hard error that can abort the
-            // whole `brew install` batch and fail the rest. Reinstalling is low-risk and makes
-            // import resilient.
-            arguments.append("--force")
+            // A batch cannot provide per-app consent to replace an existing installation.
             arguments.append(contentsOf: configuration.appdirArguments)
         }
 

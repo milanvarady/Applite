@@ -559,6 +559,22 @@ enum ExternalInstallTests {
         let mixedArguments = try String(contentsOf: arguments, encoding: .utf8)
         precondition(vm.progressState.isFailed && missing.isInstalled
                      && mixedArguments.contains(missing.fullToken) && !mixedArguments.contains(vm.fullToken))
+        precondition(!mixedArguments.split(whereSeparator: \.isNewline).contains("--force"),
+                     "A batch without per-app adoption consent must not force-replace an unknown artifact")
+
+        try fm.removeItem(at: arguments)
+        var legacyRecord = record("legacy-missing-artifacts", bundle: "")
+        legacyRecord.appBundleNames = []
+        let legacy = CaskViewModel(record: legacyRecord)
+        await service.install(legacy).value
+        let normalArguments = try String(contentsOf: arguments, encoding: .utf8)
+        precondition(!normalArguments.split(whereSeparator: \.isNewline).contains("--force"),
+                     "A normal install with an incomplete legacy catalog must not use force")
+        try fm.removeItem(at: arguments)
+        await service.install(legacy, arguments: ["install", "--cask", legacy.fullToken, "--force"]).value
+        precondition(legacy.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "Explicit force arguments without adoption confirmation must be rejected")
+        try mixedArguments.write(to: arguments, atomically: true, encoding: .utf8)
 
         registry.markExternalInstallations(appURLs: [vm.fullToken: app])
         manager.confirmAdoption(vm)
