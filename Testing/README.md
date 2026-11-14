@@ -152,6 +152,10 @@ Installed, and opting out hides it again without changing the other app cards.
 
 ## Non-destructive favicon tests
 
+Proxy fixtures cover a cached failure and a paused old request after route changes.
+Redirected error/non-HTML responses and exact-cutoff unclosed script/style/comment
+prefixes verify the fallback origin and ignored-region boundaries.
+
 Review fixtures cover head-like text inside scripts/styles/comments, target-only
 base elements, numeric/named character references and decoded scheme rejection.
 The module harness also verifies downloader reuse and replacement after an

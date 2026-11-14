@@ -130,6 +130,10 @@ preference can restore the Installed self-card for diagnostics; see the
 
 ## App icons
 
+Discovery caches and in-flight requests are isolated by effective proxy settings.
+Unusable redirected pages use the final site's root favicon, and truncated comments,
+scripts, or styles never expose their literal link/base text as metadata.
+
 Favicon downloads pick up proxy preference changes without restarting Applite.
 Discovery ignores comments/script/style contents before finding the head boundary,
 uses the first base element with an href, and decodes numeric/named URL references.
