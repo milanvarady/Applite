@@ -44,17 +44,24 @@ enum ExternalAppDetector {
             return lhs.fullToken < rhs.fullToken
         }
 
-        var claimed: Set<String> = []
+        let managedPaths = Set(recordedAppURLs.filter { managedTokens.contains($0.key) }
+            .flatMap { $0.value.map { $0.resolvingSymlinksInPath().standardizedFileURL.path } })
+        let knownManaged = Set(catalog.filter { managedTokens.contains($0.fullToken) }.map(\.fullToken))
+        var claimed = Set(recordedAppURLs.filter { managedTokens.contains($0.key) && !knownManaged.contains($0.key) }
+            .flatMap { $0.value.map { $0.resolvingSymlinksInPath().standardizedFileURL.path } })
         var found = ScanResult()
         var matchesByToken: [(CaskRecord, [URL])] = []
         for record in ordered {
             try Task.checkCancellation()
             let recorded = recordedAppURLs[record.fullToken] ?? []
-            let matching = appURLs(
+            let discovered = appURLs(
                 bundleNames: record.appBundleNames,
                 displayName: record.name,
                 directories: directories
             ) + artCraft.matchingAppURLs(bundleNames: record.appBundleNames, displayName: record.name)
+            let matching = managedTokens.contains(record.fullToken) ? discovered : discovered.filter {
+                !managedPaths.contains($0.resolvingSymlinksInPath().standardizedFileURL.path)
+            }
             matchesByToken.append((record, matching + recorded))
             if hasMultipleCopies(matching + recorded) {
                 found.multipleCopyTokens.insert(record.fullToken)

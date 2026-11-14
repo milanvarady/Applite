@@ -20,6 +20,8 @@ final class CaskDataLoader {
     private let loadArtCraftInventory: ArtCraftAppDetector.Loader
     private var externalScanGeneration = 0
     private var installedRefreshGeneration = 0
+    private var receiptConfiguration: BrewOperationConfiguration?
+    private var receiptTokens: Set<CaskId> = []
     private var externalScanTask: Task<ExternalAppDetector.ScanResult, Error>?
 
     private let logger = Logger(
@@ -135,6 +137,8 @@ final class CaskDataLoader {
         guard generation == installedRefreshGeneration else { throw CancellationError() }
         _ = registry.viewModels(for: records)
         registry.markInstalled(tokens: tokens)
+        receiptTokens = tokens
+        receiptConfiguration = configuration
 
         let scanGeneration = externalScanGeneration &+ 1
         do {
@@ -165,6 +169,8 @@ final class CaskDataLoader {
 
     func invalidateInstalledReceipts() {
         installedRefreshGeneration &+= 1
+        receiptConfiguration = nil
+        receiptTokens = []
         invalidateExternalInstallations()
     }
 
@@ -185,7 +191,8 @@ final class CaskDataLoader {
         guard generation == externalScanGeneration, configuration == .current,
               UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) == detectionEnabled else { return }
         registry.updateExistingViewModels(for: records)
-        let tokens = Set(registry.installedViewModels.map(\.fullToken))
+        let tokens = receiptConfiguration == configuration
+            ? receiptTokens : Set(registry.installedViewModels.map(\.fullToken))
         let catalog = detectionEnabled ? records : records.filter { tokens.contains($0.fullToken) }
         let loadIntuneInventory = self.loadIntuneInventory
         let loadArtCraftInventory = self.loadArtCraftInventory
@@ -214,12 +221,11 @@ final class CaskDataLoader {
                 try Task.checkCancellation()
                 let intune = try loadIntuneInventory()
                 let artCraft = try loadArtCraftInventory()
-                let recorded = try Dictionary(uniqueKeysWithValues: catalog.filter {
-                    tokens.contains($0.fullToken)
-                }.map {
+                let recorded = try Dictionary(uniqueKeysWithValues: tokens.map { token in
                     try Task.checkCancellation()
-                    return ($0.fullToken, try InstalledAppLocator.recordedAppURLs(
-                        token: $0.token, executable: configuration.executable
+                    return (token, try InstalledAppLocator.recordedAppURLs(
+                        token: (token as NSString).lastPathComponent, executable: configuration.executable,
+                        requireRecordedOwnership: true
                     ))
                 })
                 return try ExternalAppDetector.installations(

@@ -23,6 +23,10 @@ Setapp or Intune evidence or changing Homebrew. A two-entry batch also pauses it
 last metadata request to verify the first entry is rechecked. Recorded old-appdir
 targets (including nested staging links and a directory-symlink loop), managed-receipt aliases, separate bundles, and immediate single/bulk
 Installed projection reconciliation use isolated filesystem fixtures.
+Recorded source fixtures ignore unrelated payload apps and symlink loops.
+Sibling-cask fixtures cover uncataloged owners, aliases, separate copies, conflicting
+configured destinations, stale selections, single/bulk guards, and unavailable
+ownership records. Confirmation warns when the selected copy is outside appdir.
 
 Hidden-self fixtures ensure an external Applite bundle contributes neither a row
 nor a badge. A paused reconciliation also verifies the real operation remains busy

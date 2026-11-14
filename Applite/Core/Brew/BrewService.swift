@@ -111,11 +111,14 @@ final class BrewService {
                     configuration: configuration, confirmedConfiguration: confirmedConfiguration,
                     consent: adoptionConsent
                 )
-                let external = try await self.externalInstallations(
+                let preflight = try await self.externalInstallations(
                     in: [vm], configuration: configuration, bundleNames: [vm.fullToken: appBundleNames]
                 )
                 try Task.checkCancellation()
-                if let appURL = external[vm.fullToken] {
+                if preflight.managedConflicts.contains(vm.fullToken) {
+                    throw CaskAdoptionError.managedByAnotherCask
+                }
+                if let appURL = preflight.external[vm.fullToken] {
                     guard confirmedConfiguration != nil else {
                         vm.isInstalled = false
                         if UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) {
@@ -496,46 +499,66 @@ final class BrewService {
         }
     }
 
+    private struct ExternalInstallationPreflight {
+        var external: [CaskId: URL] = [:]
+        var managedConflicts: Set<CaskId> = []
+    }
+
     private func externalInstallations(
         in vms: [CaskViewModel], configuration: BrewOperationConfiguration,
         bundleNames: [CaskId: [String]] = [:]
-    ) async throws -> [CaskId: URL] {
+    ) async throws -> ExternalInstallationPreflight {
         let managed = try await InstalledCaskService().getInstalledCasks(configuration: configuration)
         let candidates = vms.map {
-            (token: $0.fullToken, bareToken: $0.token, name: $0.name, bundles: bundleNames[$0.fullToken] ?? $0.appBundleNames,
+            (token: $0.fullToken, name: $0.name, bundles: bundleNames[$0.fullToken] ?? $0.appBundleNames,
              knownURL: $0.externalAppURL ?? $0.installedBundleURL)
         }
         let task = Task.detached {
-            var found: [CaskId: URL] = [:]
+            var ownedByToken: [CaskId: Set<String>] = [:]
+            for token in managed {
+                try Task.checkCancellation()
+                let urls = try InstalledAppLocator.recordedAppURLs(
+                    token: (token as NSString).lastPathComponent, executable: configuration.executable,
+                    requireRecordedOwnership: true
+                )
+                ownedByToken[token] = Set(urls.map { $0.resolvingSymlinksInPath().standardizedFileURL.path })
+            }
+            var found = ExternalInstallationPreflight()
             for candidate in candidates {
                 try Task.checkCancellation()
+                let otherOwned = Set(ownedByToken.filter { $0.key != candidate.token }.flatMap(\.value))
+                let targets = ExternalAppDetector.appURLs(
+                    bundleNames: candidate.bundles, displayName: candidate.name,
+                    directories: Array(configuration.applicationDirectories.prefix(1))
+                )
+                if targets.contains(where: {
+                    otherOwned.contains($0.resolvingSymlinksInPath().standardizedFileURL.path)
+                }) || (candidate.knownURL.map {
+                    otherOwned.contains($0.resolvingSymlinksInPath().standardizedFileURL.path)
+                } ?? false) {
+                    found.managedConflicts.insert(candidate.token)
+                    continue
+                }
                 if managed.contains(candidate.token) {
-                    let recorded = try InstalledAppLocator.recordedAppURLs(
-                        token: candidate.bareToken, executable: configuration.executable
-                    )
-                    guard !recorded.isEmpty else { continue }
-                    let owned = Set(recorded.map(\.path))
-                    let targets = ExternalAppDetector.appURLs(
-                        bundleNames: candidate.bundles, displayName: candidate.name,
-                        directories: Array(configuration.applicationDirectories.prefix(1))
-                    )
+                    let owned = ownedByToken[candidate.token] ?? []
+                    guard !owned.isEmpty else { continue }
                     if let external = targets.first(where: {
                         !owned.contains($0.resolvingSymlinksInPath().standardizedFileURL.path)
                     }) {
-                        found[candidate.token] = external
+                        found.external[candidate.token] = external
                     }
                     continue
                 }
-                let detected = ExternalAppDetector.appURL(
+                let detected = ExternalAppDetector.appURLs(
                     bundleNames: candidate.bundles, displayName: candidate.name,
                     directories: configuration.applicationDirectories
-                )
+                ).first { !otherOwned.contains($0.resolvingSymlinksInPath().standardizedFileURL.path) }
                 if let detected {
-                    found[candidate.token] = detected
+                    found.external[candidate.token] = detected
                 } else if let known = candidate.knownURL {
                     do {
                         if try known.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
-                            found[candidate.token] = known
+                            found.external[candidate.token] = known
                         }
                     } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
                         continue
@@ -884,10 +907,10 @@ final class BrewService {
                 return
             }
             guard !supported.isEmpty else { return }
-            var unconfirmed: [CaskId: URL] = [:]
+            var preflight = ExternalInstallationPreflight()
             do {
                 if kind == .install {
-                    unconfirmed = try await self.externalInstallations(
+                    preflight = try await self.externalInstallations(
                         in: supported, configuration: configuration, bundleNames: verifiedBundles
                     )
                 }
@@ -921,7 +944,11 @@ final class BrewService {
                     vm.isOutdated = false
                     vm.progressState = .failed(output: error.localizedDescription)
                     blocked.append((vm, error))
-                } else if let url = unconfirmed[vm.fullToken] {
+                } else if preflight.managedConflicts.contains(vm.fullToken) {
+                    let error = CaskAdoptionError.managedByAnotherCask
+                    vm.progressState = .failed(output: error.localizedDescription)
+                    blocked.append((vm, error))
+                } else if let url = preflight.external[vm.fullToken] {
                     vm.isInstalled = false
                     if UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) {
                         vm.externalAppURL = url
