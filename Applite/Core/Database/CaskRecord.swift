@@ -80,7 +80,8 @@ extension CaskRecord: Codable, FetchableRecord, PersistableRecord {
 
 extension CaskRecord {
     var isApplite: Bool {
-        token == "applite" || token.hasPrefix("applite@") || appBundleNames.contains("Applite.app")
+        token == "applite" || token.hasPrefix("applite@")
+            || appBundleNames.contains { ($0 as NSString).lastPathComponent == "Applite.app" }
     }
 
     /// Homepage as URL

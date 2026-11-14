@@ -77,8 +77,16 @@ struct CaskArtifact: Decodable {
             if case .source(let name) = value { return name }
             return nil
         }.first
-        guard let path = target ?? source else { return nil }
-        let name = (path as NSString).lastPathComponent
-        return (name as NSString).pathExtension == "app" ? name : nil
+        guard let path = target ?? source.map({ ($0 as NSString).lastPathComponent }),
+              Self.isSafeAppTargetPath(path) else { return nil }
+        return path
+    }
+
+    nonisolated static func isSafeAppTargetPath(_ path: String) -> Bool {
+        let components = path.components(separatedBy: "/")
+        return !(path as NSString).isAbsolutePath
+            && !path.contains("\0")
+            && components.allSatisfy { !$0.isEmpty && $0 != "." && $0 != ".." }
+            && (path as NSString).pathExtension == "app"
     }
 }
