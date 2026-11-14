@@ -53,7 +53,7 @@ struct BrewSettingsView: View {
             previousBrewOption = brewPathOption
         }
         .onChange(of: [String(brewPathOption), customUserBrewPath, String(appdirOn), appdirPath]) { _, _ in
-            caskManager.applyExternalAppDetectionSetting(surfacingErrorsIn: alert)
+            caskManager.applyExternalAppDetectionSetting(debounce: true, surfacingErrorsIn: alert)
         }
     }
 

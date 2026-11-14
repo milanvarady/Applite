@@ -193,6 +193,10 @@ still block writes even when all source overrides have been enabled.
 
 ## App icons
 
+Discovery caches and in-flight requests are isolated by effective proxy settings.
+Unusable redirected pages use the final site's root favicon, and truncated comments,
+scripts, or styles never expose their literal link/base text as metadata.
+
 Favicon downloads pick up proxy preference changes without restarting Applite.
 Discovery ignores comments/script/style contents before finding the head boundary,
 uses the first base element with an href, and decodes numeric/named URL references.
@@ -221,6 +225,12 @@ Swift and SwiftUI, targeting macOS 14 so `@Observable` and `NavigationSplitView`
 Architecture notes are in [CLAUDE.md](CLAUDE.md).
 
 ### Externally installed apps
+
+Bulk imports skip apps already present outside the selected Homebrew; use the
+single-app management confirmation instead. Disabling either management prerequisite
+permanently invalidates open/queued confirmations until a new confirmation is made.
+Receipt refreshes are bound to their selected Homebrew configuration and cannot
+publish after it changes. Path edits debounce detection; superseded scans are canceled.
 
 Install rechecks the expected app bundle before running, so an unfinished detection
 scan cannot silently turn Install into Homebrew adoption. Adoption confirmation is
@@ -252,12 +262,17 @@ command and expose the reason in Active Tasks. Existing ownership protection win
 before this check.
 
 Each operation pins its Homebrew executable and app-directory configuration.
+Verified live cask artifacts supplement cached/recorded targets before final
+ownership and adoption checks. Missing target metadata blocks modifying commands.
 Ownership evidence is refreshed again after metadata verification, including
 recorded Caskroom targets in previous custom app directories. Bulk operations
 refresh shared inventories after all metadata requests, then make final override
 decisions without yielding. Changing the selection invalidates pending writes.
 Installed rows, search filtering, and totals use canonical bundle identities;
 duplicate receipts stay intact, and single/bulk installs reconcile the projection.
+Matching continues across app directories after a canonical bundle is claimed.
+Conservative management-source evidence never replaces a distinct selected or
+recorded bundle identity. A failed catalog sync cannot retire the Settings refresh prompt.
 
 Disabled/unavailable apps cannot offer adoption, installation, updates, or reinstall;
 cards show **Homebrew unavailable** with an explanatory tooltip. Open/Get Info remain

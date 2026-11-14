@@ -21,6 +21,9 @@ final class CaskManager {
     private let dataLoader: CaskDataLoader
     private let registry: CaskViewModelRegistry
     private let brewService: BrewService
+    private let catalogLoad: @MainActor (Bool) async throws -> (categories: [CategoryLoadResult], taps: [TapLoadResult])
+    private var adoptionConsentGeneration = 0
+    private var detectionSettingTask: Task<Void, Never>?
 
     /// Resolves brew on launch (detect existing / install annex) without onboarding or CLT.
     /// `ContentView` observes `bootstrap.phase` to show the install sheet.
@@ -90,11 +93,14 @@ final class CaskManager {
     init(
         dataLoader: CaskDataLoader? = nil,
         registry: CaskViewModelRegistry? = nil,
-        brewService: BrewService? = nil
+        brewService: BrewService? = nil,
+        catalogLoad: (@MainActor (Bool) async throws -> (categories: [CategoryLoadResult], taps: [TapLoadResult]))? = nil
     ) {
         let reg = registry ?? CaskViewModelRegistry()
         self.registry = reg
-        self.dataLoader = dataLoader ?? CaskDataLoader(registry: reg)
+        let loader = dataLoader ?? CaskDataLoader(registry: reg)
+        self.dataLoader = loader
+        self.catalogLoad = catalogLoad ?? { forceSync in try await loader.loadCatalogData(forceSync: forceSync) }
         self.brewService = brewService ?? BrewService()
         self.categories = Self.loadInitialCategories()
 
@@ -131,6 +137,7 @@ final class CaskManager {
     }
 
     func applyAppManagementSettings(surfacingErrorsIn surface: AlertManager) {
+        invalidateAdoptionConsent()
         guard registry.applyManagementSourceOverrides() else { return }
         guard bootstrap.isBrewReady else { return }
         Task {
@@ -180,16 +187,28 @@ final class CaskManager {
         )
     }
 
-    func applyExternalAppDetectionSetting(surfacingErrorsIn errorSurface: AlertManager? = nil) {
+    func invalidateAdoptionConsent() {
+        adoptionConsentGeneration &+= 1
+    }
+
+    func applyExternalAppDetectionSetting(
+        debounce: Bool = false, surfacingErrorsIn errorSurface: AlertManager? = nil
+    ) {
+        invalidateAdoptionConsent()
+        detectionSettingTask?.cancel()
         dataLoader.invalidateExternalInstallations()
         guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
             registry.clearExternalInstallations()
             return
         }
         let surface = errorSurface ?? alert
-        Task {
+        detectionSettingTask = Task {
             do {
+                if debounce { try await Task.sleep(for: .milliseconds(300)) }
+                try Task.checkCancellation()
                 try await dataLoader.refreshExternalInstallations()
+            } catch is CancellationError {
+                return
             } catch {
                 Self.logger.error("External app detection failed: \(error.localizedDescription)")
                 surface.show(error: error, title: "Couldn't detect externally installed apps")
@@ -212,6 +231,15 @@ final class CaskManager {
               UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
               cask.isInstalledExternally, !(cask.warning?.isDisabled ?? false) else { return }
         let configuration = BrewOperationConfiguration.current
+        let generation = adoptionConsentGeneration
+        let validateConsent: @MainActor () throws -> Void = { [weak self] in
+            guard let self, self.adoptionConsentGeneration == generation,
+                  UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+                  UserDefaults.standard.value(for: Preferences.offerHomebrewManagement) else {
+                throw CaskAdoptionError.confirmationExpired
+            }
+            try configuration.validateCurrent()
+        }
         let arguments = BrewService.installArguments(fullToken: cask.fullToken, configuration: configuration)
         let preview = (["brew"] + arguments).map { argument in
             if argument.range(of: #"^[A-Za-z0-9_./@=+-]+$"#, options: .regularExpression) != nil {
@@ -258,13 +286,16 @@ final class CaskManager {
                         return
                     }
                     do {
-                        try configuration.validateCurrent()
+                        try validateConsent()
                     } catch {
-                        self.alert.show(error: error, title: "Homebrew configuration changed")
+                        self.alert.show(error: error, title: "Couldn't confirm Homebrew management")
                         return
                     }
-                    self.brewService.install(cask, arguments: arguments, confirmedConfiguration: configuration) {
-                        try await self.dataLoader.refreshInstalled()
+                    self.brewService.install(
+                        cask, arguments: arguments, confirmedConfiguration: configuration,
+                        adoptionConsent: BrewAdoptionConsent(validate: validateConsent)
+                    ) {
+                        try await self.dataLoader.refreshInstalled(configuration: configuration)
                         guard cask.isInstalled else {
                             throw CaskAdoptionError.notManaged
                         }
@@ -404,7 +435,7 @@ final class CaskManager {
                 surface.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: surface))
             }
             await loadInstalledState(surfacingErrorsIn: surface)
-            return true
+            return catalogError == nil
         }
 
         // Selected brew is invalid — attempt recovery (detect existing / reinstall annex).
@@ -446,7 +477,7 @@ final class CaskManager {
         do {
             // Animate the placeholder→full transition so cask cards cross-fade into place
             // rather than swapping instantly mid-shimmer-cycle.
-            let catalog = try await dataLoader.loadCatalogData(forceSync: forceSync)
+            let catalog = try await catalogLoad(forceSync)
             withAnimation(.easeInOut(duration: 0.25)) {
                 self.categories = catalog.categories
                 self.taps = catalog.taps

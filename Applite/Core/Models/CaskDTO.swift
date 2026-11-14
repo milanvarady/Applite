@@ -46,14 +46,14 @@ struct CaskDTO: Decodable {
 }
 
 /// Only `app` artifacts identify bundles; binaries, fonts and installer packages do not.
-struct CaskArtifact: Decodable {
+struct CaskArtifact: Codable, Hashable {
     let app: [AppValue]?
 
-    enum AppValue: Decodable {
+    enum AppValue: Codable, Hashable {
         case source(String)
         case target(String?)
 
-        private struct Options: Decodable {
+        private struct Options: Codable {
             let target: String?
         }
 
@@ -63,6 +63,14 @@ struct CaskArtifact: Decodable {
                 self = .source(source)
             } else {
                 self = .target(try container.decode(Options.self).target)
+            }
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            switch self {
+            case .source(let source): try container.encode(source)
+            case .target(let target): try container.encode(Options(target: target))
             }
         }
     }

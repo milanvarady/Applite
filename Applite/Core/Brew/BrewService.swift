@@ -99,34 +99,27 @@ final class BrewService {
         _ vm: CaskViewModel,
         arguments: [String]? = nil,
         confirmedConfiguration: BrewOperationConfiguration? = nil,
+        adoptionConsent: BrewAdoptionConsent? = nil,
         reconcile: (@MainActor () async throws -> Void)? = nil
     ) -> Task<Void, Never> {
         let configuration = confirmedConfiguration ?? .current
-        return runTask(for: vm, configuration: configuration) { configuration in
+        return runTask(for: vm, configuration: configuration) { configuration, appBundleNames in
             Self.logger.info("Cask \"\(vm.token)\" installation started")
 
             do {
-                try configuration.validateCurrent()
-                let bundleNames = vm.appBundleNames
-                let name = vm.name
-                let appURL = await Task.detached {
-                    ExternalAppDetector.appURL(
-                        bundleNames: bundleNames, displayName: name,
-                        directories: configuration.applicationDirectories
-                    )
-                }.value
+                try self.validateAdoption(
+                    configuration: configuration, confirmedConfiguration: confirmedConfiguration,
+                    consent: adoptionConsent
+                )
+                let external = try await self.externalInstallations(
+                    in: [vm], configuration: configuration, bundleNames: [vm.fullToken: appBundleNames]
+                )
                 try Task.checkCancellation()
-                try configuration.validateCurrent()
-                if confirmedConfiguration != nil {
-                    guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
-                          UserDefaults.standard.value(for: Preferences.offerHomebrewManagement) else {
-                        throw CaskAdoptionError.confirmationRequired
-                    }
-                }
-                if !vm.isInstalled, appURL != nil || vm.isInstalledExternally {
+                if let appURL = external[vm.fullToken] {
                     guard confirmedConfiguration != nil else {
-                        if UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
-                           let appURL { vm.externalAppURL = appURL }
+                        if UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) {
+                            vm.externalAppURL = appURL
+                        }
                         throw CaskAdoptionError.confirmationRequired
                     }
                 }
@@ -141,11 +134,27 @@ final class BrewService {
                 )
                 return
             }
-            guard !(await self.blockProtectedManagement(of: vm, configuration: configuration)) else { return }
+            guard !(await self.blockProtectedManagement(
+                of: vm, configuration: configuration, appBundleNames: appBundleNames
+            )) else { return }
             let arguments = arguments ?? Self.installArguments(fullToken: vm.fullToken, configuration: configuration)
 
             // Setup progress
             vm.progressState = .busy(withTask: "")
+
+            do {
+                try self.validateAdoption(
+                    configuration: configuration, confirmedConfiguration: confirmedConfiguration,
+                    consent: adoptionConsent
+                )
+            } catch {
+                await self.showFailure(
+                    for: vm, error: error, output: error.localizedDescription,
+                    failureTitle: String(localized: "Couldn't start app installation"),
+                    failureMessage: error.localizedDescription
+                )
+                return
+            }
 
             // Run install command and stream output
             let result = await self.streamBrewCommand(
@@ -192,14 +201,18 @@ final class BrewService {
                 return
             }
 
+            vm.progressState = .busy(withTask: String(localized: "Refreshing installed apps..."))
             do {
                 try configuration.validateCurrent()
                 if let reconcile {
                     try await reconcile()
+                    try configuration.validateCurrent()
                 } else {
                     vm.isInstalled = true
                 }
-                try await self.refreshOwnership(for: [vm], configuration: configuration)
+                try await self.refreshOwnership(
+                    for: [vm], configuration: configuration, bundleNames: [vm.fullToken: appBundleNames]
+                )
             } catch {
                 await self.showFailure(
                     for: vm,
@@ -228,7 +241,7 @@ final class BrewService {
 
     /// Uninstalls the cask
     func uninstall(_ vm: CaskViewModel, zap: Bool = false) {
-        runTask(for: vm, requiresSupportedCask: false) { configuration in
+        runTask(for: vm, requiresSupportedCask: false) { configuration, _ in
             vm.progressState = .busy(withTask: String(localized: "Uninstalling", comment: "Uninstall progress text"))
 
             // Always --force (mirrors the bulk-install rationale): a cask whose files are partly
@@ -270,7 +283,7 @@ final class BrewService {
     /// Updates the cask. Returns the tracking task so `updateAll` can serialize.
     @discardableResult
     func update(_ vm: CaskViewModel) -> Task<Void, Never> {
-        return runTask(for: vm) { configuration in
+        return runTask(for: vm) { configuration, _ in
             let updateLabel = String(localized: "Updating", comment: "Update progress text")
             vm.progressState = .busy(withTask: updateLabel)
 
@@ -307,7 +320,7 @@ final class BrewService {
 
     /// Reinstalls the cask
     func reinstall(_ vm: CaskViewModel) {
-        runTask(for: vm) { configuration in
+        runTask(for: vm) { configuration, _ in
             let reinstallLabel = String(localized: "Reinstalling", comment: "Reinstall progress text")
             vm.progressState = .busy(withTask: reinstallLabel)
 
@@ -431,6 +444,78 @@ final class BrewService {
 
     // MARK: - Helper Functions
 
+    private func validateAdoption(
+        configuration: BrewOperationConfiguration, confirmedConfiguration: BrewOperationConfiguration?,
+        consent: BrewAdoptionConsent?
+    ) throws {
+        try configuration.validateCurrent()
+        if confirmedConfiguration != nil {
+            guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+                  UserDefaults.standard.value(for: Preferences.offerHomebrewManagement) else {
+                throw CaskAdoptionError.confirmationExpired
+            }
+            try consent?.validate()
+        }
+    }
+
+    private func externalInstallations(
+        in vms: [CaskViewModel], configuration: BrewOperationConfiguration,
+        bundleNames: [CaskId: [String]] = [:]
+    ) async throws -> [CaskId: URL] {
+        let managed = try await InstalledCaskService().getInstalledCasks(configuration: configuration)
+        let candidates = vms.map {
+            (token: $0.fullToken, bareToken: $0.token, name: $0.name, bundles: bundleNames[$0.fullToken] ?? $0.appBundleNames,
+             knownURL: $0.externalAppURL ?? $0.installedBundleURL)
+        }
+        let task = Task.detached {
+            var found: [CaskId: URL] = [:]
+            for candidate in candidates {
+                try Task.checkCancellation()
+                if managed.contains(candidate.token) {
+                    let recorded = try InstalledAppLocator.recordedAppURLs(
+                        token: candidate.bareToken, executable: configuration.executable
+                    )
+                    guard !recorded.isEmpty else { continue }
+                    let owned = Set(recorded.map(\.path))
+                    let targets = ExternalAppDetector.appURLs(
+                        bundleNames: candidate.bundles, displayName: candidate.name,
+                        directories: Array(configuration.applicationDirectories.prefix(1))
+                    )
+                    if let external = targets.first(where: {
+                        !owned.contains($0.resolvingSymlinksInPath().standardizedFileURL.path)
+                    }) {
+                        found[candidate.token] = external
+                    }
+                    continue
+                }
+                let detected = ExternalAppDetector.appURL(
+                    bundleNames: candidate.bundles, displayName: candidate.name,
+                    directories: configuration.applicationDirectories
+                )
+                if let detected {
+                    found[candidate.token] = detected
+                } else if let known = candidate.knownURL {
+                    do {
+                        if try known.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
+                            found[candidate.token] = known
+                        }
+                    } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                        continue
+                    }
+                }
+            }
+            return found
+        }
+        let found = try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
+        }
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
+        return found
+    }
+
     /// Enqueues a single-cask brew operation on the serial queue and tracks it. Returns the
     /// task. The op waits for any earlier queued op to finish (only one brew process at a time);
     /// until then the card shows "Waiting…".
@@ -438,7 +523,7 @@ final class BrewService {
     private func runTask(
         for vm: CaskViewModel, configuration: BrewOperationConfiguration = .current,
         requiresSupportedCask: Bool = true,
-        _ operation: @escaping @MainActor (BrewOperationConfiguration) async -> Void
+        _ operation: @escaping @MainActor (BrewOperationConfiguration, [String]) async -> Void
     ) -> Task<Void, Never> {
         // Drop any lingering (dismissed-or-not) entry for this cask before re-queuing it, so a
         // retry of a failed op doesn't leave two cards for the same cask.
@@ -473,14 +558,18 @@ final class BrewService {
                 return
             }
 
+            var appBundleNames = vm.appBundleNames
             if requiresSupportedCask {
-                guard !(await self.blockUnsupportedManagement(of: vm, configuration: configuration)) else { return }
+                guard let verified = await self.verifiedInstallationTargets(of: vm, configuration: configuration) else { return }
+                appBundleNames = verified
             } else if !vm.isInstalled {
                 await self.reportManagementBlock(for: vm, error: CaskAdoptionError.notHomebrewManaged)
                 return
             }
-            guard !(await self.blockProtectedManagement(of: vm, configuration: configuration)) else { return }
-            await operation(configuration)
+            guard !(await self.blockProtectedManagement(
+                of: vm, configuration: configuration, appBundleNames: appBundleNames
+            )) else { return }
+            await operation(configuration, appBundleNames)
         }
 
         queueTail = task
@@ -491,11 +580,12 @@ final class BrewService {
     private func refreshOwnership(
         for vms: [CaskViewModel], configuration: BrewOperationConfiguration,
         intuneInventory: IntuneAppDetector.Snapshot? = nil,
-        artCraftInventory: ArtCraftAppDetector.Snapshot? = nil
+        artCraftInventory: ArtCraftAppDetector.Snapshot? = nil,
+        bundleNames: [CaskId: [String]] = [:]
     ) async throws {
         let candidates = vms.map {
-            (token: $0.token, name: $0.name, bundles: $0.appBundleNames,
-             knownURL: $0.protectedAppInstallation?.url ?? $0.externalAppURL ?? $0.installedBundleURL)
+            (token: $0.token, name: $0.name, bundles: bundleNames[$0.fullToken] ?? $0.appBundleNames,
+             knownURL: $0.installedBundleURL ?? $0.externalAppURL ?? $0.protectedAppInstallation?.url)
         }
         let loadIntuneInventory = self.loadIntuneInventory
         let loadArtCraftInventory = self.loadArtCraftInventory
@@ -511,7 +601,13 @@ final class BrewService {
                     directories: configuration.applicationDirectories, knownURL: candidate.knownURL,
                     intune: inventory, artCraft: artCraft, additionalURLs: recorded
                 )
-                let url = protection?.url ?? recorded.first ?? ExternalAppDetector.appURL(
+                var existingKnown: URL?
+                if let known = candidate.knownURL {
+                    do {
+                        if try known.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true { existingKnown = known }
+                    } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile { }
+                }
+                let url = recorded.first ?? existingKnown ?? ExternalAppDetector.appURL(
                     bundleNames: candidate.bundles, displayName: candidate.name,
                     directories: configuration.applicationDirectories
                 )
@@ -529,12 +625,14 @@ final class BrewService {
     private func blockProtectedManagement(
         of vm: CaskViewModel, configuration: BrewOperationConfiguration,
         intuneInventory: IntuneAppDetector.Snapshot? = nil,
-        artCraftInventory: ArtCraftAppDetector.Snapshot? = nil
+        artCraftInventory: ArtCraftAppDetector.Snapshot? = nil,
+        appBundleNames: [String]? = nil
     ) async -> Bool {
         do {
             try await refreshOwnership(
                 for: [vm], configuration: configuration,
-                intuneInventory: intuneInventory, artCraftInventory: artCraftInventory
+                intuneInventory: intuneInventory, artCraftInventory: artCraftInventory,
+                bundleNames: appBundleNames.map { [vm.fullToken: $0] } ?? [:]
             )
             return await blockKnownProtectedManagement(of: vm)
         } catch {
@@ -563,28 +661,29 @@ final class BrewService {
         )
     }
 
-    private func blockUnsupportedManagement(
+    private func verifiedInstallationTargets(
         of vm: CaskViewModel, configuration: BrewOperationConfiguration
-    ) async -> Bool {
+    ) async -> [String]? {
         do {
             if vm.warning?.isDisabled == true { throw CaskAdoptionError.homebrewDisabled }
             let info = try await getAdditionalInfoForCask(vm, configuration: configuration)
             if info.disabled { throw CaskAdoptionError.homebrewDisabled }
+            guard let artifacts = info.artifacts else { throw CaskAdoptionError.installationTargetsUnavailable }
             if Task.isCancelled {
                 vm.progressState = .idle
-                return true
+                return nil
             }
             vm.homebrewManagementError = nil
-            return false
+            return Array(Set(vm.appBundleNames + artifacts.compactMap(\.bundleName))).sorted()
         } catch {
             if Task.isCancelled {
                 vm.progressState = .idle
-                return true
+                return nil
             }
             vm.homebrewManagementError = error.localizedDescription
             vm.isOutdated = false
             await reportManagementBlock(for: vm, error: error)
-            return true
+            return nil
         }
     }
 
@@ -711,8 +810,10 @@ final class BrewService {
                 return
             }
             var supported: [CaskViewModel] = []
+            var verifiedBundles: [CaskId: [String]] = [:]
             for vm in eligible {
-                if !(await self.blockUnsupportedManagement(of: vm, configuration: configuration)) {
+                if let bundles = await self.verifiedInstallationTargets(of: vm, configuration: configuration) {
+                    verifiedBundles[vm.fullToken] = bundles
                     supported.append(vm)
                 }
             }
@@ -721,11 +822,23 @@ final class BrewService {
                 return
             }
             guard !supported.isEmpty else { return }
+            var unconfirmed: [CaskId: URL] = [:]
             do {
-                try await self.refreshOwnership(for: supported, configuration: configuration)
+                if kind == .install {
+                    unconfirmed = try await self.externalInstallations(
+                        in: supported, configuration: configuration, bundleNames: verifiedBundles
+                    )
+                }
+                try await self.refreshOwnership(
+                    for: supported, configuration: configuration, bundleNames: verifiedBundles
+                )
             } catch {
                 for vm in supported {
-                    await self.reportManagementBlock(for: vm, error: error)
+                    if Task.isCancelled {
+                        vm.progressState = .idle
+                    } else {
+                        await self.reportManagementBlock(for: vm, error: error)
+                    }
                 }
                 return
             }
@@ -739,6 +852,13 @@ final class BrewService {
                 if let protection = vm.managementProtection {
                     let error = protection.source.blockError
                     vm.isOutdated = false
+                    vm.progressState = .failed(output: error.localizedDescription)
+                    blocked.append((vm, error))
+                } else if let url = unconfirmed[vm.fullToken] {
+                    if UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) {
+                        vm.externalAppURL = url
+                    }
+                    let error = CaskAdoptionError.confirmationRequired
                     vm.progressState = .failed(output: error.localizedDescription)
                     blocked.append((vm, error))
                 } else {
@@ -768,6 +888,23 @@ final class BrewService {
     private func runBatchOperation(
         _ vms: [CaskViewModel], kind: BatchKind, configuration: BrewOperationConfiguration
     ) async {
+        do {
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
+        } catch {
+            for vm in vms {
+                if Task.isCancelled {
+                    vm.progressState = .idle
+                } else {
+                    await self.showFailure(
+                        for: vm, error: error, output: error.localizedDescription,
+                        failureTitle: String(localized: "Couldn't start app installation"),
+                        failureMessage: error.localizedDescription
+                    )
+                }
+            }
+            return
+        }
         // token AND fullToken → vm, so brew's per-cask output lines (which name either) can be
         // routed to a card. If two casks in the batch share a key (e.g. a core cask and a tap cask
         // with the same bare token), drop that key so it can't mis-route — those fall to reconcile.

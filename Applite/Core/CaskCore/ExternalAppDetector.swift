@@ -36,21 +36,37 @@ enum ExternalAppDetector {
             return lhs.fullToken < rhs.fullToken
         }
 
-        var claimed: Set<URL> = []
+        var claimed: Set<String> = []
         var found = ScanResult()
         for record in ordered {
+            try Task.checkCancellation()
             let recorded = recordedAppURLs[record.fullToken] ?? []
-            guard let url = recorded.first ?? appURL(
+            let matching = appURLs(
                 bundleNames: record.appBundleNames,
                 displayName: record.name,
                 directories: directories
-            ) ?? artCraft.matchingAppURLs(bundleNames: record.appBundleNames, displayName: record.name).first
-            else { continue }
+            ) + artCraft.matchingAppURLs(bundleNames: record.appBundleNames, displayName: record.name)
+            var selected: URL
+            if let recorded = recorded.first {
+                selected = recorded
+            } else {
+                guard let first = matching.first else { continue }
+                let sameArtifact = matching.filter { $0.lastPathComponent == first.lastPathComponent }
+                selected = sameArtifact.first {
+                    !claimed.contains($0.resolvingSymlinksInPath().standardizedFileURL.path)
+                } ?? first
+            }
             let protection = try protectedInstallation(
                 bundleNames: record.appBundleNames, displayName: record.name,
-                directories: directories, knownURL: url, intune: intune,
-                artCraft: artCraft, additionalURLs: recorded
+                directories: directories, knownURL: selected, intune: intune,
+                artCraft: artCraft, additionalURLs: recorded + matching
             )
+            if recorded.isEmpty, let preferred = protection?.url,
+               preferred.lastPathComponent == selected.lastPathComponent,
+               matching.contains(preferred),
+               !claimed.contains(preferred.resolvingSymlinksInPath().standardizedFileURL.path) {
+                selected = preferred
+            }
             // Protect every matching cask alias, but still list each installed bundle once.
             if let protection {
                 for (source, url) in protection.appURLs {
@@ -62,12 +78,11 @@ enum ExternalAppDetector {
                     }
                 }
             }
-            let installationURL = protection?.url ?? url
-            let canonicalURL = installationURL.resolvingSymlinksInPath().standardizedFileURL
+            let canonicalURL = selected.resolvingSymlinksInPath().standardizedFileURL
             found.bundleURLs[record.fullToken] = canonicalURL
-            guard claimed.insert(canonicalURL).inserted else { continue }
+            guard claimed.insert(canonicalURL.path).inserted else { continue }
             if !managedTokens.contains(record.fullToken) {
-                found.externalAppURLs[record.fullToken] = installationURL
+                found.externalAppURLs[record.fullToken] = selected
             }
         }
         return found
@@ -113,12 +128,26 @@ enum ExternalAppDetector {
         }
         var appURLs: [ProtectedAppInstallation.Source: URL] = [:]
         for url in candidates {
+            try Task.checkCancellation()
             if appURLs[.intune] == nil, try intune.isManagedApp(at: url) { appURLs[.intune] = url }
             if appURLs[.appStore] == nil, hasAppStoreReceipt(at: url) { appURLs[.appStore] = url }
             if appURLs[.setapp] == nil, try isSetappApp(at: url) { appURLs[.setapp] = url }
             if appURLs[.artCraft] == nil, artCraft.isManagedApp(at: url) { appURLs[.artCraft] = url }
         }
         return ProtectedAppInstallation(appURLs: appURLs)
+    }
+
+    nonisolated static func scan(
+        catalog: [CaskRecord], directories: [URL], managedTokens: Set<CaskId>
+    ) async throws -> [CaskId: URL] {
+        let task = Task.detached {
+            try installations(catalog: catalog, managedTokens: managedTokens, directories: directories).externalAppURLs
+        }
+        return try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
+        }
     }
 
     /// Unlike launch resolution, detection never looks in the Caskroom or LaunchServices:
@@ -128,7 +157,14 @@ enum ExternalAppDetector {
         displayName: String,
         directories: [URL]
     ) -> URL? {
+        appURLs(bundleNames: bundleNames, displayName: displayName, directories: directories).first
+    }
+
+    nonisolated static func appURLs(
+        bundleNames: [String], displayName: String, directories: [URL]
+    ) -> [URL] {
         let names = bundleNames.isEmpty ? ["\(displayName).app"] : bundleNames
+        var matches: [URL] = []
         for directory in directories {
             for name in names {
                 guard (name as NSString).lastPathComponent == name,
@@ -137,10 +173,10 @@ enum ExternalAppDetector {
                 var isDirectory: ObjCBool = false
                 if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
                    isDirectory.boolValue {
-                    return url
+                    if !matches.contains(url) { matches.append(url) }
                 }
             }
         }
-        return nil
+        return matches
     }
 }

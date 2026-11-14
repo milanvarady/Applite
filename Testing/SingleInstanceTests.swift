@@ -161,6 +161,15 @@ enum SingleInstanceTests {
             CaskAdditionalInfo.self, from: JSONSerialization.data(withJSONObject: legacyJSON)
         )
         precondition(legacy.displayName == "example/tap/fixture" && legacy.desc == nil && legacy.version == nil)
+        let appValues: [Any] = ["Nested/Source.app", ["target": "Renamed.app"]]
+        legacyJSON["artifacts"] = [["app": appValues]]
+        let withArtifacts = try JSONDecoder().decode(
+            CaskAdditionalInfo.self, from: JSONSerialization.data(withJSONObject: legacyJSON)
+        )
+        let roundTrip = try JSONDecoder().decode(CaskAdditionalInfo.self, from: JSONEncoder().encode(withArtifacts))
+        precondition(withArtifacts.artifacts?.compactMap(\.bundleName) == ["Renamed.app"]
+                     && roundTrip.artifacts == withArtifacts.artifacts,
+                     "Live artifact target renames must survive metadata serialization")
 
         print("PASS: single-instance locking, Settings routing, activity summaries, and app-info metadata compatibility")
     }

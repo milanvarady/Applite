@@ -9,8 +9,13 @@ actor FaviconResolver {
         let expires: Date
     }
 
-    private var cache: [URL: Cached] = [:]
-    private var pending: [URL: Task<[URL], Never>] = [:]
+    private struct RequestKey: Hashable {
+        let homepage: URL
+        let proxy: NSDictionary
+    }
+
+    private var cache: [RequestKey: Cached] = [:]
+    private var pending: [RequestKey: Task<[URL], Never>] = [:]
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "Applite",
         category: "FaviconResolver"
@@ -22,21 +27,22 @@ actor FaviconResolver {
             Self.logger.info("Skipping favicon discovery for an unsupported homepage URL")
             return []
         }
-        if let cached = cache[homepage], cached.expires > Date() {
+        let key = RequestKey(homepage: homepage, proxy: NSDictionary(dictionary: configuration.connectionProxyDictionary ?? [:]))
+        if let cached = cache[key], cached.expires > Date() {
             return cached.urls
         }
-        if let task = pending[homepage] {
+        if let task = pending[key] {
             return await task.value
         }
 
         let task = Task { await Self.discover(homepage, configuration: configuration) }
-        pending[homepage] = task
+        pending[key] = task
         let urls = await task.value
-        pending[homepage] = nil
+        pending[key] = nil
         if cache.count >= 256, let oldest = cache.min(by: { $0.value.expires < $1.value.expires })?.key {
             cache.removeValue(forKey: oldest)
         }
-        cache[homepage] = Cached(urls: urls, expires: Date().addingTimeInterval(300))
+        cache[key] = Cached(urls: urls, expires: Date().addingTimeInterval(300))
         return urls
     }
 
@@ -50,12 +56,12 @@ actor FaviconResolver {
         do {
             let (bytes, response) = try await session.bytes(for: request)
             defer { bytes.task.cancel() }
+            let pageURL = response.url.flatMap(httpURL) ?? homepage
             guard let response = response as? HTTPURLResponse,
                   (200..<300).contains(response.statusCode),
-                  response.mimeType == "text/html" || response.mimeType == "application/xhtml+xml",
-                  let pageURL = response.url.flatMap(httpURL) else {
+                  response.mimeType == "text/html" || response.mimeType == "application/xhtml+xml" else {
                 logger.info("Favicon homepage did not return usable HTML: \(homepage.absoluteString)")
-                return candidates(in: "", pageURL: homepage)
+                return candidates(in: "", pageURL: pageURL)
             }
             var data = Data()
             for try await byte in bytes {
@@ -72,7 +78,7 @@ actor FaviconResolver {
     static func candidates(in html: String, pageURL: URL) -> [URL] {
         guard let pageURL = httpURL(pageURL) else { return [] }
         let visibleHTML = html.replacing(
-            #/(?is)<!--.*?-->|<script\b[^>]*>.*?</script\s*>|<style\b[^>]*>.*?</style\s*>/#,
+            #/(?is)<!--.*?(?:-->|$)|<script\b[^>]*>.*?(?:</script\s*>|$)|<style\b[^>]*>.*?(?:</style\s*>|$)/#,
             with: ""
         )
         let headEnd = visibleHTML.range(of: "</head", options: .caseInsensitive)?.lowerBound ?? visibleHTML.endIndex

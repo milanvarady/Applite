@@ -19,6 +19,8 @@ final class CaskDataLoader {
     private let loadIntuneInventory: IntuneAppDetector.Loader
     private let loadArtCraftInventory: ArtCraftAppDetector.Loader
     private var externalScanGeneration = 0
+    private var installedRefreshGeneration = 0
+    private var externalScanTask: Task<ExternalAppDetector.ScanResult, Error>?
 
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -119,25 +121,32 @@ final class CaskDataLoader {
 
     /// Re-queries brew CLI for installed casks, ensures view models exist for each,
     /// and marks them installed in the registry.
-    func refreshInstalled() async throws {
-        let tokens = try await installedService.getInstalledCasks()
+    func refreshInstalled(configuration: BrewOperationConfiguration = .current) async throws {
+        installedRefreshGeneration &+= 1
+        let generation = installedRefreshGeneration
+        let tokens = try await installedService.getInstalledCasks(configuration: configuration)
         let records = try await dbService.fetchCasks(forTokens: Array(tokens))
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
+        guard generation == installedRefreshGeneration else { throw CancellationError() }
         _ = registry.viewModels(for: records)
         registry.markInstalled(tokens: tokens)
 
-        try await refreshExternalInstallations()
+        try await refreshExternalInstallations(configuration: configuration)
     }
 
     func invalidateExternalInstallations() {
         externalScanGeneration &+= 1
+        externalScanTask?.cancel()
+        externalScanTask = nil
     }
 
     func refreshExternalInstallations(
+        configuration: BrewOperationConfiguration = .current,
         scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil
     ) async throws {
         invalidateExternalInstallations()
         let generation = externalScanGeneration
-        let configuration = BrewOperationConfiguration.current
         guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
             registry.clearExternalInstallations()
             return
@@ -145,22 +154,26 @@ final class CaskDataLoader {
 
         // Scan the full catalog, not just curated/search results, so totals include unbrowsed apps.
         let catalog = try await dbService.fetchAllCasks()
+        try Task.checkCancellation()
+        guard generation == externalScanGeneration, configuration == .current,
+              UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else { return }
         let tokens = Set(registry.installedViewModels.map(\.fullToken))
         let loadIntuneInventory = self.loadIntuneInventory
         let loadArtCraftInventory = self.loadArtCraftInventory
-        let result: ExternalAppDetector.ScanResult
-        if let scan {
-            result = ExternalAppDetector.ScanResult(
-                externalAppURLs: try await scan(catalog, configuration.applicationDirectories, tokens)
-            )
-        } else {
-            result = try await Task.detached {
+        let task = Task.detached {
+            if let scan {
+                return ExternalAppDetector.ScanResult(
+                    externalAppURLs: try await scan(catalog, configuration.applicationDirectories, tokens)
+                )
+            } else {
+                try Task.checkCancellation()
                 let intune = try loadIntuneInventory()
                 let artCraft = try loadArtCraftInventory()
                 let recorded = try Dictionary(uniqueKeysWithValues: catalog.filter {
                     tokens.contains($0.fullToken)
                 }.map {
-                    ($0.fullToken, try InstalledAppLocator.recordedAppURLs(
+                    try Task.checkCancellation()
+                    return ($0.fullToken, try InstalledAppLocator.recordedAppURLs(
                         token: $0.token, executable: configuration.executable
                     ))
                 })
@@ -169,7 +182,14 @@ final class CaskDataLoader {
                     directories: configuration.applicationDirectories, intune: intune,
                     artCraft: artCraft, recordedAppURLs: recorded
                 )
-            }.value
+            }
+        }
+        externalScanTask = task
+        defer { if generation == externalScanGeneration { externalScanTask = nil } }
+        let result = try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
         }
         guard !Task.isCancelled, generation == externalScanGeneration,
               configuration == .current else { return }
@@ -188,9 +208,11 @@ final class CaskDataLoader {
 
     /// Re-queries brew CLI for outdated casks, ensures view models exist for each,
     /// and marks them outdated in the registry.
-    func refreshOutdated() async throws {
-        let tokens = try await installedService.getOutdatedCasks()
+    func refreshOutdated(configuration: BrewOperationConfiguration = .current) async throws {
+        let tokens = try await installedService.getOutdatedCasks(configuration: configuration)
         let records = try await dbService.fetchCasks(forTokens: Array(tokens))
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
         _ = registry.viewModels(for: records)
         registry.markOutdated(tokens: tokens)
     }
