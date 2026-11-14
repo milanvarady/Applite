@@ -79,6 +79,10 @@ extension CaskRecord: Codable, FetchableRecord, PersistableRecord {
 // MARK: - Computed Properties
 
 extension CaskRecord {
+    var isApplite: Bool {
+        token == "applite" || token.hasPrefix("applite@") || appBundleNames.contains("Applite.app")
+    }
+
     /// Homepage as URL
     var homepage: URL? {
         homepageURL.flatMap { URL(string: $0) }

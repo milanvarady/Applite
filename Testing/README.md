@@ -2,9 +2,16 @@
 
 ## Non-destructive external-install regression tests
 
+Hidden-self fixtures ensure an external Applite bundle contributes neither a row
+nor a badge. A paused reconciliation also verifies the real operation remains busy
+in the status summary until post-install ownership refresh completes.
+
 Review-race fixtures also cover an Install before initial detection, configuration
 changes before confirmation/queued execution, retained stdout/stderr after a failed
 reconciliation, and a paused scan completing after detection is disabled/re-enabled.
+Upstream-review fixtures additionally cover bulk external exclusion and mixed batches,
+disabled/re-enabled consent, stale receipt snapshots, busy reconciliation, debounced
+path edits, and cancellation of superseded scan work.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including
