@@ -7,6 +7,16 @@
 
 import SwiftUI
 
+private struct CaskSortKeySnapshot: Equatable {
+    enum Key: Equatable {
+        case downloads(Int)
+        case name(String)
+    }
+
+    let id: String
+    let key: Key
+}
+
 struct DiscoverSectionView: View {
     let category: CategoryLoadResult
     @Binding var navigationSelection: SidebarItem?
@@ -35,7 +45,7 @@ struct DiscoverSectionView: View {
                 .frame(height: AppView.dimensions.height * 2 + 20)
         }
         .onAppear(perform: updatePreparedCasks)
-        .onChange(of: category.casks) { _, _ in updatePreparedCasks() }
+        .onChange(of: sortKeySnapshot) { _, _ in updatePreparedCasks() }
         .onChange(of: sortOption) { _, _ in updatePreparedCasks() }
     }
 
@@ -76,6 +86,19 @@ struct DiscoverSectionView: View {
 
     private func updatePreparedCasks() {
         preparedCasks = category.casksCoupled(by: sortOption)
+    }
+
+    private var sortKeySnapshot: [CaskSortKeySnapshot] {
+        category.casks.map { cask in
+            let key: CaskSortKeySnapshot.Key
+            switch sortOption {
+            case .mostDownloaded:
+                key = .downloads(cask.downloadsIn365days)
+            case .aToZ:
+                key = .name(cask.name)
+            }
+            return CaskSortKeySnapshot(id: cask.id, key: key)
+        }
     }
 
     private func appRow(_ casksCoupled: [[CaskViewModel]]) -> some View {
