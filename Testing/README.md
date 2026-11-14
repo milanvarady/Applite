@@ -18,6 +18,7 @@ blocked imports with stale receipt flags, outdated-state clearing, and empty sca
 without materializing unrelated catalog records.
 Creating a previously missing custom app directory must not change its captured
 Homebrew configuration.
+A delayed external scan cannot overwrite a newer existing catalog record.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including

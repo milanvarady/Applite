@@ -180,7 +180,7 @@ final class CaskDataLoader {
             registry.markExternalInstallations(appURLs: [:])
             return
         }
-        _ = registry.viewModels(for: catalog.filter { appURLs[$0.fullToken] != nil })
+        registry.materializeMissingViewModels(for: catalog.filter { appURLs[$0.fullToken] != nil })
         registry.markExternalInstallations(appURLs: appURLs)
     }
 
