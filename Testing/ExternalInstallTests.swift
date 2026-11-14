@@ -2017,9 +2017,11 @@ enum ExternalInstallTests {
         try PropertyListSerialization.data(
             fromPropertyList: ["CFBundleIdentifier": recordedIdentifier], format: .xml, options: 0
         ).write(to: oldApp.appendingPathComponent("Contents/Info.plist"))
-        let recordedLink = root.appendingPathComponent("Recorded Brew/Caskroom/review-recorded/1.0/Review Protected.app")
+        let recordedLink = root.appendingPathComponent("Recorded Brew/Caskroom/review-recorded/1.0/Nested/Review Protected.app")
         try fm.createDirectory(at: recordedLink.deletingLastPathComponent(), withIntermediateDirectories: true)
         try fm.createSymbolicLink(at: recordedLink, withDestinationURL: oldApp)
+        let loop = recordedLink.deletingLastPathComponent().appendingPathComponent("Loop")
+        try fm.createSymbolicLink(at: loop, withDestinationURL: recordedLink.deletingLastPathComponent())
         defaults.setValue(recordedBrew.path, for: Preferences.customUserBrewPath)
         let targets = try InstalledAppLocator.recordedAppURLs(token: "review-recorded", executable: recordedBrew)
         precondition(targets == [oldApp.resolvingSymlinksInPath().standardizedFileURL])

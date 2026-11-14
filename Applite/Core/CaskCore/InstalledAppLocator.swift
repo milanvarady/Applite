@@ -64,16 +64,30 @@ enum InstalledAppLocator {
         }
         var result: Set<URL> = []
         for version in versions.sorted(by: { $0.lastPathComponent > $1.lastPathComponent }) {
-            guard try version.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true else { continue }
-            let entries = try fm.contentsOfDirectory(at: version, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
-            for entry in entries where entry.pathExtension == "app" {
-                let resolved = entry.resolvingSymlinksInPath().standardizedFileURL
-                do {
-                    if try resolved.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
-                        result.insert(resolved)
+            let versionValues = try version.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
+            guard versionValues.isDirectory == true, versionValues.isSymbolicLink != true else { continue }
+            var directories = [version]
+            while let directory = directories.popLast() {
+                let entries = try fm.contentsOfDirectory(
+                    at: directory, includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey],
+                    options: [.skipsHiddenFiles]
+                )
+                for entry in entries {
+                    if entry.pathExtension == "app" {
+                        let resolved = entry.resolvingSymlinksInPath().standardizedFileURL
+                        do {
+                            if try resolved.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
+                                result.insert(resolved)
+                            }
+                        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                            continue
+                        }
+                    } else {
+                        let values = try entry.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
+                        if values.isDirectory == true && values.isSymbolicLink != true {
+                            directories.append(entry)
+                        }
                     }
-                } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
-                    continue
                 }
             }
         }
