@@ -11,7 +11,8 @@ path edits, and cancellation of superseded scan work. Receipt refresh tolerates
 replacement-scan cancellation but propagates parent cancellation, a changed
 Homebrew configuration, and unexpected scan cancellation.
 Batch fixtures also switch Homebrew during streamed output and during the final
-receipt query, asserting that neither stale result changes installed state.
+receipt query, asserting that neither stale result changes installed state and
+that a running Homebrew process is allowed to finish after a configuration change.
 Additional cases cover single-install profile changes, retained stale-batch output,
 blocked imports with stale receipt flags, outdated-state clearing, and empty scans
 without materializing unrelated catalog records.
