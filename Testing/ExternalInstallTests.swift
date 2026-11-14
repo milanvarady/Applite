@@ -507,6 +507,7 @@ enum ExternalInstallTests {
         try await testUpstreamConsentAndRefresh(root: root)
         try await testLiveArtifactOwnershipAndCatalogResult(root: root)
         try testDistinctInstallationIdentities(root: root)
+        try await testManagedIdentityWithDetectionDisabled(root: root)
         if CommandLine.arguments.contains("--live-intune") {
             try checkLiveIntuneInventory()
         }
@@ -1519,6 +1520,8 @@ enum ExternalInstallTests {
 
         // Retired casks can still be removed, but only when Homebrew actually owns the installation.
         try Data().write(to: infoFailure)
+        let managedTokens = root.appendingPathComponent("managed-tokens")
+        try vm.fullToken.write(to: managedTokens, atomically: true, encoding: .utf8)
         service.uninstall(vm)
         _ = try await service.runSerialized { true }
         precondition(!vm.isInstalled && !vm.progressState.isFailed)
@@ -1529,6 +1532,7 @@ enum ExternalInstallTests {
         precondition(vm.progressState.isFailed)
         let afterUnmanagedRemoval = try String(contentsOf: argumentsURL, encoding: .utf8)
         precondition(afterUnmanagedRemoval == removal)
+        try fm.removeItem(at: managedTokens)
         try fm.removeItem(at: infoFailure)
         registry.clearHomebrewManagementErrors()
         precondition(vm.homebrewManagementBlockReason == nil && disabled.homebrewManagementBlockReason != nil)
@@ -2280,6 +2284,110 @@ enum ExternalInstallTests {
         )
         precondition(registry.installedCount == 2 && registry.locallyInstalledCount == 2,
                      "Distinct recorded bundles must remain separate rows and counts despite shared protection")
+        for vm in registry.locallyInstalledViewModels {
+            precondition(vm.selectedInstallationURL?.path == managed.bundleURLs[vm.fullToken]?.path
+                         && vm.selectedInstallationURL?.path != protected.path,
+                         "Launching or displaying a row must use its selected bundle, not other protection evidence")
+        }
+    }
+
+    @MainActor
+    private static func testManagedIdentityWithDetectionDisabled(root: URL) async throws {
+        let defaults = UserDefaults.standard
+        let previousBrew = defaults.value(for: Preferences.customUserBrewPath)
+        let previousDetection = defaults.value(for: Preferences.detectExternallyInstalledApps)
+        defer {
+            defaults.setValue(previousBrew, for: Preferences.customUserBrewPath)
+            defaults.setValue(previousDetection, for: Preferences.detectExternallyInstalledApps)
+        }
+        let fm = FileManager.default
+        let prefix = root.appendingPathComponent("Disabled Detection Receipts")
+        let brew = prefix.appendingPathComponent("bin/brew")
+        let app = prefix.appendingPathComponent("Apps/Shared.app")
+        try fm.createDirectory(at: brew.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try fm.createDirectory(at: app, withIntermediateDirectories: true)
+        try "#!/bin/sh\nif [ \"$1\" = list ]; then printf 'stable\\nbeta\\n'; fi\n".write(
+            to: brew, atomically: true, encoding: .utf8
+        )
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: brew.path)
+        for token in ["stable", "beta"] {
+            let directory = prefix.appendingPathComponent("Caskroom/\(token)/1")
+            try fm.createDirectory(at: directory, withIntermediateDirectories: true)
+            try fm.createSymbolicLink(at: directory.appendingPathComponent("Shared.app"), withDestinationURL: app)
+        }
+        func record(_ token: String) -> CaskRecord {
+            CaskRecord(
+                token: token, fullToken: token, tap: "homebrew/cask", name: "Shared",
+                descriptionText: "", homepageURL: nil, pkgInstaller: false,
+                warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+                appBundleNames: ["Shared.app"]
+            )
+        }
+        let pool = try DatabasePool(path: prefix.appendingPathComponent("catalog.sqlite").path)
+        try AppDatabase.migrator().migrate(pool)
+        let stable = record("stable")
+        let beta = record("beta")
+        try await pool.write { db in
+            try stable.insert(db)
+            try beta.insert(db)
+        }
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+        defaults.setValue(false, for: Preferences.detectExternallyInstalledApps)
+        let registry = CaskViewModelRegistry()
+        let loader = CaskDataLoader(
+            dbService: CaskDatabaseService(databasePool: pool), registry: registry,
+            intuneInventory: { throw CaskAdoptionError.intuneInventoryUnavailable },
+            artCraftInventory: { .empty }
+        )
+        try await loader.refreshInstalled()
+        precondition(registry.installedCount == 2 && registry.locallyInstalledCount == 1
+                     && registry.externalInstalledCount == 0,
+                     "Managed aliases must deduplicate from recorded bundle identity even when external detection is disabled")
+        let secondPrefix = root.appendingPathComponent("Second Homebrew Receipts")
+        let secondBrew = secondPrefix.appendingPathComponent("bin/brew")
+        try fm.createDirectory(at: secondBrew.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let secondFixture = """
+        #!/bin/sh
+        prefix="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+        case "$1" in
+          --version) echo "Homebrew fixture" ;;
+          list)
+            touch "$prefix/list-started"
+            while [ -f "$prefix/pause-list" ]; do sleep 0.01; done ;;
+          outdated) : ;;
+          uninstall) touch "$prefix/uninstall-started" ;;
+        esac
+        """
+        try secondFixture.write(to: secondBrew, atomically: true, encoding: .utf8)
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: secondBrew.path)
+        let pause = secondPrefix.appendingPathComponent("pause-list")
+        try Data().write(to: pause)
+        let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
+        let manager = CaskManager(dataLoader: loader, registry: registry, brewService: service)
+        let vm = registry.viewModel(for: stable)
+        defaults.setValue(secondBrew.path, for: Preferences.customUserBrewPath)
+        manager.selectedHomebrewDidChange(surfacingErrorsIn: manager.alert)
+        precondition(!vm.isInstalled && manager.isResolvingInstalledState,
+                     "Switching Homebrew must immediately invalidate stale receipt ownership")
+        manager.uninstall(vm)
+        precondition(!fm.fileExists(atPath: secondPrefix.appendingPathComponent("uninstall-started").path))
+        let started = secondPrefix.appendingPathComponent("list-started")
+        let deadline = Date().addingTimeInterval(5)
+        while !fm.fileExists(atPath: started.path) && Date() < deadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(fm.fileExists(atPath: started.path))
+        try fm.removeItem(at: pause)
+        let finish = Date().addingTimeInterval(5)
+        while manager.isResolvingInstalledState && Date() < finish {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(!manager.isResolvingInstalledState && !vm.isInstalled)
+        vm.isInstalled = true
+        service.uninstall(vm)
+        _ = try await service.runSerialized { true }
+        precondition(vm.progressState.isFailed && !fm.fileExists(atPath: secondPrefix.appendingPathComponent("uninstall-started").path),
+                     "A stale cached flag must never authorize uninstall when the selected Homebrew has no receipt")
     }
 
     @MainActor
@@ -2474,15 +2582,21 @@ enum ExternalInstallTests {
             token="${4##*/}"
             bundle="External.app"
             if [ "$token" = "review-missing" ]; then bundle="Missing.app"; fi
+            if [ "$token" = "legacy-missing-artifacts" ]; then bundle="Legacy.app"; fi
             printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["%s"]}],"deprecated":false,"disabled":false}]}' "$token" "$4" "$bundle" ;;
           install)
             printf '%s\\n' "$@" > "$fixture_dir/arguments"
+            if [ -f "$fixture_dir/pause-stream" ]; then
+              touch "$fixture_dir/stream-started"
+              while [ -f "$fixture_dir/pause-stream" ]; do sleep 0.01; done
+            fi
             for token in "$@"; do
               case "$token" in install|--cask|--force|--appdir=*) continue ;; esac
               printf '%s\\n' "$token" >> "$fixture_dir/receipts"
-              echo "$token was successfully installed!"
+              if [ ! -f "$fixture_dir/no-markers" ]; then echo "$token was successfully installed!"; fi
               if [ "$token" = "review-missing" ]; then mkdir -p "$fixture_dir/Apps/Missing.app"; fi
-            done ;;
+            done
+            if [ -f "$fixture_dir/pause-reconciliation" ]; then touch "$fixture_dir/pause-list"; fi ;;
           *) exit 2 ;;
         esac
         """
@@ -2529,6 +2643,22 @@ enum ExternalInstallTests {
         let mixedArguments = try String(contentsOf: arguments, encoding: .utf8)
         precondition(vm.progressState.isFailed && missing.isInstalled
                      && mixedArguments.contains(missing.fullToken) && !mixedArguments.contains(vm.fullToken))
+        precondition(!mixedArguments.split(whereSeparator: \.isNewline).contains("--force"),
+                     "A batch without per-app adoption consent must not force-replace an unknown artifact")
+
+        try fm.removeItem(at: arguments)
+        var legacyRecord = record("legacy-missing-artifacts", bundle: "")
+        legacyRecord.appBundleNames = []
+        let legacy = CaskViewModel(record: legacyRecord)
+        await service.install(legacy).value
+        let normalArguments = try String(contentsOf: arguments, encoding: .utf8)
+        precondition(!normalArguments.split(whereSeparator: \.isNewline).contains("--force"),
+                     "A normal install with an incomplete legacy catalog must not use force")
+        try fm.removeItem(at: arguments)
+        await service.install(legacy, arguments: ["install", "--cask", legacy.fullToken, "--force"]).value
+        precondition(legacy.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "Explicit force arguments without adoption confirmation must be rejected")
+        try mixedArguments.write(to: arguments, atomically: true, encoding: .utf8)
 
         registry.markExternalInstallations(appURLs: [vm.fullToken: app])
         manager.confirmAdoption(vm)
@@ -2586,6 +2716,66 @@ enum ExternalInstallTests {
         } catch CaskAdoptionError.configurationChanged { }
         precondition(!vm.isInstalled, "Stale receipts must not commit to the registry after Homebrew changes")
         defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+
+        for mode in ["superseded", "parent", "configuration"] {
+            let gate = ScanGate()
+            let receiptRefresh = Task {
+                try await loader.refreshInstalled(configuration: configuration) { _, _, _ in
+                    try await gate.waitForCancellation()
+                    return [:]
+                }
+            }
+            let deadline = Date().addingTimeInterval(5)
+            while !(await gate.cancellationStarted) && Date() < deadline { await Task.yield() }
+            let started = await gate.cancellationStarted
+            precondition(started)
+            if mode == "parent" { receiptRefresh.cancel() }
+            if mode == "configuration" {
+                defaults.setValue(prefix.appendingPathComponent("other-brew").path, for: Preferences.customUserBrewPath)
+            }
+            loader.invalidateExternalInstallations()
+            do {
+                try await receiptRefresh.value
+                precondition(mode == "superseded", "Parent cancellation and configuration changes must propagate")
+            } catch is CancellationError {
+                precondition(mode == "parent")
+            } catch CaskAdoptionError.configurationChanged {
+                precondition(mode == "configuration")
+            }
+            defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+        }
+        do {
+            try await loader.refreshInstalled(configuration: configuration) { _, _, _ in
+                throw CancellationError()
+            }
+            preconditionFailure("An unexpected scan cancellation must not be hidden")
+        } catch is CancellationError { }
+
+        for mode in ["stream", "reconciliation"] {
+            let missingApp = apps.appendingPathComponent("Missing.app")
+            if fm.fileExists(atPath: missingApp.path) { try fm.removeItem(at: missingApp) }
+            try? fm.removeItem(at: prefix.appendingPathComponent("receipts"))
+            try? fm.removeItem(at: prefix.appendingPathComponent("list-started"))
+            registry.markInstalled(tokens: [])
+            let flag = prefix.appendingPathComponent(mode == "stream" ? "pause-stream" : "pause-reconciliation")
+            try Data().write(to: flag)
+            if mode == "reconciliation" { try Data().write(to: prefix.appendingPathComponent("no-markers")) }
+            service.installAll([missing])
+            let started = prefix.appendingPathComponent(mode == "stream" ? "stream-started" : "list-started")
+            let deadline = Date().addingTimeInterval(5)
+            while !fm.fileExists(atPath: started.path) && Date() < deadline {
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            precondition(fm.fileExists(atPath: started.path))
+            defaults.setValue(prefix.appendingPathComponent("other-brew").path, for: Preferences.customUserBrewPath)
+            try fm.removeItem(at: mode == "stream" ? flag : prefix.appendingPathComponent("pause-list"))
+            _ = try await service.runSerialized { true }
+            precondition(!missing.isInstalled && missing.progressState.isFailed,
+                         "Obsolete batch \(mode) results must not update receipt state after a Homebrew switch")
+            defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+            if fm.fileExists(atPath: flag.path) { try fm.removeItem(at: flag) }
+            if mode == "reconciliation" { try fm.removeItem(at: prefix.appendingPathComponent("no-markers")) }
+        }
 
         var resumeReconciliation: CheckedContinuation<Void, Never>?
         let reconcileTask = service.install(vm, confirmedConfiguration: .current) {

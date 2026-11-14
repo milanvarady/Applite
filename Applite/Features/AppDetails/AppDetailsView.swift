@@ -186,7 +186,9 @@ struct AppDetailsView: View {
                 let sources = ProtectedAppInstallation.Source.allCases.filter { protection.appURLs[$0] != nil }
                 infoRow("Detected Management Sources", sources.map(\.name).joined(separator: ", "))
                 infoRow("Tracked by Homebrew", yesNo(cask.isInstalled))
-                infoRow("App Location", protection.url.path)
+                if let appURL = localInfo?.appURL ?? cask.selectedInstallationURL {
+                    infoRow("App Location", appURL.path)
+                }
                 let overridden = sources.filter { cask.managementSourceOverrides.contains($0) }
                 if !overridden.isEmpty {
                     infoRow("Source Overrides", overridden.map(\.name).joined(separator: ", "))
@@ -343,9 +345,7 @@ struct AppDetailsView: View {
         localState = .loading
         let key = localKey
         let isManaged = cask.isInstalled
-        let knownURL = isManaged
-            ? cask.installedBundleURL ?? cask.protectedAppInstallation?.url ?? cask.externalAppURL
-            : cask.externalAppURL ?? cask.protectedAppInstallation?.url ?? cask.installedBundleURL
+        let knownURL = cask.selectedInstallationURL
         let configuration = BrewOperationConfiguration.current
         let token = cask.token
         let name = cask.name

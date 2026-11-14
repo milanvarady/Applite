@@ -231,10 +231,19 @@ Architecture notes are in [CLAUDE.md](CLAUDE.md).
 ### Externally installed apps
 
 Bulk imports skip apps already present outside the selected Homebrew; use the
-single-app management confirmation instead. Disabling either management prerequisite
+confirmed single-app action to manage an external app. Ordinary installs and bulk
+imports do not use `--force`, so missing or stale catalog artifact names cannot
+silently replace an existing app; Homebrew may instead report a conflict.
+Disabling either management prerequisite
 permanently invalidates open/queued confirmations until a new confirmation is made.
 Receipt refreshes are bound to their selected Homebrew configuration and cannot
 publish after it changes. Path edits debounce detection; superseded scans are canceled.
+Changing Homebrew or its app directory immediately clears old receipt ownership and
+blocks Homebrew actions while a serialized refresh runs. Uninstall also checks the
+selected Homebrew's current receipt before issuing a removal command. When external
+detection is disabled, recorded Homebrew bundle identities still deduplicate Installed
+rows. A row's selected bundle is used for Open and App Location; evidence from a
+different protected copy continues to protect Homebrew actions.
 
 Install rechecks the expected app bundle before running, so an unfinished detection
 scan cannot silently turn Install into Homebrew adoption. Adoption confirmation is

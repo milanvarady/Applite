@@ -7,6 +7,10 @@ during the final ownership await, and reject incomplete target metadata. Injecte
 catalog failure/success verifies refresh-baseline results without network requests.
 Identity fixtures cover two roots sharing a bundle filename and distinct recorded
 targets protected conservatively by a third store-managed copy.
+The selected row's URL remains distinct from protection evidence. With external
+detection disabled, managed aliases still collapse by their recorded bundle path
+without reading external ownership inventories. A paused profile switch verifies
+immediate receipt invalidation, blocked actions, and fresh uninstall receipt checks.
 
 Review-race cases pause single and bulk metadata requests before adding App Store,
 Setapp or Intune evidence or changing Homebrew. A two-entry batch also pauses its
@@ -23,7 +27,11 @@ changes before confirmation/queued execution, retained stdout/stderr after a fai
 reconciliation, and a paused scan completing after detection is disabled/re-enabled.
 Upstream-review fixtures additionally cover bulk external exclusion and mixed batches,
 disabled/re-enabled consent, stale receipt snapshots, busy reconciliation, debounced
-path edits, and cancellation of superseded scan work.
+path edits, and cancellation of superseded scan work. Receipt refresh tolerates
+replacement-scan cancellation but propagates parent cancellation, a changed
+Homebrew configuration, and unexpected scan cancellation.
+Batch fixtures also switch Homebrew during streamed output and during the final
+receipt query, asserting that neither stale result changes installed state.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including

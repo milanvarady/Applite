@@ -90,6 +90,12 @@ final class CaskViewModelRegistry {
         }
     }
 
+    func updateManagedBundleURLs(_ urls: [CaskId: URL]) {
+        for vm in viewModelsByFullToken.values where vm.isInstalled {
+            vm.installedBundleURL = urls[vm.fullToken]
+        }
+    }
+
     @discardableResult
     func applyManagementSourceOverrides() -> Bool {
         let overrides = ProtectedAppInstallation.Source.enabledOverrides()

@@ -137,7 +137,18 @@ final class BrewService {
             guard !(await self.blockProtectedManagement(
                 of: vm, configuration: configuration, appBundleNames: appBundleNames
             )) else { return }
-            let arguments = arguments ?? Self.installArguments(fullToken: vm.fullToken, configuration: configuration)
+            let arguments = arguments ?? Self.installArguments(
+                fullToken: vm.fullToken, configuration: configuration
+            ).filter { confirmedConfiguration != nil || $0 != "--force" }
+            if arguments.contains("--force") && confirmedConfiguration == nil {
+                let error = CaskAdoptionError.confirmationRequired
+                await self.showFailure(
+                    for: vm, error: error, output: error.localizedDescription,
+                    failureTitle: String(localized: "Couldn't start app installation"),
+                    failureMessage: error.localizedDescription
+                )
+                return
+            }
 
             // Setup progress
             vm.progressState = .busy(withTask: "")
@@ -243,8 +254,21 @@ final class BrewService {
     func uninstall(_ vm: CaskViewModel, zap: Bool = false) {
         runTask(for: vm, requiresSupportedCask: false) { configuration, _ in
             vm.progressState = .busy(withTask: String(localized: "Uninstalling", comment: "Uninstall progress text"))
+            do {
+                let receipts = try await InstalledCaskService().getInstalledCasks(configuration: configuration)
+                try Task.checkCancellation()
+                try configuration.validateCurrent()
+                guard vm.matchesFullName(in: receipts) else { throw CaskAdoptionError.notHomebrewManaged }
+            } catch {
+                if Task.isCancelled {
+                    vm.progressState = .idle
+                } else {
+                    await self.reportManagementBlock(for: vm, error: error)
+                }
+                return
+            }
 
-            // Always --force (mirrors the bulk-install rationale): a cask whose files are partly
+            // Always --force: a cask whose files are partly
             // gone — app manually trashed, an orphaned font, a half-finished install — otherwise
             // fails a plain uninstall and strands the entry. Force makes uninstall resilient.
             var arguments: [String] = ["uninstall", "--cask", vm.fullToken, "--force"]
@@ -258,6 +282,7 @@ final class BrewService {
 
             do {
                 output = try await Shell.run(configuration.executable, arguments)
+                try configuration.validateCurrent()
             } catch {
                 await self.showFailure(
                     for: vm,
@@ -308,6 +333,10 @@ final class BrewService {
                 return
             }
 
+            guard configuration == .current else {
+                await self.reportManagementBlock(for: vm, error: CaskAdoptionError.configurationChanged)
+                return
+            }
             vm.isOutdated = false
             await self.showSuccess(
                 for: vm,
@@ -345,6 +374,10 @@ final class BrewService {
                 return
             }
 
+            guard configuration == .current else {
+                await self.reportManagementBlock(for: vm, error: CaskAdoptionError.configurationChanged)
+                return
+            }
             await self.showSuccess(
                 for: vm,
                 logMessage: "Successfully reinstalled \(vm.fullToken)",
@@ -923,12 +956,7 @@ final class BrewService {
 
         var arguments = [kind.subcommand, "--cask"] + vms.map(\.fullToken)
         if kind == .install {
-            // --force: bulk install is only used by app-list import, which commonly re-lists casks
-            // that are already installed (or orphaned — e.g. a font whose files remain after brew
-            // lost track). Without --force any one of those raises a hard error that can abort the
-            // whole `brew install` batch and fail the rest. Reinstalling is low-risk and makes
-            // import resilient.
-            arguments.append("--force")
+            // A batch cannot provide per-app consent to replace an existing installation.
             arguments.append(contentsOf: configuration.appdirArguments)
         }
 
@@ -941,9 +969,13 @@ final class BrewService {
         do {
             for try await line in Shell.stream(configuration.executable, arguments, pty: true) {
                 if Task.isCancelled { break }
+                try configuration.validateCurrent()
                 completeOutput += line + "\n"
                 applyBatchLine(line, kind: kind, lookup: lookup, perCaskError: &perCaskError)
             }
+        } catch CaskAdoptionError.configurationChanged {
+            await failBatchForConfigurationChange(vms)
+            return
         } catch {
             // A non-zero exit is expected when any cask fails (reconcile decides per-cask outcome).
             // A user cancel also throws here — don't log that as an error.
@@ -957,9 +989,32 @@ final class BrewService {
             return
         }
 
-        await reconcileBatch(
-            vms, kind: kind, perCaskError: perCaskError, output: completeOutput, configuration: configuration
-        )
+        do {
+            try await reconcileBatch(
+                vms, kind: kind, perCaskError: perCaskError, output: completeOutput, configuration: configuration
+            )
+        } catch is CancellationError {
+            for vm in vms { vm.progressState = .idle }
+        } catch {
+            for vm in vms {
+                await showFailure(
+                    for: vm, error: error, output: error.localizedDescription,
+                    failureTitle: String(localized: "Couldn't refresh installed apps"),
+                    failureMessage: error.localizedDescription
+                )
+            }
+        }
+    }
+
+    private func failBatchForConfigurationChange(_ vms: [CaskViewModel]) async {
+        let error = CaskAdoptionError.configurationChanged
+        for vm in vms {
+            await showFailure(
+                for: vm, error: error, output: error.localizedDescription,
+                failureTitle: String(localized: "Couldn't refresh installed apps"),
+                failureMessage: error.localizedDescription
+            )
+        }
     }
 
     /// Routes one streamed batch-output line to the matching cask's `progressState`.
@@ -1042,7 +1097,7 @@ final class BrewService {
         perCaskError: [String: String],
         output: String,
         configuration: BrewOperationConfiguration
-    ) async {
+    ) async throws {
         // Casks that already got a success/error marker while streaming are authoritative — do
         // NOT re-derive them from a list query (its `--full-name` format may not match a token,
         // which would flip a genuinely-installed cask to a false failure). Only query brew for
@@ -1056,10 +1111,14 @@ final class BrewService {
         var brewTokens: Set<String> = []
         if vms.contains(where: { !isResolved($0) }) {
             let args = kind == .install ? ["list", "--cask", "--full-name"] : ["outdated", "--cask", "-q"]
-            let out = (try? await Shell.run(configuration.executable, args)) ?? ""
+            let out = try await Shell.run(configuration.executable, args)
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
             brewTokens = Set(out.split(whereSeparator: \.isNewline).map(String.init))
         }
 
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
         var succeeded = 0
         var failedNames: [String] = []
 

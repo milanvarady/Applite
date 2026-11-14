@@ -133,6 +133,10 @@ final class CaskViewModel {
 
     // MARK: - App Launch
 
+    var selectedInstallationURL: URL? {
+        installedBundleURL ?? externalAppURL ?? protectedAppInstallation?.url
+    }
+
     func launchApp() async throws {
         let token = self.token
         let displayName = self.name
@@ -140,10 +144,8 @@ final class CaskViewModel {
         // Resolve the real bundle location off the main actor — a few stat calls plus a small
         // JSON read. `InstalledAppLocator` tries the Caskroom symlink, the cask's `app` artifact
         // name, a display-name guess, and finally a LaunchServices bundle-id lookup.
-        let appURL = if let protectedAppInstallation {
-            protectedAppInstallation.url
-        } else if let externalAppURL, isInstalledExternally {
-            externalAppURL
+        let appURL = if let selectedInstallationURL {
+            selectedInstallationURL
         } else {
             await Task.detached {
                 InstalledAppLocator.appURL(token: token, displayName: displayName)
