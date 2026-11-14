@@ -49,6 +49,7 @@ final class CaskManager {
 
     /// True while a manual catalog refresh is running (toolbar action).
     private(set) var isRefreshingCatalog: Bool = false
+    private(set) var successfulCatalogRefreshRevision = 0
     private var outdatedRefreshCount = 0
     var isRefreshingOutdated: Bool { outdatedRefreshCount > 0 }
 
@@ -484,6 +485,7 @@ final class CaskManager {
                 surface.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: surface))
             }
             await loadInstalledState(surfacingErrorsIn: surface)
+            if forceSync && catalogError == nil { successfulCatalogRefreshRevision &+= 1 }
             return catalogError == nil
         }
 
@@ -511,6 +513,7 @@ final class CaskManager {
             surface.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: surface))
         }
         await loadInstalledState(surfacingErrorsIn: surface)
+        if forceSync && catalogError == nil { successfulCatalogRefreshRevision &+= 1 }
         return catalogError == nil
     }
 

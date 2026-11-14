@@ -140,13 +140,14 @@ struct AppDetailsView: View {
     }
 
     private var infoKey: [String] {
-        configurationKey + [cask.fullToken, String(cask.isInstalled), String(cask.metadataRevision), String(homebrewRetryCount)]
+        configurationKey + [cask.fullToken, String(cask.isInstalled), String(cask.metadataRevision),
+                            String(caskManager.successfulCatalogRefreshRevision), String(homebrewRetryCount)]
     }
 
     private var localKey: [String] {
         configurationKey + [cask.fullToken, String(cask.isInstalled), cask.externalAppURL?.path ?? "",
          cask.protectedAppInstallation?.url.path ?? "", cask.installedBundleURL?.path ?? "",
-         String(cask.metadataRevision), String(localRetryCount)]
+         String(cask.metadataRevision), String(caskManager.successfulCatalogRefreshRevision), String(localRetryCount)]
     }
 
     private var brewInfo: CaskAdditionalInfo? {

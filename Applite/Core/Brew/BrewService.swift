@@ -117,6 +117,7 @@ final class BrewService {
                 try Task.checkCancellation()
                 if let appURL = external[vm.fullToken] {
                     guard confirmedConfiguration != nil else {
+                        vm.isInstalled = false
                         if UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) {
                             vm.externalAppURL = appURL
                         }
@@ -888,6 +889,7 @@ final class BrewService {
                     vm.progressState = .failed(output: error.localizedDescription)
                     blocked.append((vm, error))
                 } else if let url = unconfirmed[vm.fullToken] {
+                    vm.isInstalled = false
                     if UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) {
                         vm.externalAppURL = url
                     }
@@ -969,12 +971,12 @@ final class BrewService {
         do {
             for try await line in Shell.stream(configuration.executable, arguments, pty: true) {
                 if Task.isCancelled { break }
-                try configuration.validateCurrent()
                 completeOutput += line + "\n"
+                try configuration.validateCurrent()
                 applyBatchLine(line, kind: kind, lookup: lookup, perCaskError: &perCaskError)
             }
         } catch CaskAdoptionError.configurationChanged {
-            await failBatchForConfigurationChange(vms)
+            await failBatchForConfigurationChange(vms, output: completeOutput)
             return
         } catch {
             // A non-zero exit is expected when any cask fails (reconcile decides per-cask outcome).
@@ -998,7 +1000,7 @@ final class BrewService {
         } catch {
             for vm in vms {
                 await showFailure(
-                    for: vm, error: error, output: error.localizedDescription,
+                    for: vm, error: error, output: completeOutput + "\n" + error.localizedDescription,
                     failureTitle: String(localized: "Couldn't refresh installed apps"),
                     failureMessage: error.localizedDescription
                 )
@@ -1006,11 +1008,11 @@ final class BrewService {
         }
     }
 
-    private func failBatchForConfigurationChange(_ vms: [CaskViewModel]) async {
+    private func failBatchForConfigurationChange(_ vms: [CaskViewModel], output: String) async {
         let error = CaskAdoptionError.configurationChanged
         for vm in vms {
             await showFailure(
-                for: vm, error: error, output: error.localizedDescription,
+                for: vm, error: error, output: output + "\n" + error.localizedDescription,
                 failureTitle: String(localized: "Couldn't refresh installed apps"),
                 failureMessage: error.localizedDescription
             )

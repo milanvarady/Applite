@@ -43,7 +43,9 @@ struct AppSettingsView: View {
             refreshCatalogBanner
         }
         .onAppear {
-            previousIncludeCasksFromTaps = includeCasksFromTaps
+            if previousIncludeCasksFromTaps == nil {
+                previousIncludeCasksFromTaps = includeCasksFromTaps
+            }
         }
         .onChange(of: detectExternallyInstalledApps) { _, _ in
             caskManager.applyExternalAppDetectionSetting(surfacingErrorsIn: alert)
@@ -70,6 +72,7 @@ struct AppSettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+                .disabled(caskManager.isRefreshingCatalog)
             }
         }
     }
@@ -141,8 +144,9 @@ struct AppSettingsView: View {
                 Text("Refresh the app catalog to apply your changes")
                 Spacer()
                 AsyncButton {
+                    let requestedIncludeCasksFromTaps = includeCasksFromTaps
                     if await caskManager.loadData(forceSync: true, surfacingErrorsIn: alert) {
-                        self.previousIncludeCasksFromTaps = includeCasksFromTaps
+                        self.previousIncludeCasksFromTaps = requestedIncludeCasksFromTaps
                     }
                 } label: {
                     Label("Refresh Catalog", systemImage: "arrow.clockwise")

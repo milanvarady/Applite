@@ -32,6 +32,9 @@ replacement-scan cancellation but propagates parent cancellation, a changed
 Homebrew configuration, and unexpected scan cancellation.
 Batch fixtures also switch Homebrew during streamed output and during the final
 receipt query, asserting that neither stale result changes installed state.
+Additional cases cover single-install profile changes, retained stale-batch output,
+blocked imports with stale receipt flags, outdated-state clearing, and empty scans
+without materializing unrelated catalog records.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including
@@ -91,7 +94,10 @@ apps, self-updaters, placeholders, and missing Homebrew version or status. They 
 outdated outcomes and preserve local version information when Homebrew is unavailable.
 Managed-location fixtures move/rename a bundle, repeat the lookup with a stale cached
 path, select a second pinned Homebrew, and retain an explicit external/protected
-distribution. Malformed recovered/selected plists must fail rather than switch apps.
+distribution. When multiple historical targets remain, they retain ownership evidence
+while the selected recorded bundle supplies metadata. Malformed recovered/selected
+plists must fail rather than switch apps. Explicit successful catalog refresh advances
+the details revision; failed and non-forced loads do not.
 Sidebar-navigation cases cover repeated activation, switching items, and leaving
 search for every sidebar destination type, including categories and taps.
 Management-source cases check the displayed primary source for Homebrew, Intune,
@@ -116,6 +122,8 @@ advance metadata revisions and replace bundle versions without changing Installe
 With a completed details page open, switch between two Homebrew profiles that both
 have the cask installed. Receipt/available versions and Outdated must reload without
 reopening the page. App-directory changes must also invalidate the local lookup.
+Change an installed app outside Applite and refresh the catalog with its details
+open; both the local metadata and Homebrew details should reload.
 Outdated must say Unknown even if the Homebrew catalog has a different version.
 Check a Homebrew-managed app, an uninstalled app, and a Homebrew lookup failure:
 local information should remain available independently of the lookup. The signing

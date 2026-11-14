@@ -699,6 +699,17 @@ enum ExternalInstallTests {
             precondition(recovered.path == newApp.path && metadata.version == "2.0",
                          "Automatic reload and retry must recover a moved managed bundle through its current Caskroom link")
         }
+        try writeApp(oldApp, version: "1.0")
+        let historicalLink = try record(oldApp, version: "0.1", configuration: configurationA)
+        let recorded = try InstalledAppLocator.recordedAppURLs(token: token, executable: configurationA.executable)
+        precondition(recorded.count == 2, "Ownership checks must retain historical live targets")
+        for _ in 0..<2 {
+            let selected = try resolve(newApp, configuration: configurationA)
+            let metadata = try InstalledAppMetadata.read(at: selected)
+            precondition(selected.path == newApp.path && metadata.version == "2.0",
+                         "Metadata reload and retry must prefer the selected recorded bundle over an alphabetical historical target")
+        }
+        try fm.removeItem(at: historicalLink)
         let otherApp = apps.appendingPathComponent("Other Profile.app")
         try writeApp(otherApp, version: "3.0")
         _ = try record(otherApp, version: "3.0", configuration: configurationB)
@@ -736,12 +747,23 @@ enum ExternalInstallTests {
         let receiptDirectory = app.appendingPathComponent("Contents/_MASReceipt", isDirectory: true)
         let receipt = receiptDirectory.appendingPathComponent("receipt")
         try fm.createDirectory(at: receipt, withIntermediateDirectories: true)
-        precondition(!ExternalAppDetector.hasAppStoreReceipt(at: app), "A receipt directory is not a receipt file")
+        let directoryReceipt = try ExternalAppDetector.hasAppStoreReceipt(at: app)
+        precondition(!directoryReceipt, "A receipt directory is not a receipt file")
         try fm.removeItem(at: receipt)
         try Data("sandbox fixture".utf8).write(to: receiptDirectory.appendingPathComponent("sandboxReceipt"))
-        precondition(!ExternalAppDetector.hasAppStoreReceipt(at: app), "A sandbox receipt must not imply App Store management")
+        let sandboxReceipt = try ExternalAppDetector.hasAppStoreReceipt(at: app)
+        precondition(!sandboxReceipt, "A sandbox receipt must not imply App Store management")
         try Data("receipt fixture".utf8).write(to: receipt)
-        precondition(ExternalAppDetector.hasAppStoreReceipt(at: app))
+        let storeReceipt = try ExternalAppDetector.hasAppStoreReceipt(at: app)
+        precondition(storeReceipt)
+        try fm.setAttributes([.posixPermissions: 0], ofItemAtPath: receiptDirectory.path)
+        do {
+            _ = try ExternalAppDetector.hasAppStoreReceipt(at: app)
+            preconditionFailure("An inaccessible App Store receipt must not be treated as absent")
+        } catch {
+            precondition((error as NSError).code != NSFileNoSuchFileError)
+        }
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: receiptDirectory.path)
 
         func record(_ token: String) -> CaskRecord {
             CaskRecord(
@@ -1089,6 +1111,15 @@ enum ExternalInstallTests {
         try Data("public-key fixture".utf8).write(to: key)
         let identifiedByResource = try ExternalAppDetector.isSetappApp(at: legacy)
         precondition(identifiedByResource, "The documented main-bundle key supports older bundle IDs")
+        let resources = key.deletingLastPathComponent()
+        try fm.setAttributes([.posixPermissions: 0], ofItemAtPath: resources.path)
+        do {
+            _ = try ExternalAppDetector.isSetappApp(at: legacy)
+            preconditionFailure("An inaccessible Setapp marker must not be treated as absent")
+        } catch {
+            precondition((error as NSError).code != NSFileNoSuchFileError)
+        }
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: resources.path)
         let unrelated = try makeApp("Unrelated Fixture", identifier: "org.fixture.not-setapp.helper")
         let unrelatedMatch = try ExternalAppDetector.isSetappApp(at: unrelated)
         precondition(!unrelatedMatch, "A Setapp folder or a substring in an ID must not classify unrelated apps")
@@ -2568,14 +2599,18 @@ enum ExternalInstallTests {
             catalogLoad: { _ in throw NSError(domain: "FixtureCatalog", code: 1) }
         )
         let failedResult = await failedCatalog.loadData(forceSync: true)
-        precondition(!failedResult && failedCatalog.alert.current != nil,
+        precondition(!failedResult && failedCatalog.alert.current != nil && failedCatalog.successfulCatalogRefreshRevision == 0,
                      "A valid Homebrew must not turn a failed catalog synchronization into success")
         let successfulCatalog = CaskManager(
             dataLoader: loader, registry: registry, brewService: service,
             catalogLoad: { _ in (categories: [], taps: []) }
         )
         let successfulResult = await successfulCatalog.loadData(forceSync: true)
-        precondition(successfulResult, "A successful catalog sync must still permit retiring the refresh baseline")
+        precondition(successfulResult && successfulCatalog.successfulCatalogRefreshRevision == 1,
+                     "A successful explicit catalog sync must invalidate open details")
+        _ = await successfulCatalog.loadData(forceSync: false)
+        precondition(successfulCatalog.successfulCatalogRefreshRevision == 1,
+                     "A non-forced load must not advance the explicit-refresh revision")
     }
 
     @MainActor
@@ -2642,11 +2677,13 @@ enum ExternalInstallTests {
         }
         let externalRecord = record("review-external", bundle: "External.app")
         let missingRecord = record("review-missing", bundle: "Missing.app")
+        let unusedRecord = record("review-unused", bundle: "Unused.app")
         let pool = try DatabasePool(path: prefix.appendingPathComponent("catalog.sqlite").path)
         try AppDatabase.migrator().migrate(pool)
         try await pool.write { db in
             try externalRecord.insert(db)
             try missingRecord.insert(db)
+            try unusedRecord.insert(db)
         }
         let registry = CaskViewModelRegistry()
         let vm = registry.viewModel(for: externalRecord)
@@ -2658,11 +2695,17 @@ enum ExternalInstallTests {
         let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
         let manager = CaskManager(dataLoader: loader, registry: registry, brewService: service)
         let arguments = prefix.appendingPathComponent("arguments")
+        try await loader.refreshExternalInstallations { _, _, _ in [:] }
+        precondition(registry.count == 2, "Empty scans must not materialize the entire catalog")
         for enabled in [false, true] {
             defaults.setValue(enabled, for: Preferences.offerHomebrewManagement)
+            defaults.setValue(enabled, for: Preferences.detectExternallyInstalledApps)
+            vm.isInstalled = true
+            vm.isOutdated = true
             service.installAll([vm])
             _ = try await service.runSerialized { true }
-            precondition(vm.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+            precondition(vm.progressState.isFailed && !vm.isInstalled && !vm.isOutdated
+                         && !fm.fileExists(atPath: arguments.path),
                          "Bulk import must never adopt an external app without explicit consent")
         }
         service.installAll([vm, missing])
@@ -2799,10 +2842,35 @@ enum ExternalInstallTests {
             _ = try await service.runSerialized { true }
             precondition(!missing.isInstalled && missing.progressState.isFailed,
                          "Obsolete batch \(mode) results must not update receipt state after a Homebrew switch")
+            if mode == "stream", case .failed(let output) = missing.progressState {
+                precondition(output.contains("successfully installed"),
+                             "Stale streamed results must retain command output")
+            }
             defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
             if fm.fileExists(atPath: flag.path) { try fm.removeItem(at: flag) }
             if mode == "reconciliation" { try fm.removeItem(at: prefix.appendingPathComponent("no-markers")) }
         }
+
+        try? fm.removeItem(at: prefix.appendingPathComponent("receipts"))
+        let missingApp = apps.appendingPathComponent("Missing.app")
+        if fm.fileExists(atPath: missingApp.path) { try fm.removeItem(at: missingApp) }
+        registry.markInstalled(tokens: [])
+        let pauseStream = prefix.appendingPathComponent("pause-stream")
+        let streamStarted = prefix.appendingPathComponent("stream-started")
+        if fm.fileExists(atPath: streamStarted.path) { try fm.removeItem(at: streamStarted) }
+        try Data().write(to: pauseStream)
+        let single = service.install(missing)
+        let singleDeadline = Date().addingTimeInterval(5)
+        while !fm.fileExists(atPath: streamStarted.path) && Date() < singleDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(fm.fileExists(atPath: streamStarted.path))
+        defaults.setValue(prefix.appendingPathComponent("other-brew").path, for: Preferences.customUserBrewPath)
+        try fm.removeItem(at: pauseStream)
+        await single.value
+        precondition(!missing.isInstalled && missing.progressState.isFailed,
+                     "A single install from the previous Homebrew must not publish receipt state")
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
 
         var resumeReconciliation: CheckedContinuation<Void, Never>?
         let reconcileTask = service.install(vm, confirmedConfiguration: .current) {

@@ -85,8 +85,17 @@ enum InstalledAppLocator {
         isManaged: Bool, configuration: BrewOperationConfiguration
     ) throws -> URL? {
         guard isManaged else { return preferredURL }
-        if let recorded = try recordedAppURLs(token: token, executable: configuration.executable).first {
-            return recorded
+        let recorded = try recordedAppURLs(token: token, executable: configuration.executable)
+        if let preferredURL {
+            let preferred = preferredURL.resolvingSymlinksInPath().standardizedFileURL
+            if recorded.contains(preferred) { return preferred }
+        }
+        if !recorded.isEmpty {
+            if let current = appURL(token: token, displayName: displayName, configuration: configuration)?
+                .resolvingSymlinksInPath().standardizedFileURL, recorded.contains(current) {
+                return current
+            }
+            return recorded.first
         }
         if let preferredURL {
             do {

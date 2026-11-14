@@ -34,7 +34,7 @@ struct SearchView: View {
         let displayed = displayedResults
         return Group {
             if displayed.isEmpty && !isSearching {
-                if installedOnly {
+                if installedOnly && caskManager.locallyInstalledCount == 0 {
                     ContentUnavailableView(
                         "No installed apps found.",
                         systemImage: "app.badge.checkmark"

@@ -34,6 +34,7 @@ private final class FaviconFixtures: @unchecked Sendable {
         let status: Int
         let finalURL: URL?
         let gate: FaviconResponseGate?
+        let failBody: Bool
     }
 
     private let lock = NSLock()
@@ -42,11 +43,11 @@ private final class FaviconFixtures: @unchecked Sendable {
 
     func set(
         _ url: URL, html: String, mime: String = "text/html", status: Int = 200,
-        finalURL: URL? = nil, gate: FaviconResponseGate? = nil
+        finalURL: URL? = nil, gate: FaviconResponseGate? = nil, failBody: Bool = false
     ) {
         lock.lock()
         defer { lock.unlock() }
-        responses[url] = Response(body: Data(html.utf8), mime: mime, status: status, finalURL: finalURL, gate: gate)
+        responses[url] = Response(body: Data(html.utf8), mime: mime, status: status, finalURL: finalURL, gate: gate, failBody: failBody)
     }
 
     func take(_ url: URL) -> Response? {
@@ -81,7 +82,13 @@ private final class FaviconURLProtocol: URLProtocol, @unchecked Sendable {
         let complete: @Sendable () -> Void = { [self] in
             client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
             client?.urlProtocol(self, didLoad: fixture.body)
-            client?.urlProtocolDidFinishLoading(self)
+            if fixture.failBody {
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.1) { [self] in
+                    client?.urlProtocol(self, didFailWithError: URLError(.networkConnectionLost))
+                }
+            } else {
+                client?.urlProtocolDidFinishLoading(self)
+            }
         }
         if let gate = fixture.gate {
             gate.submit(complete)
@@ -136,6 +143,13 @@ enum FaviconResolverTests {
         precondition(FaviconResolver.candidates(in: misleadingHead, pageURL: page).map(\.path) == [
             "/assets/app.png", "/favicon.ico"
         ], "Head-like text in ignored regions and target-only bases must not hide a valid icon")
+        let quotedHead = """
+        <head><meta content="The </head> element"><link rel=icon href="/right.png">
+        </head><link rel=icon href="/wrong.png">
+        """
+        precondition(FaviconResolver.candidates(in: quotedHead, pageURL: page).map(\.path) == [
+            "/right.png", "/favicon.ico"
+        ], "Head-like text inside quoted attributes must not close the head")
         let references = """
         <base href="&#47;assets&#x2f;">
         <link rel=icon href="favicon&copy;.png?x=1&amp;y=&quot;q&quot;">
@@ -154,6 +168,11 @@ enum FaviconResolverTests {
         configuration.urlCache = nil
         let resolver = FaviconResolver()
         let redirected = URL(string: "https://new.example.invalid/releases/latest/")!
+        let brokenBody = URL(string: "https://example.invalid/broken-body")!
+        FaviconURLProtocol.fixtures.set(brokenBody, html: "x", finalURL: redirected, failBody: true)
+        let bodyFallback = await resolver.candidates(for: brokenBody, configuration: configuration)
+        precondition(bodyFallback.map(\.absoluteString) == ["https://new.example.invalid/favicon.ico"],
+                     "A response-body failure must retain the final response origin")
         FaviconURLProtocol.fixtures.set(page, html: "<link rel=icon href=logo.png>", finalURL: redirected)
         async let first = resolver.candidates(for: page, configuration: configuration)
         async let second = resolver.candidates(for: page, configuration: configuration)
