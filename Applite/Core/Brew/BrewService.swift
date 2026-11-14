@@ -96,8 +96,8 @@ final class BrewService {
         adoptionConsent: BrewAdoptionConsent? = nil,
         reconcile: (@MainActor () async throws -> Void)? = nil
     ) -> Task<Void, Never> {
-        let configuration = confirmedConfiguration ?? .current
         return runTask(for: vm) {
+            let configuration = confirmedConfiguration ?? .current
             Self.logger.info("Cask \"\(vm.token)\" installation started")
 
             do {
@@ -589,8 +589,6 @@ final class BrewService {
     /// own `ActiveBrewTask` (all sharing this batch task) so each card shows in `ActiveTasksView`.
     private func runBatch(_ vms: [CaskViewModel], kind: BatchKind) {
         guard !vms.isEmpty else { return }
-        let configuration = BrewOperationConfiguration.current
-
         let batchTokens = Set(vms.map(\.fullToken))
         // Drop any lingering entries for these casks (e.g. a dismissed-or-not failure) before re-queuing.
         activeTasks.removeAll { batchTokens.contains($0.viewModel.fullToken) }
@@ -617,10 +615,11 @@ final class BrewService {
                 for vm in vms { vm.progressState = .idle }
                 return
             }
-            guard await self.brewPathIsValid(configuration: configuration) else {
+            guard await self.brewPathIsValid() else {
                 for vm in vms { vm.progressState = .idle }
                 return
             }
+            let configuration = BrewOperationConfiguration.current
             var allowed = vms
             var blocked: [CaskViewModel] = []
             if kind == .install {
