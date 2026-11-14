@@ -49,6 +49,12 @@ final class CaskViewModelRegistry {
         }
     }
 
+    func updateExistingViewModels(for records: [CaskRecord]) {
+        for record in records where viewModelsByFullToken[record.fullToken] != nil {
+            _ = viewModel(for: record)
+        }
+    }
+
     // MARK: - Bulk State Updates
 
     /// Reconciles a boolean flag across every view model using `isMatch`.
