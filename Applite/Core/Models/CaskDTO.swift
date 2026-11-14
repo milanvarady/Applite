@@ -50,7 +50,8 @@ struct CaskDTO: Decodable {
         let hasFontArtifact = artifacts?.contains { $0.font?.isEmpty == false } == true
         let isDefaultTapFontSource = tap == "homebrew/cask"
             && rubySourcePath?.hasPrefix("Casks/font/") == true
-        return hasFontArtifact || isDefaultTapFontSource
+        let isDefaultTapFontToken = tap == "homebrew/cask" && token.hasPrefix("font-")
+        return hasFontArtifact || isDefaultTapFontSource || isDefaultTapFontToken
     }
 }
 

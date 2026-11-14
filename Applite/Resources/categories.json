@@ -115,11 +115,6 @@
         ]
     },
     {
-        "id": "Fonts",
-        "sfSymbol": "textformat",
-        "casks": []
-    },
-    {
         "id": "Media",
         "sfSymbol": "play.tv",
         "casks": [

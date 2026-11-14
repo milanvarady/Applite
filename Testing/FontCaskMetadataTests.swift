@@ -11,6 +11,11 @@ enum FontCaskMetadataTests {
             artifacts: [["pkg": ["SFProFonts.pkg"]]],
             rubySourcePath: "Casks/font/font-s/font-sf-pro.rb"
         )
+        let packageFontByToken = try decode(
+            token: "font-example",
+            artifacts: [["pkg": ["ExampleFonts.pkg"]]],
+            rubySourcePath: "Casks/font-example.rb"
+        )
         let regularPackage = try decode(
             token: "package-app",
             artifacts: [["pkg": ["Sample.pkg"]]],
@@ -21,6 +26,12 @@ enum FontCaskMetadataTests {
             tap: "example/tap",
             artifacts: [["pkg": ["Sample.pkg"]]],
             rubySourcePath: "Casks/font/font-sample.rb"
+        )
+        let nonDefaultTapFontToken = try decode(
+            token: "font-sample",
+            tap: "example/tap",
+            artifacts: [["pkg": ["Sample.pkg"]]],
+            rubySourcePath: "Casks/font-sample.rb"
         )
         let emptyFont = try decode(artifacts: [["font": [String]()]])
         let noArtifacts = try decode(artifacts: nil)
@@ -33,8 +44,10 @@ enum FontCaskMetadataTests {
             "String font paths must be retained while option objects are ignored"
         )
         precondition(packageFont.isFontCask, "Package-installed casks under Casks/font must be recognized as fonts")
+        precondition(packageFontByToken.isFontCask, "Core font- cask tokens must classify package-installed fonts")
         precondition(!regularPackage.isFontCask, "Other package casks must not be classified as fonts")
         precondition(!nonDefaultTapFontPath.isFontCask, "Non-default tap source paths must not classify fonts")
+        precondition(!nonDefaultTapFontToken.isFontCask, "A font- token from a non-default tap must not classify as a font")
         precondition(!emptyFont.isFontCask, "An empty font artifact must not create an empty category entry")
         precondition(!noArtifacts.isFontCask, "Casks without artifacts must remain non-font casks")
         print("PASS: Homebrew font artifact classification")

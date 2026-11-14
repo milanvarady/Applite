@@ -8,10 +8,10 @@ Run the focused decoder test with:
 bash Testing/run-font-category-tests.sh
 ```
 
-It verifies that non-empty Homebrew `font` artifacts and default-tap
-`Casks/font/` source paths classify a cask as a font, mixed font paths and
-option objects retain only the paths, and ordinary package, app-only,
-empty-font, and missing-artifact casks do not.
+It verifies that non-empty Homebrew `font` artifacts, default-tap
+`Casks/font/` source paths, and default-tap `font-` tokens classify a cask as
+a font, mixed font paths and option objects retain only the paths, and
+ordinary package, app-only, empty-font, and non-default-tap casks do not.
 
 `applite_test.py` is a **guided** end-to-end test harness. It doesn't automate the
 UI — *you* perform each action in the real Applite window, and after each step the
