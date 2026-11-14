@@ -1,4 +1,4 @@
-#  Applite test harness
+# Applite test harness
 
 ## Non-destructive external-install regression tests
 
