@@ -270,7 +270,7 @@ enum InstalledAppLocator {
     private nonisolated static var appDirectory: URL {
         let custom = UserDefaults.standard.value(for: Preferences.appdirPath)
         if UserDefaults.standard.value(for: Preferences.appdirOn), !custom.isEmpty {
-            return URL(fileURLWithPath: (custom as NSString).expandingTildeInPath)
+            return URL(fileURLWithPath: (custom as NSString).expandingTildeInPath, isDirectory: true)
         }
         return URL.applicationDirectory
     }

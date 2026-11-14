@@ -2,6 +2,8 @@
 
 ## Non-destructive external-install regression tests
 
+Creating a missing custom app directory must not change its captured Homebrew configuration.
+
 Live-artifact fixtures rename Old.app to a protected New.app, revoke prerequisites
 during the final ownership await, and reject incomplete target metadata. Injected
 catalog failure/success verifies refresh-baseline results without network requests.
