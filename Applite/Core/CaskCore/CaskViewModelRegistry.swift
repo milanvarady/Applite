@@ -83,6 +83,7 @@ final class CaskViewModelRegistry {
         applyManagementSourceOverrides()
         for vm in viewModelsByFullToken.values {
             vm.hasMultipleInstalledCopies = multipleCopyTokens.contains(vm.fullToken)
+            vm.hasSelectedCopyProvenance = vm.hasMultipleInstalledCopies
             vm.selectedCopyProtection = selectedCopyProtection[vm.fullToken]
             let urls: [ProtectedAppInstallation.Source: URL?] = [
                 .intune: intuneAppURLs[vm.fullToken], .appStore: appStoreAppURLs[vm.fullToken],
@@ -125,9 +126,14 @@ final class CaskViewModelRegistry {
         additionalCopies = currentCopies
     }
 
-    func updateManagedBundleURLs(_ urls: [CaskId: URL]) {
+    func updateManagedBundleURLs(
+        _ urls: [CaskId: URL], multipleCopyTokens: Set<CaskId>,
+        selectedCopyProtection: [CaskId: ProtectedAppInstallation]
+    ) {
         for vm in viewModelsByFullToken.values where vm.isInstalled {
             vm.installedBundleURL = urls[vm.fullToken]
+            vm.hasSelectedCopyProvenance = multipleCopyTokens.contains(vm.fullToken)
+            vm.selectedCopyProtection = selectedCopyProtection[vm.fullToken]
         }
     }
 
@@ -158,7 +164,10 @@ final class CaskViewModelRegistry {
         }
         for vm in viewModelsByFullToken.values {
             vm.hasMultipleInstalledCopies = false
-            vm.selectedCopyProtection = nil
+            if !vm.isInstalled {
+                vm.hasSelectedCopyProvenance = false
+                vm.selectedCopyProtection = nil
+            }
         }
         for copy in additionalCopies.values {
             copy.externalAppURL = nil

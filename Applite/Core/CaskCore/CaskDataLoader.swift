@@ -244,7 +244,10 @@ final class CaskDataLoader {
                 || result.additionalInstallations[$0.fullToken] != nil
         })
         if !detectionEnabled {
-            registry.updateManagedBundleURLs(result.bundleURLs)
+            registry.updateManagedBundleURLs(
+                result.bundleURLs, multipleCopyTokens: result.multipleCopyTokens,
+                selectedCopyProtection: result.selectedCopyProtection
+            )
             return
         }
         registry.markExternalInstallations(

@@ -662,6 +662,7 @@ final class BrewService {
             vm.protectedAppInstallation = protection
             vm.installedBundleURL = url
             vm.hasMultipleInstalledCopies = multipleCopies
+            vm.hasSelectedCopyProvenance = multipleCopies
             vm.selectedCopyProtection = selectedProtection
         }
     }

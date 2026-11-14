@@ -33,10 +33,11 @@ final class CaskViewModel {
     var installedBundleURL: URL?
     var protectedAppInstallation: ProtectedAppInstallation?
     var selectedCopyProtection: ProtectedAppInstallation?
+    var hasSelectedCopyProvenance = false
     var hasMultipleInstalledCopies = false
     let isAdditionalInstalledCopy: Bool
     var displayedProtection: ProtectedAppInstallation? {
-        hasMultipleInstalledCopies && !isAdditionalInstalledCopy ? selectedCopyProtection : protectedAppInstallation
+        hasSelectedCopyProvenance && !isAdditionalInstalledCopy ? selectedCopyProtection : protectedAppInstallation
     }
     var appStoreAppURL: URL? {
         displayedProtection?.source == .appStore ? displayedProtection?.url : nil

@@ -2392,6 +2392,30 @@ enum ExternalInstallTests {
         precondition(appStoreRows[0].installedManagementSourceName == ProtectedAppInstallation.Source.appStore.name
                      && otherRows[0].installedManagementSourceName == String(localized: "Unknown"),
                      "Details must describe the selected copy's source rather than another copy's protection")
+        let managedMixed = try ExternalAppDetector.installations(
+            catalog: [stable], managedTokens: [stable.fullToken], directories: [system, user],
+            recordedAppURLs: [stable.fullToken: [systemApp]]
+        )
+        oneCaskRegistry.markInstalled(tokens: [stable.fullToken])
+        oneCaskRegistry.markExternalInstallations(
+            appURLs: managedMixed.externalAppURLs, appStoreAppURLs: managedMixed.appStoreAppURLs,
+            bundleURLs: managedMixed.bundleURLs, copies: managedMixed.additionalInstallations,
+            multipleCopyTokens: managedMixed.multipleCopyTokens,
+            selectedCopyProtection: managedMixed.selectedCopyProtection
+        )
+        oneCaskRegistry.clearExternalInstallations()
+        precondition(primary.installedManagementSourceName == String(localized: "Homebrew")
+                     && InstalledListOptions(source: .homebrew).apply(to: [primary]) == [primary]
+                     && InstalledListOptions(source: .appStore).apply(to: [primary]).isEmpty
+                     && primary.protectedAppInstallation?.source == .appStore,
+                     "Hiding external copies must preserve selected provenance and aggregate write protection")
+        oneCaskRegistry.updateManagedBundleURLs(
+            managedMixed.bundleURLs, multipleCopyTokens: managedMixed.multipleCopyTokens,
+            selectedCopyProtection: managedMixed.selectedCopyProtection
+        )
+        precondition(primary.installedManagementSourceName == String(localized: "Homebrew")
+                     && primary.protectedAppInstallation?.source == .appStore,
+                     "A disabled-detection refresh must retain per-copy provenance and aggregate protection")
         try fm.removeItem(at: userReceipt)
         let oneManaged = try ExternalAppDetector.installations(
             catalog: [stable], managedTokens: [stable.fullToken], directories: [system, user],
