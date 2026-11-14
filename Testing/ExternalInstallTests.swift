@@ -449,6 +449,7 @@ enum ExternalInstallTests {
         case "$1" in
           --version) echo "Homebrew fixture" ;;
           list) echo stable ;;
+          outdated) echo stable ;;
           install) printf '%s\\n' "$@" > "$dir/arguments" ;;
           *) exit 2 ;;
         esac
@@ -497,6 +498,52 @@ enum ExternalInstallTests {
                      "A managed cask absent from the catalog must still suppress its owned bundle")
 
         let service = BrewService(notify: { _, _, _ in })
+        try await pool.write { db in try stable.insert(db) }
+        let managedVM = registry.viewModel(for: stable)
+        registry.markInstalled(tokens: [stable.fullToken])
+        registry.markOutdated(tokens: [stable.fullToken])
+        let manager = CaskManager(dataLoader: loader, registry: registry, brewService: service)
+        defaults.setValue(externalDirectory.path, for: Preferences.appdirPath)
+        manager.applyExternalAppDetectionSetting(debounce: true)
+        precondition(managedVM.isInstalled && managedVM.isOutdated
+                     && loader.hasReceiptSnapshot(for: .current),
+                     "An app-directory change must not invalidate receipts or updates")
+        let secondBrew = prefix.appendingPathComponent("Second/bin/brew")
+        try fm.createDirectory(at: secondBrew.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try script.write(to: secondBrew, atomically: true, encoding: .utf8)
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: secondBrew.path)
+        let secondRoom = prefix.appendingPathComponent("Second/Caskroom/stable")
+        let secondMetadata = secondRoom.appendingPathComponent(".metadata/1/1/Casks")
+        try fm.createDirectory(at: secondRoom.appendingPathComponent("1"), withIntermediateDirectories: true)
+        try fm.createDirectory(at: secondMetadata, withIntermediateDirectories: true)
+        try Data(#"{"artifacts":[]}"#.utf8).write(to: secondMetadata.appendingPathComponent("stable.json"))
+        defaults.setValue(secondBrew.path, for: Preferences.customUserBrewPath)
+        manager.applyExternalAppDetectionSetting(debounce: true)
+        precondition(manager.isResolvingInstalledState && manager.isRefreshingOutdated,
+                     "Receipt reconciliation must publish busy state during debounce and queue wait")
+        manager.invalidateAdoptionConsent()
+        let consentDeadline = Date().addingTimeInterval(5)
+        while (!managedVM.isInstalled || manager.outdatedRefreshFailed
+               || manager.isResolvingInstalledState || manager.isRefreshingOutdated) && Date() < consentDeadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        precondition(managedVM.isInstalled && managedVM.isOutdated && !manager.outdatedRefreshFailed,
+                     "Revoking adoption consent must not abandon receipt reconciliation")
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+        manager.applyExternalAppDetectionSetting(debounce: true)
+        defaults.setValue(false, for: Preferences.detectExternallyInstalledApps)
+        manager.applyExternalAppDetectionSetting()
+        let refreshDeadline = Date().addingTimeInterval(5)
+        while (!managedVM.isInstalled || manager.outdatedRefreshFailed
+               || manager.isResolvingInstalledState || manager.isRefreshingOutdated) && Date() < refreshDeadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        precondition(managedVM.isInstalled && managedVM.isOutdated && !manager.outdatedRefreshFailed
+                     && !manager.isResolvingInstalledState && !manager.isRefreshingOutdated,
+                     "Receipt reconciliation must survive consent changes and disabled detection")
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+        defaults.setValue(managedDirectory.path, for: Preferences.appdirPath)
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
         let sibling = CaskViewModel(record: beta)
         sibling.externalAppURL = externalApp
         await service.install(sibling, confirmedConfiguration: .current).value
@@ -522,6 +569,14 @@ enum ExternalInstallTests {
         await service.install(sibling, confirmedConfiguration: .current).value
         precondition(sibling.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
                      "Unverifiable managed ownership must block adoption rather than imply an unmanaged target")
+        let receipt = metadata.deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().appendingPathComponent("INSTALL_RECEIPT.json")
+        try JSONSerialization.data(withJSONObject: ["uninstall_artifacts": [["app": ["Payload/Source.app"]]]])
+            .write(to: receipt)
+        try Data("cask fixture".utf8).write(to: metadata.appendingPathComponent("stable.rb"))
+        let rubyOwned = try InstalledAppLocator.recordedAppURLs(token: "stable", executable: brew)
+        precondition(rubyOwned == [managedApp.resolvingSymlinksInPath().standardizedFileURL],
+                     "Ruby-only saved casks must use receipt artifacts without evaluating Ruby")
     }
 
     @MainActor

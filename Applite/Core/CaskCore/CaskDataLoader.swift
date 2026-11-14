@@ -153,7 +153,7 @@ final class CaskDataLoader {
     }
 
     func hasReceiptSnapshot(for configuration: BrewOperationConfiguration) -> Bool {
-        receiptConfiguration == configuration
+        receiptConfiguration?.executable == configuration.executable
     }
 
     func invalidateInstalledReceipts() {
@@ -181,7 +181,7 @@ final class CaskDataLoader {
         guard generation == externalScanGeneration, configuration == .current,
               UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else { return }
         registry.updateExistingViewModels(for: catalog, unchangedSince: snapshots)
-        let tokens = receiptConfiguration == configuration
+        let tokens = hasReceiptSnapshot(for: configuration)
             ? receiptTokens : Set(registry.installedViewModels.map(\.fullToken))
         let task = Task.detached {
             if let scan {

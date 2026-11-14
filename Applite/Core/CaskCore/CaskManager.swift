@@ -22,6 +22,8 @@ final class CaskManager {
     private let registry: CaskViewModelRegistry
     private let brewService: BrewService
     private var adoptionConsentGeneration = 0
+    private var detectionSettingGeneration = 0
+    private var receiptRefreshPending = false
     private var detectionSettingTask: Task<Void, Never>?
 
     /// Resolves brew on launch (detect existing / install annex) without onboarding or CLT.
@@ -40,7 +42,8 @@ final class CaskManager {
 
     /// True while brew CLI is being queried for installed/outdated state.
     /// Catalog (categories/taps) is independent and lights up before this flips false.
-    private(set) var isResolvingInstalledState: Bool = false
+    private var installedStateResolutionCount = 0
+    var isResolvingInstalledState: Bool { installedStateResolutionCount > 0 }
 
     /// True while a manual catalog refresh is running (toolbar action).
     private(set) var isRefreshingCatalog: Bool = false
@@ -137,24 +140,37 @@ final class CaskManager {
         debounce: Bool = false, surfacingErrorsIn errorSurface: AlertManager? = nil
     ) {
         invalidateAdoptionConsent()
+        detectionSettingGeneration &+= 1
         detectionSettingTask?.cancel()
         dataLoader.invalidateExternalInstallations()
         let configuration = BrewOperationConfiguration.current
         let detectionEnabled = UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps)
-        let needsReceipts = !dataLoader.hasReceiptSnapshot(for: configuration)
+        let hasReceipts = dataLoader.hasReceiptSnapshot(for: configuration)
+        let needsReceipts = !hasReceipts || receiptRefreshPending
         if !detectionEnabled {
             registry.markExternalInstallations(appURLs: [:])
         }
-        guard detectionEnabled || (debounce && needsReceipts) else { return }
-        if needsReceipts {
+        guard detectionEnabled || (needsReceipts && (debounce || receiptRefreshPending)) else { return }
+        if !hasReceipts {
             dataLoader.invalidateInstalledReceipts()
             registry.markInstalled(tokens: [])
             registry.markOutdated(tokens: [])
             outdatedRefreshFailed = true
         }
-        let generation = adoptionConsentGeneration
+        if needsReceipts { receiptRefreshPending = true }
+        if needsReceipts {
+            installedStateResolutionCount += 1
+            outdatedRefreshCount += 1
+        }
+        let generation = detectionSettingGeneration
         let surface = errorSurface ?? alert
         detectionSettingTask = Task {
+            defer {
+                if needsReceipts {
+                    installedStateResolutionCount -= 1
+                    outdatedRefreshCount -= 1
+                }
+            }
             do {
                 if debounce { try await Task.sleep(for: .milliseconds(300)) }
                 try Task.checkCancellation()
@@ -165,7 +181,7 @@ final class CaskManager {
                         return
                     }
                     try await brewService.runSerialized {
-                        guard generation == self.adoptionConsentGeneration else { throw CancellationError() }
+                        guard generation == self.detectionSettingGeneration else { throw CancellationError() }
                         try configuration.validateCurrent()
                         try await self.dataLoader.refreshInstalled(configuration: configuration)
                         do {
@@ -179,6 +195,10 @@ final class CaskManager {
                             self.outdatedRefreshFailed = true
                             Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
                         }
+                        try Task.checkCancellation()
+                        try configuration.validateCurrent()
+                        guard generation == self.detectionSettingGeneration else { throw CancellationError() }
+                        self.receiptRefreshPending = false
                     }
                 } else {
                     try await dataLoader.refreshExternalInstallations(configuration: configuration)
@@ -459,8 +479,8 @@ final class CaskManager {
     /// Stage 2: installed/outdated state from the brew CLI (slow). Updates the registry reactively,
     /// so view models already on screen flip their flags without rebuilding the catalog views.
     private func loadInstalledState(surfacingErrorsIn surface: AlertManager) async {
-        self.isResolvingInstalledState = true
-        defer { self.isResolvingInstalledState = false }
+        installedStateResolutionCount += 1
+        defer { installedStateResolutionCount -= 1 }
 
         do {
             // Run the refresh on the serial brew queue so its `brew list`/`outdated` snapshot can't
