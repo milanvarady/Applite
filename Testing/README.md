@@ -11,7 +11,9 @@ changes before confirmation/queued execution, retained stdout/stderr after a fai
 reconciliation, and a paused scan completing after detection is disabled/re-enabled.
 Upstream-review fixtures additionally cover bulk external exclusion and mixed batches,
 disabled/re-enabled consent, stale receipt snapshots, busy reconciliation, debounced
-path edits, and cancellation of superseded scan work.
+path edits, and cancellation of superseded scan work. Receipt refresh tolerates
+replacement-scan cancellation but propagates parent cancellation, a changed
+Homebrew configuration, and unexpected scan cancellation.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including

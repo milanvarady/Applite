@@ -601,6 +601,40 @@ enum ExternalInstallTests {
         precondition(!vm.isInstalled, "Stale receipts must not commit to the registry after Homebrew changes")
         defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
 
+        for mode in ["superseded", "parent", "configuration"] {
+            let gate = ScanGate()
+            let receiptRefresh = Task {
+                try await loader.refreshInstalled(configuration: configuration) { _, _, _ in
+                    try await gate.waitForCancellation()
+                    return [:]
+                }
+            }
+            let deadline = Date().addingTimeInterval(5)
+            while !(await gate.cancellationStarted) && Date() < deadline { await Task.yield() }
+            let started = await gate.cancellationStarted
+            precondition(started)
+            if mode == "parent" { receiptRefresh.cancel() }
+            if mode == "configuration" {
+                defaults.setValue(prefix.appendingPathComponent("other-brew").path, for: Preferences.customUserBrewPath)
+            }
+            loader.invalidateExternalInstallations()
+            do {
+                try await receiptRefresh.value
+                precondition(mode == "superseded", "Parent cancellation and configuration changes must propagate")
+            } catch is CancellationError {
+                precondition(mode == "parent")
+            } catch CaskAdoptionError.configurationChanged {
+                precondition(mode == "configuration")
+            }
+            defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+        }
+        do {
+            try await loader.refreshInstalled(configuration: configuration) { _, _, _ in
+                throw CancellationError()
+            }
+            preconditionFailure("An unexpected scan cancellation must not be hidden")
+        } catch is CancellationError { }
+
         var resumeReconciliation: CheckedContinuation<Void, Never>?
         let reconcileTask = service.install(vm, confirmedConfiguration: .current) {
             await withCheckedContinuation { resumeReconciliation = $0 }

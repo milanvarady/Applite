@@ -113,7 +113,10 @@ final class CaskDataLoader {
 
     /// Re-queries brew CLI for installed casks, ensures view models exist for each,
     /// and marks them installed in the registry.
-    func refreshInstalled(configuration: BrewOperationConfiguration = .current) async throws {
+    func refreshInstalled(
+        configuration: BrewOperationConfiguration = .current,
+        scan: @escaping @Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL] = ExternalAppDetector.scan
+    ) async throws {
         installedRefreshGeneration &+= 1
         let generation = installedRefreshGeneration
         let tokens = try await installedService.getInstalledCasks(configuration: configuration)
@@ -124,7 +127,19 @@ final class CaskDataLoader {
         _ = registry.viewModels(for: records)
         registry.markInstalled(tokens: tokens)
 
-        try await refreshExternalInstallations(configuration: configuration)
+        let scanGeneration = externalScanGeneration &+ 1
+        do {
+            try await refreshExternalInstallations(configuration: configuration, scan: scan)
+        } catch is CancellationError {
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
+            guard generation == installedRefreshGeneration else { throw CancellationError() }
+            guard externalScanGeneration != scanGeneration else { throw CancellationError() }
+            // A replacement disk scan does not invalidate successfully refreshed receipts.
+        }
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
+        guard generation == installedRefreshGeneration else { throw CancellationError() }
     }
 
     func invalidateExternalInstallations() {
