@@ -766,6 +766,14 @@ enum ExternalInstallTests {
             agentURL: directory.appendingPathComponent("Missing Agent.app"), databaseURL: databaseURL
         )
         precondition(missingAgent.bundleIDs.isEmpty, "A leftover policy cache without the agent must not imply management")
+        let inaccessible = directory.appendingPathComponent("Inaccessible")
+        try fm.createDirectory(at: inaccessible, withIntermediateDirectories: true)
+        try fm.setAttributes([.posixPermissions: 0], ofItemAtPath: inaccessible.path)
+        do {
+            _ = try IntuneAppDetector.load(agentURL: inaccessible.appendingPathComponent("Agent.app"), databaseURL: databaseURL)
+            preconditionFailure("An inaccessible agent location must not be interpreted as absent")
+        } catch CaskAdoptionError.intuneInventoryUnavailable { }
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: inaccessible.path)
         let snapshot = try IntuneAppDetector.load(agentURL: agent, databaseURL: databaseURL)
         precondition(snapshot.bundleIDs == ["org.fixture.primary", "org.fixture.managed"])
         let matches = try snapshot.isManagedApp(at: app)
@@ -796,6 +804,14 @@ enum ExternalInstallTests {
         precondition(scan.intuneAppURLs == [stable.fullToken: app, alias.fullToken: app])
         precondition(scan.appStoreAppURLs == scan.intuneAppURLs && scan.externalAppURLs.isEmpty,
                      "Retain secondary App Store evidence without duplicating a managed installation")
+        let recordedAlias = try ExternalAppDetector.installations(
+            catalog: [alias, stable], managedTokens: [stable.fullToken], directories: [directory],
+            intune: snapshot, recordedAppURLs: [stable.fullToken: [app]]
+        )
+        precondition(recordedAlias.intuneAppURLs[alias.fullToken] == app
+                     && recordedAlias.appStoreAppURLs[alias.fullToken] == app
+                     && recordedAlias.externalAppURLs[alias.fullToken] == nil,
+                     "A recorded sibling bundle must still protect its alias without adding an installed copy")
         let registry = CaskViewModelRegistry()
         let vm = registry.viewModel(for: stable)
         _ = registry.viewModel(for: alias)
@@ -2167,6 +2183,13 @@ enum ExternalInstallTests {
             token: "receipt-cask", executable: brew, requireRecordedOwnership: true
         )
         precondition(receiptTargets == [managedApp.resolvingSymlinksInPath().standardizedFileURL])
+        try fm.moveItem(at: receiptMetadata.appendingPathComponent("receipt-cask.json"),
+                        to: receiptMetadata.appendingPathComponent("receipt-cask.internal.json"))
+        let internalTargets = try InstalledAppLocator.recordedAppURLs(
+            token: "receipt-cask", executable: brew, requireRecordedOwnership: true
+        )
+        precondition(internalTargets == receiptTargets, "Internal JSON must preserve staged-path metadata")
+        try fm.removeItem(at: receiptMetadata.appendingPathComponent("receipt-cask.internal.json"))
         try JSONSerialization.data(withJSONObject: ["url_specs": ["only_path": "../outside"]])
             .write(to: receiptMetadata.appendingPathComponent("receipt-cask.json"))
         do {
@@ -2181,6 +2204,12 @@ enum ExternalInstallTests {
             token: "receipt-cask", executable: brew, requireRecordedOwnership: true
         )
         precondition(rubyTargets == [managedApp.resolvingSymlinksInPath().standardizedFileURL])
+        try fm.removeItem(at: directLink)
+        try fm.createSymbolicLink(at: directLink, withDestinationURL: prefix.appendingPathComponent("Missing.app"))
+        let missingTargets = try InstalledAppLocator.recordedAppURLs(
+            token: "receipt-cask", executable: brew, requireRecordedOwnership: true
+        )
+        precondition(missingTargets.isEmpty, "A recorded link to a missing app must not block other casks")
         try fm.removeItem(at: directLink)
         do {
             _ = try InstalledAppLocator.recordedAppURLs(token: "receipt-cask", executable: brew)
@@ -2207,6 +2236,17 @@ enum ExternalInstallTests {
         }
         let stable = record("identity-shared")
         let beta = record("identity-shared@beta")
+        let oldApp = system.appendingPathComponent("Old.app")
+        try fm.createDirectory(at: oldApp, withIntermediateDirectories: true)
+        let renamed = try ExternalAppDetector.installations(
+            catalog: [stable], managedTokens: [stable.fullToken], directories: [user],
+            recordedAppURLs: [stable.fullToken: [oldApp]]
+        )
+        precondition(renamed.multipleCopyTokens.contains(stable.fullToken)
+                     && renamed.bundleURLs[stable.fullToken] == oldApp.resolvingSymlinksInPath().standardizedFileURL
+                     && renamed.additionalInstallations[stable.fullToken]?.map(\.url)
+                        == [userApp.resolvingSymlinksInPath().standardizedFileURL],
+                     "A recorded old target and a separate renamed current target are distinct copies")
         let recordedOnly = try ExternalAppDetector.installations(
             catalog: [stable], managedTokens: [stable.fullToken], directories: [],
             recordedAppURLs: [stable.fullToken: [systemApp, userApp, systemApp]]

@@ -51,6 +51,7 @@ enum ExternalAppDetector {
             .flatMap { $0.value.map { $0.resolvingSymlinksInPath().standardizedFileURL.path } })
         var found = ScanResult()
         var matchesByToken: [(CaskRecord, [URL])] = []
+        var renamedCopyTokens: Set<CaskId> = []
         for record in ordered {
             try Task.checkCancellation()
             let recorded = recordedAppURLs[record.fullToken] ?? []
@@ -59,18 +60,25 @@ enum ExternalAppDetector {
                 displayName: record.name,
                 directories: directories
             ) + artCraft.matchingAppURLs(bundleNames: record.appBundleNames, displayName: record.name)
+            guard !recorded.isEmpty || !discovered.isEmpty else { continue }
             let matching = managedTokens.contains(record.fullToken) ? discovered : discovered.filter {
                 !managedPaths.contains($0.resolvingSymlinksInPath().standardizedFileURL.path)
             }
             matchesByToken.append((record, matching + recorded))
-            if hasMultipleCopies(matching + recorded) {
+            if record.appBundleNames.count == 1, let old = recorded.first,
+               old.lastPathComponent != (record.appBundleNames[0] as NSString).lastPathComponent,
+               matching.contains(where: {
+                   $0.resolvingSymlinksInPath().standardizedFileURL != old.resolvingSymlinksInPath().standardizedFileURL
+               }) {
+                renamedCopyTokens.insert(record.fullToken)
+            }
+            if renamedCopyTokens.contains(record.fullToken) || hasMultipleCopies(matching + recorded) {
                 found.multipleCopyTokens.insert(record.fullToken)
             }
-            var selected: URL
+            var selected: URL?
             if let recorded = recorded.first {
                 selected = recorded
-            } else {
-                guard let first = matching.first else { continue }
+            } else if let first = matching.first {
                 let sameArtifact = matching.filter { $0.lastPathComponent == first.lastPathComponent }
                 selected = sameArtifact.first {
                     !claimed.contains($0.resolvingSymlinksInPath().standardizedFileURL.path)
@@ -79,15 +87,8 @@ enum ExternalAppDetector {
             let protection = try protectedInstallation(
                 bundleNames: record.appBundleNames, displayName: record.name,
                 directories: directories, knownURL: selected, intune: intune,
-                artCraft: artCraft, additionalURLs: recorded + matching
+                artCraft: artCraft, additionalURLs: recorded + discovered
             )
-            if recorded.isEmpty, let preferred = protection?.url,
-               preferred.lastPathComponent == selected.lastPathComponent,
-               matching.contains(preferred),
-               !claimed.contains(preferred.resolvingSymlinksInPath().standardizedFileURL.path) {
-                selected = preferred
-            }
-            // Protect every matching cask alias, but still list each installed bundle once.
             if let protection {
                 for (source, url) in protection.appURLs {
                     switch source {
@@ -97,6 +98,13 @@ enum ExternalAppDetector {
                     case .artCraft: found.artCraftAppURLs[record.fullToken] = url
                     }
                 }
+            }
+            guard var selected else { continue }
+            if recorded.isEmpty, let preferred = protection?.url,
+               preferred.lastPathComponent == selected.lastPathComponent,
+               matching.contains(preferred),
+               !claimed.contains(preferred.resolvingSymlinksInPath().standardizedFileURL.path) {
+                selected = preferred
             }
             let canonicalURL = selected.resolvingSymlinksInPath().standardizedFileURL
             found.bundleURLs[record.fullToken] = canonicalURL
@@ -114,7 +122,7 @@ enum ExternalAppDetector {
             guard found.multipleCopyTokens.contains(record.fullToken) else { continue }
             for url in matching {
                 let sameArtifact = matching.filter { $0.lastPathComponent == url.lastPathComponent }
-                guard hasMultipleCopies(sameArtifact) else {
+                guard renamedCopyTokens.contains(record.fullToken) || hasMultipleCopies(sameArtifact) else {
                     continue
                 }
                 try Task.checkCancellation()

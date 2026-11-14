@@ -30,8 +30,12 @@ enum IntuneAppDetector {
         agentURL: URL = URL(fileURLWithPath: "/Library/Intune/Microsoft Intune Agent.app"),
         databaseURL: URL = URL(fileURLWithPath: "/Library/Application Support/Microsoft/Intune/SideCar/sidecar.sqlite")
     ) throws -> Snapshot {
-        guard FileManager.default.fileExists(atPath: agentURL.path) else { return .empty }
-        guard FileManager.default.fileExists(atPath: databaseURL.path) else {
+        do {
+            _ = try FileManager.default.attributesOfItem(atPath: agentURL.path)
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            return .empty
+        } catch {
+            logger.error("Couldn't inspect Intune agent: \(error.localizedDescription)")
             throw CaskAdoptionError.intuneInventoryUnavailable
         }
         do {

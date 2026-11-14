@@ -249,6 +249,8 @@ final class CaskDataLoader {
         registry.materializeMissingViewModels(for: catalog.filter {
             result.bundleURLs[$0.fullToken] != nil || result.externalAppURLs[$0.fullToken] != nil
                 || result.additionalInstallations[$0.fullToken] != nil
+                || result.appStoreAppURLs[$0.fullToken] != nil || result.intuneAppURLs[$0.fullToken] != nil
+                || result.setappAppURLs[$0.fullToken] != nil || result.artCraftAppURLs[$0.fullToken] != nil
         })
         if !detectionEnabled {
             registry.updateManagedBundleURLs(result.bundleURLs)

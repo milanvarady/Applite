@@ -104,24 +104,28 @@ enum InstalledAppLocator {
             for timestamp in timestamps {
                 let values = try timestamp.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
                 guard values.isDirectory == true, values.isSymbolicLink != true else { continue }
-                let json = timestamp.appendingPathComponent("Casks").appendingPathComponent("\(token).json")
-                do {
-                    installed = try JSONDecoder().decode(RecordedCask.self, from: Data(contentsOf: json))
-                    break
-                } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
-                    let ruby = timestamp.appendingPathComponent("Casks").appendingPathComponent("\(token).rb")
+                let casks = timestamp.appendingPathComponent("Casks")
+                for name in ["\(token).json", "\(token).internal.json"] {
                     do {
-                        let values = try ruby.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
-                        guard values.isRegularFile == true, values.isSymbolicLink != true,
-                              let artifacts = receipt?.uninstall_artifacts else {
-                            throw CaskAdoptionError.installationTargetsUnavailable
-                        }
-                        installed = RecordedCask(artifacts: artifacts, url_specs: nil)
-                        receiptOnly = true
+                        installed = try JSONDecoder().decode(RecordedCask.self, from: Data(contentsOf: casks.appendingPathComponent(name)))
                         break
                     } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
                         continue
                     }
+                }
+                if installed != nil { break }
+                do {
+                    let ruby = timestamp.appendingPathComponent("Casks").appendingPathComponent("\(token).rb")
+                    let values = try ruby.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
+                    guard values.isRegularFile == true, values.isSymbolicLink != true,
+                          let artifacts = receipt?.uninstall_artifacts else {
+                        throw CaskAdoptionError.installationTargetsUnavailable
+                    }
+                    installed = RecordedCask(artifacts: artifacts, url_specs: nil)
+                    receiptOnly = true
+                    break
+                } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                    continue
                 }
             }
             guard let installed, let artifacts = installed.artifacts ?? receipt?.uninstall_artifacts else {
@@ -156,14 +160,22 @@ enum InstalledAppLocator {
                         if requireRecordedOwnership || receiptOnly { throw CaskAdoptionError.installationTargetsUnavailable }
                         continue
                     }
-                    let resolved = entry.resolvingSymlinksInPath().standardizedFileURL
-                    if try resolved.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
+                } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                    if requireRecordedOwnership || receiptOnly { throw CaskAdoptionError.installationTargetsUnavailable }
+                    continue
+                }
+                let destination = try fm.destinationOfSymbolicLink(atPath: entry.path)
+                let target = (destination as NSString).isAbsolutePath
+                    ? URL(fileURLWithPath: destination)
+                    : entry.deletingLastPathComponent().appendingPathComponent(destination)
+                let resolved = target.resolvingSymlinksInPath().standardizedFileURL
+                do {
+                    if try fm.attributesOfItem(atPath: resolved.path)[.type] as? FileAttributeType == .typeDirectory {
                         result.insert(resolved)
                     } else if requireRecordedOwnership || receiptOnly {
                         throw CaskAdoptionError.installationTargetsUnavailable
                     }
                 } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
-                    if requireRecordedOwnership || receiptOnly { throw CaskAdoptionError.installationTargetsUnavailable }
                     continue
                 }
             }
