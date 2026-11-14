@@ -258,6 +258,12 @@ enum FaviconResolverTests {
         FaviconURLProtocol.fixtures.set(huge, html: prefix + "<link rel=icon href=/beyond-limit.png>")
         let bounded = await resolver.candidates(for: huge, configuration: configuration)
         precondition(bounded.map(\.path) == ["/favicon.ico"], "Do not parse bytes beyond the HTML budget")
+        let malformedTagHTML = String(repeating: "<", count: 8_192)
+        let malformedTagStart = ProcessInfo.processInfo.systemUptime
+        let malformedTagCandidates = FaviconResolver.candidates(in: malformedTagHTML, pageURL: page)
+        let malformedTagDuration = ProcessInfo.processInfo.systemUptime - malformedTagStart
+        precondition(malformedTagCandidates.map(\.path) == ["/favicon.ico"] && malformedTagDuration < 1,
+                     "An unterminated tag must stop parsing without repeatedly rescanning its suffix")
         for (name, opening, closing) in [
             ("script", "<script>", "</script>"), ("style", "<style>", "</style>"), ("comment", "<!--", "-->")
         ] {

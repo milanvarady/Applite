@@ -403,7 +403,8 @@ The default run compiles the production resolver and uses an isolated URLProtoco
 fixture session. It checks declared icon and touch-icon links, redirects, HTML
 base URLs, relative/protocol-relative paths, entity escaping, duplicates, URL
 scheme/credential rejection, candidate limits, concurrent/cached discovery,
-offline/HTTP/non-HTML failures, and the exact 128 KiB HTML cutoff.
+offline/HTTP/non-HTML failures, the exact 128 KiB HTML cutoff, and bounded parsing
+of unterminated tags.
 
 `--live` additionally checks the real Copilot CLI primary icon URL, resolves its
 metadata homepage, downloads the selected website icon, and decodes its pixels.

@@ -134,11 +134,12 @@ actor FaviconResolver {
                 continue
             }
 
-            guard html[index] == "<", let tagEnd = tagEnd(in: html, startingAt: index) else {
+            guard html[index] == "<" else {
                 visibleHTML.append(html[index])
                 index = html.index(after: index)
                 continue
             }
+            guard let tagEnd = tagEnd(in: html, startingAt: index) else { break }
 
             let tag = html[index...tagEnd]
             let afterTag = html.index(after: tagEnd)
