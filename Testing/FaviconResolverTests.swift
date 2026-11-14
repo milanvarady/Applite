@@ -134,6 +134,9 @@ enum FaviconResolverTests {
         ])
         precondition(FaviconResolver.candidates(in: "<link rel=icon href=/favicon.ico>", pageURL: page).count == 1)
         precondition(FaviconResolver.candidates(in: "", pageURL: URL(fileURLWithPath: "/tmp/fixture")).isEmpty)
+        let quotedScript = #"<meta content="Use <script> tags"><link rel=icon href=/assets/real.png>"#
+        precondition(FaviconResolver.candidates(in: quotedScript, pageURL: page).first?.path == "/assets/real.png",
+                     "Script text in an attribute must not hide a later real icon")
         let misleadingHead = """
         <head><!-- </head> --><script>const text = "</head>";</script>
         <style>.example::after { content: "</head>"; }</style>

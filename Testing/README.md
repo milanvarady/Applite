@@ -3,6 +3,13 @@
 Receipt-refresh fixtures preserve managed state across app-directory edits and
 verify busy-state lifetime and reconciliation after consent or detection changes.
 Ruby-only cask metadata is resolved using receipt artifacts.
+Receipt-only metadata requires a verified staged link. External searches retain
+matching tokens without creating unrelated view models; rescans refresh receipts
+after queued writes, and detection failures do not suppress update checks.
+Adoption rejects a newly selected copy, and mixed batches fail managed conflicts
+before waiting for eligible installs.
+Recorded dangling links do not block unrelated casks, and quoted script text in
+HTML attributes does not hide subsequent favicon links.
 
 ## Non-destructive external-install regression tests
 

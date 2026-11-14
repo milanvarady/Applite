@@ -96,6 +96,7 @@ final class BrewService {
         adoptionConsent: BrewAdoptionConsent? = nil,
         reconcile: (@MainActor () async throws -> Void)? = nil
     ) -> Task<Void, Never> {
+        let confirmedAppURL = confirmedConfiguration == nil ? nil : vm.externalAppURL
         return runTask(for: vm) {
             let configuration = confirmedConfiguration ?? .current
             Self.logger.info("Cask \"\(vm.token)\" installation started")
@@ -115,6 +116,13 @@ final class BrewService {
                 try Task.checkCancellation()
                 if preflight.managedConflicts.contains(vm.fullToken) {
                     throw CaskAdoptionError.managedByAnotherCask
+                }
+                if confirmedConfiguration != nil {
+                    guard let confirmedAppURL, let detectedURL = preflight.external[vm.fullToken],
+                          confirmedAppURL.resolvingSymlinksInPath().standardizedFileURL
+                            == detectedURL.resolvingSymlinksInPath().standardizedFileURL else {
+                        throw CaskAdoptionError.confirmationExpired
+                    }
                 }
                 if let appURL = preflight.external[vm.fullToken] {
                     guard confirmedConfiguration != nil else {

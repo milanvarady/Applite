@@ -63,10 +63,15 @@ enum InstalledAppLocator {
         for version in versions.sorted(by: { $0.lastPathComponent > $1.lastPathComponent }) {
             let values = try version.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
             guard values.isDirectory == true, values.isSymbolicLink != true else { continue }
-            let timestamps = try fm.contentsOfDirectory(
-                at: metadata.appendingPathComponent(version.lastPathComponent),
-                includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey], options: [.skipsHiddenFiles]
-            ).sorted { $0.lastPathComponent > $1.lastPathComponent }
+            let timestamps: [URL]
+            do {
+                timestamps = try fm.contentsOfDirectory(
+                    at: metadata.appendingPathComponent(version.lastPathComponent),
+                    includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey], options: [.skipsHiddenFiles]
+                ).sorted { $0.lastPathComponent > $1.lastPathComponent }
+            } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                timestamps = []
+            }
             var installed: RecordedCask?
             for timestamp in timestamps {
                 let values = try timestamp.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
@@ -90,11 +95,11 @@ enum InstalledAppLocator {
                     }
                 }
             }
-            guard let installed, let artifacts = installed.artifacts ?? receipt?.uninstall_artifacts else {
+            guard let artifacts = installed?.artifacts ?? receipt?.uninstall_artifacts else {
                 throw CaskAdoptionError.installationTargetsUnavailable
             }
             var staged = version
-            if let onlyPath = installed.url_specs?.only_path {
+            if let onlyPath = installed?.url_specs?.only_path {
                 guard isSafeRelativePath(onlyPath) else { throw CaskAdoptionError.installationTargetsUnavailable }
                 staged.appendPathComponent(onlyPath)
             }
@@ -120,13 +125,22 @@ enum InstalledAppLocator {
                     guard try entry.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink == true else {
                         throw CaskAdoptionError.installationTargetsUnavailable
                     }
-                    let resolved = entry.resolvingSymlinksInPath().standardizedFileURL
-                    guard try resolved.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true else {
+                } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                    throw CaskAdoptionError.installationTargetsUnavailable
+                }
+                let destination = try fm.destinationOfSymbolicLink(atPath: entry.path)
+                let target = (destination as NSString).isAbsolutePath
+                    ? URL(fileURLWithPath: destination)
+                    : entry.deletingLastPathComponent().appendingPathComponent(destination)
+                let resolved = target.resolvingSymlinksInPath().standardizedFileURL
+                do {
+                    let attributes = try fm.attributesOfItem(atPath: resolved.path)
+                    guard attributes[.type] as? FileAttributeType == .typeDirectory else {
                         throw CaskAdoptionError.installationTargetsUnavailable
                     }
                     result.insert(resolved)
                 } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
-                    throw CaskAdoptionError.installationTargetsUnavailable
+                    continue
                 }
             }
         }

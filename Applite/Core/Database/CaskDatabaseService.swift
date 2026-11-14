@@ -118,6 +118,20 @@ struct CaskDatabaseService {
         }
     }
 
+    func searchFullTokens(query: String) async throws -> [CaskId] {
+        guard let pattern = FTS5Pattern(matchingAllPrefixesIn: query) else { return [] }
+        let request: SQLRequest<String> = """
+            SELECT casks.fullToken
+            FROM casks
+            JOIN cask_fts ON cask_fts.rowid = casks.rowid
+            WHERE cask_fts MATCH \(pattern)
+            ORDER BY bm25(cask_fts)
+            """
+        return try await pool().read { db in
+            try request.fetchAll(db)
+        }
+    }
+
     // MARK: - Sync Operations
 
     /// Syncs cask records from API data: deletes removed casks and upserts all records.
