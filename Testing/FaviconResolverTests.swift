@@ -150,6 +150,13 @@ enum FaviconResolverTests {
         precondition(FaviconResolver.candidates(in: quotedHead, pageURL: page).map(\.path) == [
             "/right.png", "/favicon.ico"
         ], "Head-like text inside quoted attributes must not close the head")
+        let quotedTags = """
+        <head><meta content='<base href="https://other.invalid/"><link rel="icon" href="/wrong.png">'>
+        <link rel=icon href="right.png"></head>
+        """
+        precondition(FaviconResolver.candidates(in: quotedTags, pageURL: page).map(\.absoluteString) == [
+            "https://example.invalid/docs/right.png", "https://example.invalid/favicon.ico"
+        ], "Tag-like text in quoted attributes must not alter icon discovery")
         let references = """
         <base href="&#47;assets&#x2f;">
         <link rel=icon href="favicon&copy;.png?x=1&amp;y=&quot;q&quot;">

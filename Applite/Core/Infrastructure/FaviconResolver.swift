@@ -82,11 +82,9 @@ actor FaviconResolver {
             #/(?is)<!--.*?(?:-->|$)|<script\b[^>]*>.*?(?:</script\s*>|$)|<style\b[^>]*>.*?(?:</style\s*>|$)/#,
             with: ""
         )
-        let headEnd = visibleHTML.matches(of: #/(?is)<(?:[^"'<>]|"[^"]*"|'[^']*')*>/#)
-            .first { $0.0.wholeMatch(of: #/(?i)</head\s*>/#) != nil }?.range.lowerBound
-            ?? visibleHTML.endIndex
-        let head = String(visibleHTML[..<headEnd])
-        let tags = head.matches(of: #/(?is)<(link|base)\b(?:[^"'<>]|"[^"]*"|'[^']*')*>/#)
+        let tags = visibleHTML.matches(of: #/(?is)<(?:[^"'<>]|"[^"]*"|'[^']*')*>/#)
+            .prefix { $0.0.wholeMatch(of: #/(?i)</head\s*>/#) == nil }
+            .compactMap { $0.0.wholeMatch(of: #/(?is)<(link|base)\b(?:[^"'<>]|"[^"]*"|'[^']*')*>/#) }
         var baseURL = pageURL
         if let base = tags.first(where: {
             $0.1.lowercased() == "base" && attributes(in: String($0.0))["href"] != nil
