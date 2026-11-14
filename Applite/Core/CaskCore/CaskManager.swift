@@ -285,7 +285,10 @@ final class CaskManager {
                         cask, arguments: arguments, confirmedConfiguration: configuration,
                         adoptionConsent: BrewAdoptionConsent(validate: validateConsent)
                     ) {
-                        try await self.dataLoader.refreshInstalled(configuration: configuration)
+                        try await self.dataLoader.refreshInstalled(configuration: configuration, onExternalScanFailure: { error in
+                            Self.logger.error("External app detection failed: \(error.localizedDescription)")
+                            self.alert.show(error: error, title: "Couldn't detect externally installed apps")
+                        })
                         guard cask.isInstalled else {
                             throw CaskAdoptionError.notManaged
                         }
