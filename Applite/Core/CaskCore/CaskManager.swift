@@ -139,17 +139,53 @@ final class CaskManager {
         invalidateAdoptionConsent()
         detectionSettingTask?.cancel()
         dataLoader.invalidateExternalInstallations()
-        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
+        let configuration = BrewOperationConfiguration.current
+        let detectionEnabled = UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps)
+        let needsReceipts = !dataLoader.hasReceiptSnapshot(for: configuration)
+        if !detectionEnabled {
             registry.markExternalInstallations(appURLs: [:])
-            return
         }
+        guard detectionEnabled || (debounce && needsReceipts) else { return }
+        if needsReceipts {
+            dataLoader.invalidateInstalledReceipts()
+            registry.markInstalled(tokens: [])
+            registry.markOutdated(tokens: [])
+            outdatedRefreshFailed = true
+        }
+        let generation = adoptionConsentGeneration
         let surface = errorSurface ?? alert
         detectionSettingTask = Task {
             do {
                 if debounce { try await Task.sleep(for: .milliseconds(300)) }
                 try Task.checkCancellation()
-                try await dataLoader.refreshExternalInstallations()
+                try configuration.validateCurrent()
+                if needsReceipts {
+                    guard await BrewPaths.isBrewPathValid(at: configuration.executable) else {
+                        Self.logger.warning("Cannot refresh receipts: selected Homebrew path is invalid")
+                        return
+                    }
+                    try await brewService.runSerialized {
+                        guard generation == self.adoptionConsentGeneration else { throw CancellationError() }
+                        try configuration.validateCurrent()
+                        try await self.dataLoader.refreshInstalled(configuration: configuration)
+                        do {
+                            try await self.dataLoader.refreshOutdated(configuration: configuration)
+                            self.outdatedRefreshFailed = false
+                        } catch is CancellationError {
+                            throw CancellationError()
+                        } catch CaskAdoptionError.configurationChanged {
+                            throw CaskAdoptionError.configurationChanged
+                        } catch {
+                            self.outdatedRefreshFailed = true
+                            Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
+                        }
+                    }
+                } else {
+                    try await dataLoader.refreshExternalInstallations(configuration: configuration)
+                }
             } catch is CancellationError {
+                return
+            } catch CaskAdoptionError.configurationChanged {
                 return
             } catch {
                 Self.logger.error("External app detection failed: \(error.localizedDescription)")
