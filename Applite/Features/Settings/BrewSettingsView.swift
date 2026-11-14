@@ -19,8 +19,6 @@ struct BrewSettingsView: View {
     @AppStorage(Preferences.customUserBrewPath) var customUserBrewPath
     @AppStorage(Preferences.brewPathOption) var brewPathOption
     @AppStorage(Preferences.annexUpdateFrequency) var annexUpdateFrequency
-    @AppStorage(Preferences.appdirOn) private var appdirOn
-    @AppStorage(Preferences.appdirPath) private var appdirPath
 
     /// Applite's own annex brew is the selected one.
     var isUsingAnnexBrew: Bool { brewPathOption == BrewPaths.PathOption.annex.rawValue }
@@ -52,7 +50,7 @@ struct BrewSettingsView: View {
         .onAppear {
             previousBrewOption = brewPathOption
         }
-        .onChange(of: [String(brewPathOption), customUserBrewPath, String(appdirOn), appdirPath]) { _, _ in
+        .onChange(of: [String(brewPathOption), customUserBrewPath]) { _, _ in
             caskManager.selectedHomebrewDidChange(surfacingErrorsIn: alert)
         }
     }

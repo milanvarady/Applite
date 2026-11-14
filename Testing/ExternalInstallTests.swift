@@ -2487,6 +2487,20 @@ enum ExternalInstallTests {
         let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
         let manager = CaskManager(dataLoader: loader, registry: registry, brewService: service)
         let vm = registry.viewModel(for: stable)
+        let settingsAlert = AlertManager()
+        manager.selectedAppDetails = vm
+        defaults.setValue(secondBrew.path + "-partial", for: Preferences.customUserBrewPath)
+        manager.selectedHomebrewDidChange(surfacingErrorsIn: settingsAlert)
+        precondition(manager.selectedAppDetails == nil, "Changing configuration must close stale details")
+        let invalidDeadline = Date().addingTimeInterval(5)
+        while manager.isResolvingInstalledState && Date() < invalidDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(!manager.isResolvingInstalledState && settingsAlert.current == nil,
+                     "An incomplete brew path must not show a modal receipt failure")
+        manager.uninstall(vm)
+        precondition(!fm.fileExists(atPath: secondPrefix.appendingPathComponent("uninstall-started").path),
+                     "Invalid paths must keep Homebrew writes blocked")
         defaults.setValue(secondBrew.path, for: Preferences.customUserBrewPath)
         manager.selectedHomebrewDidChange(surfacingErrorsIn: manager.alert)
         precondition(!vm.isInstalled && manager.isResolvingInstalledState,

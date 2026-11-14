@@ -156,6 +156,7 @@ final class CaskManager {
 
     func selectedHomebrewDidChange(surfacingErrorsIn surface: AlertManager) {
         invalidateAdoptionConsent()
+        selectedAppDetails = nil
         detectionSettingTask?.cancel()
         brewConfigurationTask?.cancel()
         homebrewConfigurationGeneration &+= 1
@@ -170,7 +171,13 @@ final class CaskManager {
             do {
                 try await Task.sleep(for: .milliseconds(300))
                 try Task.checkCancellation()
+                let isValid = await BrewPaths.isBrewPathValid(at: configuration.executable)
+                try Task.checkCancellation()
+                try configuration.validateCurrent()
+                guard isValid else { return }
             } catch is CancellationError {
+                return
+            } catch CaskAdoptionError.configurationChanged {
                 return
             } catch {
                 surface.show(error: error, title: "Couldn't load installed apps")
