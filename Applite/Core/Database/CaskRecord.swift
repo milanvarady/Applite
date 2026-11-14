@@ -53,6 +53,9 @@ struct CaskRecord: Equatable {
 
     /// Number of downloads in last 365 days
     var downloadsIn365days: Int
+
+    /// True when Homebrew installs font files for this cask.
+    var isFontCask: Bool = false
 }
 
 // MARK: - Persistence Types
@@ -116,6 +119,7 @@ extension CaskRecord {
         self.homepageURL = dto.homepage.isEmpty ? nil : dto.homepage
         self.pkgInstaller = dto.url.hasSuffix("pkg")
         self.downloadsIn365days = downloadsIn365days
+        self.isFontCask = dto.isFontCask
 
         // Determine warning type
         if dto.disabled {

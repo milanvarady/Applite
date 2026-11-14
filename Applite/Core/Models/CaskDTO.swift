@@ -24,6 +24,7 @@ struct CaskDTO: Decodable {
     let disabled: Bool
     let disableDate: String?
     let disableReason: String?
+    let artifacts: [CaskArtifact]?
 
     enum CodingKeys: String, CodingKey {
         case token
@@ -40,5 +41,14 @@ struct CaskDTO: Decodable {
         case disabled
         case disableDate = "disable_date"
         case disableReason = "disable_reason"
+        case artifacts
     }
+
+    var isFontCask: Bool {
+        artifacts?.contains { $0.font?.isEmpty == false } == true
+    }
+}
+
+struct CaskArtifact: Decodable {
+    let font: [String]?
 }

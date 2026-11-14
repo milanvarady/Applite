@@ -22,6 +22,8 @@ import OSLog
 /// `refreshRemoteCategories()` is the separate, best-effort step that writes the cache. It never
 /// throws into the caller, so a blocked or failing fetch can never break catalog loading.
 enum CategoryProvider {
+    static let fontsCategoryID = "Fonts"
+
     /// Schema version this app build understands. A remote file with a different version is
     /// ignored (the bundled/cached copy keeps being used) so old apps never mis-parse new data.
     static let supportedSchemaVersion = 1
@@ -42,7 +44,7 @@ enum CategoryProvider {
         // 1. Cached remote copy
         if let data = try? Data(contentsOf: AppPaths.categories),
            let categories = decode(data) {
-            return categories
+            return addingFontsCategoryIfNeeded(to: categories)
         }
 
         // 2. Bundled fallback
@@ -53,7 +55,12 @@ enum CategoryProvider {
             return []
         }
 
-        return categories
+        return addingFontsCategoryIfNeeded(to: categories)
+    }
+
+    private static func addingFontsCategoryIfNeeded(to categories: [Category]) -> [Category] {
+        guard !categories.contains(where: { $0.id == fontsCategoryID }) else { return categories }
+        return categories + [Category(id: fontsCategoryID, casks: [], sfSymbol: "textformat")]
     }
 
     /// Decodes a category catalog, returning its categories only when the schema version is
