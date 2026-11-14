@@ -996,17 +996,16 @@ final class BrewService {
 
         var perCaskError: [String: String] = [:]
         var completeOutput = ""
+        var configurationChanged = false
 
         do {
             for try await line in Shell.stream(configuration.executable, arguments, pty: true) {
                 if Task.isCancelled { break }
                 completeOutput += line + "\n"
-                try configuration.validateCurrent()
+                if configuration != .current { configurationChanged = true }
+                guard !configurationChanged else { continue }
                 applyBatchLine(line, kind: kind, lookup: lookup, perCaskError: &perCaskError)
             }
-        } catch CaskAdoptionError.configurationChanged {
-            await failBatchForConfigurationChange(vms, output: completeOutput)
-            return
         } catch {
             // A non-zero exit is expected when any cask fails (reconcile decides per-cask outcome).
             // A user cancel also throws here — don't log that as an error.
@@ -1017,6 +1016,10 @@ final class BrewService {
 
         if Task.isCancelled {
             for vm in vms { vm.progressState = .idle }
+            return
+        }
+        if configurationChanged || configuration != .current {
+            await failBatchForConfigurationChange(vms, output: completeOutput)
             return
         }
 
