@@ -21,6 +21,118 @@ import OSLog
 enum InstalledAppLocator {
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "InstalledAppLocator")
 
+    private struct RecordedCask: Decodable {
+        struct URLSpecs: Decodable {
+            let only_path: String?
+        }
+        let artifacts: [CaskArtifact]?
+        let url_specs: URLSpecs?
+    }
+
+    private struct InstalledReceipt: Decodable {
+        let uninstall_artifacts: [CaskArtifact]?
+    }
+
+    nonisolated static func recordedAppURLs(token: String, executable: URL) throws -> [URL] {
+        guard !token.isEmpty, token != ".", token != "..",
+              (token as NSString).lastPathComponent == token else {
+            throw CaskAdoptionError.installationTargetsUnavailable
+        }
+        let caskroom = executable.deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Caskroom").appendingPathComponent(token)
+        let fm = FileManager.default
+        let versions: [URL]
+        do {
+            versions = try fm.contentsOfDirectory(
+                at: caskroom, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles]
+            )
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            throw CaskAdoptionError.installationTargetsUnavailable
+        }
+        guard !versions.isEmpty else { throw CaskAdoptionError.installationTargetsUnavailable }
+        let metadata = caskroom.appendingPathComponent(".metadata")
+        let receipt: InstalledReceipt?
+        do {
+            receipt = try JSONDecoder().decode(
+                InstalledReceipt.self, from: Data(contentsOf: metadata.appendingPathComponent("INSTALL_RECEIPT.json"))
+            )
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            receipt = nil
+        }
+        var result: Set<URL> = []
+        for version in versions.sorted(by: { $0.lastPathComponent > $1.lastPathComponent }) {
+            let values = try version.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
+            guard values.isDirectory == true, values.isSymbolicLink != true else { continue }
+            let timestamps = try fm.contentsOfDirectory(
+                at: metadata.appendingPathComponent(version.lastPathComponent),
+                includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey], options: [.skipsHiddenFiles]
+            ).sorted { $0.lastPathComponent > $1.lastPathComponent }
+            var installed: RecordedCask?
+            for timestamp in timestamps {
+                let values = try timestamp.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
+                guard values.isDirectory == true, values.isSymbolicLink != true else { continue }
+                let json = timestamp.appendingPathComponent("Casks").appendingPathComponent("\(token).json")
+                do {
+                    installed = try JSONDecoder().decode(RecordedCask.self, from: Data(contentsOf: json))
+                    break
+                } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                    continue
+                }
+            }
+            guard let installed, let artifacts = installed.artifacts ?? receipt?.uninstall_artifacts else {
+                throw CaskAdoptionError.installationTargetsUnavailable
+            }
+            var staged = version
+            if let onlyPath = installed.url_specs?.only_path {
+                guard isSafeRelativePath(onlyPath) else { throw CaskAdoptionError.installationTargetsUnavailable }
+                staged.appendPathComponent(onlyPath)
+            }
+            guard isInside(staged.resolvingSymlinksInPath(), directory: version.resolvingSymlinksInPath()) else {
+                throw CaskAdoptionError.installationTargetsUnavailable
+            }
+            for artifact in artifacts {
+                guard let app = artifact.app else { continue }
+                guard artifact.bundleName != nil,
+                      let source = app.compactMap({ value -> String? in
+                          if case .source(let path) = value { return path }
+                          return nil
+                      }).first,
+                      CaskArtifact.isSafeAppTargetPath(source) else {
+                    throw CaskAdoptionError.installationTargetsUnavailable
+                }
+                let entry = staged.appendingPathComponent(source)
+                guard isInside(entry.deletingLastPathComponent().resolvingSymlinksInPath(),
+                               directory: version.resolvingSymlinksInPath()) else {
+                    throw CaskAdoptionError.installationTargetsUnavailable
+                }
+                do {
+                    guard try entry.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink == true else {
+                        throw CaskAdoptionError.installationTargetsUnavailable
+                    }
+                    let resolved = entry.resolvingSymlinksInPath().standardizedFileURL
+                    guard try resolved.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true else {
+                        throw CaskAdoptionError.installationTargetsUnavailable
+                    }
+                    result.insert(resolved)
+                } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                    throw CaskAdoptionError.installationTargetsUnavailable
+                }
+            }
+        }
+        return result.sorted { $0.path < $1.path }
+    }
+
+    private nonisolated static func isSafeRelativePath(_ path: String) -> Bool {
+        !(path as NSString).isAbsolutePath && !path.contains("\0")
+            && path.components(separatedBy: "/").allSatisfy { !$0.isEmpty && $0 != "." && $0 != ".." }
+    }
+
+    private nonisolated static func isInside(_ url: URL, directory: URL) -> Bool {
+        let parent = directory.standardizedFileURL.path
+        let child = url.standardizedFileURL.path
+        return child == parent || child.hasPrefix(parent.hasSuffix("/") ? parent : parent + "/")
+    }
+
     nonisolated static var applicationDirectories: [URL] {
         let configured = appDirectory
         return [configured] + [

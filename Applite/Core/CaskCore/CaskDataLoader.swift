@@ -19,6 +19,7 @@ final class CaskDataLoader {
     private var externalScanGeneration = 0
     private var installedRefreshGeneration = 0
     private var receiptConfiguration: BrewOperationConfiguration?
+    private var receiptTokens: Set<CaskId> = []
     private var externalScanTask: Task<[CaskId: URL], Error>?
 
     private let logger = Logger(
@@ -116,7 +117,7 @@ final class CaskDataLoader {
     /// and marks them installed in the registry.
     func refreshInstalled(
         configuration: BrewOperationConfiguration = .current,
-        scan: @escaping @Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL] = ExternalAppDetector.scan
+        scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil
     ) async throws {
         installedRefreshGeneration &+= 1
         let generation = installedRefreshGeneration
@@ -127,6 +128,7 @@ final class CaskDataLoader {
         guard generation == installedRefreshGeneration else { throw CancellationError() }
         _ = registry.viewModels(for: records)
         registry.markInstalled(tokens: tokens)
+        receiptTokens = tokens
         receiptConfiguration = configuration
 
         let scanGeneration = externalScanGeneration &+ 1
@@ -157,12 +159,13 @@ final class CaskDataLoader {
     func invalidateInstalledReceipts() {
         installedRefreshGeneration &+= 1
         receiptConfiguration = nil
+        receiptTokens = []
         invalidateExternalInstallations()
     }
 
     func refreshExternalInstallations(
         configuration: BrewOperationConfiguration = .current,
-        scan: @escaping @Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL] = ExternalAppDetector.scan
+        scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil
     ) async throws {
         invalidateExternalInstallations()
         let generation = externalScanGeneration
@@ -178,8 +181,20 @@ final class CaskDataLoader {
         guard generation == externalScanGeneration, configuration == .current,
               UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else { return }
         registry.updateExistingViewModels(for: catalog, unchangedSince: snapshots)
-        let tokens = Set(registry.installedViewModels.map(\.fullToken))
-        let task = Task.detached { try await scan(catalog, configuration.applicationDirectories, tokens) }
+        let tokens = receiptConfiguration == configuration
+            ? receiptTokens : Set(registry.installedViewModels.map(\.fullToken))
+        let task = Task.detached {
+            if let scan {
+                return try await scan(catalog, configuration.applicationDirectories, tokens)
+            }
+            let managedPaths = try ExternalAppDetector.managedBundlePaths(
+                tokens: tokens, executable: configuration.executable
+            )
+            return try await ExternalAppDetector.scan(
+                catalog: catalog, directories: configuration.applicationDirectories,
+                managedTokens: tokens, excluding: managedPaths
+            )
+        }
         externalScanTask = task
         defer { if generation == externalScanGeneration { externalScanTask = nil } }
         let appURLs = try await withTaskCancellationHandler {
