@@ -42,6 +42,8 @@ final class CaskManager {
 
     /// True while a manual catalog refresh is running (toolbar action).
     private(set) var isRefreshingCatalog: Bool = false
+    private var outdatedRefreshCount = 0
+    var isRefreshingOutdated: Bool { outdatedRefreshCount > 0 }
 
     /// True when the last `brew outdated` check failed (or couldn't run). `UpdateView` reads this so
     /// an empty outdated list shows "couldn't check for updates" instead of a false "all up to date"
@@ -420,6 +422,8 @@ final class CaskManager {
     /// Serialized behind the brew queue (like `loadInstalledState`) so it can't race an install's
     /// optimistic write, and updates `outdatedRefreshFailed` so the empty-state UI stays accurate.
     func refreshOutdated() async throws {
+        outdatedRefreshCount += 1
+        defer { outdatedRefreshCount -= 1 }
         do {
             try await brewService.runSerialized {
                 try await self.dataLoader.refreshOutdated()

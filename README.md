@@ -82,7 +82,54 @@ or
 
 Minimum OS version: **macOS 14+**. Universal binary, Apple Silicon and Intel.
 
+## Single-instance behavior
+
+Only one Applite instance runs per macOS user, including copies launched from
+different locations with the same bundle identifier. Launching it again brings
+the existing main window forward or reopens it when needed, rather than starting
+another Homebrew/database session or showing a routine "already running" warning.
+The startup lock is released automatically when the process exits, including
+after a crash. Lock or handoff errors are reported instead of starting unprotected.
+
+When upgrading, quit any older copies that are already running once. The new
+version does not terminate another copy's in-progress Homebrew work.
+
+All self-uninstall entry points share **Settings > Uninstall**. Choosing Uninstall
+from the app menu or optional diagnostic self-card selects that pane and opens or focuses the
+existing Settings window instead of creating a separate uninstaller.
+
+The app menu's **Check for Updates...** action selects and opens or focuses
+**Settings > Updates** before starting the existing Sparkle update check.
+It remains disabled while a check is in progress.
+
+The main window has a persistent bottom status bar with a **Refresh App Catalog**
+button and a shortcut to **Active Tasks**. It shows startup/setup, catalog refresh,
+installed-app checks, queued/running installs, updates, uninstalls, and failed tasks.
+Failed tasks remain available for inspection but do not leave a spinner running.
+Downloads show Homebrew's real percentage; bulk installs/updates show completed
+app counts. Catalog refresh uses an indeterminate spinner, not an estimated
+percentage, and the catalog remains available to browse. Refresh is disabled while
+a refresh, installed-state check, standalone app-update check, startup/setup, or
+Homebrew maintenance is running. Standalone update checks and retries show their
+own busy status instead of Ready or an old failure.
+
+App names stay in their human-readable form. Clicking a name opens **Get Info**,
+with loading feedback while Homebrew retrieves details; it no longer toggles all
+cards to cask tokens. The info window shows the app name, description, available
+version, installation details, source, links, download size when available, and
+deprecation/disablement information. Homebrew tokens remain selectable there.
+Cmd-click continues to open the app's website.
+
+**Include Self-Updating Apps** is configured in Settings, not duplicated in the
+Updates toolbar. Updates retains its refresh button and search.
+
+Applite does not show itself in the app lists by default. Its update and uninstall
+actions remain in the app menu and Settings. A default-off, internal developer
+preference can restore the Installed self-card for diagnostics; see the
+[diagnostic instructions](Testing/README.md#optional-applite-self-card).
+
 ## Built With
+
 
 Swift and SwiftUI, targeting macOS 14 so `@Observable` and `NavigationSplitView` are available without back-deployment shims. No Combine. The cask catalog is a local SQLite database (GRDB.swift, WAL mode) synced from the Homebrew JSON API, with FTS5 and BM25 ranking for full-catalog search. Loading is two-stage: SQLite paints the UI immediately, then `brew list --cask` and `brew outdated --cask` fill in installed and outdated state reactively, so nothing blocks on the brew CLI.
 

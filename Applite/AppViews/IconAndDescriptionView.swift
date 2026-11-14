@@ -9,7 +9,8 @@ import SwiftUI
 
 struct IconAndDescriptionView: View {
     var cask: CaskViewModel
-    @AppStorage("showToken") var showToken: Bool = false
+    var isLoadingDetails: Bool
+    var showDetails: () -> Void
     @Environment(\.openURL) private var openURL
     
     var body: some View {
@@ -24,17 +25,29 @@ struct IconAndDescriptionView: View {
             }
 
             // Name and description
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 4) {
                 Button {
-                    // Cmd+click is reserved for opening the homepage (handled
-                    // by the outer simultaneousGesture); don't also toggle the token.
+                    // The outer gesture owns Cmd-click; do not also open details.
                     guard !NSEvent.modifierFlags.contains(.command) else { return }
-                    showToken.toggle()
+                    showDetails()
                 } label: {
-                    Text(showToken ? cask.token : cask.name)
+                    Text(cask.name)
                         .font(.system(size: 16, weight: .bold))
+                        .overlay(alignment: .bottom) {
+                            if isLoadingDetails {
+                                ProgressView()
+                                    .progressViewStyle(.linear)
+                                    .controlSize(.mini)
+                                    .frame(height: 2)
+                                    .offset(y: 3)
+                                    .accessibilityHidden(true)
+                            }
+                        }
                 }
                 .buttonStyle(.plain)
+                .disabled(isLoadingDetails)
+                .accessibilityLabel("Show details for \(cask.name)")
+                .help(isLoadingDetails ? Text("Loading app details...") : Text("Show app details"))
 
                 Text(cask.descriptionText)
                     .foregroundStyle(.secondary)

@@ -246,6 +246,12 @@ enum ExternalInstallTests {
           --version) echo "Homebrew fixture" ;;
           list)
             if [ -f "$fixture_dir/managed" ]; then echo "example/tap/sample"; fi ;;
+          outdated)
+            if [ -f "$fixture_dir/fail-outdated" ]; then exit 1; fi
+            if [ -f "$fixture_dir/pause-outdated" ]; then
+              touch "$fixture_dir/outdated-started"
+              while [ ! -f "$fixture_dir/resume-outdated" ]; do sleep 0.02; done
+            fi ;;
           install)
             printf '%s\\n' "$@" > "$fixture_dir/arguments"
             if [ -f "$fixture_dir/fail" ]; then
@@ -301,6 +307,7 @@ enum ExternalInstallTests {
             root: root, loader: loader, registry: registry, vm: tapVM,
             appURL: helper, customApps: customApps, service: service
         )
+        try await testOutdatedRefreshLifetime(root: root, loader: loader, registry: registry, service: service)
         print("PASS: detection, migration/FTS, identity/totals, default-enabled setting/disable guards, and adoption success/failure")
     }
 
@@ -398,6 +405,33 @@ enum ExternalInstallTests {
         try await oldScan.value
         precondition(vm.externalAppURL == newerApp,
                      "An old scan must not win after detection was disabled and re-enabled, even with restored settings")
+    }
+
+    @MainActor
+    private static func testOutdatedRefreshLifetime(
+        root: URL, loader: CaskDataLoader, registry: CaskViewModelRegistry, service: BrewService
+    ) async throws {
+        let manager = CaskManager(dataLoader: loader, registry: registry, brewService: service)
+        let fm = FileManager.default
+        let failure = root.appendingPathComponent("fail-outdated")
+        try Data().write(to: failure)
+        do {
+            try await manager.refreshOutdated()
+            preconditionFailure("The fixture's failed update check must throw")
+        } catch { }
+        precondition(manager.outdatedRefreshFailed && !manager.isRefreshingOutdated)
+        try fm.removeItem(at: failure)
+        try Data().write(to: root.appendingPathComponent("pause-outdated"))
+        let task = Task { try await manager.refreshOutdated() }
+        let started = root.appendingPathComponent("outdated-started")
+        let deadline = Date().addingTimeInterval(5)
+        while !fm.fileExists(atPath: started.path) && Date() < deadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(fm.fileExists(atPath: started.path) && manager.isRefreshingOutdated)
+        try Data().write(to: root.appendingPathComponent("resume-outdated"))
+        try await task.value
+        precondition(!manager.isRefreshingOutdated && !manager.outdatedRefreshFailed)
     }
 
     private actor ScanGate {

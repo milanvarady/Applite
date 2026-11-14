@@ -62,6 +62,9 @@ enum Preferences {
     static let categorySortOption = PreferenceKey("categorySortOption", default: CategorySortingOptions.mostDownloaded)
     static let hideUnpopularApps = PreferenceKey("hideUnpopularApps", default: false)
     static let hideDisabledApps = PreferenceKey("hideDisabledApps", default: false)
+
+    // Developer diagnostics, not exposed in Settings
+    static let showAppliteInInstalledList = PreferenceKey("showAppliteInInstalledList", default: false)
 }
 
 // MARK: - SwiftUI @AppStorage support

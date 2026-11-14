@@ -40,12 +40,15 @@ struct ContentView: View {
         ZStack {
             mainNavigation
 
-            // `bootstrap.phase` is the single owned "is brew usable" state, so this overlay — up for
-            // the annex install *and* every broken outcome — is the only place a broken brew changes
-            // the UI. Nothing else branches on it (E1).
+            // `bootstrap.phase` owns brew readiness. This overlay handles setup and broken outcomes;
+            // the footer only reports the same phase and gates its own actions.
             if caskManager.bootstrap.needsSetupOverlay {
                 setupOverlay
             }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            AppStatusBar()
+                .disabled(modifyingBrew)
         }
         // The window's one alert surface, presented once at its root: brew failures, load failures
         // and errors raised by any view in this window queue here (F5/P3-5). Never bind this inside

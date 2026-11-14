@@ -50,7 +50,100 @@ Enable **Offer Manage with Homebrew**, then disable it separately: external stat
 filters, and counts should remain, while external cards show **Open** instead of
 **Manage with Homebrew**. Re-enable it to restore the management offer.
 
-## Guided VM harness
+## Non-destructive single-instance regression tests
+
+Run `bash Testing/run-single-instance-tests.sh` to exercise the production lock
+without launching Applite or touching its preferences, database, or Homebrew.
+Tests cover concurrent processes, ownership release, abrupt process exit, stale
+lock files, explicit I/O failures, and selecting Uninstall before opening Settings,
+including repeat requests when Uninstall is already selected.
+They also verify that the Updates pane is selected and Settings is opened or focused
+before exactly one update-check callback runs per request, including repeated requests.
+Status-summary cases cover simultaneous refresh/tasks, queued or running work,
+retained failures, measured download fractions, installed-state loading, unavailable
+update checks, and completed tasks returning to Ready without a stuck spinner.
+Standalone update-check retries are verified while paused in the fake brew:
+busy lifetime and refresh gating must remain active until completion.
+App-info fixtures verify friendly names, description/version metadata, and
+compatibility with older saved info values that lack those optional fields.
+
+For a manual UI check, launch Applite, then attempt to launch another copy with the
+same bundle identifier. The existing main window should come forward without an
+"already running" dialog or another persistent process. Repeat with the main
+window minimized or closed while Settings remains open; it should be restored or
+reopened. Quit and launch again to verify normal startup. Older copies that were
+already running before this fix must be quit once; the new version does not
+terminate another copy's in-progress Homebrew work.
+
+Also open **Settings > Uninstall**, then choose **Uninstall Applite...** from the app
+menu repeatedly and, with the [diagnostic self-card](#optional-applite-self-card)
+enabled, use its trash action. Each entry point should
+select and focus the same Settings window, retaining the current uninstall options.
+Repeat from another Settings tab and with Settings closed or minimized. Merely
+opening the pane must not start an uninstall; do not confirm an actual uninstall
+on a shared machine.
+
+Choose **Check for Updates...** from the app menu with Settings closed, on another
+tab, and already on Updates. Each request should select and focus **Settings > Updates**
+and start the existing Sparkle check once. While checking, the menu item should be
+disabled. Cancel or dismiss the result; do not install an update during this check.
+
+Choose **Refresh App Catalog** from the app menu. The main window should show a
+spinner and **Refreshing app catalog...** status throughout the existing refresh,
+without replacing the catalog or blocking browsing. The spinner and refresh label
+should clear when the operation finishes, returning to current activity or Ready;
+failures must still use the existing error alert. Also verify the status appears
+when a refresh is started from the Brew settings refresh prompt.
+
+In Updates, verify the self-updating-app checkbox and its info popover are absent
+from the toolbar, while Refresh and search remain. The self-updating-app preference
+must remain available in Settings and still control the next outdated-app check.
+
+Verify the bottom bar remains visible while idle and its refresh icon starts the
+same manual catalog refresh. It must disable during refresh, installed-state
+loading, startup/setup, or Homebrew maintenance, and re-enable afterward. Click the
+Tasks shortcut with running/queued tasks or retained failures and verify it opens
+Active Tasks, clearing any active search. In a disposable test environment, check
+install/update/uninstall labels, real download percentages, bulk completed counts,
+and failures that show a warning rather than an endless spinner. Opening Tasks or
+refreshing the catalog must not cancel an ongoing operation.
+
+Click an app's name in Discover, search, Installed, and Updates. It must keep its
+friendly name, show a loading indicator during the request, and open the same
+Get Info destination as the ellipsis/right-click menu. Other cards' names must not
+change. Verify the info window's friendly title, description, available version,
+and existing installation/source details; repeat the action and confirm the same
+unchanged info value focuses its existing window. Cmd-click must open only the
+homepage, not details. With an unavailable brew, the request must surface an error
+and re-enable the title/menu action for retry.
+
+## Optional Applite self-card
+
+There is no Advanced Debug settings pane. The internal preference
+`Preferences.showAppliteInInstalledList` defaults to **false**, including in Debug
+builds, so normal Installed lists do not contain Applite itself. The ordinary
+catalog entry stays excluded from app grids regardless of this preference; opting
+in restores only the dedicated diagnostic self-card in Installed.
+
+Quit Applite before changing the preference, then reopen it afterward. To enable:
+
+```sh
+defaults write dev.aerolite.Applite showAppliteInInstalledList -bool true
+```
+
+To disable again:
+
+```sh
+defaults write dev.aerolite.Applite showAppliteInInstalledList -bool false
+```
+
+Use your build's bundle identifier instead if it differs. These commands affect
+only self-card visibility, not installed-app detection, Homebrew receipts, or
+update/uninstall availability in the app menu and Settings. Verify a fresh
+preference domain hides the card, opting in shows exactly one self-card only in
+Installed, and opting out hides it again without changing the other app cards.
+
+## Guided end-to-end harness
 
 `applite_test.py` is a **guided** end-to-end test harness. It doesn't automate the
 UI — *you* perform each action in the real Applite window, and after each step the
