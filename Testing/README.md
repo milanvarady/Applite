@@ -2,6 +2,8 @@
 
 ## Non-destructive external-install regression tests
 
+Creating a missing custom app directory must not change its captured Homebrew configuration.
+
 Hidden-self fixtures ensure an external Applite bundle contributes neither a row
 nor a badge. A paused reconciliation also verifies the real operation remains busy
 in the status summary until post-install ownership refresh completes.
