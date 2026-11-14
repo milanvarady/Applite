@@ -80,6 +80,26 @@ enum InstalledAppLocator {
         return result.sorted { $0.path < $1.path }
     }
 
+    nonisolated static func metadataAppURL(
+        token: String, displayName: String, preferredURL: URL?,
+        isManaged: Bool, configuration: BrewOperationConfiguration
+    ) throws -> URL? {
+        guard isManaged else { return preferredURL }
+        if let recorded = try recordedAppURLs(token: token, executable: configuration.executable).first {
+            return recorded
+        }
+        if let preferredURL {
+            do {
+                if try preferredURL.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
+                    return preferredURL
+                }
+            } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                // A managed operation may have moved the bundle since the last scan.
+            }
+        }
+        return appURL(token: token, displayName: displayName, configuration: configuration)
+    }
+
     /// Resolves the URL of the installed app for a cask.
     ///
     /// - Parameters:
@@ -88,10 +108,16 @@ enum InstalledAppLocator {
     /// - Returns: The URL of an existing `.app` bundle, or `nil` if none of the strategies located it.
     ///
     /// Pure disk/LaunchServices lookups — safe to call off the main actor.
-    nonisolated static func appURL(token: String, displayName: String) -> URL? {
-        let caskroom = BrewPaths.currentBrewDirectory
+    nonisolated static func appURL(
+        token: String, displayName: String, configuration: BrewOperationConfiguration = .current
+    ) -> URL? {
+        let caskroom = configuration.executable.deletingLastPathComponent().deletingLastPathComponent()
             .appending(path: "Caskroom", directoryHint: .isDirectory)
             .appending(path: token, directoryHint: .isDirectory)
+        guard let appDirectory = configuration.applicationDirectories.first else {
+            logger.error("No application directory configured while locating cask \(token, privacy: .public)")
+            return nil
+        }
 
         let artifacts = artifacts(caskDirectory: caskroom, token: token)
 

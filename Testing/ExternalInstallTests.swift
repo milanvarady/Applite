@@ -28,6 +28,7 @@ enum ExternalInstallTests {
         try fm.createDirectory(at: root, withIntermediateDirectories: true)
         defer { try! fm.removeItem(at: root) }
         try testInstalledAppMetadata(root: root)
+        try testManagedMetadataResolution(root: root)
 
         let systemApps = root.appendingPathComponent("Applications", isDirectory: true)
         let userApps = root.appendingPathComponent("User Applications", isDirectory: true)
@@ -640,6 +641,88 @@ enum ExternalInstallTests {
             _ = try InstalledAppMetadata.read(at: app)
             preconditionFailure("Missing plists must report an error")
         } catch { }
+    }
+
+    @MainActor
+    private static func testManagedMetadataResolution(root: URL) throws {
+        let fm = FileManager.default
+        let apps = root.appendingPathComponent("Metadata recovery apps")
+        let token = "metadata-fixture"
+        let configurationA = BrewOperationConfiguration(
+            executable: root.appendingPathComponent("Metadata Homebrew A/bin/brew"),
+            appdirArguments: [], applicationDirectories: [apps]
+        )
+        let configurationB = BrewOperationConfiguration(
+            executable: root.appendingPathComponent("Metadata Homebrew B/bin/brew"),
+            appdirArguments: [], applicationDirectories: [apps]
+        )
+        func writeApp(_ url: URL, version: String) throws {
+            let contents = url.appendingPathComponent("Contents")
+            try fm.createDirectory(at: contents, withIntermediateDirectories: true)
+            try PropertyListSerialization.data(
+                fromPropertyList: ["CFBundleIdentifier": "org.example.metadata", "CFBundleShortVersionString": version],
+                format: .xml, options: 0
+            ).write(to: contents.appendingPathComponent("Info.plist"))
+        }
+        func record(_ app: URL, version: String, configuration: BrewOperationConfiguration) throws -> URL {
+            let directory = configuration.executable.deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Caskroom/\(token)/\(version)")
+            try fm.createDirectory(at: directory, withIntermediateDirectories: true)
+            let link = directory.appendingPathComponent(app.lastPathComponent)
+            try fm.createSymbolicLink(at: link, withDestinationURL: app)
+            return link
+        }
+        func resolve(
+            _ preferred: URL, configuration: BrewOperationConfiguration, managed: Bool = true
+        ) throws -> URL {
+            guard let url = try InstalledAppLocator.metadataAppURL(
+                token: token, displayName: "Metadata Fixture", preferredURL: preferred,
+                isManaged: managed, configuration: configuration
+            ) else { throw CocoaError(.fileReadNoSuchFile) }
+            return url
+        }
+        let oldApp = apps.appendingPathComponent("Old Metadata.app")
+        let newApp = apps.appendingPathComponent("Renamed Metadata.app")
+        try writeApp(oldApp, version: "1.0")
+        let oldLink = try record(oldApp, version: "1.0", configuration: configurationA)
+        let initial = try resolve(oldApp, configuration: configurationA)
+        let initialMetadata = try InstalledAppMetadata.read(at: initial)
+        precondition(initialMetadata.version == "1.0")
+        try fm.moveItem(at: oldApp, to: newApp)
+        try writeApp(newApp, version: "2.0")
+        try fm.removeItem(at: oldLink)
+        _ = try record(newApp, version: "2.0", configuration: configurationA)
+        for _ in 0..<2 {
+            let recovered = try resolve(oldApp, configuration: configurationA)
+            let metadata = try InstalledAppMetadata.read(at: recovered)
+            precondition(recovered.path == newApp.path && metadata.version == "2.0",
+                         "Automatic reload and retry must recover a moved managed bundle through its current Caskroom link")
+        }
+        let otherApp = apps.appendingPathComponent("Other Profile.app")
+        try writeApp(otherApp, version: "3.0")
+        _ = try record(otherApp, version: "3.0", configuration: configurationB)
+        let selectedB = try resolve(newApp, configuration: configurationB)
+        let metadataB = try InstalledAppMetadata.read(at: selectedB)
+        precondition(selectedB.path == otherApp.path && metadataB.version == "3.0",
+                     "A different pinned Homebrew must not reuse an existing bundle from the previous profile")
+
+        let externalApp = apps.appendingPathComponent("Protected Distribution.app")
+        try writeApp(externalApp, version: "7.0")
+        let external = try resolve(externalApp, configuration: configurationA, managed: false)
+        let externalMetadata = try InstalledAppMetadata.read(at: external)
+        precondition(external.path == externalApp.path && externalMetadata.version == "7.0",
+                     "An explicit external/protected selection must not be replaced by a Homebrew distribution")
+        for (app, managed) in [(newApp, true), (externalApp, false)] {
+            try Data("invalid plist".utf8).write(to: app.appendingPathComponent("Contents/Info.plist"))
+            let resolved = try resolve(app, configuration: configurationA, managed: managed)
+            precondition(resolved.path == app.path)
+            do {
+                _ = try InstalledAppMetadata.read(at: resolved)
+                preconditionFailure("An unreadable selected bundle must report an error, not switch distributions")
+            } catch let error as CocoaError {
+                precondition(error.code == .propertyListReadCorrupt)
+            }
+        }
     }
 
     @MainActor

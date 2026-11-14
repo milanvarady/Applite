@@ -142,6 +142,10 @@ Homebrew lookup fails; errors are retryable.
 Local and Homebrew retries are independent: retrying one source leaves the other
 source's successful details visible. Successful single and bulk operations refresh
 details even when the app remains installed.
+Changing Homebrew or its app-directory settings invalidates both detail lookups.
+Managed bundle metadata is resolved through that Homebrew's current Caskroom before
+using a cached location, so moved apps can reload; explicit external/protected
+selections and malformed-plist errors never fall back to another distribution.
 Homebrew tokens remain selectable.
 Cmd-click continues to open the app's website instead of the details page.
 

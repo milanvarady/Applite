@@ -11,6 +11,10 @@ import OSLog
 struct AppDetailsView: View {
     let cask: CaskViewModel
     @Environment(CaskManager.self) private var caskManager
+    @AppStorage(Preferences.brewPathOption) private var brewPathOption
+    @AppStorage(Preferences.customUserBrewPath) private var customUserBrewPath
+    @AppStorage(Preferences.appdirOn) private var appdirOn
+    @AppStorage(Preferences.appdirPath) private var appdirPath
 
     @State private var loadState: LoadState = .loading
     @State private var homebrewRetryCount = 0
@@ -131,12 +135,16 @@ struct AppDetailsView: View {
         }
     }
 
+    private var configurationKey: [String] {
+        [String(brewPathOption), customUserBrewPath, String(appdirOn), appdirPath]
+    }
+
     private var infoKey: [String] {
-        [cask.fullToken, String(cask.isInstalled), String(cask.metadataRevision), String(homebrewRetryCount)]
+        configurationKey + [cask.fullToken, String(cask.isInstalled), String(cask.metadataRevision), String(homebrewRetryCount)]
     }
 
     private var localKey: [String] {
-        [cask.fullToken, String(cask.isInstalled), cask.externalAppURL?.path ?? "",
+        configurationKey + [cask.fullToken, String(cask.isInstalled), cask.externalAppURL?.path ?? "",
          cask.protectedAppInstallation?.url.path ?? "", cask.installedBundleURL?.path ?? "",
          String(cask.metadataRevision), String(localRetryCount)]
     }
@@ -334,12 +342,19 @@ struct AppDetailsView: View {
         }
         localState = .loading
         let key = localKey
-        let knownURL = cask.protectedAppInstallation?.url ?? cask.externalAppURL ?? cask.installedBundleURL
+        let isManaged = cask.isInstalled
+        let knownURL = isManaged
+            ? cask.installedBundleURL ?? cask.protectedAppInstallation?.url ?? cask.externalAppURL
+            : cask.externalAppURL ?? cask.protectedAppInstallation?.url ?? cask.installedBundleURL
+        let configuration = BrewOperationConfiguration.current
         let token = cask.token
         let name = cask.name
         do {
             let info = try await Task.detached { () throws -> InstalledAppMetadata? in
-                guard let url = knownURL ?? InstalledAppLocator.appURL(token: token, displayName: name) else {
+                guard let url = try InstalledAppLocator.metadataAppURL(
+                    token: token, displayName: name, preferredURL: knownURL,
+                    isManaged: isManaged, configuration: configuration
+                ) else {
                     return nil
                 }
                 return try InstalledAppMetadata.read(at: url)
