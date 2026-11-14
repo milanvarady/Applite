@@ -7,6 +7,17 @@ enum ExternalInstallTests {
     @MainActor
     static func main() async throws {
         precondition(Bundle.main.bundleIdentifier == "dev.applite.ExternalInstallTests")
+        let httpProxy = URLSessionConfiguration.ephemeral
+        httpProxy.connectionProxyDictionary = ["HTTPEnable": 1, "HTTPProxy": "127.0.0.1", "HTTPPort": 8080]
+        let originalDownloader = AppIconView.faviconDownloader(configuration: httpProxy)
+        precondition(originalDownloader === AppIconView.faviconDownloader(configuration: httpProxy))
+        let socksProxy = URLSessionConfiguration.ephemeral
+        socksProxy.connectionProxyDictionary = ["SOCKSEnable": 1, "SOCKSProxy": "127.0.0.1", "SOCKSPort": 1080]
+        let refreshedDownloader = AppIconView.faviconDownloader(configuration: socksProxy)
+        precondition(originalDownloader !== refreshedDownloader)
+        precondition(NSDictionary(dictionary: refreshedDownloader.sessionConfiguration.connectionProxyDictionary ?? [:])
+            .isEqual(to: socksProxy.connectionProxyDictionary ?? [:]),
+                     "Favicon image downloads must use the current effective proxy, without restarting")
         let fm = FileManager.default
         let root = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         try fm.createDirectory(at: root, withIntermediateDirectories: true)

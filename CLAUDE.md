@@ -104,6 +104,7 @@ Other `Core/` subfolders: `Core/Brew/` (brew CLI services + `BrewPaths`, `Shell`
 
 - Homebrew Cask API: `https://formulae.brew.sh/api/cask.json`
 - Analytics API: `https://formulae.brew.sh/api/analytics/cask-install/365d.json`
+- App icons: CaskFlow via jsDelivr first, then `AppIconView` lazily asks `FaviconResolver` for metadata-homepage icon links and `/favicon.ico`. Discovery is bounded to 128 KiB, coalesced, and cached for five minutes (maximum 256 pages); image candidates are limited to three declared links plus the root fallback. Website requests respect proxies and omit cookies/credentials. Kingfisher caches favicon images separately from primary app icons; the deterministic monogram remains the last resort.
 - Custom taps via `brew ruby` script (`Applite/Resources/brew-tap-cask-info.rb`), invoked by `CaskDataLoader.fetchTapDTOs`. The script no-ops `Homebrew::Trust.require_trusted_cask!` so metadata loads from already-tapped repos on Brew 6+ without requiring `brew trust` (Applite only reads metadata; real `brew install` still honors trust). It also injects `tap` and `full_token` into each entry because `FromPathLoader`'s `to_h` leaves them `nil`
 
 ### Preferences

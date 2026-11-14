@@ -19,7 +19,8 @@ struct IconAndDescriptionView: View {
                 AppIconView(
                     iconURL: iconURL,
                     name: cask.name,
-                    cacheKey: cask.iconCacheKey
+                    cacheKey: cask.iconCacheKey,
+                    homepageURL: cask.homepage
                 )
                 .padding(.leading, 5)
             }

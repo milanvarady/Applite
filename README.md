@@ -128,8 +128,30 @@ actions remain in the app menu and Settings. A default-off, internal developer
 preference can restore the Installed self-card for diagnostics; see the
 [diagnostic instructions](Testing/README.md#optional-applite-self-card).
 
-## Built With
+## App icons
 
+Favicon downloads pick up proxy preference changes without restarting Applite.
+Discovery ignores comments/script/style contents before finding the head boundary,
+uses the first base element with an href, and decodes numeric/named URL references.
+
+Applite tries its normal CaskFlow icon first. If that image fails, it reads the
+app's metadata homepage for declared favicon or Apple touch-icon links, then tries
+the site's `/favicon.ico`. A letter tile remains the offline/failure fallback.
+This applies to app cards and migration selection rows; working primary icons and
+their caches are unchanged.
+
+Website discovery happens only after a primary icon failure, not for the entire
+catalog. It contacts the website directly (including any declared icon CDN),
+without a third-party favicon lookup service, cookies, or stored credentials.
+Discovery uses the configured proxy, reads at most 128 KiB of HTML, and caches
+candidate URLs in memory for five minutes. Icon images use a separate Kingfisher
+cache namespace. Website icons are a best-effort brand fallback, not necessarily
+the app's own logo.
+
+For example, the CaskFlow `copilot-cli.png` asset returned HTTP 404 when this fix
+was verified; GitHub Docs declares a working favicon at a nonstandard asset path.
+
+## Built With
 
 Swift and SwiftUI, targeting macOS 14 so `@Observable` and `NavigationSplitView` are available without back-deployment shims. No Combine. The cask catalog is a local SQLite database (GRDB.swift, WAL mode) synced from the Homebrew JSON API, with FTS5 and BM25 ranking for full-catalog search. Loading is two-stage: SQLite paints the UI immediately, then `brew list --cask` and `brew outdated --cask` fill in installed and outdated state reactively, so nothing blocks on the brew CLI.
 

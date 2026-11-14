@@ -106,6 +106,7 @@ struct CaskSelectionSheet: View {
                         iconURL: iconURL,
                         name: cask.name,
                         cacheKey: cask.iconCacheKey,
+                        homepageURL: cask.homepage,
                         size: 24
                     )
                 }
