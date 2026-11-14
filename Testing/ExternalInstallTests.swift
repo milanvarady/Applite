@@ -223,8 +223,34 @@ enum ExternalInstallTests {
         precondition(confirmation.message.contains(
             "brew install --cask example/tap/sample --force '--appdir=/tmp/Apps with '\\''quotes'\\'''"
         ))
+        precondition(confirmation.message.contains(helper.path)
+                     && confirmation.message.contains("/tmp/Apps with 'quotes'")
+                     && confirmation.message.contains("will remain unmanaged"),
+                     "Consent must warn when the detected copy is outside the Homebrew app directory")
         precondition(manager.activeTasks.isEmpty)
         precondition(tapVM.installationState == .externalInstalled)
+        defaults.setValue(userApps.path, for: Preferences.appdirPath)
+        let sameDirectoryManager = CaskManager(registry: registry)
+        sameDirectoryManager.confirmAdoption(tapVM)
+        precondition(sameDirectoryManager.alert.current?.message.contains("will remain unmanaged") == false,
+                     "A copy in the Homebrew app directory must not receive the separate-copy warning")
+        let alias = root.appendingPathComponent("Apps Alias", isDirectory: true)
+        try fm.createSymbolicLink(at: alias, withDestinationURL: userApps)
+        defaults.setValue(alias.path, for: Preferences.appdirPath)
+        let aliasedDirectoryManager = CaskManager(registry: registry)
+        aliasedDirectoryManager.confirmAdoption(tapVM)
+        precondition(aliasedDirectoryManager.alert.current?.message.contains("will remain unmanaged") == false,
+                     "An app directory symlink must not imply a separate copy")
+        defaults.setValue("/tmp/Apps with 'quotes'", for: Preferences.appdirPath)
+
+        let changedCopyManager = CaskManager(registry: registry)
+        changedCopyManager.confirmAdoption(tapVM)
+        let changedCopyConfirmation = changedCopyManager.alert.current!
+        tapVM.externalAppURL = displayGuess
+        changedCopyConfirmation.actions.first?.handler?()
+        precondition(changedCopyManager.activeTasks.isEmpty,
+                     "A changed detected copy must require new consent")
+        tapVM.externalAppURL = helper
 
         // Hiding management offers must not turn off detection or let an old confirmation install.
         defaults.setValue(false, for: Preferences.offerHomebrewManagement)
