@@ -2467,6 +2467,7 @@ enum ExternalInstallTests {
             bundle="External.app"
             if [ "$token" = "review-missing" ]; then bundle="Missing.app"; fi
             if [ "$token" = "legacy-safe" ]; then bundle="Safe.app"; fi
+            case "$token" in mixed-*) bundle="$token.app" ;; esac
             if [ -f "$fixture_dir/missing-artifacts" ]; then
               printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","deprecated":false,"disabled":false}]}' "$token" "$4"
               exit 0
