@@ -11,6 +11,8 @@ The selected row's URL remains distinct from protection evidence. With external
 detection disabled, managed aliases still collapse by their recorded bundle path
 without reading external ownership inventories. A paused profile switch verifies
 immediate receipt invalidation, blocked actions, and fresh uninstall receipt checks.
+Invalid partial brew paths do not raise a modal alert or unblock writes, and changing
+configuration closes stale details.
 
 Review-race cases pause single and bulk metadata requests before adding App Store,
 Setapp or Intune evidence or changing Homebrew. A two-entry batch also pauses its
