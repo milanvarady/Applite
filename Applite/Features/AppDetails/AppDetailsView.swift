@@ -131,7 +131,7 @@ struct AppDetailsView: View {
                     ? String(localized: "Unknown")
                     : String(localized: "Not installed", comment: "Cask info: app is not installed")
             ))
-            if let protection = cask.protectedAppInstallation {
+            if let protection = cask.displayedProtection {
                 let sources = ProtectedAppInstallation.Source.allCases.filter { protection.appURLs[$0] != nil }
                 infoRow("Detected Management Sources", sources.map(\.name).joined(separator: ", "))
                 infoRow("Tracked by Homebrew", yesNo(cask.isInstalled))

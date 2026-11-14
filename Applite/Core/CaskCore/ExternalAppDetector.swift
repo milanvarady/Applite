@@ -1,6 +1,11 @@
 import Foundation
 
 enum ExternalAppDetector {
+    struct AdditionalInstallation: Sendable {
+        let url: URL
+        let protection: ProtectedAppInstallation?
+    }
+
     struct ScanResult: Sendable {
         var externalAppURLs: [CaskId: URL] = [:]
         var appStoreAppURLs: [CaskId: URL] = [:]
@@ -8,6 +13,9 @@ enum ExternalAppDetector {
         var setappAppURLs: [CaskId: URL] = [:]
         var artCraftAppURLs: [CaskId: URL] = [:]
         var bundleURLs: [CaskId: URL] = [:]
+        var selectedCopyProtection: [CaskId: ProtectedAppInstallation] = [:]
+        var additionalInstallations: [CaskId: [AdditionalInstallation]] = [:]
+        var multipleCopyTokens: Set<CaskId> = []
     }
 
     nonisolated static func installations(
@@ -38,6 +46,7 @@ enum ExternalAppDetector {
 
         var claimed: Set<String> = []
         var found = ScanResult()
+        var matchesByToken: [(CaskRecord, [URL])] = []
         for record in ordered {
             try Task.checkCancellation()
             let recorded = recordedAppURLs[record.fullToken] ?? []
@@ -46,6 +55,10 @@ enum ExternalAppDetector {
                 displayName: record.name,
                 directories: directories
             ) + artCraft.matchingAppURLs(bundleNames: record.appBundleNames, displayName: record.name)
+            matchesByToken.append((record, matching))
+            if hasMultipleCopies(matching + recorded) {
+                found.multipleCopyTokens.insert(record.fullToken)
+            }
             var selected: URL
             if let recorded = recorded.first {
                 selected = recorded
@@ -80,12 +93,53 @@ enum ExternalAppDetector {
             }
             let canonicalURL = selected.resolvingSymlinksInPath().standardizedFileURL
             found.bundleURLs[record.fullToken] = canonicalURL
+            if found.multipleCopyTokens.contains(record.fullToken) {
+                found.selectedCopyProtection[record.fullToken] = try Self.protection(
+                    at: selected, intune: intune, artCraft: artCraft
+                )
+            }
             guard claimed.insert(canonicalURL.path).inserted else { continue }
             if !managedTokens.contains(record.fullToken) {
                 found.externalAppURLs[record.fullToken] = selected
             }
         }
+        for (record, matching) in matchesByToken {
+            guard found.multipleCopyTokens.contains(record.fullToken) else { continue }
+            for url in matching {
+                let sameArtifact = matching.filter { $0.lastPathComponent == url.lastPathComponent }
+                    + (recordedAppURLs[record.fullToken] ?? []).filter { $0.lastPathComponent == url.lastPathComponent }
+                guard hasMultipleCopies(sameArtifact) else {
+                    continue
+                }
+                try Task.checkCancellation()
+                let canonical = url.resolvingSymlinksInPath().standardizedFileURL
+                guard claimed.insert(canonical.path).inserted else { continue }
+                found.additionalInstallations[record.fullToken, default: []].append(
+                    AdditionalInstallation(url: canonical, protection: try protection(
+                        at: url, intune: intune, artCraft: artCraft
+                    ))
+                )
+            }
+        }
         return found
+    }
+
+    nonisolated static func hasMultipleCopies(_ urls: [URL]) -> Bool {
+        let groups = Dictionary(grouping: urls, by: \.lastPathComponent)
+        return groups.values.contains {
+            Set($0.map { $0.resolvingSymlinksInPath().standardizedFileURL.path }).count > 1
+        }
+    }
+
+    nonisolated static func protection(
+        at url: URL, intune: IntuneAppDetector.Snapshot, artCraft: ArtCraftAppDetector.Snapshot
+    ) throws -> ProtectedAppInstallation? {
+        var sources: [ProtectedAppInstallation.Source: URL] = [:]
+        if try intune.isManagedApp(at: url) { sources[.intune] = url }
+        if try hasAppStoreReceipt(at: url) { sources[.appStore] = url }
+        if try isSetappApp(at: url) { sources[.setapp] = url }
+        if artCraft.isManagedApp(at: url) { sources[.artCraft] = url }
+        return ProtectedAppInstallation(appURLs: sources)
     }
 
     nonisolated static func hasAppStoreReceipt(at appURL: URL) throws -> Bool {

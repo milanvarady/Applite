@@ -234,6 +234,7 @@ final class CaskDataLoader {
         guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) == detectionEnabled else { return }
         _ = registry.viewModels(for: catalog.filter {
             result.bundleURLs[$0.fullToken] != nil || result.externalAppURLs[$0.fullToken] != nil
+                || result.additionalInstallations[$0.fullToken] != nil
         })
         if !detectionEnabled {
             registry.updateManagedBundleURLs(result.bundleURLs)
@@ -242,7 +243,9 @@ final class CaskDataLoader {
         registry.markExternalInstallations(
             appURLs: result.externalAppURLs, appStoreAppURLs: result.appStoreAppURLs,
             intuneAppURLs: result.intuneAppURLs, setappAppURLs: result.setappAppURLs,
-            artCraftAppURLs: result.artCraftAppURLs, bundleURLs: result.bundleURLs
+            artCraftAppURLs: result.artCraftAppURLs, bundleURLs: result.bundleURLs,
+            copies: result.additionalInstallations, multipleCopyTokens: result.multipleCopyTokens,
+            selectedCopyProtection: result.selectedCopyProtection
         )
     }
 

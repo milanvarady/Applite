@@ -11455,7 +11455,8 @@
     "Couldn't verify this cask's installation targets. Homebrew changes are blocked. Refresh the app catalog and try again." : {},
     "Homebrew action unavailable" : {},
     "Refresh installed apps before performing Homebrew actions." : {},
-    "Wait for installed apps to finish refreshing." : {}
+    "Wait for installed apps to finish refreshing." : {},
+    "Multiple copies of this app were detected. Homebrew changes are unavailable until the installation target is unambiguous." : {}
   },
   "version" : "1.1"
 }
