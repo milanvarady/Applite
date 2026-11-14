@@ -50,6 +50,7 @@ final class CaskManager {
     /// True while a manual catalog refresh is running (toolbar action).
     private(set) var isRefreshingCatalog: Bool = false
     private(set) var successfulCatalogRefreshRevision = 0
+    private(set) var successfulOutdatedRefreshRevision = 0
     private var outdatedRefreshCount = 0
     var isRefreshingOutdated: Bool { outdatedRefreshCount > 0 }
 
@@ -595,6 +596,7 @@ final class CaskManager {
                 do {
                     try await self.dataLoader.refreshOutdated(configuration: configuration)
                     self.outdatedRefreshFailed = false
+                    self.successfulOutdatedRefreshRevision &+= 1
                 } catch CaskAdoptionError.configurationChanged {
                     throw CaskAdoptionError.configurationChanged
                 } catch is CancellationError {
@@ -633,6 +635,7 @@ final class CaskManager {
                 try await self.dataLoader.refreshOutdated()
             }
             outdatedRefreshFailed = false
+            successfulOutdatedRefreshRevision &+= 1
         } catch {
             outdatedRefreshFailed = true
             Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")

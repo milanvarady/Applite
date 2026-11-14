@@ -676,6 +676,27 @@ enum ExternalInstallTests {
             brew: try brew(installed: "unknown", outdated: nil, available: "latest")
         )
         precondition(placeholderVersions.installed == nil && placeholderVersions.available == nil)
+        var cache = UpdateVersionCache()
+        let keys = ["first": ["config", "1"], "second": ["config", "1"]]
+        precondition(Set(cache.reconcile(keys: keys)) == Set(keys.keys))
+        cache.store(.loaded(updateVersions, error: nil), for: "first", key: keys["first"]!)
+        cache.store(.loaded(unavailableVersions, error: "failed"), for: "second", key: keys["second"]!)
+        precondition(cache.reconcile(keys: keys).isEmpty)
+        cache.retry("second")
+        precondition(cache.reconcile(keys: keys) == ["second"], "Retry must reload only the selected row")
+        cache.store(.loaded(unavailableVersions, error: nil), for: "second", key: keys["second"]!)
+        let changed = ["first": ["config", "2"], "second": ["config", "1"]]
+        precondition(cache.reconcile(keys: changed) == ["first"], "Changed rows alone must reload")
+        cache.store(.loaded(updateVersions, error: nil), for: "first", key: keys["first"]!)
+        if case .loading = cache.state(for: "first", key: changed["first"]!) {} else {
+            preconditionFailure("An obsolete result must not replace the new loading state")
+        }
+        cache.store(.loaded(updateVersions, error: nil), for: "first", key: changed["first"]!)
+        precondition(cache.reconcile(keys: ["first": changed["first"]!]).isEmpty)
+        precondition(cache.reconcile(keys: changed) == ["second"], "Removed rows must be pruned")
+        let refreshed = ["first": ["refresh", "3"], "second": ["refresh", "3"]]
+        precondition(Set(cache.reconcile(keys: refreshed)) == Set(refreshed.keys),
+                     "A successful same-membership refresh must reload versions")
 
         precondition(InstalledAppDetails.version(
             isLocallyInstalled: true, isHomebrewManaged: false, hasOtherOwner: false, metadata: metadata, brew: current
@@ -2468,7 +2489,8 @@ enum ExternalInstallTests {
             try await manager.refreshOutdated()
             preconditionFailure("The fixture's failed update check must throw")
         } catch { }
-        precondition(manager.outdatedRefreshFailed && !manager.isRefreshingOutdated)
+        precondition(manager.outdatedRefreshFailed && !manager.isRefreshingOutdated
+                     && manager.successfulOutdatedRefreshRevision == 0)
         try fm.removeItem(at: failure)
         try Data().write(to: root.appendingPathComponent("pause-outdated"))
         let task = Task { try await manager.refreshOutdated() }
@@ -2481,6 +2503,12 @@ enum ExternalInstallTests {
         try Data().write(to: root.appendingPathComponent("resume-outdated"))
         try await task.value
         precondition(!manager.isRefreshingOutdated && !manager.outdatedRefreshFailed)
+        let revision = manager.successfulOutdatedRefreshRevision
+        let membership = manager.outdatedViewModels.map(\.fullToken)
+        try await manager.refreshOutdated()
+        precondition(manager.outdatedViewModels.map(\.fullToken) == membership
+                     && manager.successfulOutdatedRefreshRevision == revision + 1,
+                     "A successful refresh must invalidate versions even when membership is unchanged")
     }
 
     @MainActor
@@ -2767,6 +2795,17 @@ enum ExternalInstallTests {
         precondition(appStoreRows[0].installedManagementSourceName == ProtectedAppInstallation.Source.appStore.name
                      && otherRows[0].installedManagementSourceName == String(localized: "Unknown"),
                      "Details must describe the selected copy's source rather than another copy's protection")
+        let protectedRow = appStoreRows[0]
+        protectedRow.isInstalled = true
+        precondition(!protectedRow.resolvesManagedInstallation,
+                     "A protected selection must not recover a different Homebrew copy")
+        let protectedURL = try InstalledAppLocator.metadataAppURL(
+            token: protectedRow.token, displayName: protectedRow.name,
+            preferredURL: protectedRow.selectedInstallationURL, isManaged: protectedRow.resolvesManagedInstallation,
+            configuration: .current
+        )
+        precondition(protectedURL?.path == userApp.path)
+        protectedRow.isInstalled = false
         let managedMixed = try ExternalAppDetector.installations(
             catalog: [stable], managedTokens: [stable.fullToken], directories: [system, user],
             recordedAppURLs: [stable.fullToken: [systemApp]]
@@ -2779,7 +2818,8 @@ enum ExternalInstallTests {
             selectedCopyProtection: managedMixed.selectedCopyProtection
         )
         oneCaskRegistry.clearExternalInstallations()
-        precondition(primary.installedManagementSourceName == String(localized: "Homebrew")
+        precondition(primary.resolvesManagedInstallation
+                     && primary.installedManagementSourceName == String(localized: "Homebrew")
                      && InstalledListOptions(source: .homebrew).apply(to: [primary]) == [primary]
                      && InstalledListOptions(source: .appStore).apply(to: [primary]).isEmpty
                      && primary.protectedAppInstallation?.source == .appStore,

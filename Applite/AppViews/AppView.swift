@@ -48,7 +48,7 @@ struct AppView: View {
     var body: some View {
         HStack {
             IconAndDescriptionView(cask: cask, showDetails: showInfo,
-                                   updateVersion: role == .update ? (updateVersion ?? .loading) : nil,
+                                   updateVersion: role == .update ? updateVersion : nil,
                                    retryUpdateVersions: retryUpdateVersions)
             IconsAndWarnings(cask: cask)
             actionsView

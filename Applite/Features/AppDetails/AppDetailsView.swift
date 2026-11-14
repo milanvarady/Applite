@@ -346,7 +346,7 @@ struct AppDetailsView: View {
         }
         localState = .loading
         let key = localKey
-        let isManaged = cask.isInstalled
+        let isManaged = cask.resolvesManagedInstallation
         let knownURL = cask.selectedInstallationURL
         let configuration = BrewOperationConfiguration.current
         let token = cask.token

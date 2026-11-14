@@ -152,6 +152,10 @@ final class CaskViewModel {
         installedBundleURL ?? externalAppURL ?? protectedAppInstallation?.url
     }
 
+    var resolvesManagedInstallation: Bool {
+        isInstalled && displayedProtection == nil
+    }
+
     var cardIdentity: String {
         guard hasMultipleInstalledCopies || isAdditionalInstalledCopy,
               let url = selectedInstallationURL else { return id }
@@ -162,7 +166,7 @@ final class CaskViewModel {
         let token = self.token
         let displayName = self.name
         let preferredURL = selectedInstallationURL
-        let isManaged = isInstalled
+        let isManaged = resolvesManagedInstallation
         let brewConfiguration = BrewOperationConfiguration.current
         let appURL = try await Task.detached {
             try InstalledAppLocator.launchURL(
