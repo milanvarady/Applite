@@ -172,10 +172,12 @@ final class CaskDataLoader {
         }
 
         // Scan the full catalog, not just curated/search results, so totals include unbrowsed apps.
+        let snapshots = registry.recordSnapshots()
         let catalog = try await dbService.fetchAllCasks()
         try Task.checkCancellation()
         guard generation == externalScanGeneration, configuration == .current,
               UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else { return }
+        registry.updateExistingViewModels(for: catalog, unchangedSince: snapshots)
         let tokens = Set(registry.installedViewModels.map(\.fullToken))
         let task = Task.detached { try await scan(catalog, configuration.applicationDirectories, tokens) }
         externalScanTask = task
