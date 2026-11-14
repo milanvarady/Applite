@@ -156,6 +156,11 @@ final class CaskDataLoader {
         externalScanTask = nil
     }
 
+    func invalidateInstalledReceipts() {
+        installedRefreshGeneration &+= 1
+        invalidateExternalInstallations()
+    }
+
     func refreshExternalInstallations(
         configuration: BrewOperationConfiguration = .current,
         scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil

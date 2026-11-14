@@ -2054,7 +2054,8 @@ enum ExternalInstallTests {
           --version) echo "Homebrew fixture" ;;
           list)
             touch "$prefix/list-started"
-            while [ -f "$prefix/pause-list" ]; do sleep 0.01; done ;;
+            while [ -f "$prefix/pause-list" ]; do sleep 0.01; done
+            if [ -f "$prefix/fail-list" ]; then echo "receipt query failed" >&2; exit 1; fi ;;
           outdated) : ;;
           uninstall) touch "$prefix/uninstall-started" ;;
         esac
@@ -2089,6 +2090,32 @@ enum ExternalInstallTests {
         _ = try await service.runSerialized { true }
         precondition(vm.progressState.isFailed && !fm.fileExists(atPath: secondPrefix.appendingPathComponent("uninstall-started").path),
                      "A stale cached flag must never authorize uninstall when the selected Homebrew has no receipt")
+        let fail = secondPrefix.appendingPathComponent("fail-list")
+        try Data().write(to: fail)
+        manager.selectedHomebrewDidChange(surfacingErrorsIn: manager.alert)
+        let failureDeadline = Date().addingTimeInterval(5)
+        while manager.isResolvingInstalledState && Date() < failureDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(!manager.isResolvingInstalledState)
+        vm.isInstalled = true
+        vm.progressState = .idle
+        manager.uninstall(vm)
+        _ = try await service.runSerialized { true }
+        precondition(!vm.progressState.isFailed && !fm.fileExists(atPath: secondPrefix.appendingPathComponent("uninstall-started").path),
+                     "A failed receipt refresh must keep Homebrew actions blocked")
+        try fm.removeItem(at: fail)
+        manager.selectedHomebrewDidChange(surfacingErrorsIn: manager.alert)
+        let retryDeadline = Date().addingTimeInterval(5)
+        while manager.isResolvingInstalledState && Date() < retryDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(!manager.isResolvingInstalledState && !vm.isInstalled)
+        vm.isInstalled = true
+        manager.uninstall(vm)
+        _ = try await service.runSerialized { true }
+        precondition(vm.progressState.isFailed,
+                     "A successful retry must unblock actions, which still verify the selected receipt")
     }
 
     @MainActor
