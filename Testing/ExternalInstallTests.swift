@@ -19,6 +19,25 @@ enum ExternalInstallTests {
         for directory in directories {
             try fm.createDirectory(at: directory, withIntermediateDirectories: true)
         }
+        let hiddenSelfApp = userApps.appendingPathComponent("Applite.app")
+        try fm.createDirectory(at: hiddenSelfApp, withIntermediateDirectories: true)
+        let hiddenSelfRecord = CaskRecord(
+            token: "applite", fullToken: "applite", tap: "homebrew/cask", name: "Applite",
+            descriptionText: "", homepageURL: nil, pkgInstaller: false,
+            warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+            appBundleNames: ["Applite.app"]
+        )
+        let selfMatches = try await ExternalAppDetector.scan(
+            catalog: [hiddenSelfRecord], directories: [userApps], managedTokens: []
+        )
+        let selfRegistry = CaskViewModelRegistry()
+        let hiddenSelfVM = selfRegistry.viewModel(for: hiddenSelfRecord)
+        selfRegistry.markExternalInstallations(appURLs: selfMatches)
+        precondition(selfMatches.isEmpty && selfRegistry.externalInstalledCount == 0
+                     && selfRegistry.externalInstalledViewModels.isEmpty,
+                     "Hidden Applite must not produce an external badge or a blank non-empty list")
+        selfRegistry.markInstalled(tokens: [hiddenSelfRecord.fullToken])
+        precondition(hiddenSelfVM.isInstalled, "Self-exclusion must not rewrite actual Homebrew receipts")
 
         let json = """
         {
@@ -593,6 +612,13 @@ enum ExternalInstallTests {
         guard case .busy = vm.progressState else {
             preconditionFailure("A completed command must stay busy during ownership reconciliation")
         }
+        let activity = AppStatusSummary(
+            isRefreshingCatalog: false, isResolvingInstalledState: false,
+            outdatedRefreshFailed: false,
+            operations: service.activeTasks.map { ($0.viewModel.name, $0.viewModel.progressState) }
+        )
+        precondition(activity.activity.isBusy && activity.activeTaskCount > 0,
+                     "The footer/quit-facing operation state must remain active during reconciliation")
         resumeReconciliation?.resume()
         await reconcileTask.value
 

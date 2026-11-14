@@ -6,7 +6,7 @@ enum ExternalAppDetector {
     ) async throws -> [CaskId: URL] {
         let task = Task.detached {
             var found: [CaskId: URL] = [:]
-            for record in catalog where !managedTokens.contains(record.fullToken) {
+            for record in catalog where !record.isApplite && !managedTokens.contains(record.fullToken) {
                 try Task.checkCancellation()
                 if let url = appURL(bundleNames: record.appBundleNames, displayName: record.name, directories: directories) {
                     found[record.fullToken] = url
