@@ -76,7 +76,18 @@ enum InstalledAppLocator {
                     installed = try JSONDecoder().decode(RecordedCask.self, from: Data(contentsOf: json))
                     break
                 } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
-                    continue
+                    let ruby = timestamp.appendingPathComponent("Casks").appendingPathComponent("\(token).rb")
+                    do {
+                        let values = try ruby.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
+                        guard values.isRegularFile == true, values.isSymbolicLink != true,
+                              let artifacts = receipt?.uninstall_artifacts else {
+                            throw CaskAdoptionError.installationTargetsUnavailable
+                        }
+                        installed = RecordedCask(artifacts: artifacts, url_specs: nil)
+                        break
+                    } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                        continue
+                    }
                 }
             }
             guard let installed, let artifacts = installed.artifacts ?? receipt?.uninstall_artifacts else {

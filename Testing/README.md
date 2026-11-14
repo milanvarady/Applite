@@ -1,5 +1,9 @@
 # Applite test harness
 
+Receipt-refresh fixtures preserve managed state across app-directory edits and
+verify that consent changes or disabling detection cannot abandon a pending
+Homebrew refresh. Ruby-only cask metadata is resolved using receipt artifacts.
+
 ## Non-destructive external-install regression tests
 
 Hidden-self fixtures ensure an external Applite bundle contributes neither a row

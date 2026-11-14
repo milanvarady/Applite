@@ -22,6 +22,8 @@ final class CaskManager {
     private let registry: CaskViewModelRegistry
     private let brewService: BrewService
     private var adoptionConsentGeneration = 0
+    private var detectionSettingGeneration = 0
+    private var receiptRefreshPending = false
     private var detectionSettingTask: Task<Void, Never>?
 
     /// Resolves brew on launch (detect existing / install annex) without onboarding or CLT.
@@ -135,22 +137,25 @@ final class CaskManager {
         debounce: Bool = false, surfacingErrorsIn errorSurface: AlertManager? = nil
     ) {
         invalidateAdoptionConsent()
+        detectionSettingGeneration &+= 1
         detectionSettingTask?.cancel()
         dataLoader.invalidateExternalInstallations()
         let configuration = BrewOperationConfiguration.current
         let detectionEnabled = UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps)
-        let needsReceipts = !dataLoader.hasReceiptSnapshot(for: configuration)
+        let hasReceipts = dataLoader.hasReceiptSnapshot(for: configuration)
+        let needsReceipts = !hasReceipts || receiptRefreshPending
         if !detectionEnabled {
             registry.markExternalInstallations(appURLs: [:])
         }
-        guard detectionEnabled || (debounce && needsReceipts) else { return }
-        if needsReceipts {
+        guard detectionEnabled || (needsReceipts && (debounce || receiptRefreshPending)) else { return }
+        if !hasReceipts {
             dataLoader.invalidateInstalledReceipts()
             registry.markInstalled(tokens: [])
             registry.markOutdated(tokens: [])
             outdatedRefreshFailed = true
         }
-        let generation = adoptionConsentGeneration
+        if needsReceipts { receiptRefreshPending = true }
+        let generation = detectionSettingGeneration
         let surface = errorSurface ?? alert
         detectionSettingTask = Task {
             do {
@@ -163,7 +168,7 @@ final class CaskManager {
                         return
                     }
                     try await brewService.runSerialized {
-                        guard generation == self.adoptionConsentGeneration else { throw CancellationError() }
+                        guard generation == self.detectionSettingGeneration else { throw CancellationError() }
                         try configuration.validateCurrent()
                         try await self.dataLoader.refreshInstalled(configuration: configuration)
                         do {
@@ -177,6 +182,10 @@ final class CaskManager {
                             self.outdatedRefreshFailed = true
                             Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
                         }
+                        try Task.checkCancellation()
+                        try configuration.validateCurrent()
+                        guard generation == self.detectionSettingGeneration else { throw CancellationError() }
+                        self.receiptRefreshPending = false
                     }
                 } else {
                     try await dataLoader.refreshExternalInstallations(configuration: configuration)
