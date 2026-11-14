@@ -2173,6 +2173,19 @@ enum ExternalInstallTests {
             _ = try InstalledAppLocator.recordedAppURLs(token: "receipt-cask", executable: brew)
             preconditionFailure("An unsafe recorded source path must fail closed")
         } catch CaskAdoptionError.installationTargetsUnavailable { }
+        try fm.removeItem(at: receiptMetadata.appendingPathComponent("receipt-cask.json"))
+        try Data("cask fixture".utf8).write(to: receiptMetadata.appendingPathComponent("receipt-cask.rb"))
+        let directLink = receiptRoom.appendingPathComponent("1/Source.app")
+        try fm.createSymbolicLink(at: directLink, withDestinationURL: managedApp)
+        let rubyTargets = try InstalledAppLocator.recordedAppURLs(
+            token: "receipt-cask", executable: brew, requireRecordedOwnership: true
+        )
+        precondition(rubyTargets == [managedApp.resolvingSymlinksInPath().standardizedFileURL])
+        try fm.removeItem(at: directLink)
+        do {
+            _ = try InstalledAppLocator.recordedAppURLs(token: "receipt-cask", executable: brew)
+            preconditionFailure("Ruby-only metadata with an unverifiable staged link must fail closed")
+        } catch CaskAdoptionError.installationTargetsUnavailable { }
     }
 
     @MainActor

@@ -24,6 +24,7 @@ last metadata request to verify the first entry is rechecked. Recorded old-appdi
 targets (including nested staging links and a directory-symlink loop), managed-receipt aliases, separate bundles, and immediate single/bulk
 Installed projection reconciliation use isolated filesystem fixtures.
 Recorded source fixtures ignore unrelated payload apps and symlink loops.
+Ruby-only cask metadata uses receipt artifacts and requires verifiable staged links.
 Sibling-cask fixtures cover uncataloged owners, aliases, separate copies, conflicting
 configured destinations, stale selections, single/bulk guards, and unavailable
 ownership records. Confirmation warns when the selected copy is outside appdir.
