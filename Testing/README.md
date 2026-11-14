@@ -32,6 +32,9 @@ Manually verify an eligible Install button remains usable during installed-state
 refresh, with the operation queued and checked before it starts.
 Nested relative app targets are detected without allowing traversal or absolute targets;
 the catalog migration invalidates older basename-only metadata for re-verification.
+Managed sibling fixtures resolve recorded source links, including casks absent from
+the catalog, and verify that aliases are excluded while separate copies remain visible.
+Single and bulk installs reject managed target conflicts or unverifiable ownership.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including

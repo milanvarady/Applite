@@ -1,6 +1,7 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Another Homebrew cask already manages this app. Homebrew cannot replace it through this cask." : {},
     "Existing app: %@\nHomebrew app directory: %@\nThe existing copy is outside the Homebrew app directory and will remain unmanaged; Homebrew will install a separate copy." : {},
     "" : {
       "localizations" : {

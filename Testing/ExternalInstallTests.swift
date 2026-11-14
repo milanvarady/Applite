@@ -303,7 +303,9 @@ enum ExternalInstallTests {
         precondition(tapVM.installationState == .notInstalled)
         precondition(registry.externalInstalledCount == 0)
         defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
-        try await loader.refreshExternalInstallations()
+        try await loader.refreshExternalInstallations { catalog, directories, tokens in
+            try await ExternalAppDetector.scan(catalog: catalog, directories: directories, managedTokens: tokens)
+        }
         precondition(tapVM.installationState == .externalInstalled)
         precondition(registry.externalInstalledCount == 1)
         precondition(vm.installationState == .installed)
@@ -318,7 +320,9 @@ enum ExternalInstallTests {
         defaults.setValue(false, for: Preferences.detectExternallyInstalledApps)
         manager.applyExternalAppDetectionSetting()
         defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
-        try await loader.refreshExternalInstallations()
+        try await loader.refreshExternalInstallations { catalog, directories, tokens in
+            try await ExternalAppDetector.scan(catalog: catalog, directories: directories, managedTokens: tokens)
+        }
         let restoredOptOut = CaskManager(registry: registry)
         restoredOptOut.confirmAdoption(tapVM)
         precondition(
@@ -402,7 +406,122 @@ enum ExternalInstallTests {
         )
         try await testOutdatedRefreshLifetime(root: root, loader: loader, registry: registry, service: service)
         try await testUpstreamConsentAndRefresh(root: root)
+        try await testManagedSiblingOwnership(root: root)
         print("PASS: detection, migration/FTS, identity/totals, default-enabled setting/disable guards, and adoption success/failure")
+    }
+
+    @MainActor
+    private static func testManagedSiblingOwnership(root: URL) async throws {
+        let fm = FileManager.default
+        let defaults = UserDefaults.standard
+        let oldBrew = defaults.value(for: Preferences.customUserBrewPath)
+        let oldOption = defaults.value(for: Preferences.brewPathOption)
+        let oldAppdir = defaults.value(for: Preferences.appdirPath)
+        let oldAppdirOn = defaults.value(for: Preferences.appdirOn)
+        let oldDetection = defaults.value(for: Preferences.detectExternallyInstalledApps)
+        let oldOffer = defaults.value(for: Preferences.offerHomebrewManagement)
+        defer {
+            defaults.setValue(oldBrew, for: Preferences.customUserBrewPath)
+            defaults.setValue(oldOption, for: Preferences.brewPathOption)
+            defaults.setValue(oldAppdir, for: Preferences.appdirPath)
+            defaults.setValue(oldAppdirOn, for: Preferences.appdirOn)
+            defaults.setValue(oldDetection, for: Preferences.detectExternallyInstalledApps)
+            defaults.setValue(oldOffer, for: Preferences.offerHomebrewManagement)
+        }
+        let prefix = root.appendingPathComponent("Managed sibling")
+        let brew = prefix.appendingPathComponent("bin/brew")
+        let managedDirectory = prefix.appendingPathComponent("Managed Apps")
+        let externalDirectory = prefix.appendingPathComponent("External Apps")
+        let managedApp = managedDirectory.appendingPathComponent("Shared.app")
+        let externalApp = externalDirectory.appendingPathComponent("Shared.app")
+        let source = prefix.appendingPathComponent("Caskroom/stable/1/Payload/Source.app")
+        let metadata = prefix.appendingPathComponent("Caskroom/stable/.metadata/1/1/Casks")
+        for directory in [brew.deletingLastPathComponent(), managedApp, externalApp,
+                          source.deletingLastPathComponent(), metadata] {
+            try fm.createDirectory(at: directory, withIntermediateDirectories: true)
+        }
+        try fm.createSymbolicLink(at: source, withDestinationURL: managedApp)
+        let recorded = ["artifacts": [["app": ["Payload/Source.app", ["target": "Shared.app"]]]]]
+        try JSONSerialization.data(withJSONObject: recorded).write(to: metadata.appendingPathComponent("stable.json"))
+        let script = """
+        #!/bin/sh
+        dir="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+        case "$1" in
+          --version) echo "Homebrew fixture" ;;
+          list) echo stable ;;
+          install) printf '%s\\n' "$@" > "$dir/arguments" ;;
+          *) exit 2 ;;
+        esac
+        """
+        try script.write(to: brew, atomically: true, encoding: .utf8)
+        try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: brew.path)
+        defaults.setValue(BrewPaths.PathOption.custom.rawValue, for: Preferences.brewPathOption)
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+        defaults.setValue(true, for: Preferences.appdirOn)
+        defaults.setValue(managedDirectory.path, for: Preferences.appdirPath)
+        defaults.setValue(true, for: Preferences.detectExternallyInstalledApps)
+        defaults.setValue(true, for: Preferences.offerHomebrewManagement)
+        let stable = CaskRecord(
+            token: "stable", fullToken: "stable", tap: "homebrew/cask", name: "Shared",
+            descriptionText: "", homepageURL: nil, pkgInstaller: false, warningType: nil,
+            warningDate: nil, warningReason: nil, downloadsIn365days: 0, appBundleNames: ["Shared.app"]
+        )
+        let beta = CaskRecord(
+            token: "beta", fullToken: "beta", tap: "homebrew/cask", name: "Shared",
+            descriptionText: "", homepageURL: nil, pkgInstaller: false, warningType: nil,
+            warningDate: nil, warningReason: nil, downloadsIn365days: 0, appBundleNames: ["Shared.app"]
+        )
+        let owned = try ExternalAppDetector.managedBundlePaths(tokens: [stable.fullToken], executable: brew)
+        let sharedOnly = try await ExternalAppDetector.scan(
+            catalog: [stable, beta], directories: [managedDirectory], managedTokens: [stable.fullToken],
+            excluding: owned
+        )
+        precondition(sharedOnly.isEmpty, "A sibling cask must not claim a Homebrew-owned bundle")
+        let alias = prefix.appendingPathComponent("Managed Alias")
+        try fm.createSymbolicLink(at: alias, withDestinationURL: managedDirectory)
+        let separate = try await ExternalAppDetector.scan(
+            catalog: [stable, beta], directories: [alias, externalDirectory],
+            managedTokens: [stable.fullToken], excluding: owned
+        )
+        precondition(separate[beta.fullToken]?.standardizedFileURL.path == externalApp.standardizedFileURL.path,
+                     "A physically separate copy must remain externally detectable")
+
+        let pool = try DatabasePool(path: prefix.appendingPathComponent("catalog.sqlite").path)
+        try AppDatabase.migrator().migrate(pool)
+        try await pool.write { db in try beta.insert(db) }
+        let registry = CaskViewModelRegistry()
+        let loader = CaskDataLoader(dbService: CaskDatabaseService(databasePool: pool), registry: registry)
+        _ = registry.viewModel(for: beta)
+        try await loader.refreshInstalled()
+        precondition(registry.externalInstalledCount == 0,
+                     "A managed cask absent from the catalog must still suppress its owned bundle")
+
+        let service = BrewService(notify: { _, _, _ in })
+        let sibling = CaskViewModel(record: beta)
+        sibling.externalAppURL = externalApp
+        await service.install(sibling, confirmedConfiguration: .current).value
+        let arguments = prefix.appendingPathComponent("arguments")
+        precondition(sibling.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "A separate external copy must not authorize overwriting the managed appdir target")
+        sibling.externalAppURL = managedApp
+        await service.install(sibling, confirmedConfiguration: .current).value
+        precondition(sibling.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "A stale confirmation for a managed sibling must fail closed")
+        service.installAll([sibling])
+        _ = try await service.runSerialized { true }
+        precondition(sibling.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "Bulk install must also block a sibling's managed target")
+
+        defaults.setValue(externalDirectory.path, for: Preferences.appdirPath)
+        sibling.externalAppURL = externalApp
+        await service.install(sibling, confirmedConfiguration: .current).value
+        precondition(fm.fileExists(atPath: arguments.path),
+                     "A separately installed target must remain eligible for confirmed adoption")
+        try fm.removeItem(at: arguments)
+        try fm.removeItem(at: metadata.appendingPathComponent("stable.json"))
+        await service.install(sibling, confirmedConfiguration: .current).value
+        precondition(sibling.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "Unverifiable managed ownership must block adoption rather than imply an unmanaged target")
     }
 
     @MainActor
@@ -611,6 +730,8 @@ enum ExternalInstallTests {
                 esac
                 continue
               fi
+              mkdir -p "$fixture_dir/Caskroom/$token/1" "$fixture_dir/Caskroom/$token/.metadata/1/1/Casks"
+              printf '{"artifacts":[]}' > "$fixture_dir/Caskroom/$token/.metadata/1/1/Casks/$token.json"
               printf '%s\\n' "$token" >> "$fixture_dir/receipts"
               if [ ! -f "$fixture_dir/no-markers" ]; then echo "$token was successfully installed!"; fi
               if [ "$token" = "review-missing" ]; then mkdir -p "$fixture_dir/Apps/Missing.app"; fi
@@ -744,6 +865,12 @@ enum ExternalInstallTests {
         try fm.removeItem(at: arguments)
         try fm.removeItem(at: prefix.appendingPathComponent("receipts"))
         let profileReceipts = prefix.appendingPathComponent("receipts")
+        let fixtureMetadata = prefix.appendingPathComponent("Caskroom/\(externalRecord.token)/.metadata/1/1/Casks")
+        try fm.createDirectory(at: fixtureMetadata, withIntermediateDirectories: true)
+        try fm.createDirectory(at: prefix.appendingPathComponent("Caskroom/\(externalRecord.token)/1"),
+                               withIntermediateDirectories: true)
+        try Data(#"{"artifacts":[]}"#.utf8)
+            .write(to: fixtureMetadata.appendingPathComponent("\(externalRecord.token).json"))
         try externalRecord.fullToken.write(to: profileReceipts, atomically: true, encoding: .utf8)
         try await loader.refreshInstalled()
         precondition(vm.isInstalled)
@@ -1081,6 +1208,8 @@ enum ExternalInstallTests {
         resumeReconciliation?.resume()
         await reconcileTask.value
 
+        if fm.fileExists(atPath: profileReceipts.path) { try fm.removeItem(at: profileReceipts) }
+        try await loader.refreshInstalled { _, _, _ in [:] }
         registry.markInstalled(tokens: [])
         registry.markExternalInstallations(appURLs: [:])
         for _ in 0..<3 {
