@@ -706,7 +706,10 @@ final class BrewService {
             if vm.warning?.isDisabled == true { throw CaskAdoptionError.homebrewDisabled }
             let info = try await getAdditionalInfoForCask(vm, configuration: configuration)
             if info.disabled { throw CaskAdoptionError.homebrewDisabled }
-            guard let artifacts = info.artifacts else { throw CaskAdoptionError.installationTargetsUnavailable }
+            guard let artifacts = info.artifacts,
+                  artifacts.allSatisfy({ $0.app == nil || $0.bundleName != nil }) else {
+                throw CaskAdoptionError.installationTargetsUnavailable
+            }
             if Task.isCancelled {
                 vm.progressState = .idle
                 return nil
