@@ -465,12 +465,28 @@ final class BrewService {
 
     private struct LegacyTargetResponse: Decodable {
         struct Cask: Decodable {
-            let token: String
-            let full_token: String
-            let tap: String
+            let token: String?
+            let full_token: String?
+            let tap: String?
             let artifacts: [CaskArtifact]?
+
+            private enum CodingKeys: String, CodingKey { case token, full_token, tap, artifacts }
+
+            init(from decoder: Decoder) throws {
+                let values = try decoder.container(keyedBy: CodingKeys.self)
+                token = try? values.decode(String.self, forKey: .token)
+                full_token = try? values.decode(String.self, forKey: .full_token)
+                tap = try? values.decode(String.self, forKey: .tap)
+                artifacts = try? values.decode([CaskArtifact].self, forKey: .artifacts)
+            }
         }
-        let casks: [Cask]
+        struct Entry: Decodable {
+            let cask: Cask?
+            init(from decoder: Decoder) throws {
+                cask = try? Cask(from: decoder)
+            }
+        }
+        let casks: [Entry]
     }
 
     private func verifiedLegacyInstallationTargets(
@@ -485,10 +501,10 @@ final class BrewService {
         try Task.checkCancellation()
         try configuration.validateCurrent()
         let response = try JSONDecoder().decode(LegacyTargetResponse.self, from: Data(json.utf8))
-        let byFullToken = Dictionary(grouping: response.casks, by: \.full_token)
+        let byFullToken = Dictionary(grouping: response.casks.compactMap(\.cask), by: \.full_token)
         var result: [CaskId: [String]] = [:]
         for vm in missing {
-            let matches = byFullToken[vm.fullToken] ?? []
+            let matches = byFullToken[Optional(vm.fullToken)] ?? []
             guard matches.count == 1, let cask = matches.first,
                   cask.token == vm.token, cask.tap == vm.tap,
                   let artifacts = cask.artifacts,

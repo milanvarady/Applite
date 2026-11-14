@@ -553,8 +553,10 @@ enum ExternalInstallTests {
               if [ "$token" = "review-missing" ]; then bundle="Missing.app"; fi
               case "$token" in legacy-safe*) bundle="Safe.app" ;; esac
               printf '%s' "$separator"
-              if [ -f "$fixture_dir/missing-artifacts" ] || [ "$token" = "legacy-invalid" ]; then
+              if [ -f "$fixture_dir/missing-artifacts" ]; then
                 printf '{"token":"%s","full_token":"%s","tap":"homebrew/cask"}' "$token" "$full_token"
+              elif [ "$token" = "legacy-invalid" ]; then
+                printf '{"token":"%s","full_token":"%s","tap":"homebrew/cask","artifacts":"malformed"}' "$token" "$full_token"
               else
                 printf '{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["%s"]}],"deprecated":false,"disabled":false}' "$token" "$full_token" "$bundle"
               fi
