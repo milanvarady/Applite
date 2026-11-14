@@ -596,6 +596,32 @@ enum ExternalInstallTests {
         try fm.removeItem(at: prefix.appendingPathComponent("mixed-reconcile"))
         try fm.removeItem(at: prefix.appendingPathComponent("fail-list"))
         try fm.removeItem(at: arguments)
+        service.recoverBrew = {
+            defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+            return true
+        }
+        let invalidBrew = prefix.appendingPathComponent("missing-brew")
+        for batch in [false, true] {
+            defaults.setValue(invalidBrew.path, for: Preferences.customUserBrewPath)
+            let recovered = CaskViewModel(record: record("recovery-\(batch)", bundle: "Recovery-\(batch).app"))
+            if batch {
+                service.installAll([recovered])
+                _ = try await service.runSerialized { true }
+            } else {
+                await service.install(recovered).value
+            }
+            precondition(recovered.isInstalled && !recovered.progressState.isFailed,
+                         "An unconfirmed operation must use the recovered Homebrew configuration")
+            try fm.removeItem(at: arguments)
+        }
+        defaults.setValue(invalidBrew.path, for: Preferences.customUserBrewPath)
+        let pinned = BrewOperationConfiguration.current
+        let confirmed = CaskViewModel(record: externalRecord)
+        await service.install(confirmed, confirmedConfiguration: pinned).value
+        precondition(confirmed.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+                     "Recovery must not change a confirmed adoption's previewed configuration")
+        service.recoverBrew = nil
+        try fm.removeItem(at: prefix.appendingPathComponent("receipts"))
         try await loader.refreshExternalInstallations { _, _, _ in [:] }
         precondition(registry.count == 2, "Empty scans must not materialize the entire catalog")
         let scanGate = ScanGate()
