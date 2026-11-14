@@ -19,6 +19,7 @@ final class CaskViewModel {
 
     /// Cask information from database
     private var record: CaskRecord
+    var recordSnapshot: CaskRecord { record }
 
     // MARK: - Runtime State (not persisted)
 
