@@ -27,6 +27,8 @@ targets (including nested staging links and a directory-symlink loop), managed-r
 Installed projection reconciliation use isolated filesystem fixtures.
 Recorded source tests cover receipt artifacts, staged `only_path`, unrelated payload
 apps, and unsafe source paths without recursively traversing Caskroom payloads.
+Ruby-only cask metadata uses receipt artifacts without executing Ruby and requires
+verifiable staged links; a missing link fails closed.
 Sibling-cask fixtures cover uncataloged managed owners, symlink aliases, separate
 copies, conflicting configured destinations, stale selections, single/bulk guards,
 and fail-closed handling of unavailable ownership records. Confirmation also warns

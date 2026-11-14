@@ -144,6 +144,12 @@ final class CaskViewModelRegistry {
             vm.installedBundleURL = url
             vm.hasSelectedCopyProvenance = multipleCopyTokens.contains(vm.fullToken)
             vm.selectedCopyProtection = selectedCopyProtection[vm.fullToken]
+            if let selected = vm.selectedCopyProtection {
+                var sources = vm.protectedAppInstallation?.appURLs ?? [:]
+                sources.merge(selected.appURLs) { _, current in current }
+                vm.protectedAppInstallation = ProtectedAppInstallation(appURLs: sources)
+                if vm.isManagementProtected { vm.isOutdated = false }
+            }
         }
     }
 

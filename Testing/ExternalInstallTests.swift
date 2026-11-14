@@ -849,6 +849,26 @@ enum ExternalInstallTests {
             _ = try InstalledAppLocator.recordedAppURLs(token: receiptToken, executable: configurationA.executable)
             preconditionFailure("An unsafe recorded source path must fail closed")
         } catch CaskAdoptionError.installationTargetsUnavailable { }
+        let rubyRoom = receiptCaskroom.deletingLastPathComponent().appendingPathComponent("ruby-receipt")
+        let rubyStage = rubyRoom.appendingPathComponent("1.0")
+        let rubyCasks = rubyRoom.appendingPathComponent(".metadata/1.0/20260101000000/Casks")
+        try fm.createDirectory(at: rubyStage, withIntermediateDirectories: true)
+        try fm.createDirectory(at: rubyCasks, withIntermediateDirectories: true)
+        try Data("cask fixture".utf8).write(to: rubyCasks.appendingPathComponent("ruby-receipt.rb"))
+        try JSONSerialization.data(withJSONObject: ["uninstall_artifacts": [["app": ["Source.app"]]]])
+            .write(to: rubyRoom.appendingPathComponent(".metadata/INSTALL_RECEIPT.json"))
+        let rubyLink = rubyStage.appendingPathComponent("Source.app")
+        try fm.createSymbolicLink(at: rubyLink, withDestinationURL: otherApp)
+        let rubyTargets = try InstalledAppLocator.recordedAppURLs(
+            token: "ruby-receipt", executable: configurationA.executable, requireRecordedOwnership: true
+        )
+        precondition(rubyTargets == [otherApp.resolvingSymlinksInPath().standardizedFileURL],
+                     "Ruby-only saved casks must use recorded receipt artifacts without evaluating Ruby")
+        try fm.removeItem(at: rubyLink)
+        do {
+            _ = try InstalledAppLocator.recordedAppURLs(token: "ruby-receipt", executable: configurationA.executable)
+            preconditionFailure("A Ruby receipt without a verifiable staged link must fail closed")
+        } catch CaskAdoptionError.installationTargetsUnavailable { }
         let launchB = try InstalledAppLocator.launchURL(
             token: token, displayName: "Metadata Fixture", preferredURL: newApp,
             isManaged: true, configuration: configurationB
@@ -2780,6 +2800,19 @@ enum ExternalInstallTests {
                      && provenanceRegistry.locallyInstalledCount == 1
                      && provenanceRegistry.externalInstalledCount == 0,
                      "A changed recorded copy must refresh its source without exposing external rows")
+        let newSourceRegistry = CaskViewModelRegistry()
+        let newlyProtected = newSourceRegistry.viewModel(for: stable)
+        newSourceRegistry.markInstalled(tokens: [stable.fullToken])
+        newlyProtected.installedBundleURL = app
+        newlyProtected.isOutdated = true
+        let newSourceLoader = CaskDataLoader(
+            dbService: CaskDatabaseService(databasePool: pool), registry: newSourceRegistry,
+            intuneInventory: { .empty }, artCraftInventory: { .empty }
+        )
+        try await newSourceLoader.refreshExternalInstallations()
+        precondition(newlyProtected.protectedAppInstallation?.source == .appStore
+                     && newlyProtected.isManagementProtected && !newlyProtected.isOutdated,
+                     "A newly detected source must immediately protect actions and clear updates")
         try fm.removeItem(at: stableLink)
         try fm.createSymbolicLink(at: stableLink, withDestinationURL: app)
         let secondPrefix = root.appendingPathComponent("Second Homebrew Receipts")
