@@ -93,7 +93,9 @@ Architecture notes are in [CLAUDE.md](CLAUDE.md).
 Bulk imports skip apps already present outside the selected Homebrew; use the
 confirmed single-app action to manage an external app. Ordinary installs and bulk
 imports do not use `--force`, so missing or stale catalog artifact names cannot
-silently replace an existing app; Homebrew may instead report a conflict.
+force Homebrew to overwrite an existing `app` artifact; Homebrew may instead
+report a conflict. Package and custom installers may replace apps independently,
+including bundles whose names are not present in the cask's app artifacts.
 Disabling either management prerequisite
 permanently invalidates open/queued confirmations until a new confirmation is made.
 Receipt refreshes are bound to their selected Homebrew configuration and cannot
