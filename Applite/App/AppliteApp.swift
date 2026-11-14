@@ -111,6 +111,7 @@ struct AppliteApp: App {
             logger.error("Single-instance startup failed: \(error.localizedDescription)")
             let alert = NSAlert(error: error)
             alert.messageText = String(localized: "Couldn't start Applite")
+            alert.informativeText = error.localizedDescription
             alert.runModal()
             exit(EXIT_FAILURE)
         }
