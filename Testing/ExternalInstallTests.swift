@@ -110,19 +110,52 @@ enum ExternalInstallTests {
                 return .init(data: Data(json.utf8), status: 200, url: url)
             }
             precondition(plusNotes?.tag == "v1.2.3+456")
+            let lowercasePrerelease = ReleaseNotesResolver.source(
+                homepage: homepage,
+                download: URL(string: "https://github.com/example/project/releases/download/v1.2.3-rc.1/App.dmg")!,
+                version: "1.2.3-rc.1"
+            )!
+            precondition(lowercasePrerelease.tags == ["v1.2.3-rc.1"])
+            let differentPrereleaseCase = ReleaseNotesResolver.source(
+                homepage: homepage,
+                download: URL(string: "https://github.com/example/project/releases/download/v1.2.3-RC.1/App.dmg")!,
+                version: "1.2.3-rc.1"
+            )!
+            precondition(differentPrereleaseCase.tags.isEmpty,
+                         "Prerelease identifiers are case-sensitive; only an optional v prefix may vary")
             for path in ["Example/Other/releases/tag/v1.2.3+456",
                          "Example/Project/releases/tag/V1.2.3+456",
                          "Example/Project/RELEASES/tag/v1.2.3+456"] {
-                do {
-                    _ = try await ReleaseNotesResolver.load(plusSource) { url in
-                        let json = """
-                        {"tag_name":"v1.2.3+456","body":"wrong","html_url":"https://github.com/\(path)","draft":false}
-                        """
-                        return .init(data: Data(json.utf8), status: 200, url: url)
-                    }
-                    preconditionFailure("Only owner and repository case may vary")
-                } catch ReleaseNotesResolver.Failure.invalidResponse {}
+                let notes = try await ReleaseNotesResolver.load(plusSource) { url in
+                    let json = """
+                    {"tag_name":"v1.2.3+456","body":"wrong","html_url":"https://github.com/\(path)","draft":false}
+                    """
+                    return .init(data: Data(json.utf8), status: 200, url: url)
+                }
+                precondition(notes == nil, "A release link that does not match the final API repository must show history instead")
             }
+            let renamedRepository = ReleaseNotesResolver.Source(
+                owner: "old-owner", repository: "old-project", tags: ["v1.2.3"]
+            )
+            let canonicalAPIURL = URL(
+                string: "https://api.github.com/repos/new-owner/new-project/releases/tags/v1.2.3"
+            )!
+            let canonicalHTML = """
+            {"tag_name":"v1.2.3","body":"Renamed repository notes","html_url":"https://github.com/new-owner/new-project/releases/tag/v1.2.3","draft":false}
+            """
+            let renamedNotes = try await ReleaseNotesResolver.load(renamedRepository) { _ in
+                .init(data: Data(canonicalHTML.utf8), status: 200, url: canonicalAPIURL)
+            }
+            precondition(renamedNotes?.url.absoluteString
+                         == "https://github.com/new-owner/new-project/releases/tag/v1.2.3",
+                         "A trusted GitHub API repository redirect must validate against its canonical release URL")
+            let staleHTML = """
+            {"tag_name":"v1.2.3","body":"stale link","html_url":"https://github.com/old-owner/old-project/releases/tag/v1.2.3","draft":false}
+            """
+            let staleRedirectNotes = try await ReleaseNotesResolver.load(renamedRepository) { _ in
+                .init(data: Data(staleHTML.utf8), status: 200, url: canonicalAPIURL)
+            }
+            precondition(staleRedirectNotes == nil, "Stale release links should fall back to release history")
             let ambiguous = ReleaseNotesResolver.source(
                 homepage: homepage, download: URL(string: "https://example.test/app.dmg")!, version: "1.2.3,42"
             )!
@@ -479,6 +512,18 @@ enum ExternalInstallTests {
         precondition(vm.externalAppURL == nil)
         precondition(tapVM.installationState == .notInstalled)
         precondition(registry.externalInstalledCount == 0)
+        registry.markOutdated(tokens: [record.token])
+        vm.isOutdated = false
+        registry.retireOutdatedTokens(for: [vm])
+        precondition(!registry.hasNonActionableOutdated,
+                     "A successful update or uninstall must retire its stale outdated token")
+        registry.markOutdated(tokens: [record.token, "unrecognized"])
+        vm.isOutdated = false
+        registry.retireOutdatedTokens(for: [vm])
+        precondition(registry.hasNonActionableOutdated,
+                     "Retiring a successful cask must preserve unrelated non-actionable outdated tokens")
+        registry.markOutdated(tokens: [])
+        registry.markOutdated(tokens: [record.token])
 
         // Confirmation does not run brew. No user's preferences or app database are modified.
         defaults.removeObject(forKey: Preferences.detectExternallyInstalledApps.name)
@@ -2437,6 +2482,7 @@ enum ExternalInstallTests {
         let managed = adoption.viewModel(for: alias)
         adoption.markExternalInstallations(appURLs: [stable.fullToken: shared], bundleURLs: scan.bundleURLs)
         let service = BrewService(notify: { _, _, _ in }, intuneInventory: { .empty }, artCraftInventory: { .empty })
+        _ = CaskManager(registry: adoption, brewService: service)
         let beforeInstall = managed.metadataRevision
         await service.install(managed, confirmedConfiguration: .current).value
         precondition(managed.isInstalled && !managed.progressState.isFailed && external.isInstalledExternally)
@@ -2471,14 +2517,19 @@ enum ExternalInstallTests {
             try version.write(to: versionMarker, atomically: true, encoding: .utf8)
             let revision = managed.metadataRevision
             if index == 0 {
-                managed.isOutdated = true
+                adoption.markOutdated(tokens: [managed.token])
                 await service.update(managed).value
+                precondition(!adoption.hasNonActionableOutdated,
+                             "A successful single update must retire the old outdated-token snapshot")
             } else if index == 1 {
                 service.reinstall(managed)
                 _ = try await service.runSerialized { true }
             } else {
+                adoption.markOutdated(tokens: [managed.token])
                 service.updateAll([managed])
                 _ = try await service.runSerialized { true }
+                precondition(!adoption.hasNonActionableOutdated,
+                             "A successful bulk update must retire the old outdated-token snapshot")
             }
             let metadata = try InstalledAppMetadata.read(at: shared)
             precondition(!managed.progressState.isFailed && managed.metadataRevision == revision + 1 && metadata.version == version,
@@ -2491,8 +2542,11 @@ enum ExternalInstallTests {
         precondition(managed.progressState.isFailed && managed.metadataRevision == revision,
                      "A rejected operation must not masquerade as a successful metadata refresh")
         try fm.removeItem(at: failedMetadata)
+        adoption.markOutdated(tokens: [managed.token])
         service.uninstall(managed)
         _ = try await service.runSerialized { true }
+        precondition(!adoption.hasNonActionableOutdated,
+                     "A successful uninstall must retire the old outdated-token snapshot")
         precondition(!managed.isInstalled && managed.metadataRevision == revision + 1)
     }
 
@@ -2904,6 +2958,23 @@ enum ExternalInstallTests {
         let single = try ExternalAppDetector.installations(
             catalog: [stable], managedTokens: [], directories: [system, user]
         )
+        let channelCopies = try ExternalAppDetector.installations(
+            catalog: [beta, stable], managedTokens: [], directories: [system, user]
+        )
+        precondition(channelCopies.externalAppURLs[stable.fullToken]?.path == systemApp.path
+                     && channelCopies.externalAppURLs[beta.fullToken] == nil
+                     && channelCopies.multipleCopyTokens == [stable.fullToken]
+                     && channelCopies.additionalInstallations[stable.fullToken]?.map(\.url.path) == [userApp.path],
+                     "Same-artifact copies must be reserved for the preferred stable cask, not split across channels")
+        let managedChannelOwners = try ExternalAppDetector.installations(
+            catalog: [beta, stable], managedTokens: [stable.fullToken, beta.fullToken],
+            directories: [system, user],
+            recordedAppURLs: [stable.fullToken: [systemApp], beta.fullToken: [userApp]]
+        )
+        precondition(managedChannelOwners.bundleURLs[stable.fullToken]?.path == systemApp.path
+                     && managedChannelOwners.bundleURLs[beta.fullToken]?.path == userApp.path
+                     && managedChannelOwners.externalAppURLs.isEmpty,
+                     "Separately recorded Homebrew owners must retain their exact bundle paths")
         let oneCaskRegistry = CaskViewModelRegistry()
         let primary = oneCaskRegistry.viewModel(for: stable)
         oneCaskRegistry.markExternalInstallations(
@@ -3000,10 +3071,10 @@ enum ExternalInstallTests {
         let external = try ExternalAppDetector.installations(
             catalog: [stable, beta], managedTokens: [], directories: [system, user]
         )
-        precondition(Set(external.externalAppURLs.values.map {
-            $0.resolvingSymlinksInPath().standardizedFileURL
-        }) == [systemApp.resolvingSymlinksInPath(), userApp.resolvingSymlinksInPath()],
-                     "Shared artifact names must not hide a distinct installation in another app directory")
+        precondition(external.externalAppURLs[stable.fullToken]?.path == systemApp.path
+                     && external.externalAppURLs[beta.fullToken] == nil
+                     && external.additionalInstallations[stable.fullToken]?.map(\.url.path) == [userApp.path],
+                     "Shared artifact names must retain every copy under the preferred cask, not assign one to beta")
         let protected = root.appendingPathComponent("Identity Store Apps/Shared.app")
         let receipt = protected.appendingPathComponent("Contents/_MASReceipt/receipt")
         try fm.createDirectory(at: receipt.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -3253,6 +3324,18 @@ enum ExternalInstallTests {
         precondition(vm.progressState.isFailed
                      && !fm.fileExists(atPath: secondPrefix.appendingPathComponent("uninstall-started").path),
                      "Writes must still fail closed when ownership inventory is unavailable")
+        defaults.setValue(secondBrew.path, for: Preferences.customUserBrewPath)
+        vm.isInstalled = true
+        vm.progressState = .idle
+        precondition(manager.updateAll([vm]), "A valid queued update request must be accepted")
+        defaults.setValue(secondBrew.path + "-partial", for: Preferences.customUserBrewPath)
+        let updateDeadline = Date().addingTimeInterval(5)
+        while manager.isUpdateAllInProgress && Date() < updateDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(!manager.isUpdateAllInProgress && vm.progressState.isFailed,
+                     "Update All must stop spinning after a preflight configuration failure")
+        defaults.setValue(secondBrew.path, for: Preferences.customUserBrewPath)
     }
 
     @MainActor

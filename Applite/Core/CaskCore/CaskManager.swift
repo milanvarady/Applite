@@ -45,7 +45,9 @@ final class CaskManager {
     private var installedStateResolutionCount = 0
     private var requiresReceiptRefresh = false
     private var homebrewConfigurationGeneration = 0
+    private var updateAllRequestCount = 0
     var isResolvingInstalledState: Bool { installedStateResolutionCount > 0 }
+    var isUpdateAllInProgress: Bool { updateAllRequestCount > 0 }
 
     /// True while a manual catalog refresh is running (toolbar action).
     private(set) var isRefreshingCatalog: Bool = false
@@ -107,8 +109,12 @@ final class CaskManager {
         let loader = dataLoader ?? CaskDataLoader(registry: reg)
         self.dataLoader = loader
         self.catalogLoad = catalogLoad ?? { forceSync in try await loader.loadCatalogData(forceSync: forceSync) }
-        self.brewService = brewService ?? BrewService()
+        let service = brewService ?? BrewService()
+        self.brewService = service
         self.categories = Self.loadInitialCategories()
+        service.onSuccessfulOutdatedOperation = { [weak reg] cask in
+            reg?.retireOutdatedTokens(for: [cask])
+        }
 
         // An operation that finds the brew path invalid re-resolves brew through `bootstrap` — the
         // one owned "is brew usable" state — instead of handling a broken brew its own way (E1/F1).
@@ -412,7 +418,12 @@ final class CaskManager {
     @discardableResult
     func updateAll(_ casks: [CaskViewModel]) -> Bool {
         guard canModifyApps(), !casks.isEmpty else { return false }
-        brewService.updateAll(casks)
+        guard let task = brewService.updateAll(casks) else { return false }
+        updateAllRequestCount += 1
+        Task {
+            defer { updateAllRequestCount -= 1 }
+            await task.value
+        }
         return true
     }
 

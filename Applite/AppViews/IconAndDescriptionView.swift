@@ -61,7 +61,7 @@ struct IconAndDescriptionView: View {
                     }
                         .font(.caption)
                         .foregroundStyle(.tint)
-                        .accessibilityLabel("Show details for \(cask.name)")
+                        .accessibilityLabel("Release Notes for \(cask.name)")
                         .help("Show release notes and version information")
                 } else if cask.isLocallyInstalled {
                     Text("Installed")

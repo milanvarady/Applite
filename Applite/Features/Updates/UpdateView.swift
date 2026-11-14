@@ -31,13 +31,11 @@ struct UpdateView: View {
         }
     }
 
-    /// True while a bulk update is running. Reads the observable batch state (`batchProgress`),
-    /// which survives leaving and re-entering this tab, OR the just-pressed local flag (which
-    /// covers the brief gap before the batch actually starts). Deriving `disabled` from local
-    /// `@State` alone was the bug: switching tabs destroys the view, resetting `isUpdatingAll`, so
-    /// the button re-enabled mid-update.
+    /// True while a bulk update is queued or running. The manager request state spans preflight,
+    /// while `batchProgress` survives leaving and re-entering this tab; local state covers the
+    /// brief gap before the manager publishes the request.
     private var isUpdatingAllActive: Bool {
-        isUpdatingAll || caskManager.batchProgress?.isUpdate == true
+        isUpdatingAll || caskManager.isUpdateAllInProgress || caskManager.batchProgress?.isUpdate == true
     }
 
     var updateAllButton: some View {

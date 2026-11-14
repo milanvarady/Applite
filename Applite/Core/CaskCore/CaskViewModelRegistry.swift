@@ -212,6 +212,18 @@ final class CaskViewModelRegistry {
         }
     }
 
+    func retireOutdatedTokens(for casks: [CaskViewModel]) {
+        for token in Set(casks.map(\.token)) {
+            let stillNeedsAttention = viewModelsByFullToken.values.contains {
+                $0.isInstalled && $0.token == token
+                    && ($0.isOutdated || $0.isManagementProtected || $0.homebrewManagementBlockReason != nil)
+            }
+            if !stillNeedsAttention {
+                outdatedTokens.remove(token)
+            }
+        }
+    }
+
     // MARK: - Computed Filtered Lists
 
     private var locallyInstalledProjection: [CaskViewModel] {

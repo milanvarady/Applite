@@ -46,6 +46,8 @@ final class BrewService {
     private let loadIntuneInventory: IntuneAppDetector.Loader
     private let loadArtCraftInventory: ArtCraftAppDetector.Loader
 
+    var onSuccessfulOutdatedOperation: ((CaskViewModel) -> Void)?
+
     init(
         notify: @escaping @MainActor (String, String, NotificationReason) async -> Void = { title, body, reason in
             await sendNotification(title: title, body: body, reason: reason)
@@ -305,6 +307,7 @@ final class BrewService {
                 logMessage: "Successfully uninstalled \(vm.fullToken)",
                 notificationTitle: String(localized: "\(vm.name) successfully uninstalled", comment: "Successful app uninstall notification")
             )
+            self.onSuccessfulOutdatedOperation?(vm)
 
         }
     }
@@ -347,6 +350,7 @@ final class BrewService {
                 logMessage: "Successfully updated \(vm.token)",
                 notificationTitle: String(localized: "\(vm.name) successfully updated", comment: "Successful app update notification")
             )
+            self.onSuccessfulOutdatedOperation?(vm)
 
         }
     }
@@ -399,7 +403,8 @@ final class BrewService {
     }
 
     /// Updates many casks as ONE `brew upgrade --cask <all>` process (see `installAll`).
-    func updateAll(_ vms: [CaskViewModel]) {
+    @discardableResult
+    func updateAll(_ vms: [CaskViewModel]) -> Task<Void, Never>? {
         runBatch(vms, kind: .update)
     }
 
@@ -844,8 +849,9 @@ final class BrewService {
 
     /// Enqueues a bulk op as ONE brew process on the serial queue, tracking every cask as its
     /// own `ActiveBrewTask` (all sharing this batch task) so each card shows in `ActiveTasksView`.
-    private func runBatch(_ vms: [CaskViewModel], kind: BatchKind) {
-        guard !vms.isEmpty else { return }
+    @discardableResult
+    private func runBatch(_ vms: [CaskViewModel], kind: BatchKind) -> Task<Void, Never>? {
+        guard !vms.isEmpty else { return nil }
         let configuration = BrewOperationConfiguration.current
 
         let batchTokens = Set(vms.map(\.fullToken))
@@ -1004,6 +1010,7 @@ final class BrewService {
         handle.task = task
         queueTail = task
         for vm in vms { activeTasks.append(ActiveBrewTask(operationID: operationID, viewModel: vm, task: task)) }
+        return task
     }
 
     /// Cancels the currently-running bulk operation (the whole `brew install/upgrade --cask <all>`
@@ -1088,9 +1095,14 @@ final class BrewService {
         }
 
         do {
-            try await reconcileBatch(
+            let succeededTokens = try await reconcileBatch(
                 vms, kind: kind, perCaskError: perCaskError, output: completeOutput, configuration: configuration
             )
+            if kind == .update {
+                for vm in vms where succeededTokens.contains(vm.fullToken) {
+                    self.onSuccessfulOutdatedOperation?(vm)
+                }
+            }
         } catch is CancellationError {
             for vm in vms { vm.progressState = .idle }
         } catch {
@@ -1206,7 +1218,7 @@ final class BrewService {
         perCaskError: [String: String],
         output: String,
         configuration: BrewOperationConfiguration
-    ) async throws {
+    ) async throws -> Set<CaskId> {
         // Casks that already got a success/error marker while streaming are authoritative — do
         // NOT re-derive them from a list query (its `--full-name` format may not match a token,
         // which would flip a genuinely-installed cask to a false failure). Only query brew for
@@ -1230,6 +1242,7 @@ final class BrewService {
         try configuration.validateCurrent()
         var succeeded = 0
         var failedNames: [String] = []
+        var succeededTokens: Set<CaskId> = []
 
         for vm in vms {
             let ok: Bool
@@ -1258,6 +1271,7 @@ final class BrewService {
             if ok {
                 vm.progressState = .idle
                 succeeded += 1
+                succeededTokens.insert(vm.fullToken)
             } else {
                 if case .failed = vm.progressState {
                     // keep the per-cask error already parsed onto the card
@@ -1277,6 +1291,7 @@ final class BrewService {
                     vm.progressState = .failed(output: output + "\n" + error.localizedDescription)
                     failedNames.append(vm.name)
                     succeeded -= 1
+                    succeededTokens.remove(vm.fullToken)
                 }
             }
         }
@@ -1305,6 +1320,7 @@ final class BrewService {
             // summary the user dismisses once and can't get back.
             await notify(title, names, .failure)
         }
+        return succeededTokens
     }
 
     /// Parses a single line of streamed `brew install/upgrade --cask` output.

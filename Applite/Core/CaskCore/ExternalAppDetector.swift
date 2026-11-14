@@ -50,30 +50,27 @@ enum ExternalAppDetector {
         var claimed = Set(recordedAppURLs.filter { managedTokens.contains($0.key) && !knownManaged.contains($0.key) }
             .flatMap { $0.value.map { $0.resolvingSymlinksInPath().standardizedFileURL.path } })
         var found = ScanResult()
-        var matchesByToken: [(CaskRecord, [URL])] = []
         var renamedCopyTokens: Set<CaskId> = []
         for record in ordered {
             try Task.checkCancellation()
             let recorded = recordedAppURLs[record.fullToken] ?? []
+            let recordedPaths = Set(recorded.map { $0.resolvingSymlinksInPath().standardizedFileURL.path })
             let discovered = appURLs(
                 bundleNames: record.appBundleNames,
                 displayName: record.name,
                 directories: directories
             ) + artCraft.matchingAppURLs(bundleNames: record.appBundleNames, displayName: record.name)
             guard !recorded.isEmpty || !discovered.isEmpty else { continue }
-            let matching = managedTokens.contains(record.fullToken) ? discovered : discovered.filter {
-                !managedPaths.contains($0.resolvingSymlinksInPath().standardizedFileURL.path)
+            let matching = discovered.filter {
+                let path = $0.resolvingSymlinksInPath().standardizedFileURL.path
+                return !managedPaths.contains(path) || recordedPaths.contains(path)
             }
-            matchesByToken.append((record, matching + recorded))
             if record.appBundleNames.count == 1, let old = recorded.first,
                old.lastPathComponent != (record.appBundleNames[0] as NSString).lastPathComponent,
                matching.contains(where: {
                    $0.resolvingSymlinksInPath().standardizedFileURL != old.resolvingSymlinksInPath().standardizedFileURL
                }) {
                 renamedCopyTokens.insert(record.fullToken)
-            }
-            if renamedCopyTokens.contains(record.fullToken) || hasMultipleCopies(matching + recorded) {
-                found.multipleCopyTokens.insert(record.fullToken)
             }
             var selected: URL?
             if let recorded = recorded.first {
@@ -82,7 +79,25 @@ enum ExternalAppDetector {
                 let sameArtifact = matching.filter { $0.lastPathComponent == first.lastPathComponent }
                 selected = sameArtifact.first {
                     !claimed.contains($0.resolvingSymlinksInPath().standardizedFileURL.path)
-                } ?? first
+                } ?? (managedTokens.contains(record.fullToken) ? first : nil)
+            }
+            guard var selected else {
+                let protection = try protectedInstallation(
+                    bundleNames: record.appBundleNames, displayName: record.name,
+                    directories: directories, knownURL: discovered.first, intune: intune,
+                    artCraft: artCraft, additionalURLs: recorded + discovered
+                )
+                if let protection {
+                    for (source, url) in protection.appURLs {
+                        switch source {
+                        case .intune: found.intuneAppURLs[record.fullToken] = url
+                        case .appStore: found.appStoreAppURLs[record.fullToken] = url
+                        case .setapp: found.setappAppURLs[record.fullToken] = url
+                        case .artCraft: found.artCraftAppURLs[record.fullToken] = url
+                        }
+                    }
+                }
+                continue
             }
             let protection = try protectedInstallation(
                 bundleNames: record.appBundleNames, displayName: record.name,
@@ -99,7 +114,6 @@ enum ExternalAppDetector {
                     }
                 }
             }
-            guard var selected else { continue }
             if recorded.isEmpty, let preferred = protection?.url,
                preferred.lastPathComponent == selected.lastPathComponent,
                matching.contains(preferred),
@@ -107,31 +121,46 @@ enum ExternalAppDetector {
                 selected = preferred
             }
             let canonicalURL = selected.resolvingSymlinksInPath().standardizedFileURL
-            found.bundleURLs[record.fullToken] = canonicalURL
-            if found.multipleCopyTokens.contains(record.fullToken) {
-                found.selectedCopyProtection[record.fullToken] = try Self.protection(
-                    at: selected, intune: intune, artCraft: artCraft
-                )
+            let isManaged = managedTokens.contains(record.fullToken)
+            guard claimed.insert(canonicalURL.path).inserted || isManaged else {
+                continue
             }
-            guard claimed.insert(canonicalURL.path).inserted else { continue }
-            if !managedTokens.contains(record.fullToken) {
-                found.externalAppURLs[record.fullToken] = selected
-            }
-        }
-        for (record, matching) in matchesByToken {
-            guard found.multipleCopyTokens.contains(record.fullToken) else { continue }
-            for url in matching {
-                let sameArtifact = matching.filter { $0.lastPathComponent == url.lastPathComponent }
+            let selectedCopyProtection = try Self.protection(at: selected, intune: intune, artCraft: artCraft)
+            var additionalCopies: [(URL, ProtectedAppInstallation?)] = []
+            let candidates = matching + recorded
+            let competingArtifactNames = Set(ordered.filter { $0.fullToken != record.fullToken }
+                .flatMap { $0.appBundleNames.map { ($0 as NSString).lastPathComponent } })
+            for url in candidates {
+                let sameArtifact = candidates.filter { $0.lastPathComponent == url.lastPathComponent }
                 guard renamedCopyTokens.contains(record.fullToken) || hasMultipleCopies(sameArtifact) else {
                     continue
                 }
                 try Task.checkCancellation()
                 let canonical = url.resolvingSymlinksInPath().standardizedFileURL
+                guard canonical.path != canonicalURL.path,
+                      !claimed.contains(canonical.path),
+                      !managedPaths.contains(canonical.path) || recordedPaths.contains(canonical.path) else {
+                    continue
+                }
+                let copyProtection = try Self.protection(at: url, intune: intune, artCraft: artCraft)
+                guard !competingArtifactNames.contains(url.lastPathComponent)
+                        || copyProtection?.source == selectedCopyProtection?.source else {
+                    continue
+                }
+                additionalCopies.append((canonical, copyProtection))
+            }
+            found.bundleURLs[record.fullToken] = canonicalURL
+            if !additionalCopies.isEmpty {
+                found.multipleCopyTokens.insert(record.fullToken)
+                found.selectedCopyProtection[record.fullToken] = selectedCopyProtection
+            }
+            if !isManaged {
+                found.externalAppURLs[record.fullToken] = selected
+            }
+            for (canonical, copyProtection) in additionalCopies {
                 guard claimed.insert(canonical.path).inserted else { continue }
                 found.additionalInstallations[record.fullToken, default: []].append(
-                    AdditionalInstallation(url: canonical, protection: try protection(
-                        at: url, intune: intune, artCraft: artCraft
-                    ))
+                    AdditionalInstallation(url: canonical, protection: copyProtection)
                 )
             }
         }
