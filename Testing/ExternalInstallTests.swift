@@ -359,6 +359,7 @@ enum ExternalInstallTests {
             try externalRecord.insert(db)
             try selfRecord.insert(db)
         }
+        _ = registry.viewModel(for: externalRecord)
         let loader = CaskDataLoader(
             dbService: CaskDatabaseService(databasePool: scanPool), registry: registry,
             intuneInventory: { .empty }, artCraftInventory: { .empty }
@@ -482,7 +483,7 @@ enum ExternalInstallTests {
         guard case .failed(let output) = tapVM.progressState else {
             preconditionFailure("Failed adoption must expose its output")
         }
-        precondition(output.contains("Error: adoption fixture stderr"))
+        precondition(output.contains("Error: adoption fixture stderr"), "Unexpected adoption output: \(output)")
         let receivedArguments = try String(contentsOf: root.appendingPathComponent("arguments"), encoding: .utf8)
         precondition(receivedArguments == arguments.joined(separator: "\n") + "\n")
         precondition(registry.externalInstalledCount == 1)
@@ -2859,6 +2860,30 @@ enum ExternalInstallTests {
         let arguments = prefix.appendingPathComponent("arguments")
         try await loader.refreshExternalInstallations { _, _, _ in [:] }
         precondition(registry.count == 2, "Empty scans must not materialize the entire catalog")
+        let scanGate = ScanGate()
+        let scannedToken = externalRecord.fullToken
+        let delayedScan = Task {
+            try await loader.refreshExternalInstallations { _, _, _ in
+                await scanGate.wait()
+                return [scannedToken: app]
+            }
+        }
+        let catalogScanDeadline = Date().addingTimeInterval(5)
+        while !(await scanGate.isWaiting) && Date() < catalogScanDeadline { await Task.yield() }
+        let scanWaiting = await scanGate.isWaiting
+        precondition(scanWaiting)
+        let updatedRecord = CaskRecord(
+            token: externalRecord.token, fullToken: externalRecord.fullToken, tap: externalRecord.tap,
+            name: "Newer Catalog Name", descriptionText: "", homepageURL: nil, pkgInstaller: false,
+            warningType: nil, warningDate: nil, warningReason: nil, downloadsIn365days: 0,
+            appBundleNames: ["External.app"]
+        )
+        _ = registry.viewModel(for: updatedRecord)
+        await scanGate.release()
+        try await delayedScan.value
+        precondition(vm.name == "Newer Catalog Name",
+                     "A slow external scan must not overwrite newer live catalog data")
+        _ = registry.viewModel(for: externalRecord)
         for enabled in [false, true] {
             defaults.setValue(enabled, for: Preferences.offerHomebrewManagement)
             defaults.setValue(enabled, for: Preferences.detectExternallyInstalledApps)
