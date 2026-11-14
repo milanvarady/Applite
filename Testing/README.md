@@ -16,6 +16,9 @@ replacement-scan cancellation but propagates parent cancellation, a changed
 Homebrew configuration, and unexpected scan cancellation.
 Batch fixtures also switch Homebrew during streamed output and during the final
 receipt query, asserting that neither stale result changes installed state.
+Additional cases cover single-install profile changes, retained stale-batch output,
+blocked imports with stale receipt flags, outdated-state clearing, and empty scans
+without materializing unrelated catalog records.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including

@@ -29,7 +29,7 @@ struct InstalledView: View {
 
     var body: some View {
         VStack {
-            if externalOnly && caskManager.isResolvingInstalledState {
+            if externalOnly && casks.isEmpty && caskManager.isResolvingInstalledState {
                 ProgressView()
             } else if externalOnly && casks.isEmpty {
                 ContentUnavailableView(

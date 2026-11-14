@@ -35,7 +35,7 @@ struct SearchView: View {
         let displayed = displayedResults
         return Group {
             if displayed.isEmpty && !isSearching {
-                if externalOnly {
+                if externalOnly && caskManager.externalInstalledCount == 0 {
                     ContentUnavailableView(
                         "No externally installed apps detected.",
                         systemImage: "app.badge.checkmark"

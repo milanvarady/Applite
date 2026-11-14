@@ -534,11 +534,13 @@ enum ExternalInstallTests {
         }
         let externalRecord = record("review-external", bundle: "External.app")
         let missingRecord = record("review-missing", bundle: "Missing.app")
+        let unusedRecord = record("review-unused", bundle: "Unused.app")
         let pool = try DatabasePool(path: prefix.appendingPathComponent("catalog.sqlite").path)
         try AppDatabase.migrator().migrate(pool)
         try await pool.write { db in
             try externalRecord.insert(db)
             try missingRecord.insert(db)
+            try unusedRecord.insert(db)
         }
         let registry = CaskViewModelRegistry()
         let vm = registry.viewModel(for: externalRecord)
@@ -547,11 +549,17 @@ enum ExternalInstallTests {
         let service = BrewService(notify: { _, _, _ in })
         let manager = CaskManager(dataLoader: loader, registry: registry, brewService: service)
         let arguments = prefix.appendingPathComponent("arguments")
+        try await loader.refreshExternalInstallations { _, _, _ in [:] }
+        precondition(registry.count == 2, "Empty scans must not materialize the entire catalog")
         for enabled in [false, true] {
             defaults.setValue(enabled, for: Preferences.offerHomebrewManagement)
+            defaults.setValue(enabled, for: Preferences.detectExternallyInstalledApps)
+            vm.isInstalled = true
+            vm.isOutdated = true
             service.installAll([vm])
             _ = try await service.runSerialized { true }
-            precondition(vm.progressState.isFailed && !fm.fileExists(atPath: arguments.path),
+            precondition(vm.progressState.isFailed && !vm.isInstalled && !vm.isOutdated
+                         && !fm.fileExists(atPath: arguments.path),
                          "Bulk import must never adopt an external app without explicit consent")
         }
         service.installAll([vm, missing])
@@ -688,10 +696,35 @@ enum ExternalInstallTests {
             _ = try await service.runSerialized { true }
             precondition(!missing.isInstalled && missing.progressState.isFailed,
                          "Obsolete batch \(mode) results must not update receipt state after a Homebrew switch")
+            if mode == "stream", case .failed(let output) = missing.progressState {
+                precondition(output.contains("successfully installed"),
+                             "Stale streamed results must retain command output")
+            }
             defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
             if fm.fileExists(atPath: flag.path) { try fm.removeItem(at: flag) }
             if mode == "reconciliation" { try fm.removeItem(at: prefix.appendingPathComponent("no-markers")) }
         }
+
+        try? fm.removeItem(at: prefix.appendingPathComponent("receipts"))
+        let missingApp = apps.appendingPathComponent("Missing.app")
+        if fm.fileExists(atPath: missingApp.path) { try fm.removeItem(at: missingApp) }
+        registry.markInstalled(tokens: [])
+        let pauseStream = prefix.appendingPathComponent("pause-stream")
+        let streamStarted = prefix.appendingPathComponent("stream-started")
+        if fm.fileExists(atPath: streamStarted.path) { try fm.removeItem(at: streamStarted) }
+        try Data().write(to: pauseStream)
+        let single = service.install(missing)
+        let singleDeadline = Date().addingTimeInterval(5)
+        while !fm.fileExists(atPath: streamStarted.path) && Date() < singleDeadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        precondition(fm.fileExists(atPath: streamStarted.path))
+        defaults.setValue(prefix.appendingPathComponent("other-brew").path, for: Preferences.customUserBrewPath)
+        try fm.removeItem(at: pauseStream)
+        await single.value
+        precondition(!missing.isInstalled && missing.progressState.isFailed,
+                     "A single install from the previous Homebrew must not publish receipt state")
+        defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
 
         var resumeReconciliation: CheckedContinuation<Void, Never>?
         let reconcileTask = service.install(vm, confirmedConfiguration: .current) {
