@@ -719,9 +719,13 @@ final class BrewService {
         do {
             for try await line in Shell.stream(configuration.executable, arguments, pty: true) {
                 if Task.isCancelled { break }
+                try configuration.validateCurrent()
                 completeOutput += line + "\n"
                 applyBatchLine(line, kind: kind, lookup: lookup, perCaskError: &perCaskError)
             }
+        } catch CaskAdoptionError.configurationChanged {
+            await failBatchForConfigurationChange(vms)
+            return
         } catch {
             // A non-zero exit is expected when any cask fails (reconcile decides per-cask outcome).
             // A user cancel also throws here — don't log that as an error.
@@ -735,9 +739,32 @@ final class BrewService {
             return
         }
 
-        await reconcileBatch(
-            vms, kind: kind, perCaskError: perCaskError, output: completeOutput, configuration: configuration
-        )
+        do {
+            try await reconcileBatch(
+                vms, kind: kind, perCaskError: perCaskError, output: completeOutput, configuration: configuration
+            )
+        } catch is CancellationError {
+            for vm in vms { vm.progressState = .idle }
+        } catch {
+            for vm in vms {
+                await showFailure(
+                    for: vm, error: error, output: error.localizedDescription,
+                    failureTitle: String(localized: "Couldn't refresh installed apps"),
+                    failureMessage: error.localizedDescription
+                )
+            }
+        }
+    }
+
+    private func failBatchForConfigurationChange(_ vms: [CaskViewModel]) async {
+        let error = CaskAdoptionError.configurationChanged
+        for vm in vms {
+            await showFailure(
+                for: vm, error: error, output: error.localizedDescription,
+                failureTitle: String(localized: "Couldn't refresh installed apps"),
+                failureMessage: error.localizedDescription
+            )
+        }
     }
 
     /// Routes one streamed batch-output line to the matching cask's `progressState`.
@@ -820,7 +847,7 @@ final class BrewService {
         perCaskError: [String: String],
         output: String,
         configuration: BrewOperationConfiguration
-    ) async {
+    ) async throws {
         // Casks that already got a success/error marker while streaming are authoritative — do
         // NOT re-derive them from a list query (its `--full-name` format may not match a token,
         // which would flip a genuinely-installed cask to a false failure). Only query brew for
@@ -834,10 +861,14 @@ final class BrewService {
         var brewTokens: Set<String> = []
         if vms.contains(where: { !isResolved($0) }) {
             let args = kind == .install ? ["list", "--cask", "--full-name"] : ["outdated", "--cask", "-q"]
-            let out = (try? await Shell.run(configuration.executable, args)) ?? ""
+            let out = try await Shell.run(configuration.executable, args)
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
             brewTokens = Set(out.split(whereSeparator: \.isNewline).map(String.init))
         }
 
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
         var succeeded = 0
         var failedNames: [String] = []
 

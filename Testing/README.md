@@ -10,6 +10,8 @@ disabled/re-enabled consent, stale receipt snapshots, busy reconciliation, debou
 path edits, and cancellation of superseded scan work. Receipt refresh tolerates
 replacement-scan cancellation but propagates parent cancellation, a changed
 Homebrew configuration, and unexpected scan cancellation.
+Batch fixtures also switch Homebrew during streamed output and during the final
+receipt query, asserting that neither stale result changes installed state.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including

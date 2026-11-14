@@ -441,12 +441,17 @@ enum ExternalInstallTests {
             printf '{"casks":[{"token":"%s","full_token":"%s","tap":"homebrew/cask","homepage":"https://example.test/","url":"https://example.test/app.dmg","artifacts":[{"app":["%s"]}],"deprecated":false,"disabled":false}]}' "$token" "$4" "$bundle" ;;
           install)
             printf '%s\\n' "$@" > "$fixture_dir/arguments"
+            if [ -f "$fixture_dir/pause-stream" ]; then
+              touch "$fixture_dir/stream-started"
+              while [ -f "$fixture_dir/pause-stream" ]; do sleep 0.01; done
+            fi
             for token in "$@"; do
               case "$token" in install|--cask|--force|--appdir=*) continue ;; esac
               printf '%s\\n' "$token" >> "$fixture_dir/receipts"
-              echo "$token was successfully installed!"
+              if [ ! -f "$fixture_dir/no-markers" ]; then echo "$token was successfully installed!"; fi
               if [ "$token" = "review-missing" ]; then mkdir -p "$fixture_dir/Apps/Missing.app"; fi
-            done ;;
+            done
+            if [ -f "$fixture_dir/pause-reconciliation" ]; then touch "$fixture_dir/pause-list"; fi ;;
           *) exit 2 ;;
         esac
         """
@@ -581,6 +586,32 @@ enum ExternalInstallTests {
             }
             preconditionFailure("An unexpected scan cancellation must not be hidden")
         } catch is CancellationError { }
+
+        for mode in ["stream", "reconciliation"] {
+            let missingApp = apps.appendingPathComponent("Missing.app")
+            if fm.fileExists(atPath: missingApp.path) { try fm.removeItem(at: missingApp) }
+            try? fm.removeItem(at: prefix.appendingPathComponent("receipts"))
+            try? fm.removeItem(at: prefix.appendingPathComponent("list-started"))
+            registry.markInstalled(tokens: [])
+            let flag = prefix.appendingPathComponent(mode == "stream" ? "pause-stream" : "pause-reconciliation")
+            try Data().write(to: flag)
+            if mode == "reconciliation" { try Data().write(to: prefix.appendingPathComponent("no-markers")) }
+            service.installAll([missing])
+            let started = prefix.appendingPathComponent(mode == "stream" ? "stream-started" : "list-started")
+            let deadline = Date().addingTimeInterval(5)
+            while !fm.fileExists(atPath: started.path) && Date() < deadline {
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            precondition(fm.fileExists(atPath: started.path))
+            defaults.setValue(prefix.appendingPathComponent("other-brew").path, for: Preferences.customUserBrewPath)
+            try fm.removeItem(at: mode == "stream" ? flag : prefix.appendingPathComponent("pause-list"))
+            _ = try await service.runSerialized { true }
+            precondition(!missing.isInstalled && missing.progressState.isFailed,
+                         "Obsolete batch \(mode) results must not update receipt state after a Homebrew switch")
+            defaults.setValue(brew.path, for: Preferences.customUserBrewPath)
+            if fm.fileExists(atPath: flag.path) { try fm.removeItem(at: flag) }
+            if mode == "reconciliation" { try fm.removeItem(at: prefix.appendingPathComponent("no-markers")) }
+        }
 
         var resumeReconciliation: CheckedContinuation<Void, Never>?
         let reconcileTask = service.install(vm, confirmedConfiguration: .current) {
