@@ -135,6 +135,12 @@ enum ExternalInstallTests {
         defaults.removeObject(forKey: Preferences.detectExternallyInstalledApps.name)
         defaults.removeObject(forKey: Preferences.offerHomebrewManagement.name)
         defaults.setValue(true, for: Preferences.appdirOn)
+        let futureApps = root.appendingPathComponent("New App Directory", isDirectory: true)
+        defaults.setValue(futureApps.path, for: Preferences.appdirPath)
+        let configurationBeforeCreation = BrewOperationConfiguration.current
+        try fm.createDirectory(at: futureApps, withIntermediateDirectories: true)
+        precondition(configurationBeforeCreation == BrewOperationConfiguration.current,
+                     "Creating an unchanged custom app directory must not change the pinned configuration")
         defaults.setValue("/tmp/Apps with 'quotes'", for: Preferences.appdirPath)
         let arguments = BrewService.installArguments(fullToken: tapRecord.fullToken)
         precondition(arguments == [

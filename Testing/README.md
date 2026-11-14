@@ -1,4 +1,4 @@
-# Applite test harness
+#  Applite test harness
 
 ## Non-destructive external-install regression tests
 
@@ -15,6 +15,8 @@ receipt query, asserting that neither stale result changes installed state.
 Additional cases cover single-install profile changes, retained stale-batch output,
 blocked imports with stale receipt flags, outdated-state clearing, and empty scans
 without materializing unrelated catalog records.
+Creating a previously missing custom app directory must not change its captured
+Homebrew configuration.
 
 These tests use the real app's Debug module, isolated databases, temporary app
 directories, and a temporary fake `brew`. They verify artifact decoding (including
