@@ -43,6 +43,8 @@ final class CaskManager {
     /// True while brew CLI is being queried for installed/outdated state.
     /// Catalog (categories/taps) is independent and lights up before this flips false.
     private var installedStateResolutionCount = 0
+    private var requiresReceiptRefresh = false
+    private var homebrewConfigurationGeneration = 0
     var isResolvingInstalledState: Bool { installedStateResolutionCount > 0 }
 
     /// True while a manual catalog refresh is running (toolbar action).
@@ -141,7 +143,11 @@ final class CaskManager {
 
     private func canModifyApps() -> Bool {
         guard !isResolvingInstalledState else {
-            alert.show(title: "Homebrew action unavailable", message: "Wait for installed apps to finish refreshing.")
+            alert.show(title: "Homebrew action unavailable", message: String(localized: "Wait for installed apps to finish refreshing."))
+            return false
+        }
+        guard !requiresReceiptRefresh else {
+            alert.show(title: "Homebrew action unavailable", message: String(localized: "Refresh installed apps before performing Homebrew actions."))
             return false
         }
         return true
@@ -151,7 +157,9 @@ final class CaskManager {
         invalidateAdoptionConsent()
         detectionSettingTask?.cancel()
         brewConfigurationTask?.cancel()
-        dataLoader.invalidateExternalInstallations()
+        homebrewConfigurationGeneration &+= 1
+        requiresReceiptRefresh = true
+        dataLoader.invalidateInstalledReceipts()
         registry.markInstalled(tokens: [])
         registry.markOutdated(tokens: [])
         installedStateResolutionCount += 1
@@ -537,6 +545,7 @@ final class CaskManager {
     ) async {
         installedStateResolutionCount += 1
         defer { installedStateResolutionCount -= 1 }
+        let generation = homebrewConfigurationGeneration
 
         do {
             // Run the refresh on the serial brew queue so its `brew list`/`outdated` snapshot can't
@@ -549,6 +558,10 @@ final class CaskManager {
             // ordered as a second line of defense.
             try await brewService.runSerialized {
                 try await self.dataLoader.refreshInstalled(configuration: configuration)
+                guard generation == self.homebrewConfigurationGeneration else {
+                    throw CaskAdoptionError.configurationChanged
+                }
+                self.requiresReceiptRefresh = false
                 // Outdated is a nested best-effort step: if it fails, keep the (good) installed state
                 // and just flag the failure, so UpdateView shows "couldn't check" instead of a false
                 // "all up to date" (P3-3).
