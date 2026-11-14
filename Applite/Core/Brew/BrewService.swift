@@ -1034,12 +1034,23 @@ final class BrewService {
         } catch is CancellationError {
             for vm in vms { vm.progressState = .idle }
         } catch {
+            guard configuration == .current else {
+                await failBatchForConfigurationChange(vms, output: completeOutput)
+                return
+            }
             for vm in vms {
-                await showFailure(
-                    for: vm, error: error, output: completeOutput + "\n" + error.localizedDescription,
-                    failureTitle: String(localized: "Couldn't refresh installed apps"),
-                    failureMessage: error.localizedDescription
-                )
+                switch vm.progressState {
+                case .success:
+                    vm.progressState = .idle
+                case .failed:
+                    break
+                default:
+                    await showFailure(
+                        for: vm, error: error, output: completeOutput + "\n" + error.localizedDescription,
+                        failureTitle: String(localized: "Couldn't refresh installed apps"),
+                        failureMessage: error.localizedDescription
+                    )
+                }
             }
         }
     }
