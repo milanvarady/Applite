@@ -20,7 +20,7 @@ enum ArtCraftAppDetector {
         }
 
         nonisolated func matchingAppURLs(bundleNames: [String], displayName: String) -> [URL] {
-            let names = bundleNames.isEmpty ? ["\(displayName).app"] : bundleNames
+            let names = bundleNames.isEmpty ? ["\(displayName).app"] : bundleNames.map { ($0 as NSString).lastPathComponent }
             return appURLs.filter { names.contains($0.lastPathComponent) }.sorted { $0.path < $1.path }
         }
     }

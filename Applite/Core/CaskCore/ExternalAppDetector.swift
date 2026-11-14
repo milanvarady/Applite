@@ -227,8 +227,7 @@ enum ExternalAppDetector {
         var matches: [URL] = []
         for directory in directories {
             for name in names {
-                guard (name as NSString).lastPathComponent == name,
-                      (name as NSString).pathExtension == "app" else { continue }
+                guard CaskArtifact.isSafeAppTargetPath(name) else { continue }
                 let url = directory.appendingPathComponent(name, isDirectory: true)
                 var isDirectory: ObjCBool = false
                 if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
