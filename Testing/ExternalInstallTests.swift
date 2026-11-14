@@ -2607,6 +2607,43 @@ enum ExternalInstallTests {
         precondition(registry.installedCount == 2 && registry.locallyInstalledCount == 1
                      && registry.externalInstalledCount == 0,
                      "Managed aliases must deduplicate from recorded bundle identity even when external detection is disabled")
+        let storeApp = prefix.appendingPathComponent("User Apps/Shared.app")
+        let storeReceipt = storeApp.appendingPathComponent("Contents/_MASReceipt/receipt")
+        try fm.createDirectory(at: storeReceipt.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data().write(to: storeReceipt)
+        let provenanceRegistry = CaskViewModelRegistry()
+        let selected = provenanceRegistry.viewModel(for: stable)
+        provenanceRegistry.markInstalled(tokens: [stable.fullToken])
+        let initialSources = try ExternalAppDetector.installations(
+            catalog: [stable], managedTokens: [stable.fullToken],
+            directories: [app.deletingLastPathComponent(), storeApp.deletingLastPathComponent()],
+            recordedAppURLs: [stable.fullToken: [app]]
+        )
+        provenanceRegistry.markExternalInstallations(
+            appURLs: initialSources.externalAppURLs, appStoreAppURLs: initialSources.appStoreAppURLs,
+            bundleURLs: initialSources.bundleURLs, copies: initialSources.additionalInstallations,
+            multipleCopyTokens: initialSources.multipleCopyTokens,
+            selectedCopyProtection: initialSources.selectedCopyProtection
+        )
+        let provenanceLoader = CaskDataLoader(
+            dbService: CaskDatabaseService(databasePool: pool), registry: provenanceRegistry,
+            intuneInventory: { .empty }, artCraftInventory: { .empty }
+        )
+        try await provenanceLoader.refreshExternalInstallations()
+        precondition(selected.installedManagementSourceName == String(localized: "Homebrew")
+                     && selected.protectedAppInstallation?.source == .appStore
+                     && provenanceRegistry.locallyInstalledCount == 1,
+                     "A disabled-detection refresh must retain provenance for the selected Homebrew copy")
+        let stableLink = prefix.appendingPathComponent("Caskroom/stable/1/Shared.app")
+        try fm.removeItem(at: stableLink)
+        try fm.createSymbolicLink(at: stableLink, withDestinationURL: storeApp)
+        try await provenanceLoader.refreshExternalInstallations()
+        precondition(selected.installedManagementSourceName == ProtectedAppInstallation.Source.appStore.name
+                     && provenanceRegistry.locallyInstalledCount == 1
+                     && provenanceRegistry.externalInstalledCount == 0,
+                     "A changed recorded copy must refresh its source without exposing external rows")
+        try fm.removeItem(at: stableLink)
+        try fm.createSymbolicLink(at: stableLink, withDestinationURL: app)
         let secondPrefix = root.appendingPathComponent("Second Homebrew Receipts")
         let secondBrew = secondPrefix.appendingPathComponent("bin/brew")
         try fm.createDirectory(at: secondBrew.deletingLastPathComponent(), withIntermediateDirectories: true)

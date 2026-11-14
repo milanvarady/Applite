@@ -186,6 +186,9 @@ final class CaskDataLoader {
               UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) == detectionEnabled else { return }
         registry.updateExistingViewModels(for: records)
         let tokens = Set(registry.installedViewModels.map(\.fullToken))
+        let previousBundleURLs = Dictionary(uniqueKeysWithValues: registry.installedViewModels.compactMap { vm in
+            vm.installedBundleURL.map { (vm.fullToken, $0.resolvingSymlinksInPath().standardizedFileURL) }
+        })
         let catalog = detectionEnabled ? records : records.filter { tokens.contains($0.fullToken) }
         let loadIntuneInventory = self.loadIntuneInventory
         let loadArtCraftInventory = self.loadArtCraftInventory
@@ -204,7 +207,22 @@ final class CaskDataLoader {
                         bundleURLs[record.fullToken] = url.resolvingSymlinksInPath().standardizedFileURL
                     }
                 }
-                return ExternalAppDetector.ScanResult(bundleURLs: bundleURLs)
+                let changed = bundleURLs.filter { token, url in
+                    previousBundleURLs[token].map { $0 != url } ?? false
+                }
+                var result = ExternalAppDetector.ScanResult(bundleURLs: bundleURLs)
+                if !changed.isEmpty {
+                    let intune = try loadIntuneInventory()
+                    let artCraft = try loadArtCraftInventory()
+                    for (token, url) in changed {
+                        try Task.checkCancellation()
+                        result.multipleCopyTokens.insert(token)
+                        result.selectedCopyProtection[token] = try ExternalAppDetector.protection(
+                            at: url, intune: intune, artCraft: artCraft
+                        )
+                    }
+                }
+                return result
             }
             if let scan {
                 return ExternalAppDetector.ScanResult(

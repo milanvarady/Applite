@@ -13,6 +13,8 @@ The selected row's URL remains distinct from protection evidence. With external
 detection disabled, managed aliases still collapse by their recorded bundle path
 without reading external ownership inventories. A paused profile switch verifies
 immediate receipt invalidation, blocked actions, and fresh uninstall receipt checks.
+With detection disabled, an unchanged managed selection retains its provenance;
+a changed recorded target is reclassified without exposing external rows.
 Invalid partial brew paths do not raise a modal alert or unblock writes, and changing
 configuration closes stale details.
 An unavailable ownership inventory is reported separately while receipt and outdated

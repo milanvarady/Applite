@@ -137,7 +137,11 @@ final class CaskViewModelRegistry {
         selectedCopyProtection: [CaskId: ProtectedAppInstallation]
     ) {
         for vm in viewModelsByFullToken.values where vm.isInstalled {
-            vm.installedBundleURL = urls[vm.fullToken]
+            let url = urls[vm.fullToken]
+            if vm.installedBundleURL == url && !multipleCopyTokens.contains(vm.fullToken) {
+                continue
+            }
+            vm.installedBundleURL = url
             vm.hasSelectedCopyProvenance = multipleCopyTokens.contains(vm.fullToken)
             vm.selectedCopyProtection = selectedCopyProtection[vm.fullToken]
         }
