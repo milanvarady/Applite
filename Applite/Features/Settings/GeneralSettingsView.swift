@@ -9,9 +9,6 @@ import SwiftUI
 
 struct GeneralSettingsView: View {
     @AppStorage(Preferences.colorSchemePreference) var colorSchemePreference
-    @AppStorage(Preferences.catalogUpdateFrequency) var catalogUpdateFrequency
-    @AppStorage(Preferences.notificationSuccess) var notificationOnSuccess
-    @AppStorage(Preferences.notificationFailure) var notificationOnFailure
 
     /// Needed for a workaround for changing the color scheme
     @State var fixingColor = false
@@ -25,19 +22,6 @@ struct GeneralSettingsView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-            }
-
-            Section("App Catalog") {
-                Picker("Fetch app catalog every:", selection: $catalogUpdateFrequency) {
-                    ForEach(CatalogUpdateFrequency.allCases) { freq in
-                        Text(freq.description)
-                    }
-                }
-            }
-
-            Section("Notifications") {
-                Toggle("Successful installs & updates", isOn: $notificationOnSuccess)
-                Toggle("Failed installs & updates", isOn: $notificationOnFailure)
             }
         }
         .formStyle(.grouped)

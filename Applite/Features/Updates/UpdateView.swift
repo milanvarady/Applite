@@ -31,19 +31,16 @@ struct UpdateView: View {
         }
     }
 
-    /// True while a bulk update is running. Reads the observable batch state (`batchProgress`),
-    /// which survives leaving and re-entering this tab, OR the just-pressed local flag (which
-    /// covers the brief gap before the batch actually starts). Deriving `disabled` from local
-    /// `@State` alone was the bug: switching tabs destroys the view, resetting `isUpdatingAll`, so
-    /// the button re-enabled mid-update.
+    /// True while a bulk update is queued or running. The manager request state spans preflight,
+    /// while `batchProgress` survives leaving and re-entering this tab; local state covers the
+    /// brief gap before the manager publishes the request.
     private var isUpdatingAllActive: Bool {
-        isUpdatingAll || caskManager.batchProgress?.isUpdate == true
+        isUpdatingAll || caskManager.isUpdateAllInProgress || caskManager.batchProgress?.isUpdate == true
     }
 
     var updateAllButton: some View {
         Button {
-            isUpdatingAll = true
-            caskManager.updateAll(caskManager.outdatedViewModels)
+            isUpdatingAll = caskManager.updateAll(caskManager.outdatedViewModels)
         } label: {
             HStack {
                 Image(systemName: "arrow.2.circlepath")
@@ -74,6 +71,11 @@ struct UpdateView: View {
 
     var body: some View {
         VStack {
+            if caskManager.hasNonActionableOutdated && !casks.isEmpty {
+                Text("Some outdated apps can't be updated here because their installation or ownership needs attention.")
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal)
+            }
             // App grid
             AppGridView(casks: filteredCasks, appRole: .update)
                 .overlay(alignment: .bottom) {
@@ -100,6 +102,12 @@ struct UpdateView: View {
                             try? await caskManager.refreshOutdated()
                         }
                     }
+                } else if caskManager.hasNonActionableOutdated {
+                    ContentUnavailableView(
+                        "Updates Need Attention",
+                        systemImage: "exclamationmark.triangle",
+                        description: Text("Some outdated apps can't be updated here because their installation or ownership needs attention.")
+                    )
                 } else {
                     ContentUnavailableView(
                         "No Updates Available",

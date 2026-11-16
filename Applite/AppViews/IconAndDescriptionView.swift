@@ -9,8 +9,10 @@ import SwiftUI
 
 struct IconAndDescriptionView: View {
     var cask: CaskViewModel
-    @AppStorage("showToken") var showToken: Bool = false
+    var showDetails: () -> Void
+    var showReleaseNotes = false
     @Environment(\.openURL) private var openURL
+    @State private var isHoveringDetails = false
     
     var body: some View {
         HStack {
@@ -18,26 +20,62 @@ struct IconAndDescriptionView: View {
                 AppIconView(
                     iconURL: iconURL,
                     name: cask.name,
-                    cacheKey: cask.iconCacheKey
+                    cacheKey: cask.iconCacheKey,
+                    homepageURL: cask.homepage
                 )
                 .padding(.leading, 5)
             }
 
             // Name and description
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 4) {
                 Button {
-                    // Cmd+click is reserved for opening the homepage (handled
-                    // by the outer simultaneousGesture); don't also toggle the token.
+                    // The outer gesture owns Cmd-click; do not also open details.
                     guard !NSEvent.modifierFlags.contains(.command) else { return }
-                    showToken.toggle()
+                    showDetails()
                 } label: {
-                    Text(showToken ? cask.token : cask.name)
-                        .font(.system(size: 16, weight: .bold))
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(cask.name)
+                            .font(.system(size: 16, weight: .bold))
+                            .lineLimit(showReleaseNotes ? 1 : nil)
+
+                        Text(cask.descriptionText)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(showReleaseNotes ? 1 : nil)
+                    }
+                    .multilineTextAlignment(.leading)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .onHover(perform: updateDetailsCursor)
+                .onDisappear {
+                    updateDetailsCursor(false)
+                }
+                .accessibilityLabel("Show details for \(cask.name)")
+                .accessibilityHint(cask.descriptionText)
+                .help("Show app details")
 
-                Text(cask.descriptionText)
-                    .foregroundStyle(.secondary)
+                if showReleaseNotes {
+                    Button("Release Notes") {
+                        guard !NSEvent.modifierFlags.contains(.command) else { return }
+                        showDetails()
+                    }
+                        .font(.caption)
+                        .foregroundStyle(.tint)
+                        .accessibilityLabel("Release Notes for \(cask.name)")
+                        .help("Show release notes and version information")
+                } else if cask.isLocallyInstalled {
+                    Text("Installed")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    if cask.hasMultipleInstalledCopies || cask.isAdditionalInstalledCopy,
+                       let url = cask.selectedInstallationURL {
+                        Text(url.deletingLastPathComponent().path)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .help(url.path)
+                    }
+                }
             }
 
             Spacer()
@@ -52,5 +90,15 @@ struct IconAndDescriptionView: View {
                     }
                 }
         )
+    }
+
+    private func updateDetailsCursor(_ hovering: Bool) {
+        guard hovering != isHoveringDetails else { return }
+        isHoveringDetails = hovering
+        if hovering {
+            NSCursor.pointingHand.push()
+        } else {
+            NSCursor.pop()
+        }
     }
 }

@@ -8,22 +8,66 @@
 import SwiftUI
 import Kingfisher
 import Shimmer
+import OSLog
 
 struct AppIconView: View {
     @State private var iconFailed = false
+    @State private var faviconURLs: [URL] = []
+    @State private var faviconFailed = false
+    @State private var faviconDownloader: ImageDownloader?
+    @Environment(\.displayScale) private var displayScale
+    @AppStorage(Preferences.networkProxyEnabled) private var proxyEnabled
+    @AppStorage(Preferences.preferredProxyType) private var preferredProxyType
 
     let iconURL: URL
     /// App display name — its first letter is shown in the monogram fallback.
     let name: String
     let cacheKey: String
+    var homepageURL: URL? = nil
     var size: CGFloat = 54
 
     private var cornerRadius: CGFloat { size * 0.2 }
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Applite", category: "AppIconView")
+    @MainActor private static var cachedFaviconDownloader: ImageDownloader?
+
+    @MainActor
+    static func faviconDownloader(configuration: URLSessionConfiguration) -> ImageDownloader {
+        if let downloader = cachedFaviconDownloader,
+           NSDictionary(dictionary: downloader.sessionConfiguration.connectionProxyDictionary ?? [:])
+            .isEqual(to: configuration.connectionProxyDictionary ?? [:]) {
+            return downloader
+        }
+        let downloader = ImageDownloader(name: "website-favicons")
+        downloader.downloadTimeout = 8
+        downloader.sessionConfiguration = configuration
+        cachedFaviconDownloader = downloader
+        return downloader
+    }
+
+    private var proxyPreferenceID: [String] { [String(proxyEnabled), preferredProxyType.rawValue] }
 
     var body: some View {
         Group {
             if iconFailed {
-                monogram
+                if let url = faviconURLs.first, let faviconDownloader, !faviconFailed {
+                    KFImage.url(url, cacheKey: "website-favicon-\(url.absoluteString)")
+                        .alternativeSources(faviconURLs.dropFirst().map {
+                            .network(KF.ImageResource(downloadURL: $0, cacheKey: "website-favicon-\($0.absoluteString)"))
+                        })
+                        .downloader(faviconDownloader)
+                        .setProcessor(DownsamplingImageProcessor(size: CGSize(width: size * displayScale, height: size * displayScale)))
+                        .resizable()
+                        .placeholder { monogram }
+                        .fade(duration: 0.25)
+                        .onFailure { error in
+                            Self.logger.info("Website icons failed for \(cacheKey): \(error.localizedDescription)")
+                            faviconFailed = true
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                        .id(proxyPreferenceID)
+                } else {
+                    monogram
+                }
             } else {
                 KFImage.url(iconURL, cacheKey: cacheKey)
                     .resizable()
@@ -33,16 +77,39 @@ struct AppIconView: View {
                             .shimmering()
                     }
                     .fade(duration: 0.25)
-                    .onFailure { _ in iconFailed = true }
+                    .onFailure { error in
+                        Self.logger.info("Primary app icon failed for \(cacheKey): \(error.localizedDescription)")
+                        iconFailed = true
+                    }
                     .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             }
         }
         .frame(width: size, height: size)
+        .task(id: [iconFailed ? homepageURL?.absoluteString ?? "" : ""] + proxyPreferenceID) {
+            guard iconFailed, let homepageURL else { return }
+            faviconURLs = []
+            faviconDownloader = nil
+            let configuration = Self.websiteConfiguration()
+            let downloader = Self.faviconDownloader(configuration: configuration)
+            let urls = await FaviconResolver.shared.candidates(for: homepageURL, configuration: configuration)
+            guard !Task.isCancelled else { return }
+            faviconDownloader = downloader
+            faviconURLs = urls
+            faviconFailed = false
+        }
     }
 
-    /// Deterministic letter-on-color tile shown when the remote icon can't be loaded. Replaces the
-    /// old third-party favicon fallback: no network round-trip, no privacy leak, works offline, and
-    /// reads as intentional rather than a broken image.
+    private static func websiteConfiguration() -> URLSessionConfiguration {
+        let configuration = NetworkProxyManager.getURLSessionConfiguration()
+        configuration.httpCookieStorage = nil
+        configuration.httpShouldSetCookies = false
+        configuration.urlCredentialStorage = nil
+        configuration.urlCache = nil
+        configuration.timeoutIntervalForResource = 12
+        return configuration
+    }
+
+    /// Offline last resort while website icons load, or when every image source fails.
     private var monogram: some View {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             .fill(monogramColor)

@@ -15,6 +15,9 @@ import SwiftUI
 struct AppGridView: View {
     let casks: [CaskViewModel]
     var appRole: AppRole
+    var includeSelf = false
+
+    @AppStorage(Preferences.showAppliteInInstalledList) private var showAppliteInInstalledList
 
     let columns = [
         GridItem(.adaptive(minimum: 320))
@@ -23,15 +26,15 @@ struct AppGridView: View {
     var body: some View {
         // Filter out self; done once per body pass rather than as a per-row
         // conditional inside ForEach (which wraps every row in _ConditionalContent).
-        let displayedCasks = casks.filter { $0.token != "applite" }
+        let displayedCasks = casks.filter { includeSelf || !$0.isApplite }
 
         ScrollView {
             LazyVGrid(columns: columns, spacing: 20) {
-                if appRole == .installed {
+                if appRole == .installed && showAppliteInInstalledList {
                     AppliteAppView()
                 }
 
-                ForEach(displayedCasks) { cask in
+                ForEach(displayedCasks, id: \.cardIdentity) { cask in
                     AppView(cask: cask, role: appRole)
                         .transition(.scale(scale: 0.85).combined(with: .opacity))
                 }
@@ -39,7 +42,7 @@ struct AppGridView: View {
             .padding()
             // Animate cards fading/scaling in and out as they join or leave the list
             // (install/update/uninstall, search results), keyed on membership only.
-            .animation(.smooth(duration: 0.35), value: displayedCasks.map(\.id))
+            .animation(.smooth(duration: 0.35), value: displayedCasks.map(\.cardIdentity))
         }
     }
 }

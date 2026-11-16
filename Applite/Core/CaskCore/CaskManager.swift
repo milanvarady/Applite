@@ -21,6 +21,10 @@ final class CaskManager {
     private let dataLoader: CaskDataLoader
     private let registry: CaskViewModelRegistry
     private let brewService: BrewService
+    private let catalogLoad: @MainActor (Bool) async throws -> (categories: [CategoryLoadResult], taps: [TapLoadResult])
+    private var adoptionConsentGeneration = 0
+    private var detectionSettingTask: Task<Void, Never>?
+    private var brewConfigurationTask: Task<Void, Never>?
 
     /// Resolves brew on launch (detect existing / install annex) without onboarding or CLT.
     /// `ContentView` observes `bootstrap.phase` to show the install sheet.
@@ -38,10 +42,18 @@ final class CaskManager {
 
     /// True while brew CLI is being queried for installed/outdated state.
     /// Catalog (categories/taps) is independent and lights up before this flips false.
-    private(set) var isResolvingInstalledState: Bool = false
+    private var installedStateResolutionCount = 0
+    private var requiresReceiptRefresh = false
+    private var homebrewConfigurationGeneration = 0
+    private var updateAllRequestCount = 0
+    var isResolvingInstalledState: Bool { installedStateResolutionCount > 0 }
+    var isUpdateAllInProgress: Bool { updateAllRequestCount > 0 }
 
     /// True while a manual catalog refresh is running (toolbar action).
     private(set) var isRefreshingCatalog: Bool = false
+    private(set) var successfulCatalogRefreshRevision = 0
+    private var outdatedRefreshCount = 0
+    var isRefreshingOutdated: Bool { outdatedRefreshCount > 0 }
 
     /// True when the last `brew outdated` check failed (or couldn't run). `UpdateView` reads this so
     /// an empty outdated list shows "couldn't check for updates" instead of a false "all up to date"
@@ -64,11 +76,16 @@ final class CaskManager {
     // MARK: - Convenience Forwarding
 
     var installedViewModels: [CaskViewModel] { registry.installedViewModels }
+    var locallyInstalledViewModels: [CaskViewModel] { registry.locallyInstalledViewModels }
+    var locallyInstalledCount: Int { registry.locallyInstalledCount }
     var outdatedViewModels: [CaskViewModel] { registry.outdatedViewModels }
     /// Sort-free counts for sidebar badges (see registry) — avoids sorting the whole registry just
     /// to render a number.
     var installedCount: Int { registry.installedCount }
     var outdatedCount: Int { registry.outdatedCount }
+    var hasNonActionableOutdated: Bool { registry.hasNonActionableOutdated }
+    var externalInstalledViewModels: [CaskViewModel] { registry.externalInstalledViewModels }
+    var externalInstalledCount: Int { registry.externalInstalledCount }
     var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
     var batchProgress: BatchProgress? { brewService.batchProgress }
 
@@ -77,19 +94,27 @@ final class CaskManager {
     /// resets this to nil. Lives here because `CaskManager` is the shared environment object
     /// every card already holds, so no extra wiring is needed.
     var requestedTab: SidebarItem?
+    var selectedAppDetails: CaskViewModel?
 
     // MARK: - Init
 
     init(
         dataLoader: CaskDataLoader? = nil,
         registry: CaskViewModelRegistry? = nil,
-        brewService: BrewService? = nil
+        brewService: BrewService? = nil,
+        catalogLoad: (@MainActor (Bool) async throws -> (categories: [CategoryLoadResult], taps: [TapLoadResult]))? = nil
     ) {
         let reg = registry ?? CaskViewModelRegistry()
         self.registry = reg
-        self.dataLoader = dataLoader ?? CaskDataLoader(registry: reg)
-        self.brewService = brewService ?? BrewService()
+        let loader = dataLoader ?? CaskDataLoader(registry: reg)
+        self.dataLoader = loader
+        self.catalogLoad = catalogLoad ?? { forceSync in try await loader.loadCatalogData(forceSync: forceSync) }
+        let service = brewService ?? BrewService()
+        self.brewService = service
         self.categories = Self.loadInitialCategories()
+        service.onSuccessfulOutdatedOperation = { [weak reg] cask in
+            reg?.retireOutdatedTokens(for: [cask])
+        }
 
         // An operation that finds the brew path invalid re-resolves brew through `bootstrap` — the
         // one owned "is brew usable" state — instead of handling a broken brew its own way (E1/F1).
@@ -120,18 +145,252 @@ final class CaskManager {
     // MARK: - Brew Operation Forwarding
 
     func install(_ cask: CaskViewModel) {
+        guard canModifyApps(allowDuringRefresh: true) else { return }
         brewService.install(cask)
     }
 
+    private func canModifyApps(allowDuringRefresh: Bool = false) -> Bool {
+        guard allowDuringRefresh || !isResolvingInstalledState else {
+            alert.show(title: "Homebrew action unavailable", message: String(localized: "Wait for installed apps to finish refreshing."))
+            return false
+        }
+        guard !requiresReceiptRefresh else {
+            alert.show(title: "Homebrew action unavailable", message: String(localized: "Refresh installed apps before performing Homebrew actions."))
+            return false
+        }
+        return true
+    }
+
+    func selectedHomebrewDidChange(surfacingErrorsIn surface: AlertManager) {
+        invalidateAdoptionConsent()
+        selectedAppDetails = nil
+        detectionSettingTask?.cancel()
+        brewConfigurationTask?.cancel()
+        homebrewConfigurationGeneration &+= 1
+        requiresReceiptRefresh = true
+        dataLoader.invalidateInstalledReceipts()
+        registry.markInstalled(tokens: [])
+        registry.markOutdated(tokens: [])
+        installedStateResolutionCount += 1
+        let configuration = BrewOperationConfiguration.current
+        brewConfigurationTask = Task {
+            defer { installedStateResolutionCount -= 1 }
+            do {
+                try await Task.sleep(for: .milliseconds(300))
+                try Task.checkCancellation()
+                let isValid = await BrewPaths.isBrewPathValid(at: configuration.executable)
+                try Task.checkCancellation()
+                try configuration.validateCurrent()
+                guard isValid else { return }
+            } catch is CancellationError {
+                return
+            } catch CaskAdoptionError.configurationChanged {
+                return
+            } catch {
+                surface.show(error: error, title: "Couldn't load installed apps")
+                return
+            }
+            await loadInstalledState(surfacingErrorsIn: surface, configuration: configuration)
+        }
+    }
+
+    func applyAppManagementSettings(surfacingErrorsIn surface: AlertManager) {
+        invalidateAdoptionConsent()
+        guard registry.applyManagementSourceOverrides() else { return }
+        guard bootstrap.isBrewReady else { return }
+        Task {
+            do {
+                try await refreshOutdated()
+            } catch {
+                surface.show(error: error, title: "Couldn't refresh app updates")
+            }
+        }
+    }
+
+    func requestManagementSourceOverride(
+        _ source: ProtectedAppInstallation.Source, enabled: Bool, surfacingErrorsIn surface: AlertManager
+    ) {
+        if !enabled {
+            UserDefaults.standard.setValue(false, for: source.overridePreference)
+            applyAppManagementSettings(surfacingErrorsIn: surface)
+            return
+        }
+        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+              UserDefaults.standard.value(for: Preferences.offerHomebrewManagement) else {
+            surface.show(
+                title: "Homebrew management disabled",
+                message: String(localized: "Enable external app detection and Offer Manage with Homebrew before enabling source overrides.")
+            )
+            return
+        }
+        surface.show(
+            title: "Override \(source.name) protection?",
+            message: String(localized: "This allows Homebrew to replace apps detected as managed by \(source.name). Only enable this if you are authorized. Licenses, settings, and updates may be affected, and the original manager may reinstall the app. This does not remove device enrollment, organizational policies, or licensing requirements. Exact, enabled Homebrew casks are still required."),
+            actions: [
+                AppAlert.Action("Enable Override", role: .destructive) { [weak self, weak surface] in
+                    guard let self, let surface else { return }
+                    guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+                          UserDefaults.standard.value(for: Preferences.offerHomebrewManagement) else {
+                        surface.show(
+                            title: "Homebrew management disabled",
+                            message: String(localized: "The override was not enabled because Homebrew management or external app detection was turned off.")
+                        )
+                        return
+                    }
+                    UserDefaults.standard.setValue(true, for: source.overridePreference)
+                    self.applyAppManagementSettings(surfacingErrorsIn: surface)
+                },
+                AppAlert.Action("Cancel", role: .cancel)
+            ]
+        )
+    }
+
+    func invalidateAdoptionConsent() {
+        adoptionConsentGeneration &+= 1
+    }
+
+    func applyExternalAppDetectionSetting(
+        debounce: Bool = false, surfacingErrorsIn errorSurface: AlertManager? = nil
+    ) {
+        invalidateAdoptionConsent()
+        detectionSettingTask?.cancel()
+        dataLoader.invalidateExternalInstallations()
+        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
+            registry.clearExternalInstallations()
+            return
+        }
+        let surface = errorSurface ?? alert
+        detectionSettingTask = Task {
+            do {
+                if debounce { try await Task.sleep(for: .milliseconds(300)) }
+                try Task.checkCancellation()
+                try await dataLoader.refreshExternalInstallations()
+            } catch is CancellationError {
+                return
+            } catch {
+                Self.logger.error("External app detection failed: \(error.localizedDescription)")
+                surface.show(error: error, title: "Couldn't detect externally installed apps")
+            }
+        }
+    }
+
+    func confirmAdoption(_ cask: CaskViewModel) {
+        guard canModifyApps() else { return }
+        cask.managementSourceOverrides = ProtectedAppInstallation.Source.enabledOverrides()
+        guard !cask.isManagementProtected else {
+            Self.logger.info("Homebrew adoption blocked for externally managed app \(cask.fullToken)")
+            return
+        }
+        if let reason = cask.homebrewManagementBlockReason {
+            Self.logger.info("Homebrew adoption blocked for unsupported cask \(cask.fullToken)")
+            alert.show(title: "Homebrew management unavailable", message: reason)
+            return
+        }
+        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+              UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
+              cask.isInstalledExternally, let selectedURL = cask.externalAppURL,
+              !(cask.warning?.isDisabled ?? false) else { return }
+        let configuration = BrewOperationConfiguration.current
+        let generation = adoptionConsentGeneration
+        let validateConsent: @MainActor () throws -> Void = { [weak self] in
+            guard let self, self.adoptionConsentGeneration == generation,
+                  UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+                  UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
+                  cask.externalAppURL == selectedURL else {
+                throw CaskAdoptionError.confirmationExpired
+            }
+            try configuration.validateCurrent()
+        }
+        let arguments = BrewService.installArguments(fullToken: cask.fullToken, configuration: configuration)
+        let preview = (["brew"] + arguments).map { argument in
+            if argument.range(of: #"^[A-Za-z0-9_./@=+-]+$"#, options: .regularExpression) != nil {
+                return argument
+            }
+            return "'" + argument.replacingOccurrences(of: "'", with: "'\\''") + "'"
+        }.joined(separator: " ")
+        var message = String(localized: "This will reinstall the app via Homebrew so future updates can be managed here.")
+        if let appDirectory = configuration.applicationDirectories.first {
+            let existingPath = selectedURL.standardizedFileURL.path
+            let directoryPath = appDirectory.standardizedFileURL.path
+            func isInside(_ app: URL, directory: URL) -> Bool {
+                let path = directory.standardizedFileURL.path
+                return app.standardizedFileURL.path.hasPrefix(path.hasSuffix("/") ? path : path + "/")
+            }
+            if !isInside(selectedURL, directory: appDirectory)
+                && !isInside(selectedURL.resolvingSymlinksInPath(), directory: appDirectory.resolvingSymlinksInPath()) {
+                message += "\n\n" + String(localized: "Existing app: \(existingPath)\nHomebrew app directory: \(directoryPath)\nThe existing copy is outside the Homebrew app directory and will remain unmanaged; Homebrew will install a separate copy.")
+            }
+        }
+        message += "\n\n\(preview)"
+        if let protection = cask.protectedAppInstallation {
+            let sources = ProtectedAppInstallation.Source.allCases
+                .filter { protection.appURLs[$0] != nil }.map(\.name).joined(separator: ", ")
+            message += "\n\n" + String(localized: "Source protection is overridden for \(sources). Replacing this app can affect its license, settings, and updates. Its original manager may reinstall it or remove access.")
+        }
+        if let warning = cask.warning {
+            let detail: String
+            switch warning {
+            case .hasCaveat(let caveat):
+                detail = caveat
+            case .deprecated(let date, let reason):
+                detail = String(localized: "**This app is deprecated**\n**Reason:** \(reason)\n**Date:** \(date)")
+            case .disabled:
+                return
+            }
+            message += "\n\n" + detail.limitedToLines(5, suffix: "...")
+        }
+        alert.show(
+            title: "Manage this app with Homebrew?",
+            message: message,
+            actions: [
+                AppAlert.Action("Manage with Homebrew") { [weak self] in
+                    guard let self,
+                          UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+                          UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
+                          cask.isInstalledExternally else { return }
+                    cask.managementSourceOverrides = ProtectedAppInstallation.Source.enabledOverrides()
+                    guard !cask.isManagementProtected else {
+                        Self.logger.info("Pending Homebrew adoption blocked for externally managed app \(cask.fullToken)")
+                        return
+                    }
+                    if let reason = cask.homebrewManagementBlockReason {
+                        Self.logger.info("Pending Homebrew adoption blocked for unsupported cask \(cask.fullToken)")
+                        self.alert.show(title: "Homebrew management unavailable", message: reason)
+                        return
+                    }
+                    do {
+                        try validateConsent()
+                    } catch {
+                        self.alert.show(error: error, title: "Couldn't confirm Homebrew management")
+                        return
+                    }
+                    self.brewService.install(
+                        cask, arguments: arguments, confirmedConfiguration: configuration,
+                        adoptionConsent: BrewAdoptionConsent(validate: validateConsent)
+                    ) {
+                        try await self.dataLoader.refreshInstalled(configuration: configuration)
+                        guard cask.isInstalled else {
+                            throw CaskAdoptionError.notManaged
+                        }
+                    }
+                },
+                AppAlert.Action("Cancel", role: .cancel)
+            ]
+        )
+    }
+
     func uninstall(_ cask: CaskViewModel, zap: Bool = false) {
+        guard canModifyApps() else { return }
         brewService.uninstall(cask, zap: zap)
     }
 
     func update(_ cask: CaskViewModel) {
+        guard canModifyApps() else { return }
         brewService.update(cask)
     }
 
     func reinstall(_ cask: CaskViewModel) {
+        guard canModifyApps() else { return }
         brewService.reinstall(cask)
     }
 
@@ -152,11 +411,20 @@ final class CaskManager {
     }
 
     func installAll(_ casks: [CaskViewModel]) {
+        guard canModifyApps(allowDuringRefresh: true) else { return }
         brewService.installAll(casks)
     }
 
-    func updateAll(_ casks: [CaskViewModel]) {
-        brewService.updateAll(casks)
+    @discardableResult
+    func updateAll(_ casks: [CaskViewModel]) -> Bool {
+        guard canModifyApps(), !casks.isEmpty else { return false }
+        guard let task = brewService.updateAll(casks) else { return false }
+        updateAllRequestCount += 1
+        Task {
+            defer { updateAllRequestCount -= 1 }
+            await task.value
+        }
+        return true
     }
 
     func getAdditionalInfoForCask(_ cask: CaskViewModel) async throws -> CaskAdditionalInfo {
@@ -165,8 +433,8 @@ final class CaskManager {
 
     // MARK: - Search Forwarding
 
-    func search(query: String) async throws -> [CaskViewModel] {
-        try await dataLoader.search(query: query)
+    func search(query: String, installedOnly: Bool = false) async throws -> [CaskViewModel] {
+        try await dataLoader.search(query: query, installedOnly: installedOnly)
     }
     
     // MARK: - Data Loading
@@ -252,7 +520,8 @@ final class CaskManager {
                 surface.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: surface))
             }
             await loadInstalledState(surfacingErrorsIn: surface)
-            return true
+            if forceSync && catalogError == nil { successfulCatalogRefreshRevision &+= 1 }
+            return catalogError == nil
         }
 
         // Selected brew is invalid — attempt recovery (detect existing / reinstall annex).
@@ -279,6 +548,7 @@ final class CaskManager {
             surface.show(error: catalogError, title: "Couldn't load app catalog", actions: loadFailureActions(surfacingIn: surface))
         }
         await loadInstalledState(surfacingErrorsIn: surface)
+        if forceSync && catalogError == nil { successfulCatalogRefreshRevision &+= 1 }
         return catalogError == nil
     }
 
@@ -294,7 +564,7 @@ final class CaskManager {
         do {
             // Animate the placeholder→full transition so cask cards cross-fade into place
             // rather than swapping instantly mid-shimmer-cycle.
-            let catalog = try await dataLoader.loadCatalogData(forceSync: forceSync)
+            let catalog = try await catalogLoad(forceSync)
             withAnimation(.easeInOut(duration: 0.25)) {
                 self.categories = catalog.categories
                 self.taps = catalog.taps
@@ -308,9 +578,13 @@ final class CaskManager {
 
     /// Stage 2: installed/outdated state from the brew CLI (slow). Updates the registry reactively,
     /// so view models already on screen flip their flags without rebuilding the catalog views.
-    private func loadInstalledState(surfacingErrorsIn surface: AlertManager) async {
-        self.isResolvingInstalledState = true
-        defer { self.isResolvingInstalledState = false }
+    private func loadInstalledState(
+        surfacingErrorsIn surface: AlertManager, configuration: BrewOperationConfiguration = .current
+    ) async {
+        installedStateResolutionCount += 1
+        defer { installedStateResolutionCount -= 1 }
+        let generation = homebrewConfigurationGeneration
+        var ownershipScanError: Error?
 
         do {
             // Run the refresh on the serial brew queue so its `brew list`/`outdated` snapshot can't
@@ -322,19 +596,37 @@ final class CaskManager {
             // that lock fail with "already locked". Bootstrap primes Ruby up front, but keep these
             // ordered as a second line of defense.
             try await brewService.runSerialized {
-                try await self.dataLoader.refreshInstalled()
+                try await self.dataLoader.refreshInstalled(configuration: configuration, onOwnershipScanFailure: { error in
+                    ownershipScanError = error
+                })
+                guard generation == self.homebrewConfigurationGeneration else {
+                    throw CaskAdoptionError.configurationChanged
+                }
+                self.requiresReceiptRefresh = false
                 // Outdated is a nested best-effort step: if it fails, keep the (good) installed state
                 // and just flag the failure, so UpdateView shows "couldn't check" instead of a false
                 // "all up to date" (P3-3).
                 do {
-                    try await self.dataLoader.refreshOutdated()
+                    try await self.dataLoader.refreshOutdated(configuration: configuration)
                     self.outdatedRefreshFailed = false
+                } catch CaskAdoptionError.configurationChanged {
+                    throw CaskAdoptionError.configurationChanged
+                } catch is CancellationError {
+                    throw CancellationError()
                 } catch {
                     self.outdatedRefreshFailed = true
                     Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
                 }
             }
+            if let ownershipScanError {
+                Self.logger.error("App ownership scan failed: \(ownershipScanError.localizedDescription)")
+                surface.show(error: ownershipScanError, title: "Couldn't scan app management sources")
+            }
             Self.logger.info("Installed/outdated state loaded successfully!")
+        } catch CaskAdoptionError.configurationChanged {
+            Self.logger.info("Discarded installed-state refresh for a previous Homebrew configuration")
+        } catch is CancellationError {
+            Self.logger.info("Installed-state refresh was cancelled")
         } catch {
             // Installed refresh itself failed — outdated state is unknown too, so don't let
             // UpdateView claim everything is up to date.
@@ -348,6 +640,8 @@ final class CaskManager {
     /// Serialized behind the brew queue (like `loadInstalledState`) so it can't race an install's
     /// optimistic write, and updates `outdatedRefreshFailed` so the empty-state UI stays accurate.
     func refreshOutdated() async throws {
+        outdatedRefreshCount += 1
+        defer { outdatedRefreshCount -= 1 }
         do {
             try await brewService.runSerialized {
                 try await self.dataLoader.refreshOutdated()

@@ -21,6 +21,229 @@ import OSLog
 enum InstalledAppLocator {
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "InstalledAppLocator")
 
+    nonisolated static var applicationDirectories: [URL] {
+        let configured = appDirectory
+        let standard = [
+            URL.applicationDirectory,
+            FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications", isDirectory: true)
+        ]
+        return [configured] + (standard + standard.map {
+            $0.appendingPathComponent("Setapp", isDirectory: true)
+        }).filter { $0 != configured }
+    }
+
+    nonisolated static func bundleIdentifier(at appURL: URL) throws -> String? {
+        let data: Data
+        do {
+            data = try Data(contentsOf: appURL.appendingPathComponent("Contents/Info.plist"))
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            return nil
+        }
+        return try PropertyListDecoder().decode(BundleInfo.self, from: data).CFBundleIdentifier
+    }
+
+    private struct BundleInfo: Decodable {
+        let CFBundleIdentifier: String?
+    }
+
+    private struct RecordedCask: Decodable {
+        struct URLSpecs: Decodable {
+            let only_path: String?
+        }
+        let artifacts: [CaskArtifact]?
+        let url_specs: URLSpecs?
+    }
+
+    private struct InstalledReceipt: Decodable {
+        let uninstall_artifacts: [CaskArtifact]?
+    }
+
+    nonisolated static func recordedAppURLs(
+        token: String, caskroom: URL, requireRecordedOwnership: Bool = false
+    ) throws -> [URL] {
+        guard !token.isEmpty, token != ".", token != "..",
+              (token as NSString).lastPathComponent == token else {
+            throw CaskAdoptionError.homebrewUnavailable
+        }
+        let caskroom = caskroom.appendingPathComponent(token)
+        let fm = FileManager.default
+        let versions: [URL]
+        do {
+            versions = try fm.contentsOfDirectory(
+                at: caskroom, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles]
+            )
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            if requireRecordedOwnership { throw CaskAdoptionError.installationTargetsUnavailable }
+            return []
+        }
+        guard !versions.isEmpty else {
+            if requireRecordedOwnership { throw CaskAdoptionError.installationTargetsUnavailable }
+            return []
+        }
+        let metadata = caskroom.appendingPathComponent(".metadata")
+        let receiptURL = metadata.appendingPathComponent("INSTALL_RECEIPT.json")
+        let receipt: InstalledReceipt?
+        do {
+            receipt = try JSONDecoder().decode(InstalledReceipt.self, from: Data(contentsOf: receiptURL))
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            receipt = nil
+        }
+        var result: Set<URL> = []
+        var parsedVersion = false
+        for version in versions.sorted(by: { $0.lastPathComponent > $1.lastPathComponent }) {
+            let versionValues = try version.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
+            guard versionValues.isDirectory == true, versionValues.isSymbolicLink != true else { continue }
+            let metadataVersion = metadata.appendingPathComponent(version.lastPathComponent)
+            let timestamps = try fm.contentsOfDirectory(
+                at: metadataVersion, includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey],
+                options: [.skipsHiddenFiles]
+            ).sorted { $0.lastPathComponent > $1.lastPathComponent }
+            var installed: RecordedCask?
+            var receiptOnly = false
+            var rubyWithoutReceipt = false
+            for timestamp in timestamps {
+                let values = try timestamp.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
+                guard values.isDirectory == true, values.isSymbolicLink != true else { continue }
+                let casks = timestamp.appendingPathComponent("Casks")
+                for name in ["\(token).json", "\(token).internal.json"] {
+                    do {
+                        installed = try JSONDecoder().decode(RecordedCask.self, from: Data(contentsOf: casks.appendingPathComponent(name)))
+                        break
+                    } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                        continue
+                    }
+                }
+                if installed != nil { break }
+                do {
+                    let ruby = timestamp.appendingPathComponent("Casks").appendingPathComponent("\(token).rb")
+                    let values = try ruby.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
+                    guard values.isRegularFile == true, values.isSymbolicLink != true else {
+                        throw CaskAdoptionError.installationTargetsUnavailable
+                    }
+                    guard let artifacts = receipt?.uninstall_artifacts else {
+                        rubyWithoutReceipt = true
+                        break
+                    }
+                    installed = RecordedCask(artifacts: artifacts, url_specs: nil)
+                    receiptOnly = true
+                    break
+                } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                    continue
+                }
+            }
+            guard let installed, let artifacts = installed.artifacts ?? receipt?.uninstall_artifacts else {
+                if rubyWithoutReceipt && !requireRecordedOwnership {
+                    logger.warning("Cannot verify recorded ownership for Ruby-only cask \(token, privacy: .public)")
+                    continue
+                }
+                throw CaskAdoptionError.installationTargetsUnavailable
+            }
+            parsedVersion = true
+            var staged = version
+            if let onlyPath = installed.url_specs?.only_path {
+                guard isSafeRelativePath(onlyPath) else { throw CaskAdoptionError.installationTargetsUnavailable }
+                staged.appendPathComponent(onlyPath)
+            }
+            guard isInside(staged.resolvingSymlinksInPath(), directory: version.resolvingSymlinksInPath()) else {
+                throw CaskAdoptionError.installationTargetsUnavailable
+            }
+            for artifact in artifacts {
+                guard let app = artifact.app else { continue }
+                guard artifact.bundleName != nil,
+                      let source = app.compactMap({ value -> String? in
+                          if case .source(let path) = value { return path }
+                          return nil
+                      }).first,
+                      CaskArtifact.isSafeAppTargetPath(source) else {
+                    throw CaskAdoptionError.installationTargetsUnavailable
+                }
+                let entry = staged.appendingPathComponent(source)
+                guard isInside(entry.deletingLastPathComponent().resolvingSymlinksInPath(),
+                               directory: version.resolvingSymlinksInPath()) else {
+                    throw CaskAdoptionError.installationTargetsUnavailable
+                }
+                do {
+                    guard try entry.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink == true else {
+                        if requireRecordedOwnership || receiptOnly { throw CaskAdoptionError.installationTargetsUnavailable }
+                        continue
+                    }
+                } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                    if requireRecordedOwnership || receiptOnly { throw CaskAdoptionError.installationTargetsUnavailable }
+                    continue
+                }
+                let destination = try fm.destinationOfSymbolicLink(atPath: entry.path)
+                let target = (destination as NSString).isAbsolutePath
+                    ? URL(fileURLWithPath: destination)
+                    : entry.deletingLastPathComponent().appendingPathComponent(destination)
+                let resolved = target.resolvingSymlinksInPath().standardizedFileURL
+                do {
+                    if try fm.attributesOfItem(atPath: resolved.path)[.type] as? FileAttributeType == .typeDirectory {
+                        result.insert(resolved)
+                    } else if requireRecordedOwnership || receiptOnly {
+                        throw CaskAdoptionError.installationTargetsUnavailable
+                    }
+                } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                    continue
+                }
+            }
+        }
+        if requireRecordedOwnership && !parsedVersion { throw CaskAdoptionError.installationTargetsUnavailable }
+        return result.sorted { $0.path < $1.path }
+    }
+
+    private nonisolated static func isSafeRelativePath(_ path: String) -> Bool {
+        !(path as NSString).isAbsolutePath && !path.contains("\0")
+            && path.components(separatedBy: "/").allSatisfy { !$0.isEmpty && $0 != "." && $0 != ".." }
+    }
+
+    private nonisolated static func isInside(_ url: URL, directory: URL) -> Bool {
+        let parent = directory.standardizedFileURL.path
+        let child = url.standardizedFileURL.path
+        return child == parent || child.hasPrefix(parent.hasSuffix("/") ? parent : parent + "/")
+    }
+
+    nonisolated static func launchURL(
+        token: String, displayName: String, preferredURL: URL?,
+        isManaged: Bool, configuration: BrewOperationConfiguration
+    ) throws -> URL? {
+        try metadataAppURL(
+            token: token, displayName: displayName, preferredURL: preferredURL,
+            isManaged: isManaged, configuration: configuration
+        )
+    }
+
+    nonisolated static func metadataAppURL(
+        token: String, displayName: String, preferredURL: URL?,
+        isManaged: Bool, configuration: BrewOperationConfiguration
+    ) throws -> URL? {
+        guard isManaged else { return preferredURL }
+        guard let caskroom = configuration.caskroom else {
+            throw CaskAdoptionError.installationTargetsUnavailable
+        }
+        let recorded = try recordedAppURLs(token: token, caskroom: caskroom)
+        if let preferredURL {
+            let preferred = preferredURL.resolvingSymlinksInPath().standardizedFileURL
+            if recorded.contains(preferred) { return preferred }
+        }
+        if !recorded.isEmpty {
+            if let current = appURL(token: token, displayName: displayName, configuration: configuration)?
+                .resolvingSymlinksInPath().standardizedFileURL, recorded.contains(current) {
+                return current
+            }
+            return recorded.first
+        }
+        if let preferredURL {
+            do {
+                if try preferredURL.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
+                    return preferredURL
+                }
+            } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+                // A managed operation may have moved the bundle since the last scan.
+            }
+        }
+        return appURL(token: token, displayName: displayName, configuration: configuration)
+    }
+
     /// Resolves the URL of the installed app for a cask.
     ///
     /// - Parameters:
@@ -29,10 +252,17 @@ enum InstalledAppLocator {
     /// - Returns: The URL of an existing `.app` bundle, or `nil` if none of the strategies located it.
     ///
     /// Pure disk/LaunchServices lookups — safe to call off the main actor.
-    nonisolated static func appURL(token: String, displayName: String) -> URL? {
-        let caskroom = BrewPaths.currentBrewDirectory
-            .appending(path: "Caskroom", directoryHint: .isDirectory)
-            .appending(path: token, directoryHint: .isDirectory)
+    nonisolated static func appURL(
+        token: String, displayName: String, configuration: BrewOperationConfiguration
+    ) -> URL? {
+        guard let caskroom = configuration.caskroom?.appending(path: token, directoryHint: .isDirectory) else {
+            logger.error("No Caskroom configured while locating cask \(token, privacy: .public)")
+            return nil
+        }
+        guard let appDirectory = configuration.applicationDirectories.first else {
+            logger.error("No application directory configured while locating cask \(token, privacy: .public)")
+            return nil
+        }
 
         let artifacts = artifacts(caskDirectory: caskroom, token: token)
 
@@ -197,7 +427,7 @@ enum InstalledAppLocator {
     private nonisolated static var appDirectory: URL {
         let custom = UserDefaults.standard.value(for: Preferences.appdirPath)
         if UserDefaults.standard.value(for: Preferences.appdirOn), !custom.isEmpty {
-            return URL(fileURLWithPath: (custom as NSString).expandingTildeInPath)
+            return URL(fileURLWithPath: (custom as NSString).expandingTildeInPath, isDirectory: true)
         }
         return URL.applicationDirectory
     }
