@@ -24,6 +24,10 @@ struct AppView: View {
     @Environment(\.openWindow) var openWindow
 
     @Environment(CaskManager.self) var caskManager
+    @AppStorage(Preferences.detectExternallyInstalledApps) private var detectExternallyInstalledApps
+    @AppStorage(Preferences.offerHomebrewManagement) private var offerHomebrewManagement
+
+    @State private var isLoadingInfo = false
 
     // Alerts
     @State var failureAlertMessage = ""
@@ -43,7 +47,7 @@ struct AppView: View {
 
     var body: some View {
         HStack {
-            IconAndDescriptionView(cask: cask)
+            IconAndDescriptionView(cask: cask, isLoadingDetails: isLoadingInfo, showDetails: showInfo)
             IconsAndWarnings(cask: cask)
             actionsView
         }
@@ -127,6 +131,10 @@ struct AppView: View {
                 Label("Uninstall & delete app data", systemImage: "trash.fill")
             }
         } else {
+            if cask.isInstalledExternally {
+                OpenButton(cask: cask)
+            }
+
             if let homepage = cask.homepage {
                 Link(destination: homepage) {
                     Label("Homepage", systemImage: "house")
@@ -138,11 +146,10 @@ struct AppView: View {
     }
 
     private var getInfoButton: some View {
-        Button {
-            Task { await getInfo() }
-        } label: {
+        Button(action: showInfo) {
             Label("Get Info", systemImage: "info")
         }
+        .disabled(isLoadingInfo)
     }
 
     /// Ellipsis button that opens the "more options" menu (native dropdown).
@@ -158,6 +165,15 @@ struct AppView: View {
         .menuIndicator(.hidden)
         .fixedSize()
         .accessibilityLabel("More options")
+    }
+
+    private func showInfo() {
+        guard !isLoadingInfo else { return }
+        isLoadingInfo = true
+        Task {
+            defer { isLoadingInfo = false }
+            await getInfo()
+        }
     }
 
     private func getInfo() async {
@@ -201,9 +217,21 @@ struct AppView: View {
     @ViewBuilder
     private var mainButtons: some View {
         switch role {
-        case .installAndManage:
+        case .installAndManage, .installed:
             if cask.isInstalled {
                 OpenButton(cask: cask)
+            } else if cask.isInstalledExternally {
+                if detectExternallyInstalledApps && offerHomebrewManagement {
+                    Button("Manage with Homebrew") {
+                        caskManager.confirmAdoption(cask)
+                    }
+                    .cardActionPill()
+                    .frame(maxWidth: 140)
+                    .disabled(cask.warning?.isDisabled ?? false)
+                    .help("Reinstall with Homebrew so this app is tracked and updated by Homebrew.")
+                } else {
+                    OpenButton(cask: cask)
+                }
             } else {
                 DownloadButton(cask: cask)
             }
@@ -213,10 +241,6 @@ struct AppView: View {
         case .update:
             UpdateButton(cask: cask)
 
-        case .installed:
-            OpenButton(cask: cask)
-
-            optionsMenuButton
         }
     }
 

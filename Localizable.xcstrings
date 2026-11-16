@@ -1,6 +1,8 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Another Homebrew cask already manages this app. Homebrew cannot replace it through this cask." : {},
+    "Existing app: %@\nHomebrew app directory: %@\nThe existing copy is outside the Homebrew app directory and will remain unmanaged; Homebrew will install a separate copy." : {},
     "" : {
       "localizations" : {
         "fr" : {
@@ -1226,7 +1228,8 @@
             "value" : "İleri Düzey"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "After reinstalling, all currently installed apps will be unlinked from Applite. They won't be deleted, but you won't be able to update or uninstall them via Applite." : {
       "comment" : "Brew reinstall warning",
@@ -11299,7 +11302,69 @@
           }
         }
       }
-    }
+    },
+    "Adopt app into Homebrew management?" : {
+      "extractionState" : "stale"
+    },
+    "Adopt with Homebrew" : {
+      "extractionState" : "stale"
+    },
+    "Couldn't refresh installed apps" : {},
+    "Homebrew finished installing, but the app is not listed as managed. Refresh the app catalog to check again." : {},
+    "Installed externally" : {},
+    "No externally installed apps detected." : {},
+    "Reinstall with Homebrew so this app is tracked and updated by Homebrew." : {},
+    "This will reinstall the app via Homebrew cask so updates are tracked by Homebrew." : {
+      "extractionState" : "stale"
+    },
+    "Couldn't detect externally installed apps" : {},
+    "Detect externally installed apps" : {},
+    "Find apps installed outside Homebrew and offer to adopt them. Turning this off hides external app status and filters without changing your apps." : {
+      "extractionState" : "stale"
+    },
+    "Find apps installed outside Homebrew. Turning this off hides external app status and filters without changing your apps." : {},
+    "Manage this app with Homebrew?" : {},
+    "Manage with Homebrew" : {},
+    "Offer Manage with Homebrew" : {},
+    "Show \"Manage with Homebrew\" for externally installed apps. Turning this off keeps detection enabled and does not change installed apps." : {
+      "extractionState" : "stale"
+    },
+    "This will reinstall the app via Homebrew so future updates can be managed here." : {},
+    "Requires external app detection." : {},
+    "Show \"Manage with Homebrew\" on external app cards. Reinstalls require confirmation." : {},
+    "Applite is already running, but its window couldn't be opened. Select Applite in the Dock." : {},
+    "Applite is already starting. Please try again in a moment." : {},
+    "Couldn't start Applite" : {},
+    "Refreshing app catalog..." : {},
+    "%@: %@" : {},
+    "Checking installed apps and updates..." : {},
+    "Couldn't check app updates" : {},
+    "Downloading %@: %@" : {},
+    "Failed tasks: %lld" : {},
+    "Homebrew needs attention" : {},
+    "Homebrew setup complete" : {},
+    "Ready" : {},
+    "Setting up Homebrew..." : {},
+    "Starting Applite..." : {},
+    "Tasks (%lld)" : {},
+    "Tasks: %lld active, %lld failed" : {},
+    "View running, queued, and failed tasks" : {},
+    "Working on %@..." : {},
+    "Available Version" : {},
+    "Loading app details..." : {},
+    "Show app details" : {},
+    "Show details for %@" : {},
+    "Couldn't start app installation" : {},
+    "Homebrew configuration changed" : {
+      "extractionState" : "stale"
+    },
+    "Homebrew or the app installation directory changed. Review the current settings and confirm the command again." : {},
+    "This app is already installed. Enable Homebrew management and confirm the current command before reinstalling it." : {},
+    "Checking app updates..." : {},
+    "Couldn't confirm Homebrew management" : {},
+    "Refreshing installed apps..." : {},
+    "This Homebrew management confirmation expired. Review and confirm the current command again." : {},
+    "Couldn't verify this cask's installation targets. Homebrew changes are blocked. Refresh the app catalog and try again." : {}
   },
   "version" : "1.1"
 }

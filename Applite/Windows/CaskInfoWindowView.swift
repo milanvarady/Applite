@@ -23,6 +23,20 @@ struct CaskInfoWindowView: View {
     var body: some View {
         Form {
             Section {
+                Text(info.displayName)
+                    .font(.title2.bold())
+                    .textSelection(.enabled)
+                if let description = info.desc, !description.isEmpty {
+                    Text(description)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+                if let version = info.version {
+                    infoRow("Available Version", version)
+                }
+            }
+
+            Section {
                 infoRow("Token", info.token)
                 infoRow("Full Token", info.full_token)
                 infoRow("Tap", info.tap)
@@ -88,7 +102,7 @@ struct CaskInfoWindowView: View {
             }
         }
         .formStyle(.grouped)
-        .navigationTitle(info.token)
+        .navigationTitle(info.displayName)
         .frame(width: 460, height: 520)
         .task(id: info.url) {
             downloadSize = .loading
