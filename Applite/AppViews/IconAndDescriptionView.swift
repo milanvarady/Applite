@@ -38,6 +38,16 @@ struct IconAndDescriptionView: View {
 
                 Text(cask.descriptionText)
                     .foregroundStyle(.secondary)
+
+                if cask.isInstalled {
+                    Text("Installed")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if cask.isInstalledExternally {
+                    Text("Installed externally")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Spacer()

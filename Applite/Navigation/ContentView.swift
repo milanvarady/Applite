@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(CaskManager.self) var caskManager
+    @AppStorage(Preferences.detectExternallyInstalledApps) private var detectExternallyInstalledApps
 
     /// Currently selected sidebar item. Optional so the selection can be cleared
     /// while a search is active, so a sidebar tap can interrupt the search instead
@@ -75,6 +76,11 @@ struct ContentView: View {
         .searchable(text: $searchInput, placement: .sidebar)
         .onChange(of: searchInput) { _, newValue in handleSearchInputChange(newValue) }
         .onChange(of: selection) { _, newValue in handleSelectionChange(newValue) }
+        .onChange(of: detectExternallyInstalledApps) { _, enabled in
+            guard !enabled else { return }
+            if lastSelection == .externalInstalled { lastSelection = .home }
+            if selection == .externalInstalled { selection = .home }
+        }
         // A deep view (e.g. "See Active Tasks" on a batched card) requested a tab — apply it.
         .onChange(of: caskManager.requestedTab) { _, requested in
             if let requested {

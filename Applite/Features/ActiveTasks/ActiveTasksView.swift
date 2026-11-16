@@ -53,7 +53,7 @@ struct ActiveTasksView: View {
                 .padding(.bottom, 4)
             }
 
-            AppGridView(casks: caskManager.activeTasks.map(\.viewModel), appRole: .update)
+            AppGridView(casks: caskManager.activeTasks.map(\.viewModel), appRole: .update, includeSelf: true)
             Spacer()
         }
         .overlay {

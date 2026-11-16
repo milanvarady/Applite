@@ -24,6 +24,7 @@ struct CaskDTO: Decodable {
     let disabled: Bool
     let disableDate: String?
     let disableReason: String?
+    let artifacts: [CaskArtifact]?
 
     enum CodingKeys: String, CodingKey {
         case token
@@ -40,5 +41,52 @@ struct CaskDTO: Decodable {
         case disabled
         case disableDate = "disable_date"
         case disableReason = "disable_reason"
+        case artifacts
+    }
+}
+
+/// Only `app` artifacts identify bundles; binaries, fonts and installer packages do not.
+struct CaskArtifact: Decodable {
+    let app: [AppValue]?
+
+    enum AppValue: Decodable {
+        case source(String)
+        case target(String?)
+
+        private struct Options: Decodable {
+            let target: String?
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let source = try? container.decode(String.self) {
+                self = .source(source)
+            } else {
+                self = .target(try container.decode(Options.self).target)
+            }
+        }
+    }
+
+    var bundleName: String? {
+        guard let app else { return nil }
+        let target = app.compactMap { value -> String? in
+            if case .target(let name) = value { return name }
+            return nil
+        }.first
+        let source = app.compactMap { value -> String? in
+            if case .source(let name) = value { return name }
+            return nil
+        }.first
+        guard let path = target ?? source.map({ ($0 as NSString).lastPathComponent }),
+              Self.isSafeAppTargetPath(path) else { return nil }
+        return path
+    }
+
+    nonisolated static func isSafeAppTargetPath(_ path: String) -> Bool {
+        let components = path.components(separatedBy: "/")
+        return !(path as NSString).isAbsolutePath
+            && !path.contains("\0")
+            && components.allSatisfy { !$0.isEmpty && $0 != "." && $0 != ".." }
+            && (path as NSString).pathExtension == "app"
     }
 }

@@ -21,6 +21,10 @@ final class CaskManager {
     private let dataLoader: CaskDataLoader
     private let registry: CaskViewModelRegistry
     private let brewService: BrewService
+    private var adoptionConsentGeneration = 0
+    private var detectionSettingGeneration = 0
+    private var receiptRefreshPending = false
+    private var detectionSettingTask: Task<Void, Never>?
 
     /// Resolves brew on launch (detect existing / install annex) without onboarding or CLT.
     /// `ContentView` observes `bootstrap.phase` to show the install sheet.
@@ -69,6 +73,8 @@ final class CaskManager {
     /// to render a number.
     var installedCount: Int { registry.installedCount }
     var outdatedCount: Int { registry.outdatedCount }
+    var externalInstalledViewModels: [CaskViewModel] { registry.externalInstalledViewModels }
+    var externalInstalledCount: Int { registry.externalInstalledCount }
     var activeTasks: [ActiveBrewTask] { brewService.activeTasks }
     var batchProgress: BatchProgress? { brewService.batchProgress }
 
@@ -123,6 +129,163 @@ final class CaskManager {
         brewService.install(cask)
     }
 
+    func invalidateAdoptionConsent() {
+        adoptionConsentGeneration &+= 1
+    }
+
+    func applyExternalAppDetectionSetting(
+        debounce: Bool = false, surfacingErrorsIn errorSurface: AlertManager? = nil
+    ) {
+        invalidateAdoptionConsent()
+        detectionSettingGeneration &+= 1
+        detectionSettingTask?.cancel()
+        dataLoader.invalidateExternalInstallations()
+        let configuration = BrewOperationConfiguration.current
+        let detectionEnabled = UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps)
+        let hasReceipts = dataLoader.hasReceiptSnapshot(for: configuration)
+        let needsReceipts = detectionEnabled || !hasReceipts || receiptRefreshPending
+        if !detectionEnabled {
+            registry.markExternalInstallations(appURLs: [:])
+        }
+        guard detectionEnabled || (needsReceipts && (debounce || receiptRefreshPending)) else { return }
+        if !hasReceipts {
+            dataLoader.invalidateInstalledReceipts()
+            registry.markInstalled(tokens: [])
+            registry.markOutdated(tokens: [])
+            outdatedRefreshFailed = true
+        }
+        if needsReceipts { receiptRefreshPending = true }
+        let generation = detectionSettingGeneration
+        let surface = errorSurface ?? alert
+        detectionSettingTask = Task {
+            do {
+                if debounce { try await Task.sleep(for: .milliseconds(300)) }
+                try Task.checkCancellation()
+                try configuration.validateCurrent()
+                if needsReceipts {
+                    guard await BrewPaths.isBrewPathValid(at: configuration.executable) else {
+                        Self.logger.warning("Cannot refresh receipts: selected Homebrew path is invalid")
+                        return
+                    }
+                    try await brewService.runSerialized {
+                        guard generation == self.detectionSettingGeneration else { throw CancellationError() }
+                        try configuration.validateCurrent()
+                        try await self.dataLoader.refreshInstalled(configuration: configuration, onExternalScanFailure: { error in
+                            Self.logger.error("External app detection failed: \(error.localizedDescription)")
+                            surface.show(error: error, title: "Couldn't detect externally installed apps")
+                        })
+                        do {
+                            try await self.dataLoader.refreshOutdated(configuration: configuration)
+                            self.outdatedRefreshFailed = false
+                        } catch is CancellationError {
+                            throw CancellationError()
+                        } catch CaskAdoptionError.configurationChanged {
+                            throw CaskAdoptionError.configurationChanged
+                        } catch {
+                            self.outdatedRefreshFailed = true
+                            Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
+                        }
+                        try Task.checkCancellation()
+                        try configuration.validateCurrent()
+                        guard generation == self.detectionSettingGeneration else { throw CancellationError() }
+                        self.receiptRefreshPending = false
+                    }
+                } else {
+                    try await dataLoader.refreshExternalInstallations(configuration: configuration)
+                }
+            } catch is CancellationError {
+                return
+            } catch CaskAdoptionError.configurationChanged {
+                return
+            } catch {
+                Self.logger.error("External app detection failed: \(error.localizedDescription)")
+                surface.show(error: error, title: "Couldn't detect externally installed apps")
+            }
+        }
+    }
+
+    func confirmAdoption(_ cask: CaskViewModel) {
+        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+              UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
+              cask.isInstalledExternally, let selectedURL = cask.externalAppURL,
+              !(cask.warning?.isDisabled ?? false) else { return }
+        let configuration = BrewOperationConfiguration.current
+        let generation = adoptionConsentGeneration
+        let validateConsent: @MainActor () throws -> Void = { [weak self] in
+            guard let self, self.adoptionConsentGeneration == generation,
+                  UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+                  UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
+                  cask.externalAppURL == selectedURL else {
+                throw CaskAdoptionError.confirmationExpired
+            }
+            try configuration.validateCurrent()
+        }
+        let arguments = BrewService.installArguments(fullToken: cask.fullToken, configuration: configuration)
+        let preview = (["brew"] + arguments).map { argument in
+            if argument.range(of: #"^[A-Za-z0-9_./@=+-]+$"#, options: .regularExpression) != nil {
+                return argument
+            }
+            return "'" + argument.replacingOccurrences(of: "'", with: "'\\''") + "'"
+        }.joined(separator: " ")
+        var message = String(localized: "This will reinstall the app via Homebrew so future updates can be managed here.")
+        if let appDirectory = configuration.applicationDirectories.first {
+            let existingPath = selectedURL.standardizedFileURL.path
+            let directoryPath = appDirectory.standardizedFileURL.path
+            func isInside(_ app: URL, directory: URL) -> Bool {
+                let path = directory.standardizedFileURL.path
+                return app.standardizedFileURL.path.hasPrefix(path.hasSuffix("/") ? path : path + "/")
+            }
+            if !isInside(selectedURL, directory: appDirectory)
+                && !isInside(selectedURL.resolvingSymlinksInPath(), directory: appDirectory.resolvingSymlinksInPath()) {
+                message += "\n\n" + String(localized: "Existing app: \(existingPath)\nHomebrew app directory: \(directoryPath)\nThe existing copy is outside the Homebrew app directory and will remain unmanaged; Homebrew will install a separate copy.")
+            }
+        }
+        message += "\n\n\(preview)"
+        if let warning = cask.warning {
+            let detail: String
+            switch warning {
+            case .hasCaveat(let caveat):
+                detail = caveat
+            case .deprecated(let date, let reason):
+                detail = String(localized: "**This app is deprecated**\n**Reason:** \(reason)\n**Date:** \(date)")
+            case .disabled:
+                return
+            }
+            message += "\n\n" + detail.limitedToLines(5, suffix: "...")
+        }
+        alert.show(
+            title: "Manage this app with Homebrew?",
+            message: message,
+            actions: [
+                AppAlert.Action("Manage with Homebrew") { [weak self] in
+                    guard let self,
+                          UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps),
+                          UserDefaults.standard.value(for: Preferences.offerHomebrewManagement),
+                          cask.isInstalledExternally else { return }
+                    do {
+                        try validateConsent()
+                    } catch {
+                        self.alert.show(error: error, title: "Couldn't confirm Homebrew management")
+                        return
+                    }
+                    self.brewService.install(
+                        cask, arguments: arguments, confirmedConfiguration: configuration,
+                        adoptionConsent: BrewAdoptionConsent(validate: validateConsent)
+                    ) {
+                        try await self.dataLoader.refreshInstalled(configuration: configuration, onExternalScanFailure: { error in
+                            Self.logger.error("External app detection failed: \(error.localizedDescription)")
+                            self.alert.show(error: error, title: "Couldn't detect externally installed apps")
+                        })
+                        guard cask.isInstalled else {
+                            throw CaskAdoptionError.notManaged
+                        }
+                    }
+                },
+                AppAlert.Action("Cancel", role: .cancel)
+            ]
+        )
+    }
+
     func uninstall(_ cask: CaskViewModel, zap: Bool = false) {
         brewService.uninstall(cask, zap: zap)
     }
@@ -167,6 +330,10 @@ final class CaskManager {
 
     func search(query: String) async throws -> [CaskViewModel] {
         try await dataLoader.search(query: query)
+    }
+
+    func searchExternalTokens(query: String) async throws -> [CaskId] {
+        try await dataLoader.searchExternalTokens(query: query)
     }
     
     // MARK: - Data Loading
@@ -322,19 +489,31 @@ final class CaskManager {
             // that lock fail with "already locked". Bootstrap primes Ruby up front, but keep these
             // ordered as a second line of defense.
             try await brewService.runSerialized {
-                try await self.dataLoader.refreshInstalled()
+                let configuration = BrewOperationConfiguration.current
+                try await self.dataLoader.refreshInstalled(configuration: configuration, onExternalScanFailure: { error in
+                    Self.logger.error("External app detection failed: \(error.localizedDescription)")
+                    surface.show(error: error, title: "Couldn't detect externally installed apps")
+                })
                 // Outdated is a nested best-effort step: if it fails, keep the (good) installed state
                 // and just flag the failure, so UpdateView shows "couldn't check" instead of a false
                 // "all up to date" (P3-3).
                 do {
-                    try await self.dataLoader.refreshOutdated()
+                    try await self.dataLoader.refreshOutdated(configuration: configuration)
                     self.outdatedRefreshFailed = false
+                } catch is CancellationError {
+                    throw CancellationError()
+                } catch CaskAdoptionError.configurationChanged {
+                    throw CaskAdoptionError.configurationChanged
                 } catch {
                     self.outdatedRefreshFailed = true
                     Self.logger.error("Outdated refresh failed: \(error.localizedDescription)")
                 }
             }
             Self.logger.info("Installed/outdated state loaded successfully!")
+        } catch is CancellationError {
+            return
+        } catch CaskAdoptionError.configurationChanged {
+            return
         } catch {
             // Installed refresh itself failed — outdated state is unknown too, so don't let
             // UpdateView claim everything is up to date.

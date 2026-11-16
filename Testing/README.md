@@ -1,5 +1,95 @@
 # Applite test harness
 
+Review fixtures cover consented-copy changes, serialized receipt refresh, scan
+failure isolation, and preservation of streamed batch successes if a fallback
+query fails.
+
+Receipt-refresh fixtures preserve managed state across app-directory edits and
+verify that consent changes or disabling detection cannot abandon a pending
+Homebrew refresh. Ruby-only cask metadata is resolved using receipt artifacts.
+
+## Non-destructive external-install regression tests
+
+Hidden-self fixtures ensure an external Applite bundle contributes neither a row
+nor a badge. A paused reconciliation also verifies the real operation remains busy
+in the status summary until post-install ownership refresh completes.
+Manually verify self aliases are excluded from migration while any already-enqueued
+self task remains visible and dismissible in Active Tasks.
+
+Review-race fixtures also cover an Install before initial detection, configuration
+changes before confirmation/queued execution, retained stdout/stderr after a failed
+reconciliation, and a paused scan completing after detection is disabled/re-enabled.
+Upstream-review fixtures additionally cover bulk external exclusion and mixed batches,
+disabled/re-enabled consent, stale receipt snapshots, busy reconciliation, debounced
+path edits, and cancellation of superseded scan work. Receipt refresh tolerates
+replacement-scan cancellation but propagates parent cancellation, a changed
+Homebrew configuration, and unexpected scan cancellation.
+Batch fixtures also switch Homebrew during streamed output and during the final
+receipt query, asserting that neither stale result changes installed state and
+that a running Homebrew process is allowed to finish after a configuration change.
+Additional cases cover single-install profile changes, retained stale-batch output,
+blocked imports with stale receipt flags, outdated-state clearing, and empty scans
+without materializing unrelated catalog records.
+Creating a previously missing custom app directory must not change its captured
+Homebrew configuration.
+A delayed external scan cannot overwrite a newer existing catalog record.
+Manually verify an eligible Install button remains usable during installed-state
+refresh, with the operation queued and checked before it starts.
+Legacy records with missing artifact names query the selected Homebrew before single
+and bulk installs; tests cover renamed external bundles, missing live artifacts, and
+an install with verified non-conflicting targets.
+Nested relative app targets are detected without allowing traversal or absolute targets;
+the catalog migration invalidates older basename-only metadata for re-verification.
+Managed sibling fixtures resolve recorded source links, including casks absent from
+the catalog, and verify that aliases are excluded while separate copies remain visible.
+Single and bulk installs reject managed target conflicts or unverifiable ownership.
+
+These tests use the real app's Debug module, isolated databases, temporary app
+directories, and a temporary fake `brew`. They verify artifact decoding (including
+renamed targets), v1 database migration/FTS preservation, managed/external/missing
+state precedence, full-token identity, external filter membership/counts, command
+confirmation/quoting, the default-enabled detection setting and immediate disable
+guards (including pending confirmations), and queued adoption success/failure with stderr capture.
+The separate management-offer setting defaults to off; tests verify explicit opt-in,
+preserved management choices across detection changes, and guards that block new
+and already-open management confirmations without clearing external detection.
+They do not launch Applite, run real Homebrew, modify installed apps, show notification
+permission prompts, or use your Applite preferences/database.
+
+```sh
+xcodebuild -quiet -project Applite.xcodeproj -scheme Applite -configuration Debug \
+  -destination 'platform=macOS' -derivedDataPath /tmp/applite-build \
+  CODE_SIGNING_ALLOWED=NO build
+bash Testing/run-external-install-tests.sh /tmp/applite-build
+```
+
+For a visual/end-to-end check in a disposable VM, place a known cask's expected
+bundle in `/Applications` without installing its cask in the selected Homebrew.
+Refresh Applite and check its **Installed externally** card, sidebar badge, and
+search filter. Cancel adoption once to verify no change; confirm it and check the
+displayed command, then verify the app becomes **Installed** and leaves the external
+list. Trigger a failed adoption and use the card's terminal button to inspect stderr;
+the external status and count must remain unchanged. Also check a managed app and
+an absent app still offer Open and Install respectively.
+
+In **Settings > Brew > App Sources**, verify **Detect externally installed apps**
+starts enabled. Disable it while viewing the external list or using its search
+filter: the filters should disappear, navigation should leave the hidden external
+list, and external status/counts should clear immediately without changing managed
+apps. Re-enable it and check that local external apps are rediscovered without a
+catalog download.
+
+With no saved management preference, **Offer Manage with Homebrew** should start
+off. Verify it is indented beneath detection, greyed out and disabled when detection
+is off, and displays **Requires external app detection.** Re-enabling detection must
+restore the saved management choice, not enable it automatically.
+
+Enable **Offer Manage with Homebrew**, then disable it separately: external status,
+filters, and counts should remain, while external cards show **Open** instead of
+**Manage with Homebrew**. Re-enable it to restore the management offer.
+
+## Guided VM harness
+
 `applite_test.py` is a **guided** end-to-end test harness. It doesn't automate the
 UI — *you* perform each action in the real Applite window, and after each step the
 script independently verifies the real result via the Homebrew CLI + filesystem
