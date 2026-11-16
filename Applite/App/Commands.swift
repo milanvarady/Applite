@@ -11,8 +11,9 @@ import ButtonKit
 struct CommandsMenu: Commands {
     let updater: UpdaterViewModel
     let caskManager: CaskManager
+    let settingsNavigation: SettingsNavigation
 
-    @Environment(\.openWindow) var openWindow
+    @Environment(\.openSettings) private var openSettings
 
     var body: some Commands {
         SidebarCommands()
@@ -29,10 +30,15 @@ struct CommandsMenu: Commands {
 
         CommandGroup(before: .systemServices) {
             Button("Uninstall Applite...") {
-                openWindow(id: "uninstall-self")
+                settingsNavigation.showUninstall { openSettings() }
             }
 
-            Button(action: updater.checkForUpdates) {
+            Button {
+                settingsNavigation.showUpdates(
+                    openSettings: { openSettings() },
+                    checkForUpdates: updater.checkForUpdates
+                )
+            } label: {
                 Text("Check for Updates...", comment: "Check for update menu bar item")
             }
             // Sparkle clears this for the duration of a check; without it repeat invocations

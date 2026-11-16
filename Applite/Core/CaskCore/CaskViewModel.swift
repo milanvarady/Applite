@@ -14,8 +14,7 @@ import OSLog
 final class CaskViewModel {
     /// Immutable identity token, used for nonisolated protocol conformances
     nonisolated private let _token: String
-    /// Immutable identity full token, used for nonisolated protocol conformances
-    nonisolated private let _fullToken: String
+    nonisolated private let _identity: String
 
     /// Cask information from database
     private var record: CaskRecord
@@ -23,19 +22,70 @@ final class CaskViewModel {
     // MARK: - Runtime State (not persisted)
 
     /// Whether the cask is currently installed
-    var isInstalled: Bool = false
+    var isInstalled: Bool = false {
+        didSet {
+            if isInstalled { externalAppURL = nil }
+            else { isOutdated = false }
+        }
+    }
+
+    var externalAppURL: URL?
+    var installedBundleURL: URL?
+    var protectedAppInstallation: ProtectedAppInstallation?
+    var selectedCopyProtection: ProtectedAppInstallation?
+    var hasSelectedCopyProvenance = false
+    var hasMultipleInstalledCopies = false
+    let isAdditionalInstalledCopy: Bool
+    var displayedProtection: ProtectedAppInstallation? {
+        hasSelectedCopyProvenance && !isAdditionalInstalledCopy ? selectedCopyProtection : protectedAppInstallation
+    }
+    var appStoreAppURL: URL? {
+        displayedProtection?.source == .appStore ? displayedProtection?.url : nil
+    }
+    var isAppStoreManaged: Bool { displayedProtection?.source == .appStore }
+    var isIntuneManaged: Bool { displayedProtection?.source == .intune }
+    var isSetappManaged: Bool { displayedProtection?.source == .setapp }
+    var isArtCraftManaged: Bool { displayedProtection?.source == .artCraft }
+    var managementSourceOverrides = ProtectedAppInstallation.Source.enabledOverrides()
+    var managementProtection: ProtectedAppInstallation? {
+        protectedAppInstallation?.excluding(managementSourceOverrides)
+    }
+    var isManagementProtected: Bool { managementProtection != nil }
+    var homebrewManagementError: String?
+    var homebrewManagementBlockReason: String? {
+        if hasMultipleInstalledCopies || isAdditionalInstalledCopy {
+            return CaskAdoptionError.multipleInstallations.localizedDescription
+        }
+        if warning?.isDisabled == true { return CaskAdoptionError.homebrewDisabled.localizedDescription }
+        return homebrewManagementError
+    }
+
+    var installationState: CaskInstallationState {
+        CaskInstallationState(isManaged: isInstalled, externalAppURL: externalAppURL)
+    }
+
+    var isInstalledExternally: Bool { installationState == .externalInstalled }
+    var isLocallyInstalled: Bool { isInstalled || isInstalledExternally }
+    var installedManagementSourceName: String? {
+        guard isLocallyInstalled else { return nil }
+        if let source = displayedProtection?.source { return source.name }
+        return isInstalled ? String(localized: "Homebrew") : String(localized: "Unknown")
+    }
+    var isApplite: Bool { record.isApplite }
 
     /// Whether the cask has an update available
     var isOutdated: Bool = false
 
     /// Progress state when installing, updating, or uninstalling
     var progressState: CaskProgressState = .idle
+    private(set) var metadataRevision = 0
 
     // MARK: - Initialization
 
-    init(record: CaskRecord, isInstalled: Bool = false, isOutdated: Bool = false) {
+    init(record: CaskRecord, isInstalled: Bool = false, isOutdated: Bool = false, copyURL: URL? = nil) {
         self._token = record.token
-        self._fullToken = record.fullToken
+        self._identity = copyURL.map { "\(record.fullToken)\u{0}\($0.path)" } ?? record.fullToken
+        self.isAdditionalInstalledCopy = copyURL != nil
         self.record = record
         self.isInstalled = isInstalled
         self.isOutdated = isOutdated
@@ -44,6 +94,14 @@ final class CaskViewModel {
     /// Updates the underlying record (e.g. after a database sync)
     func updateRecord(_ newRecord: CaskRecord) {
         self.record = newRecord
+    }
+
+    func recordSuccessfulOperation() {
+        metadataRevision &+= 1
+    }
+
+    func installedCopy(at url: URL) -> CaskViewModel {
+        CaskViewModel(record: record, copyURL: url)
     }
 
     // MARK: - Computed Properties (forwarding from record)
@@ -56,6 +114,7 @@ final class CaskViewModel {
     var homepageURL: String? { record.homepageURL }
     var pkgInstaller: Bool { record.pkgInstaller }
     var downloadsIn365days: Int { record.downloadsIn365days }
+    var appBundleNames: [String] { record.appBundleNames }
 
     /// Homepage as URL
     var homepage: URL? { record.homepage }
@@ -89,16 +148,35 @@ final class CaskViewModel {
 
     // MARK: - App Launch
 
+    var selectedInstallationURL: URL? {
+        installedBundleURL ?? externalAppURL ?? protectedAppInstallation?.url
+    }
+
+    var resolvesManagedInstallation: Bool {
+        isInstalled && displayedProtection == nil
+    }
+
+    var cardIdentity: String {
+        guard hasMultipleInstalledCopies || isAdditionalInstalledCopy,
+              let url = selectedInstallationURL else { return id }
+        return "\(fullToken)\u{0}\(url.standardizedFileURL.path)"
+    }
+
     func launchApp() async throws {
         let token = self.token
         let displayName = self.name
-
-        // Resolve the real bundle location off the main actor — a few stat calls plus a small
-        // JSON read. `InstalledAppLocator` tries the Caskroom symlink, the cask's `app` artifact
-        // name, a display-name guess, and finally a LaunchServices bundle-id lookup.
-        let appURL = await Task.detached {
-            InstalledAppLocator.appURL(token: token, displayName: displayName)
+        let preferredURL = selectedInstallationURL
+        let isManaged = resolvesManagedInstallation
+        let brewConfiguration = BrewOperationConfiguration.current
+        let appURL = try await Task.detached {
+            try InstalledAppLocator.launchURL(
+                token: token, displayName: displayName, preferredURL: preferredURL,
+                isManaged: isManaged, configuration: brewConfiguration
+            )
         }.value
+        if isManaged {
+            try brewConfiguration.validateCurrent()
+        }
 
         guard let appURL else {
             throw AppLaunchError.appNotFound(name: displayName)
@@ -152,7 +230,7 @@ extension CaskViewModel {
 // MARK: - Identifiable
 extension CaskViewModel: Identifiable {
     nonisolated var id: String {
-        _fullToken
+        _identity
     }
 }
 

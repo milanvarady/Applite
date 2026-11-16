@@ -14,6 +14,9 @@ struct CaskAdditionalInfoResponse: Decodable {
 struct CaskAdditionalInfo: Codable, Hashable {
     let token: String
     let full_token: String
+    let name: [String]?
+    let desc: String?
+    let version: String?
     let tap: String
     let homepage: URL
     let url: URL
@@ -31,10 +34,18 @@ struct CaskAdditionalInfo: Codable, Hashable {
     let disable_date: String?
     let disable_reason: String?
     let disable_replacement: String?
+    let artifacts: [CaskArtifact]?
+
+    var displayName: String {
+        name?.first(where: { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) ?? full_token
+    }
 
     static let dummy = CaskAdditionalInfo(
         token: "applite",
         full_token: "applite",
+        name: ["Applite"],
+        desc: "User-friendly GUI macOS application for Homebrew Casks",
+        version: "1.2.5",
         tap: "homebrew/cask",
         homepage: URL(string: "https://applite.app")!,
         url: URL(string: "https://github.com/milanvarady/Applite/releases/download/v1.2.5/Applite.dmg")!,
@@ -50,6 +61,7 @@ struct CaskAdditionalInfo: Codable, Hashable {
         disabled: false,
         disable_date: nil,
         disable_reason: nil,
-        disable_replacement: nil
+        disable_replacement: nil,
+        artifacts: []
     )
 }

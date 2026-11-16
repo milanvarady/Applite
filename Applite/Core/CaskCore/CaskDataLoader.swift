@@ -16,6 +16,13 @@ final class CaskDataLoader {
     private let dbService: CaskDatabaseService
     private let registry: CaskViewModelRegistry
     private let installedService: InstalledCaskService
+    private let loadIntuneInventory: IntuneAppDetector.Loader
+    private let loadArtCraftInventory: ArtCraftAppDetector.Loader
+    private var externalScanGeneration = 0
+    private var installedRefreshGeneration = 0
+    private var receiptConfiguration: BrewOperationConfiguration?
+    private var receiptTokens: Set<CaskId> = []
+    private var externalScanTask: Task<ExternalAppDetector.ScanResult, Error>?
 
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -25,11 +32,15 @@ final class CaskDataLoader {
     init(
         dbService: CaskDatabaseService = CaskDatabaseService(),
         registry: CaskViewModelRegistry = CaskViewModelRegistry(),
-        installedService: InstalledCaskService = InstalledCaskService()
+        installedService: InstalledCaskService = InstalledCaskService(),
+        intuneInventory: @escaping IntuneAppDetector.Loader = { try IntuneAppDetector.load() },
+        artCraftInventory: @escaping ArtCraftAppDetector.Loader = { try ArtCraftAppDetector.load() }
     ) {
         self.dbService = dbService
         self.registry = registry
         self.installedService = installedService
+        self.loadIntuneInventory = intuneInventory
+        self.loadArtCraftInventory = artCraftInventory
     }
 
     // MARK: - Main Loading Flow
@@ -56,6 +67,8 @@ final class CaskDataLoader {
             logger.warning("Catalog sync failed (\(error.localizedDescription)); using existing database data")
         }
 
+        registry.clearHomebrewManagementErrors()
+
         // 2. Load category definitions from bundled JSON
         let categoryDefs = try loadCategories()
 
@@ -75,7 +88,7 @@ final class CaskDataLoader {
                     recordsByToken[token] ?? recordsByFullToken[token]
                 }
                 // Keep curated categories clean of deprecated/disabled apps
-                .filter { !$0.isDeprecatedOrDisabled }
+                .filter { !$0.isDeprecatedOrDisabled && !$0.isApplite }
             guard !records.isEmpty else { return nil }
             let vms = registry.viewModels(for: records)
             return CategoryLoadResult(id: category.id, sfSymbol: category.sfSymbol, casks: vms)
@@ -92,9 +105,10 @@ final class CaskDataLoader {
     // MARK: - Search
 
     /// Searches casks using FTS5 and returns view models (reuses existing instances)
-    func search(query: String, limit: Int = 50) async throws -> [CaskViewModel] {
-        let records = try await dbService.search(query: query, limit: limit)
-        return registry.viewModels(for: records)
+    func search(query: String, limit: Int = 50, installedOnly: Bool = false) async throws -> [CaskViewModel] {
+        let records = try await dbService.search(query: query, limit: installedOnly ? Int.max : limit)
+        // Keep unresolved models too: the view filters reactively when the disk scan finishes.
+        return registry.viewModels(for: records.filter { !$0.isApplite })
     }
 
     /// Resolves cask tokens to view models via the DB, creating any that aren't already live.
@@ -109,18 +123,198 @@ final class CaskDataLoader {
 
     /// Re-queries brew CLI for installed casks, ensures view models exist for each,
     /// and marks them installed in the registry.
-    func refreshInstalled() async throws {
-        let tokens = try await installedService.getInstalledCasks()
+    func refreshInstalled(
+        configuration: BrewOperationConfiguration = .current,
+        scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil,
+        onOwnershipScanFailure: ((Error) -> Void)? = nil
+    ) async throws {
+        installedRefreshGeneration &+= 1
+        let generation = installedRefreshGeneration
+        let tokens = try await installedService.getInstalledCasks(configuration: configuration)
         let records = try await dbService.fetchCasks(forTokens: Array(tokens))
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
+        guard generation == installedRefreshGeneration else { throw CancellationError() }
         _ = registry.viewModels(for: records)
         registry.markInstalled(tokens: tokens)
+        receiptTokens = tokens
+        receiptConfiguration = configuration
+
+        let scanGeneration = externalScanGeneration &+ 1
+        do {
+            try await refreshExternalInstallations(configuration: configuration, scan: scan)
+        } catch is CancellationError {
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
+            guard generation == installedRefreshGeneration else { throw CancellationError() }
+            guard externalScanGeneration != scanGeneration else { throw CancellationError() }
+            // A replacement disk scan does not invalidate successfully refreshed receipts.
+        } catch {
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
+            guard generation == installedRefreshGeneration else { throw CancellationError() }
+            guard let onOwnershipScanFailure else { throw error }
+            onOwnershipScanFailure(error)
+        }
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
+        guard generation == installedRefreshGeneration else { throw CancellationError() }
+    }
+
+    func invalidateExternalInstallations() {
+        externalScanGeneration &+= 1
+        externalScanTask?.cancel()
+        externalScanTask = nil
+    }
+
+    func invalidateInstalledReceipts() {
+        installedRefreshGeneration &+= 1
+        receiptConfiguration = nil
+        receiptTokens = []
+        invalidateExternalInstallations()
+    }
+
+    func reconcileInstalledReceipt(token: CaskId, isInstalled: Bool) {
+        installedRefreshGeneration &+= 1
+        if receiptConfiguration == .current {
+            if isInstalled {
+                receiptTokens.insert(token)
+            } else {
+                receiptTokens.remove(token)
+            }
+        } else {
+            receiptConfiguration = nil
+            receiptTokens = []
+        }
+        invalidateExternalInstallations()
+    }
+
+    func refreshExternalInstallations(
+        configuration: BrewOperationConfiguration = .current,
+        scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil
+    ) async throws {
+        invalidateExternalInstallations()
+        let generation = externalScanGeneration
+        let detectionEnabled = UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps)
+        if !detectionEnabled {
+            registry.clearExternalInstallations()
+        }
+
+        // Scan the full catalog, not just curated/search results, so totals include unbrowsed apps.
+        let records = try await dbService.fetchAllCasks()
+        try Task.checkCancellation()
+        guard generation == externalScanGeneration, configuration == .current,
+              UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) == detectionEnabled else { return }
+        registry.updateExistingViewModels(for: records)
+        let tokens = receiptConfiguration == configuration
+            ? receiptTokens : Set(registry.installedViewModels.map(\.fullToken))
+        let previousBundleURLs = Dictionary(uniqueKeysWithValues: registry.installedViewModels.compactMap { vm in
+            vm.installedBundleURL.map { (vm.fullToken, $0.resolvingSymlinksInPath().standardizedFileURL) }
+        })
+        let catalog = detectionEnabled ? records : records.filter { tokens.contains($0.fullToken) }
+        let loadIntuneInventory = self.loadIntuneInventory
+        let loadArtCraftInventory = self.loadArtCraftInventory
+        let logger = self.logger
+        let task = Task.detached {
+            func recordedURLs(for token: String) throws -> [URL] {
+                try Task.checkCancellation()
+                do {
+                    return try InstalledAppLocator.recordedAppURLs(token: token, executable: configuration.executable)
+                } catch is CancellationError {
+                    throw CancellationError()
+                } catch {
+                    logger.error("Could not inspect recorded installation for \(token, privacy: .public): \(error.localizedDescription)")
+                    return []
+                }
+            }
+            if !detectionEnabled {
+                var bundleURLs: [CaskId: URL] = [:]
+                for record in catalog {
+                    try Task.checkCancellation()
+                    let recorded = try recordedURLs(for: record.token)
+                    if let url = recorded.first ?? ExternalAppDetector.appURL(
+                        bundleNames: record.appBundleNames, displayName: record.name,
+                        directories: configuration.applicationDirectories
+                    ) {
+                        bundleURLs[record.fullToken] = url.resolvingSymlinksInPath().standardizedFileURL
+                    }
+                }
+                let changed = bundleURLs.filter { token, url in
+                    previousBundleURLs[token].map { $0 != url } ?? false
+                }
+                var result = ExternalAppDetector.ScanResult(bundleURLs: bundleURLs)
+                if !changed.isEmpty {
+                    let intune = try loadIntuneInventory()
+                    let artCraft = try loadArtCraftInventory()
+                    for (token, url) in changed {
+                        try Task.checkCancellation()
+                        result.multipleCopyTokens.insert(token)
+                        result.selectedCopyProtection[token] = try ExternalAppDetector.protection(
+                            at: url, intune: intune, artCraft: artCraft
+                        )
+                    }
+                }
+                return result
+            }
+            if let scan {
+                return ExternalAppDetector.ScanResult(
+                    externalAppURLs: try await scan(catalog, configuration.applicationDirectories, tokens)
+                )
+            } else {
+                try Task.checkCancellation()
+                let intune = try loadIntuneInventory()
+                let artCraft = try loadArtCraftInventory()
+                let recorded = try Dictionary(uniqueKeysWithValues: tokens.map { token in
+                    try Task.checkCancellation()
+                    return (token, try recordedURLs(for: (token as NSString).lastPathComponent))
+                })
+                return try ExternalAppDetector.installations(
+                    catalog: catalog, managedTokens: tokens,
+                    directories: configuration.applicationDirectories, intune: intune,
+                    artCraft: artCraft, recordedAppURLs: recorded
+                )
+            }
+        }
+        externalScanTask = task
+        defer { if generation == externalScanGeneration { externalScanTask = nil } }
+        let result = try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
+        }
+        guard !Task.isCancelled, generation == externalScanGeneration,
+              configuration == .current else { return }
+        // A Settings toggle may have changed while the off-main scan was running.
+        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) == detectionEnabled else { return }
+        registry.materializeMissingViewModels(for: catalog.filter {
+            result.bundleURLs[$0.fullToken] != nil || result.externalAppURLs[$0.fullToken] != nil
+                || result.additionalInstallations[$0.fullToken] != nil
+                || result.appStoreAppURLs[$0.fullToken] != nil || result.intuneAppURLs[$0.fullToken] != nil
+                || result.setappAppURLs[$0.fullToken] != nil || result.artCraftAppURLs[$0.fullToken] != nil
+        })
+        if !detectionEnabled {
+            registry.updateManagedBundleURLs(
+                result.bundleURLs, multipleCopyTokens: result.multipleCopyTokens,
+                selectedCopyProtection: result.selectedCopyProtection
+            )
+            return
+        }
+        registry.markExternalInstallations(
+            appURLs: result.externalAppURLs, appStoreAppURLs: result.appStoreAppURLs,
+            intuneAppURLs: result.intuneAppURLs, setappAppURLs: result.setappAppURLs,
+            artCraftAppURLs: result.artCraftAppURLs, bundleURLs: result.bundleURLs,
+            copies: result.additionalInstallations, multipleCopyTokens: result.multipleCopyTokens,
+            selectedCopyProtection: result.selectedCopyProtection
+        )
     }
 
     /// Re-queries brew CLI for outdated casks, ensures view models exist for each,
     /// and marks them outdated in the registry.
-    func refreshOutdated() async throws {
-        let tokens = try await installedService.getOutdatedCasks()
+    func refreshOutdated(configuration: BrewOperationConfiguration = .current) async throws {
+        let tokens = try await installedService.getOutdatedCasks(configuration: configuration)
         let records = try await dbService.fetchCasks(forTokens: Array(tokens))
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
         _ = registry.viewModels(for: records)
         registry.markOutdated(tokens: tokens)
     }
@@ -265,7 +459,7 @@ final class CaskDataLoader {
     /// Records are pre-ordered by `tap, name` so each tap's casks come out name-sorted.
     private func buildTapResults() async throws -> [TapLoadResult] {
         let records = try await dbService.fetchAllNonDefaultTapCasks()
-        let grouped = Dictionary(grouping: records, by: \.tap)
+        let grouped = Dictionary(grouping: records.filter { !$0.isApplite }, by: \.tap)
         return grouped
             .map { TapLoadResult(id: $0.key, casks: registry.viewModels(for: $0.value)) }
             .sorted { $0.id < $1.id }

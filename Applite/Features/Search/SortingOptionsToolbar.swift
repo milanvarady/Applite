@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct SortingOptionsToolbar: ToolbarContent {
+    @Binding var installedOnly: Bool
+    var installedCount: Int
     @AppStorage(Preferences.searchSortOption) var sortBy
     @AppStorage(Preferences.hideUnpopularApps) var hideUnpopularApps
     @AppStorage(Preferences.hideDisabledApps) var hideDisabledApps
@@ -22,6 +24,16 @@ struct SortingOptionsToolbar: ToolbarContent {
                     }
                 }
                 .pickerStyle(.inline)
+
+                Toggle(isOn: $installedOnly) {
+                    HStack {
+                        Text("Installed")
+                        Spacer()
+                        Text(installedCount, format: .number)
+                    }
+                }
+
+                Divider()
 
                 Toggle(isOn: $hideUnpopularApps) {
                     Text("Hide apps with few downloads", comment: "Few downloads search filter")
