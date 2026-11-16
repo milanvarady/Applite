@@ -96,7 +96,7 @@ struct ImportAppsView: View {
             // missing — it resolved, we just don't offer it (the import runs from a live Applite,
             // so it's always already installed).
             let matched = Set(resolvedAll.flatMap { [$0.token, $0.fullToken] })
-            let resolved = resolvedAll.filter { $0.token != "applite" }.sorted()
+            let resolved = resolvedAll.filter { !$0.isApplite }.sorted()
 
             guard !resolved.isEmpty else {
                 logger.notice("Imported file contains no valid apps: \(url.path(percentEncoded: false))")

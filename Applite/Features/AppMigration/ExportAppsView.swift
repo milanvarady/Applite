@@ -30,7 +30,7 @@ struct ExportAppsView: View {
     /// inside a running Applite, so it is always already installed — listing it is redundant.
     /// (Mirrors `AppGridView`, which hides the self-cask.)
     private var exportableCasks: [CaskViewModel] {
-        caskManager.installedViewModels.filter { $0.token != "applite" }
+        caskManager.installedViewModels.filter { !$0.isApplite }
     }
 
     var body: some View {

@@ -12,34 +12,8 @@ struct UpdateToolbar: ToolbarContent {
     @Environment(CaskManager.self) var caskManager
 
     var body: some ToolbarContent {
-        if #available(macOS 26.0, *) {
-            ToolbarItem {
-                GreedyUpgradeToggle(descriptionPlacement: .popover)
-                    .padding(.horizontal)
-                    .toggleStyle(.checkbox)
-            }
-
-            ToolbarSpacer()
-
-            ToolbarItem {
-                refreshButton
-            }
-        } else {
-            ToolbarItemGroup {
-                HStack {
-                    GreedyUpgradeToggle(descriptionPlacement: .popover)
-                        .toggleStyle(.checkbox)
-
-                    Spacer()
-                        .frame(width: 16)
-
-                    refreshButton
-
-                    Spacer()
-                        .frame(width: 8)
-                }
-                .labelStyle(.titleAndIcon)
-            }
+        ToolbarItem {
+            refreshButton
         }
     }
 
