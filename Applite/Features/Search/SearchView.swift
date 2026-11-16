@@ -17,7 +17,10 @@ struct SearchView: View {
     @Environment(CaskManager.self) private var caskManager
 
     @State private var results: [CaskViewModel] = []
+    @State private var externalTokens: [CaskId] = []
     @State private var isSearching = false
+    @State private var externalOnly = false
+    @AppStorage(Preferences.detectExternallyInstalledApps) private var detectExternallyInstalledApps
 
     @AppStorage(Preferences.searchSortOption) private var sortBy
     @AppStorage(Preferences.hideUnpopularApps) private var hideUnpopularApps
@@ -33,7 +36,14 @@ struct SearchView: View {
         let displayed = displayedResults
         return Group {
             if displayed.isEmpty && !isSearching {
-                ContentUnavailableView.search(text: query)
+                if externalOnly {
+                    ContentUnavailableView(
+                        "No externally installed apps detected.",
+                        systemImage: "app.badge.checkmark"
+                    )
+                } else {
+                    ContentUnavailableView.search(text: query)
+                }
             } else {
                 AppGridView(casks: displayed, appRole: .installAndManage)
             }
@@ -45,8 +55,16 @@ struct SearchView: View {
                     .padding(.top, 8)
             }
         }
-        .toolbar { SortingOptionsToolbar() }
-        .task(id: query) {
+        .toolbar {
+            SortingOptionsToolbar(
+                externalOnly: $externalOnly,
+                externalCount: caskManager.externalInstalledCount
+            )
+        }
+        .onChange(of: detectExternallyInstalledApps) { _, enabled in
+            if !enabled { externalOnly = false }
+        }
+        .task(id: [query, externalOnly ? "external" : "all"]) {
             // Debounce: wait for the user to stop typing before hitting FTS5.
             // .task(id:) cancels the previous task on each query change, so the
             // sleep is the debounce window.
@@ -57,18 +75,33 @@ struct SearchView: View {
             defer { isSearching = false }
 
             do {
-                results = try await caskManager.search(query: query)
+                if externalOnly {
+                    let tokens = try await caskManager.searchExternalTokens(query: query)
+                    try Task.checkCancellation()
+                    externalTokens = tokens
+                } else {
+                    let matches = try await caskManager.search(query: query)
+                    try Task.checkCancellation()
+                    results = matches
+                }
             } catch is CancellationError {
                 return
             } catch {
                 Self.logger.error("Search failed: \(error.localizedDescription)")
                 results = []
+                externalTokens = []
             }
         }
     }
 
     private var displayedResults: [CaskViewModel] {
         var filtered = results
+        if externalOnly {
+            let externalByToken = Dictionary(
+                uniqueKeysWithValues: caskManager.externalInstalledViewModels.map { ($0.fullToken, $0) }
+            )
+            filtered = externalTokens.compactMap { externalByToken[$0] }
+        }
         if hideUnpopularApps {
             filtered.removeAll { $0.downloadsIn365days <= 500 }
         }

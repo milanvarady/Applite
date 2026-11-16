@@ -31,6 +31,7 @@ public enum ColorSchemePreference: String, CaseIterable, Identifiable, Sendable 
 /// Settings pane
 struct SettingsView: View {
     let updater: UpdaterViewModel
+    @Bindable var navigation: SettingsNavigation
 
     /// This window's alert surface. Settings is its own scene, so it can't be served by the alert
     /// `ContentView` presents — one manager per window, bound at that window's root (F5/P3-5).
@@ -38,36 +39,42 @@ struct SettingsView: View {
     @State private var alert = AlertManager()
 
     var body: some View {
-        TabView {
+        TabView(selection: $navigation.selection) {
             GeneralSettingsView()
                 .tabItem {
                     Label("General", systemImage: "gearshape")
                 }
+                .tag(SettingsNavigation.Pane.general)
 
             BrewSettingsView(alert: alert)
                 .tabItem {
                     Label("Brew", systemImage: "mug")
                 }
+                .tag(SettingsNavigation.Pane.brew)
 
             UpdateSettingsView(updater: updater)
                 .tabItem {
                     Label("Updates", systemImage: "arrow.clockwise")
                 }
+                .tag(SettingsNavigation.Pane.updates)
 
             ProxySettingsView()
                 .tabItem {
                     Label("Proxy", systemImage: "network.badge.shield.half.filled")
                 }
+                .tag(SettingsNavigation.Pane.proxy)
 
             MirrorsView()
                 .tabItem {
                     Label("Mirrors", systemImage: "arrow.left.arrow.right")
                 }
+                .tag(SettingsNavigation.Pane.mirrors)
 
             UninstallView()
                 .tabItem {
                     Label("Uninstall", systemImage: "trash")
                 }
+                .tag(SettingsNavigation.Pane.uninstall)
         }
         .labelStyle(.titleAndIcon)
         .alertManager(alert)
@@ -91,6 +98,7 @@ struct SettingsView: View {
                 updaterDelegate: nil,
                 userDriverDelegate: nil
             ).updater
-        )
+        ),
+        navigation: SettingsNavigation()
     )
 }

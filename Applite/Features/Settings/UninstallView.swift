@@ -9,9 +9,8 @@ import SwiftUI
 
 /// Uninstalls Applite and related files.
 ///
-/// Used both as the Settings "Uninstall" tab and as the content of the
-/// standalone `uninstall-self` window opened from the menu bar and the
-/// Applite self-card.
+/// The Settings "Uninstall" tab is the single destination for the menu bar
+/// and Applite self-card as well.
 struct UninstallView: View {
     @State private var deleteBrewCache = false
     @State private var uninstallHomebrew = false

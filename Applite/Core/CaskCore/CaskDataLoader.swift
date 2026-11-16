@@ -16,6 +16,11 @@ final class CaskDataLoader {
     private let dbService: CaskDatabaseService
     private let registry: CaskViewModelRegistry
     private let installedService: InstalledCaskService
+    private var externalScanGeneration = 0
+    private var installedRefreshGeneration = 0
+    private var receiptConfiguration: BrewOperationConfiguration?
+    private var receiptTokens: Set<CaskId> = []
+    private var externalScanTask: Task<[CaskId: URL], Error>?
 
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -97,6 +102,10 @@ final class CaskDataLoader {
         return registry.viewModels(for: records)
     }
 
+    func searchExternalTokens(query: String) async throws -> [CaskId] {
+        try await dbService.searchFullTokens(query: query)
+    }
+
     /// Resolves cask tokens to view models via the DB, creating any that aren't already live.
     /// Unlike `registry.existingViewModels`, this finds casks the user has never browsed — needed
     /// so an imported app list can install anything in the catalog. Unknown tokens are dropped.
@@ -109,18 +118,120 @@ final class CaskDataLoader {
 
     /// Re-queries brew CLI for installed casks, ensures view models exist for each,
     /// and marks them installed in the registry.
-    func refreshInstalled() async throws {
-        let tokens = try await installedService.getInstalledCasks()
+    func refreshInstalled(
+        configuration: BrewOperationConfiguration = .current,
+        onExternalScanFailure: (@MainActor (Error) -> Void)? = nil,
+        scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil
+    ) async throws {
+        installedRefreshGeneration &+= 1
+        let generation = installedRefreshGeneration
+        let tokens = try await installedService.getInstalledCasks(configuration: configuration)
         let records = try await dbService.fetchCasks(forTokens: Array(tokens))
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
+        guard generation == installedRefreshGeneration else { throw CancellationError() }
         _ = registry.viewModels(for: records)
         registry.markInstalled(tokens: tokens)
+        receiptTokens = tokens
+        receiptConfiguration = configuration
+
+        let scanGeneration = externalScanGeneration &+ 1
+        do {
+            try await refreshExternalInstallations(configuration: configuration, scan: scan)
+        } catch is CancellationError {
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
+            guard generation == installedRefreshGeneration else { throw CancellationError() }
+            guard externalScanGeneration != scanGeneration else { throw CancellationError() }
+            // A replacement disk scan does not invalidate successfully refreshed receipts.
+        } catch {
+            try Task.checkCancellation()
+            try configuration.validateCurrent()
+            guard generation == installedRefreshGeneration else { throw CancellationError() }
+            if externalScanGeneration == scanGeneration {
+                guard let onExternalScanFailure else { throw error }
+                onExternalScanFailure(error)
+            }
+        }
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
+        guard generation == installedRefreshGeneration else { throw CancellationError() }
+    }
+
+    func invalidateExternalInstallations() {
+        externalScanGeneration &+= 1
+        externalScanTask?.cancel()
+        externalScanTask = nil
+    }
+
+    func hasReceiptSnapshot(for configuration: BrewOperationConfiguration) -> Bool {
+        receiptConfiguration?.executable == configuration.executable
+    }
+
+    func invalidateInstalledReceipts() {
+        installedRefreshGeneration &+= 1
+        receiptConfiguration = nil
+        receiptTokens = []
+        invalidateExternalInstallations()
+    }
+
+    func refreshExternalInstallations(
+        configuration: BrewOperationConfiguration = .current,
+        scan: (@Sendable ([CaskRecord], [URL], Set<CaskId>) async throws -> [CaskId: URL])? = nil
+    ) async throws {
+        invalidateExternalInstallations()
+        let generation = externalScanGeneration
+        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
+            registry.markExternalInstallations(appURLs: [:])
+            return
+        }
+
+        // Scan the full catalog, not just curated/search results, so totals include unbrowsed apps.
+        let snapshots = registry.recordSnapshots()
+        let catalog = try await dbService.fetchAllCasks()
+        try Task.checkCancellation()
+        guard generation == externalScanGeneration, configuration == .current,
+              UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else { return }
+        registry.updateExistingViewModels(for: catalog, unchangedSince: snapshots)
+        let tokens = hasReceiptSnapshot(for: configuration)
+            ? receiptTokens : Set(registry.installedViewModels.map(\.fullToken))
+        let task = Task.detached {
+            if let scan {
+                return try await scan(catalog, configuration.applicationDirectories, tokens)
+            }
+            let managedPaths = try ExternalAppDetector.managedBundlePaths(
+                tokens: tokens, executable: configuration.executable
+            )
+            return try await ExternalAppDetector.scan(
+                catalog: catalog, directories: configuration.applicationDirectories,
+                managedTokens: tokens, excluding: managedPaths
+            )
+        }
+        externalScanTask = task
+        defer { if generation == externalScanGeneration { externalScanTask = nil } }
+        let appURLs = try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
+        }
+        guard !Task.isCancelled, generation == externalScanGeneration,
+              configuration == .current else { return }
+        // A Settings toggle may have changed while the off-main scan was running.
+        guard UserDefaults.standard.value(for: Preferences.detectExternallyInstalledApps) else {
+            registry.markExternalInstallations(appURLs: [:])
+            return
+        }
+        registry.materializeMissingViewModels(for: catalog.filter { appURLs[$0.fullToken] != nil })
+        registry.markExternalInstallations(appURLs: appURLs)
     }
 
     /// Re-queries brew CLI for outdated casks, ensures view models exist for each,
     /// and marks them outdated in the registry.
-    func refreshOutdated() async throws {
-        let tokens = try await installedService.getOutdatedCasks()
+    func refreshOutdated(configuration: BrewOperationConfiguration = .current) async throws {
+        let tokens = try await installedService.getOutdatedCasks(configuration: configuration)
         let records = try await dbService.fetchCasks(forTokens: Array(tokens))
+        try Task.checkCancellation()
+        try configuration.validateCurrent()
         _ = registry.viewModels(for: records)
         registry.markOutdated(tokens: tokens)
     }

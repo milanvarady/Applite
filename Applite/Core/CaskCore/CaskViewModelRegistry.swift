@@ -39,6 +39,24 @@ final class CaskViewModelRegistry {
         records.map { viewModel(for: $0) }
     }
 
+    func materializeMissingViewModels(for records: [CaskRecord]) {
+        for record in records where viewModelsByFullToken[record.fullToken] == nil {
+            _ = viewModel(for: record)
+        }
+    }
+
+    func recordSnapshots() -> [CaskId: CaskRecord] {
+        viewModelsByFullToken.mapValues(\.recordSnapshot)
+    }
+
+    func updateExistingViewModels(for records: [CaskRecord], unchangedSince snapshots: [CaskId: CaskRecord]) {
+        for record in records {
+            guard let existing = viewModelsByFullToken[record.fullToken],
+                  let previous = snapshots[record.fullToken], existing.recordSnapshot == previous else { continue }
+            existing.updateRecord(record)
+        }
+    }
+
     // MARK: - Bulk State Updates
 
     /// Reconciles a boolean flag across every view model using `isMatch`.
@@ -60,6 +78,15 @@ final class CaskViewModelRegistry {
     /// `full_name` — so this is an exact `fullToken` match.
     func markInstalled(tokens: Set<CaskId>) {
         updateFlag(\.isInstalled) { $0.matchesFullName(in: tokens) }
+    }
+
+    func markExternalInstallations(appURLs: [CaskId: URL]) {
+        for vm in viewModelsByFullToken.values {
+            let url = vm.isInstalled ? nil : appURLs[vm.fullToken]
+            if vm.externalAppURL != url {
+                vm.externalAppURL = url
+            }
+        }
     }
 
     /// Marks casks as outdated from `brew outdated --cask -q`, which prints **bare** tokens even for
@@ -84,6 +111,14 @@ final class CaskViewModelRegistry {
         viewModelsByFullToken.values
             .filter(\.isOutdated)
             .sorted()
+    }
+
+    var externalInstalledViewModels: [CaskViewModel] {
+        viewModelsByFullToken.values.filter(\.isInstalledExternally).sorted()
+    }
+
+    var externalInstalledCount: Int {
+        viewModelsByFullToken.values.lazy.filter(\.isInstalledExternally).count
     }
 
     /// O(n) counts that skip the O(n log n) `.sorted()` of the full list — for the always-on-screen

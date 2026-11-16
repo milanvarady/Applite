@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(CaskManager.self) var caskManager
+    @AppStorage(Preferences.detectExternallyInstalledApps) private var detectExternallyInstalledApps
 
     /// Currently selected sidebar item. Optional so the selection can be cleared
     /// while a search is active, so a sidebar tap can interrupt the search instead
@@ -39,12 +40,15 @@ struct ContentView: View {
         ZStack {
             mainNavigation
 
-            // `bootstrap.phase` is the single owned "is brew usable" state, so this overlay — up for
-            // the annex install *and* every broken outcome — is the only place a broken brew changes
-            // the UI. Nothing else branches on it (E1).
+            // `bootstrap.phase` owns brew readiness. This overlay handles setup and broken outcomes;
+            // the footer only reports the same phase and gates its own actions.
             if caskManager.bootstrap.needsSetupOverlay {
                 setupOverlay
             }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            AppStatusBar()
+                .disabled(modifyingBrew)
         }
         // The window's one alert surface, presented once at its root: brew failures, load failures
         // and errors raised by any view in this window queue here (F5/P3-5). Never bind this inside
@@ -75,6 +79,11 @@ struct ContentView: View {
         .searchable(text: $searchInput, placement: .sidebar)
         .onChange(of: searchInput) { _, newValue in handleSearchInputChange(newValue) }
         .onChange(of: selection) { _, newValue in handleSelectionChange(newValue) }
+        .onChange(of: detectExternallyInstalledApps) { _, enabled in
+            guard !enabled else { return }
+            if lastSelection == .externalInstalled { lastSelection = .home }
+            if selection == .externalInstalled { selection = .home }
+        }
         // A deep view (e.g. "See Active Tasks" on a batched card) requested a tab — apply it.
         .onChange(of: caskManager.requestedTab) { _, requested in
             if let requested {
