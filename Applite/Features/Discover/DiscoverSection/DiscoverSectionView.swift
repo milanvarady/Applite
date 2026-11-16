@@ -7,6 +7,16 @@
 
 import SwiftUI
 
+private struct CaskSortKeySnapshot: Equatable {
+    enum Key: Equatable {
+        case downloads(Int)
+        case name(String)
+    }
+
+    let id: String
+    let key: Key
+}
+
 struct DiscoverSectionView: View {
     let category: CategoryLoadResult
     @Binding var navigationSelection: SidebarItem?
@@ -19,6 +29,8 @@ struct DiscoverSectionView: View {
     /// Updated by SwiftUI as the user scrolls; mutated by the arrow buttons.
     @State var scrollPosition: Int? = 0
 
+    @State private var preparedCasks: [[CaskViewModel]] = []
+
     /// Width of the scroll view, observed via `GeometryReader`. Used by the arrow
     /// buttons to clamp `scrollPosition` to the last achievable leading index —
     /// `count - 1` overshoots when several columns fit on screen, leaving
@@ -26,15 +38,14 @@ struct DiscoverSectionView: View {
     @State var scrollViewWidth: CGFloat = 0
 
     var body: some View {
-        // Compute the sorted+chunked casks ONCE per body pass and thread it through, instead of
-        // recomputing (sort + chunk) in each of appRow / maxLeadingIndex / the .id modifier (D2).
-        let coupled = casksCoupled
         VStack(alignment: .leading) {
             categoryHeader
 
-            appRowAndControls(coupled)
+            appRowAndControls(preparedCasks)
                 .frame(height: AppView.dimensions.height * 2 + 20)
         }
+        .onAppear(perform: updatePreparedCasks)
+        .onChange(of: sortKeySnapshot) { _, _ in updatePreparedCasks() }
     }
 
     var categoryHeader: some View {
@@ -72,9 +83,21 @@ struct DiscoverSectionView: View {
         }
     }
 
-    /// Sorted casks grouped in pairs, following the global category sort preference
-    private var casksCoupled: [[CaskViewModel]] {
-        category.casksCoupled(by: sortOption)
+    private func updatePreparedCasks() {
+        preparedCasks = category.casksCoupled(by: sortOption)
+    }
+
+    private var sortKeySnapshot: [CaskSortKeySnapshot] {
+        category.casks.map { cask in
+            let key: CaskSortKeySnapshot.Key
+            switch sortOption {
+            case .mostDownloaded:
+                key = .downloads(cask.downloadsIn365days)
+            case .aToZ:
+                key = .name(cask.name)
+            }
+            return CaskSortKeySnapshot(id: cask.id, key: key)
+        }
     }
 
     private func appRow(_ casksCoupled: [[CaskViewModel]]) -> some View {
@@ -137,7 +160,7 @@ struct DiscoverSectionView: View {
 
     func scrollButton(icon: String, direction: Int) -> some View {
         Button {
-            let new = min(max(0, (scrollPosition ?? 0) + direction), maxLeadingIndex(casksCoupled))
+            let new = min(max(0, (scrollPosition ?? 0) + direction), maxLeadingIndex(preparedCasks))
             withAnimation(.spring()) {
                 scrollPosition = new
             }

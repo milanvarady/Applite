@@ -49,6 +49,15 @@ struct CaskDatabaseService {
         }
     }
 
+    func fetchFontCasks() async throws -> [CaskRecord] {
+        try await pool().read { db in
+            try CaskRecord
+                .filter(Column("isFontCask") == true)
+                .order(Column("name"))
+                .fetchAll(db)
+        }
+    }
+
     /// Fetches all casks not in the default `homebrew/cask` tap, ordered by tap then name.
     /// Used to build per-tap result groups via in-memory partitioning.
     func fetchAllNonDefaultTapCasks() async throws -> [CaskRecord] {

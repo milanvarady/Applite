@@ -147,6 +147,17 @@ struct AppDatabase {
             }
         }
 
+        migrator.registerMigration("v2_fontCaskMetadata") { db in
+            try db.alter(table: "casks") { t in
+                t.add(column: "isFontCask", .boolean).notNull().defaults(to: false)
+            }
+            try db.execute(sql: "DELETE FROM metadata WHERE key = 'lastSyncDate'")
+        }
+
+        migrator.registerMigration("v3_fontSourcePathClassification") { db in
+            try db.execute(sql: "DELETE FROM metadata WHERE key = 'lastSyncDate'")
+        }
+
         return migrator
     }
 

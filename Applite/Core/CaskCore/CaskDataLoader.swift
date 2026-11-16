@@ -62,18 +62,24 @@ final class CaskDataLoader {
         // 3. Batch fetch records for all tokens referenced by categories
         let categoryTokens = categoryDefs.flatMap(\.casks)
         let categoryRecords = try await dbService.fetchCasks(forTokens: categoryTokens)
+        let fontRecords = try await dbService.fetchFontCasks()
         let recordsByToken = Dictionary(categoryRecords.map { ($0.token, $0) }, uniquingKeysWith: { first, _ in first })
         let recordsByFullToken = Dictionary(categoryRecords.map { ($0.fullToken, $0) }, uniquingKeysWith: { first, _ in first })
 
         // 4. Build view models via registry (get-or-create for identity)
-        _ = registry.viewModels(for: categoryRecords)
+        _ = registry.viewModels(for: categoryRecords + fontRecords)
 
         // 5. Build category results
         let categoryResults: [CategoryLoadResult] = categoryDefs.compactMap { category in
-            let records = category.casks
-                .compactMap { token -> CaskRecord? in
+            let sourceRecords: [CaskRecord]
+            if category.id == CategoryProvider.fontsCategoryID {
+                sourceRecords = fontRecords
+            } else {
+                sourceRecords = category.casks.compactMap { token in
                     recordsByToken[token] ?? recordsByFullToken[token]
                 }
+            }
+            let records = sourceRecords
                 // Keep curated categories clean of deprecated/disabled apps
                 .filter { !$0.isDeprecatedOrDisabled }
             guard !records.isEmpty else { return nil }

@@ -13,6 +13,7 @@ struct CaskDTO: Decodable {
     let token: String
     let fullToken: String
     let tap: String
+    let rubySourcePath: String?
     let nameArray: Array<String>
     let desc: String?
     let homepage: String
@@ -24,11 +25,13 @@ struct CaskDTO: Decodable {
     let disabled: Bool
     let disableDate: String?
     let disableReason: String?
+    let artifacts: [CaskArtifact]?
 
     enum CodingKeys: String, CodingKey {
         case token
         case fullToken = "full_token"
         case tap
+        case rubySourcePath = "ruby_source_path"
         case nameArray = "name"
         case desc
         case homepage
@@ -40,5 +43,44 @@ struct CaskDTO: Decodable {
         case disabled
         case disableDate = "disable_date"
         case disableReason = "disable_reason"
+        case artifacts
+    }
+
+    var isFontCask: Bool {
+        let hasFontArtifact = artifacts?.contains { $0.font?.isEmpty == false } == true
+        let isDefaultTapFontSource = tap == "homebrew/cask"
+            && rubySourcePath?.hasPrefix("Casks/font/") == true
+        let isDefaultTapFontToken = tap == "homebrew/cask" && token.hasPrefix("font-")
+        return hasFontArtifact || isDefaultTapFontSource || isDefaultTapFontToken
+    }
+}
+
+struct CaskArtifact: Decodable {
+    let font: [String]?
+
+    private enum CodingKeys: String, CodingKey {
+        case font
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        guard container.contains(.font) else {
+            font = nil
+            return
+        }
+        if try container.decodeNil(forKey: .font) {
+            font = nil
+            return
+        }
+
+        var arguments = try container.nestedUnkeyedContainer(forKey: .font)
+        var fontPaths: [String] = []
+        while !arguments.isAtEnd {
+            let argument = try arguments.superDecoder()
+            if let path = try? argument.singleValueContainer().decode(String.self) {
+                fontPaths.append(path)
+            }
+        }
+        font = fontPaths
     }
 }

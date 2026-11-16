@@ -55,6 +55,7 @@ final class CaskViewModel {
     var descriptionText: String { record.descriptionText }
     var homepageURL: String? { record.homepageURL }
     var pkgInstaller: Bool { record.pkgInstaller }
+    var isFontCask: Bool { record.isFontCask }
     var downloadsIn365days: Int { record.downloadsIn365days }
 
     /// Homepage as URL
