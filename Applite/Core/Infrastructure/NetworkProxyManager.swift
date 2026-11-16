@@ -12,7 +12,7 @@ struct NetworkProxyManager {
     static let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "NetworkProxyManager")
 
     static func getSystemProxySettings() throws -> NetworkProxyConfiguration {
-        guard let proxySettings = CFNetworkCopySystemProxySettings()?.takeUnretainedValue() as? [String: Any] else {
+        guard let proxySettings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? [String: Any] else {
             Self.logger.warning("Failed to get system network proxy settings")
             throw NetworkProxyError.failedToGetSystemSettings
         }

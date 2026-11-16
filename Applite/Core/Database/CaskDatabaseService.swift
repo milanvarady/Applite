@@ -11,6 +11,12 @@ import OSLog
 
 /// Service for all cask database operations
 struct CaskDatabaseService {
+    private let databasePool: DatabasePool?
+
+    init(databasePool: DatabasePool? = nil) {
+        self.databasePool = databasePool
+    }
+
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: CaskDatabaseService.self)
@@ -19,10 +25,17 @@ struct CaskDatabaseService {
     /// The shared pool, obtained async-lazily so the (potentially slow) open never runs on the main
     /// actor at construction time — this service is created during `CaskManager` init (P2-13).
     private func pool() async throws -> DatabasePool {
-        try await AppDatabase.pool()
+        if let databasePool { return databasePool }
+        return try await AppDatabase.pool()
     }
 
     // MARK: - Read Operations
+
+    func fetchAllCasks() async throws -> [CaskRecord] {
+        try await pool().read { db in
+            try CaskRecord.fetchAll(db)
+        }
+    }
 
     /// Fetches a single cask by its full token (the primary key).
     ///

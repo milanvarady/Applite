@@ -20,6 +20,11 @@ struct UpdateSettingsView: View {
                 }
                 .disabled(!updater.canCheckForUpdates)
 
+                Link(destination: URL(string: "https://github.com/milanvarady/Applite/releases")!) {
+                    Label("Version History", systemImage: "clock.arrow.circlepath")
+                }
+                .buttonStyle(.bordered)
+
                 LabeledContent("Current app version") {
                     Text("\(Bundle.main.version) (\(Bundle.main.buildNumber))", comment: "Update settings current app version text (version, build number)")
                 }

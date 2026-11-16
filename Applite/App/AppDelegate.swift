@@ -12,6 +12,13 @@ import AppKit
 final class ApplicationDelegate: NSObject, NSApplicationDelegate {
     /// Set by `AppliteApp` so termination can stop running brew tasks.
     weak var caskManager: CaskManager?
+    var reopenMainWindow: (() -> Void)?
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        guard let reopenMainWindow else { return true }
+        reopenMainWindow()
+        return false
+    }
 
     /// Write the app icon to the fixed path the askpass dialog reads, so the sudo
     /// password prompt shows Applite's icon. See ``AskpassIcon``.

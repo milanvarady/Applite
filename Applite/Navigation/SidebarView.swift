@@ -23,6 +23,7 @@ struct SidebarView: View {
                 .tag(SidebarItem.updates)
             
             Label("Installed", systemImage: "externaldrive.badge.checkmark")
+                .badge(caskManager.locallyInstalledCount)
                 .tag(SidebarItem.installed)
             
             Label("Active Tasks", systemImage: "gearshape")

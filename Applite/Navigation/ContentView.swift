@@ -39,12 +39,15 @@ struct ContentView: View {
         ZStack {
             mainNavigation
 
-            // `bootstrap.phase` is the single owned "is brew usable" state, so this overlay — up for
-            // the annex install *and* every broken outcome — is the only place a broken brew changes
-            // the UI. Nothing else branches on it (E1).
+            // `bootstrap.phase` owns brew readiness. This overlay handles setup and broken outcomes;
+            // the footer only reports the same phase and gates its own actions.
             if caskManager.bootstrap.needsSetupOverlay {
                 setupOverlay
             }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            AppStatusBar()
+                .disabled(modifyingBrew)
         }
         // The window's one alert surface, presented once at its root: brew failures, load failures
         // and errors raised by any view in this window queue here (F5/P3-5). Never bind this inside
@@ -53,18 +56,27 @@ struct ContentView: View {
     }
 
     private var mainNavigation: some View {
-        NavigationSplitView {
+        @Bindable var manager = caskManager
+        return NavigationSplitView {
             SidebarView(selection: $selection)
                 .disabled(modifyingBrew)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 216)
         } detail: {
-            if !searchInput.isEmpty {
-                SearchView(query: $searchInput)
-            } else if selection != nil {
-                DetailView(
-                    selection: $selection,
-                    modifyingBrew: $modifyingBrew
-                )
+            NavigationStack {
+                Group {
+                    if !searchInput.isEmpty {
+                        SearchView(query: $searchInput)
+                    } else if selection != nil {
+                        DetailView(
+                            selection: $selection,
+                            modifyingBrew: $modifyingBrew
+                        )
+                    }
+                }
+                .navigationDestination(item: $manager.selectedAppDetails) { cask in
+                    AppDetailsView(cask: cask)
+                        .id(cask.id)
+                }
             }
         }
         // Re-runs on launch and whenever the install sheet's Retry / "use my own brew" escape
@@ -78,6 +90,7 @@ struct ContentView: View {
         // A deep view (e.g. "See Active Tasks" on a batched card) requested a tab — apply it.
         .onChange(of: caskManager.requestedTab) { _, requested in
             if let requested {
+                caskManager.selectedAppDetails = nil
                 searchInput = ""
                 selection = requested
                 caskManager.requestedTab = nil
@@ -102,6 +115,7 @@ struct ContentView: View {
     // MARK: - Search
 
     private func handleSearchInputChange(_ newValue: String) {
+        caskManager.selectedAppDetails = nil
         // Limit search characters
         if newValue.count > 30 {
             searchInput = String(newValue.prefix(30))
@@ -121,6 +135,9 @@ struct ContentView: View {
     }
 
     private func handleSelectionChange(_ newValue: SidebarItem?) {
+        if newValue != nil {
+            caskManager.selectedAppDetails = nil
+        }
         // Sidebar tap during a search wins: clear the query so the detail
         // switches from SearchView to the tapped destination.
         if newValue != nil, !searchInput.isEmpty {
